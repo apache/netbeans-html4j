@@ -21,6 +21,7 @@
 package org.apidesign.html.boot.fx;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -73,9 +74,11 @@ public final class FXPresenter implements Fn.Presenter {
             } catch (ClassNotFoundException classNotFoundException) {
                 Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
                 m.setAccessible(true);
-                URL l = new URL("file://" + System.getProperty("java.home") + "/lib/jfxrt.jar");
-    //            LOG.log(Level.INFO, "url : {0}", l);
-                m.invoke(ClassLoader.getSystemClassLoader(), l);
+                File f = new File(System.getProperty("java.home"), "lib/jfxrt.jar");
+                if (f.exists()) {
+                    URL l = f.toURI().toURL();
+                    m.invoke(ClassLoader.getSystemClassLoader(), l);
+                }
             }
         } catch (Exception ex) {
             throw new LinkageError("Can't add jfxrt.jar on the classpath", ex);
