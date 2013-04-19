@@ -76,12 +76,12 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service=Processor.class)
 @SupportedAnnotationTypes({
-    "net.java.html.model.Model",
-    "net.java.html.model.Function",
-    "net.java.html.model.OnReceive",
-    "net.java.html.model.OnPropertyChange",
-    "net.java.html.model.ComputedProperty",
-    "net.java.html.model.Property"
+    "net.java.html.json.Model",
+    "net.java.html.json.Function",
+    "net.java.html.json.OnReceive",
+    "net.java.html.json.OnPropertyChange",
+    "net.java.html.json.ComputedProperty",
+    "net.java.html.json.Property"
 })
 public final class PageProcessor extends AbstractProcessor {
     private final Map<Element,String> models = new WeakHashMap<>();
