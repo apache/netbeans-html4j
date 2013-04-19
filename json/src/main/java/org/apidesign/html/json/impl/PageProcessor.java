@@ -179,19 +179,17 @@ public final class PageProcessor extends AbstractProcessor {
             w = new OutputStreamWriter(java.openOutputStream());
             try {
                 w.append("package " + pkg + ";\n");
-                w.append("import org.apidesign.bck2brwsr.htmlpage.api.*;\n");
-                w.append("import org.apidesign.bck2brwsr.htmlpage.KOList;\n");
-                w.append("import org.apidesign.bck2brwsr.core.JavaScriptOnly;\n");
+                w.append("import net.java.html.json.*;\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private boolean locked;\n");
-                w.append("  private org.apidesign.bck2brwsr.htmlpage.Knockout ko;\n");
+                w.append("  private org.apidesign.html.json.impl.Bindings ko;\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  public ").append(className).append("() {\n");
                 w.append("  };\n");
-                w.append("  private org.apidesign.bck2brwsr.htmlpage.Knockout intKnckt() {\n");
+                w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
-                w.append("    return ko = org.apidesign.bck2brwsr.htmlpage.Knockout.applyBindings(this, ");
+                w.append("    return ko = org.apidesign.html.json.impl.Bindings.apply(this, ");
                 writeStringArray(propsGetSet, w);
                 w.append(", ");
                 writeStringArray(functions, w);
@@ -207,7 +205,7 @@ public final class PageProcessor extends AbstractProcessor {
                     values++;
                 }
                 w.append("    Object[] ret = new Object[" + values + "];\n");
-                w.append("    org.apidesign.bck2brwsr.htmlpage.ConvertTypes.extractJSON(json, new String[] {\n");
+                w.append("    org.apidesign.html.json.impl.JSON.extract(json, new String[] {\n");
                 for (int i = 0; i < propsGetSet.size(); i += 4) {
                     Prprt p = findPrprt(props, propsGetSet.get(i));
                     if (p == null) {
@@ -281,25 +279,6 @@ public final class PageProcessor extends AbstractProcessor {
         return ok;
     }
     
-    private static String type(String tag) {
-        if (tag.equals("title")) {
-            return "Title";
-        }
-        if (tag.equals("button")) {
-            return "Button";
-        }
-        if (tag.equals("input")) {
-            return "Input";
-        }
-        if (tag.equals("canvas")) {
-            return "Canvas";
-        }
-        if (tag.equals("img")) {
-            return "Image";
-        }
-        return "Element";
-    }
-
     private boolean generateProperties(
         Element where,
         Writer w, Prprt[] properties,
@@ -314,7 +293,7 @@ public final class PageProcessor extends AbstractProcessor {
             String[] gs = toGetSet(p.name(), tn, p.array());
 
             if (p.array()) {
-                w.write("private KOList<" + tn + "> prop_" + p.name() + " = new KOList<" + tn + ">(\""
+                w.write("private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(\""
                     + p.name() + "\"");
                 Collection<String> dependants = deps.get(p.name());
                 if (dependants != null) {
@@ -767,9 +746,9 @@ public final class PageProcessor extends AbstractProcessor {
             body.append("  ProcessResult pr = new ProcessResult();\n");
             if (jsonpVarName != null) {
                 body.append("  String ").append(jsonpVarName).
-                    append(" = org.apidesign.bck2brwsr.htmlpage.ConvertTypes.createJSONP(result, pr);\n");
+                    append(" = org.apidesign.html.json.impl.JSON.createJSONP(result, pr);\n");
             }
-            body.append("  org.apidesign.bck2brwsr.htmlpage.ConvertTypes.loadJSON(\n      ");
+            body.append("  org.apidesign.html.json.impl.JSON.loadJSON(\n      ");
             body.append(assembleURL);
             body.append(", result, pr, ").append(jsonpVarName).append("\n  );\n");
 //            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
@@ -797,16 +776,16 @@ public final class PageProcessor extends AbstractProcessor {
                     params.append('"').append(id).append('"');
                     continue;
                 }
-                toCall = "org.apidesign.bck2brwsr.htmlpage.ConvertTypes.toString(";
+                toCall = "org.apidesign.html.json.impl.JSON.toString(";
             }
             if (ve.asType().getKind() == TypeKind.DOUBLE) {
-                toCall = "org.apidesign.bck2brwsr.htmlpage.ConvertTypes.toDouble(";
+                toCall = "org.apidesign.html.json.impl.JSON.toDouble(";
             }
             if (ve.asType().getKind() == TypeKind.INT) {
-                toCall = "org.apidesign.bck2brwsr.htmlpage.ConvertTypes.toInt(";
+                toCall = "org.apidesign.html.json.impl.JSON.toInt(";
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
-                toCall = "org.apidesign.bck2brwsr.htmlpage.ConvertTypes.toModel(" + ve.asType() + ".class, ";
+                toCall = "org.apidesign.html.json.impl.JSON.toModel(" + ve.asType() + ".class, ";
             }
 
             if (toCall != null) {
@@ -923,7 +902,7 @@ public final class PageProcessor extends AbstractProcessor {
         for (Prprt p : props) {
             w.write(sep);
             w.append("    sb.append(\"" + p.name() + ": \");\n");
-            w.append("    sb.append(org.apidesign.bck2brwsr.htmlpage.ConvertTypes.toJSON(prop_");
+            w.append("    sb.append(org.apidesign.html.json.impl.JSON.toJSON(prop_");
             w.append(p.name()).append("));\n");
             sep =    "    sb.append(',');\n";
         }
