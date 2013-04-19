@@ -20,36 +20,37 @@
  */
 package org.apidesign.html.json.impl;
 
-import net.java.html.json.Context;
-import org.apidesign.html.json.spi.ContextBuilder;
-import org.apidesign.html.json.spi.Technology;
+import java.util.List;
+import org.apidesign.html.json.spi.PropertyBinding;
 
-/** Internal communication between API (e.g. {@link Context}), SPI
- * (e.g. {@link ContextBuilder}) and the implementation package.
+/**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public abstract class ContextAccessor {
-    private static ContextAccessor DEFAULT;
-    static {
-        // run initializers
-        Context.EMPTY.getClass();
-    }
-    
-    protected ContextAccessor() {
+public abstract class PropertyBindingAccessor {
+    private static PropertyBindingAccessor DEFAULT;
+
+    protected PropertyBindingAccessor() {
         if (DEFAULT != null) throw new IllegalStateException();
         DEFAULT = this;
     }
     
-    protected abstract Context newContext(Technology<?> t);
-    protected abstract Technology<?> technology(Context c);
-    
-    
-    public static Context create(Technology<?> t) {
-        return DEFAULT.newContext(t);
+    static {
+        try {
+            // run initializers
+            Class.forName(PropertyBinding.class.getName(), 
+                true, PropertyBinding.class.getClassLoader());
+        } catch (Exception ex) {
+            // OK
+            throw new IllegalStateException(ex);
+        }
     }
+
+    protected abstract PropertyBinding newBinding(List<String> params);
     
-    static Technology<?> findTechnology(Context c) {
-        return DEFAULT.technology(c);
+    public static PropertyBinding create(
+        List<String> params
+    ) {
+        return DEFAULT.newBinding(params);
     }
 }

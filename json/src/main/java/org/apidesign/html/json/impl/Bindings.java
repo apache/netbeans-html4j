@@ -20,6 +20,9 @@
  */
 package org.apidesign.html.json.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.json.Context;
 import org.apidesign.html.json.spi.Technology;
 
@@ -47,12 +50,20 @@ public final class Bindings<Data> {
     ) {
         Data d = bp.wrapModel(model);
         
+        List<String> arr = Arrays.asList(propsAndGetters);
+        for (int i = 0; i < propsAndGetters.length; i += 4) {
+            PropertyBinding pb = PropertyBindingAccessor.create(
+                arr.subList(i, i + 4)
+            );
+            bp.bind(pb, model, d);
+        }
+        
         return new Bindings<>(d, bp);
     }
     
     
-    public Object koData() {
-        return this;
+    public Data koData() {
+        return data;
     }
 
     public void valueHasMutated(String firstName) {

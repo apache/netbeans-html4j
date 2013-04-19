@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
@@ -234,6 +235,10 @@ public class ModelTest {
         @Override
         public void valueHasMutated(Object data, String propertyName) {
             mutated.add(propertyName);
+        }
+
+        @Override
+        public void bind(PropertyBinding b, Object model, Object data) {
         }
     }
 }

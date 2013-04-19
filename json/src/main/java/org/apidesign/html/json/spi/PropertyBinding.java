@@ -18,38 +18,42 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.json.impl;
+package org.apidesign.html.json.spi;
 
-import net.java.html.json.Context;
-import org.apidesign.html.json.spi.ContextBuilder;
-import org.apidesign.html.json.spi.Technology;
+import java.util.List;
+import org.apidesign.html.json.impl.PropertyBindingAccessor;
 
-/** Internal communication between API (e.g. {@link Context}), SPI
- * (e.g. {@link ContextBuilder}) and the implementation package.
+/** Describes a property when one is asked to 
+ * bind it 
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public abstract class ContextAccessor {
-    private static ContextAccessor DEFAULT;
+public final class PropertyBinding {
+    private final List<String> params;
+    
+    private PropertyBinding(List<String> p) {
+        this.params = p;
+    }
+
     static {
-        // run initializers
-        Context.EMPTY.getClass();
+        new PropertyBindingAccessor() {
+            @Override
+            protected PropertyBinding newBinding(List<String> params) {
+                return new PropertyBinding(params);
+            }
+        };
+    }
+
+    public String getPropertyName() {
+        return params.get(0);
     }
     
-    protected ContextAccessor() {
-        if (DEFAULT != null) throw new IllegalStateException();
-        DEFAULT = this;
-    }
-    
-    protected abstract Context newContext(Technology<?> t);
-    protected abstract Technology<?> technology(Context c);
-    
-    
-    public static Context create(Technology<?> t) {
-        return DEFAULT.newContext(t);
-    }
-    
-    static Technology<?> findTechnology(Context c) {
-        return DEFAULT.technology(c);
+    public String getGetterName() {
+        final String g = params.get(1);
+        int end = g.indexOf("__");
+        if (end == -1) {
+            end = g.length();
+        }
+        return g.substring(0, end);
     }
 }

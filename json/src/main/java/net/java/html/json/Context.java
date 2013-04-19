@@ -21,6 +21,7 @@
 package net.java.html.json;
 
 import org.apidesign.html.json.impl.ContextAccessor;
+import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 
 /** Represents context where the {@link Model} and other objects
@@ -65,6 +66,10 @@ public final class Context {
 
         @Override
         public void valueHasMutated(Object data, String propertyName) {
+        }
+
+        @Override
+        public void bind(PropertyBinding b, Object model, Object data) {
         }
     }
 }
