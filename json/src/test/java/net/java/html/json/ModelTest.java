@@ -48,7 +48,7 @@ public class ModelTest {
     
     @BeforeMethod
     public void createModel() {
-        model = new Modelik();
+        model = new Modelik(Context.EMPTY);
     }
     
     @Test public void classGeneratedWithSetterGetter() {

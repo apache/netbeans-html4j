@@ -18,24 +18,23 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.json.impl;
+package net.java.html.json;
 
-import net.java.html.json.Context;
-
-/**
+/** Represents context where the {@link Model} and other objects
+ * operate in. The context is usually a particular HTML page in a browser.
+ * The context is also associated with the actual HTML rendering technology
+ * in the HTML page - there is likely to be different context for 
+ * <a href="http://knockoutjs.com">knockout.js</a> and different one
+ * for <a href="http://angularjs.org">angular</a>.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Bindings {
-    public static Bindings apply(Context c, Object model, String[] propsAndGetters, String[] functions) {
-        return null;
+public final class Context {
+    private Context() {
     }
     
-    public Object koData() {
-        return this;
-    }
-
-    public void valueHasMutated(String firstName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    /** Dummy context without binding to any real browser or technology. 
+     * Useful for simple unit testing of behavior of model classes.
+     */
+    public static final Context EMPTY = new Context();
 }

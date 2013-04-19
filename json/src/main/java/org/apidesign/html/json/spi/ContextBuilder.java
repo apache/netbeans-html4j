@@ -18,24 +18,30 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.json.impl;
+package org.apidesign.html.json.spi;
 
 import net.java.html.json.Context;
 
-/**
+/** Support for providers of new {@link Context}. Providers of different
+ * technologies should be of particular interest in this class. End users
+ * designing their application with existing technologies should rather
+ * point their attention to {@link Context} and co.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Bindings {
-    public static Bindings apply(Context c, Object model, String[] propsAndGetters, String[] functions) {
-        return null;
+public final class ContextBuilder {
+    private ContextBuilder() {
     }
     
-    public Object koData() {
+    public static ContextBuilder create() {
+        return new ContextBuilder();
+    }
+    
+    public ContextBuilder with() {
         return this;
     }
-
-    public void valueHasMutated(String firstName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public Context build() {
+        return Context.EMPTY;
     }
 }

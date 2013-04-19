@@ -185,14 +185,16 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("import net.java.html.json.*;\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private boolean locked;\n");
+                w.append("  private net.java.html.json.Context context;\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings ko;\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
-                w.append("  public ").append(className).append("() {\n");
+                w.append("  public ").append(className).append("(Context context) {\n");
+                w.append("    this.context = context;\n");
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
-                w.append("    return ko = org.apidesign.html.json.impl.Bindings.apply(this, ");
+                w.append("    return ko = org.apidesign.html.json.impl.Bindings.apply(context, this, ");
                 writeStringArray(propsGetSet, w);
                 w.append(", ");
                 writeStringArray(functions, w);
@@ -915,7 +917,7 @@ public final class ModelProcessor extends AbstractProcessor {
     }
     private void writeClone(String className, Prprt[] props, Writer w) throws IOException {
         w.write("  public " + className + " clone() {\n");
-        w.write("    " + className + " ret = new " + className + "();\n");
+        w.write("    " + className + " ret = new " + className + "(context);\n");
         for (Prprt p : props) {
             if (!p.array()) {
                 boolean isModel[] = { false };
