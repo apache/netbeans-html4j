@@ -21,6 +21,7 @@
 package org.apidesign.html.json.spi;
 
 import net.java.html.json.Context;
+import org.apidesign.html.json.impl.ContextAccessor;
 
 /** Support for providers of new {@link Context}. Providers of different
  * technologies should be of particular interest in this class. End users
@@ -30,18 +31,35 @@ import net.java.html.json.Context;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ContextBuilder {
+    private Technology<?> t;
+    
     private ContextBuilder() {
     }
     
+    /** Creates new, empty builder for creation of {@link Context}. At the
+     * end call the {@link #build()} method to generate the context.
+     * 
+     * @return new instance of the builder
+     */
     public static ContextBuilder create() {
         return new ContextBuilder();
     }
     
-    public ContextBuilder with() {
+    /** Provides technology for the context
+     * @param technology
+     * @return this
+     */
+    public ContextBuilder withTechnology(Technology<?> technology) {
+        this.t = technology;
         return this;
     }
     
+    /** Generates context based on values previously inserted into
+     * this builder.
+     * 
+     * @return new, immutable instance of {@link Context}
+     */
     public Context build() {
-        return Context.EMPTY;
+        return ContextAccessor.create(t);
     }
 }

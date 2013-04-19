@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.json.spi.Technology;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -66,13 +68,24 @@ public class ModelTest {
         model.getNames().add("Jarda");
         assertEquals(model.getNames().size(), 1, "One element");
     }
-/*    
+
     @Test public void arrayChangesNotified() {
-        MockKnockout my = new MockKnockout();
-        MockKnockout.next = my;
-        
-        model.applyBindings();
-        
+        class My implements Technology<Object> {
+            private List<String> mutated = new ArrayList<>();
+
+            @Override
+            public Object wrapModel(Object model) {
+                return this;
+            }
+
+            @Override
+            public void valueHasMutated(Object data, String propertyName) {
+                mutated.add(propertyName);
+            }
+        }
+        My my = new My();
+
+        model = new Modelik(ContextBuilder.create().withTechnology(my).build());
         model.getNames().add("Hello");
         
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
@@ -95,7 +108,7 @@ public class ModelTest {
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
         assertTrue(my.mutated.contains("names"), "Change in names property: " + my.mutated);
     }
-    
+/*    
     @Test public void autoboxedArray() {
         MockKnockout my = new MockKnockout();
         MockKnockout.next = my;

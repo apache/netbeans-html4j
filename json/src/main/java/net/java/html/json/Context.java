@@ -20,6 +20,9 @@
  */
 package net.java.html.json;
 
+import org.apidesign.html.json.impl.ContextAccessor;
+import org.apidesign.html.json.spi.Technology;
+
 /** Represents context where the {@link Model} and other objects
  * operate in. The context is usually a particular HTML page in a browser.
  * The context is also associated with the actual HTML rendering technology
@@ -30,11 +33,38 @@ package net.java.html.json;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class Context {
-    private Context() {
-    }
+    private final Technology<?> t;
     
+    private Context(Technology<?> t) {
+        t.getClass();
+        this.t = t;
+    }
+    static {
+        new ContextAccessor() {
+            @Override
+            protected Context newContext(Technology<?> t) {
+                return new Context(t);
+            }
+
+            @Override
+            protected Technology<?> technology(Context c) {
+                return c.t;
+            }
+        };
+    }
     /** Dummy context without binding to any real browser or technology. 
      * Useful for simple unit testing of behavior of model classes.
      */
-    public static final Context EMPTY = new Context();
+    public static final Context EMPTY = new Context(new EmptyTech());
+    
+    private static final class EmptyTech implements Technology<Object> {
+        @Override
+        public Object wrapModel(Object model) {
+            return model;
+        }
+
+        @Override
+        public void valueHasMutated(Object data, String propertyName) {
+        }
+    }
 }

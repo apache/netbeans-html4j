@@ -21,21 +21,41 @@
 package org.apidesign.html.json.impl;
 
 import net.java.html.json.Context;
+import org.apidesign.html.json.spi.Technology;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Bindings {
-    public static Bindings apply(Context c, Object model, String[] propsAndGetters, String[] functions) {
-        return null;
+public final class Bindings<Data> {
+    private final Data data;
+    private final Technology<Data> bp;
+
+    public Bindings(Data data, Technology<Data> bp) {
+        this.data = data;
+        this.bp = bp;
     }
+    
+    public static Bindings<?> apply(Context c, Object model, String[] propsAndGetters, String[] functions) {
+        Technology<?> bp = ContextAccessor.findTechnology(c);
+        return apply(bp, model, propsAndGetters, functions);
+    }
+    
+    private static <Data> Bindings<Data> apply(
+        Technology<Data> bp, Object model, 
+        String[] propsAndGetters, String[] functions
+    ) {
+        Data d = bp.wrapModel(model);
+        
+        return new Bindings<>(d, bp);
+    }
+    
     
     public Object koData() {
         return this;
     }
 
     public void valueHasMutated(String firstName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        bp.valueHasMutated(data, firstName);
     }
 }

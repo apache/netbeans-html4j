@@ -323,7 +323,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 
                 w.write("public java.util.List<" + tn + "> " + gs[0] + "() {\n");
                 w.write("  if (locked) throw new IllegalStateException();\n");
-                w.write("  prop_" + p.name() + ".assign(ko);\n");
+                w.write("  prop_" + p.name() + ".assign(this.intKnckt());\n");
                 w.write("  return prop_" + p.name() + ";\n");
                 w.write("}\n");
             } else {
