@@ -335,12 +335,13 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("public void " + gs[1] + "(" + tn + " v) {\n");
                 w.write("  if (locked) throw new IllegalStateException();\n");
                 w.write("  prop_" + p.name() + " = v;\n");
-                w.write("  if (ko != null) {\n");
-                w.write("    ko.valueHasMutated(\"" + p.name() + "\");\n");
+                w.write("  org.apidesign.html.json.impl.Bindings b = intKnckt();\n");
+                w.write("  if (b != null) {\n");
+                w.write("    b.valueHasMutated(\"" + p.name() + "\");\n");
                 Collection<String> dependants = deps.get(p.name());
                 if (dependants != null) {
                     for (String depProp : dependants) {
-                        w.write("    ko.valueHasMutated(\"" + depProp + "\");\n");
+                        w.write("    b.valueHasMutated(\"" + depProp + "\");\n");
                     }
                 }
                 w.write("  }\n");

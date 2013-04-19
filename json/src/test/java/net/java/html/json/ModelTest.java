@@ -101,13 +101,7 @@ public class ModelTest {
         assertEquals(model.getValues().get(0), Integer.valueOf(10), "Really ten");
     }
 
-/*    
     @Test public void derivedArrayProp() {
-        MockKnockout my = new MockKnockout();
-        MockKnockout.next = my;
-        
-        model.applyBindings();
-        
         model.setCount(10);
         
         List<String> arr = model.getRepeat();
@@ -126,11 +120,6 @@ public class ModelTest {
     }
     
     @Test public void derivedPropertiesAreNotified() {
-        MockKnockout my = new MockKnockout();
-        MockKnockout.next = my;
-        
-        model.applyBindings();
-        
         model.setValue(33);
         
         // not interested in change of this property
@@ -150,7 +139,7 @@ public class ModelTest {
         assertEquals(my.mutated.size(), 1, "One property changed: " + my.mutated);
         assertTrue(my.mutated.contains("unrelated"), "Its name is unrelated");
     }
-    */
+
     @Test public void computedPropertyCannotWriteToModel() {
         leakedModel = model;
         try {
