@@ -13,7 +13,7 @@ public abstract class ContextAccessor {
     private static ContextAccessor DEFAULT;
     static {
         // run initializers
-        Context.class.getMethods();
+        Context.EMPTY.getClass();
     }
     
     protected ContextAccessor() {

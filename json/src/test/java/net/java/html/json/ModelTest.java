@@ -45,12 +45,14 @@ import org.testng.annotations.Test;
     @Property(name = "changedProperty", type=String.class)
 })
 public class ModelTest {
+    private MockTechnology my;
     private Modelik model;
     private static Modelik leakedModel;
     
     @BeforeMethod
     public void createModel() {
-        model = new Modelik(Context.EMPTY);
+        my = new MockTechnology();
+        model = new Modelik(ContextBuilder.create().withTechnology(my).build());
     }
     
     @Test public void classGeneratedWithSetterGetter() {
@@ -70,22 +72,6 @@ public class ModelTest {
     }
 
     @Test public void arrayChangesNotified() {
-        class My implements Technology<Object> {
-            private List<String> mutated = new ArrayList<>();
-
-            @Override
-            public Object wrapModel(Object model) {
-                return this;
-            }
-
-            @Override
-            public void valueHasMutated(Object data, String propertyName) {
-                mutated.add(propertyName);
-            }
-        }
-        My my = new My();
-
-        model = new Modelik(ContextBuilder.create().withTechnology(my).build());
         model.getNames().add("Hello");
         
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
@@ -108,18 +94,14 @@ public class ModelTest {
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
         assertTrue(my.mutated.contains("names"), "Change in names property: " + my.mutated);
     }
-/*    
+
     @Test public void autoboxedArray() {
-        MockKnockout my = new MockKnockout();
-        MockKnockout.next = my;
-        
-        model.applyBindings();
-        
         model.getValues().add(10);
         
         assertEquals(model.getValues().get(0), Integer.valueOf(10), "Really ten");
     }
 
+/*    
     @Test public void derivedArrayProp() {
         MockKnockout my = new MockKnockout();
         MockKnockout.next = my;
@@ -249,6 +231,20 @@ public class ModelTest {
         if (p != null) {
             String fullNameGenerated = p.getFullName();
             assertNotNull(fullNameGenerated);
+        }
+    }
+    
+    private static class MockTechnology implements Technology<Object> {
+        private final List<String> mutated = new ArrayList<>();
+
+        @Override
+        public Object wrapModel(Object model) {
+            return this;
+        }
+
+        @Override
+        public void valueHasMutated(Object data, String propertyName) {
+            mutated.add(propertyName);
         }
     }
 }
