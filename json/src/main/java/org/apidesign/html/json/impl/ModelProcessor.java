@@ -83,7 +83,7 @@ import org.openide.util.lookup.ServiceProvider;
     "net.java.html.json.ComputedProperty",
     "net.java.html.json.Property"
 })
-public final class PageProcessor extends AbstractProcessor {
+public final class ModelProcessor extends AbstractProcessor {
     private final Map<Element,String> models = new WeakHashMap<>();
     private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
     @Override
@@ -105,6 +105,9 @@ public final class PageProcessor extends AbstractProcessor {
                 }
                 Prprt[] props;
                 Model m = finalElem.getAnnotation(Model.class);
+                if (m == null) {
+                    continue;
+                }
                 props = Prprt.wrap(processingEnv, finalElem, m.properties());
                 for (Prprt p : props) {
                     boolean[] isModel = { false };
