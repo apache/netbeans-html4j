@@ -56,4 +56,16 @@ public final class PropertyBinding {
         }
         return g.substring(0, end);
     }
+
+    public String getSetterName() {
+        final String g = params.get(2);
+        if (g == null) {
+            return null;
+        }
+        int end = g.indexOf("__");
+        if (end == -1) {
+            end = g.length();
+        }
+        return g.substring(0, end);
+    }
 }

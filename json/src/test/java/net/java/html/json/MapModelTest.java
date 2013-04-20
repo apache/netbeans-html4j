@@ -24,8 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
@@ -58,6 +56,11 @@ public class MapModelTest {
         assertEquals(o.changes, 1, "One change so far");
         
         assertEquals(o.get(), "Jarda", "Value should be in the map");
+        
+        o.set("Karle");
+        
+        assertEquals(p.getFirstName(), "Karle", "Model value updated");
+        assertEquals(o.changes, 2, "Snd change");
     }
     
     
@@ -66,14 +69,24 @@ public class MapModelTest {
         int changes;
         private final Method getter;
         private final Object model;
+        private final Method setter;
     
-        One(Object m, String get) throws NoSuchMethodException {
+        One(Object m, String get, String set) throws NoSuchMethodException {
             this.model = m;
             this.getter = m.getClass().getMethod(get);
+            if (set != null) {
+                this.setter = m.getClass().getMethod(set, this.getter.getReturnType());
+            } else {
+                this.setter = null;
+            }
         }
         
         Object get() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             return getter.invoke(model);
+        }
+        
+        void set(Object v) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            setter.invoke(model, v);
         }
     }
     
@@ -95,7 +108,7 @@ public class MapModelTest {
         @Override
         public void bind(PropertyBinding b, Object model, Map<String, One> data) {
             try {
-                One o = new One(model, b.getGetterName());
+                One o = new One(model, b.getGetterName(), b.getSetterName());
                 data.put(b.getPropertyName(), o);
             } catch (NoSuchMethodException ex) {
                 throw new IllegalStateException(ex);
