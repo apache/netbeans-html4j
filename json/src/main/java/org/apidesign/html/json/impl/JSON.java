@@ -35,4 +35,8 @@ public final class JSON {
     public static Object toJSON(Object prop_firstName) {
         return null;
     }
+
+    public static Object loadJSON(String url, Object[] res, Runnable callback, String jsonp) {
+        return null;
+    }
 }

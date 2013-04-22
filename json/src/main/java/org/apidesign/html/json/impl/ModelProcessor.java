@@ -178,6 +178,9 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
                 ok = false;
             }
+            if (!generateReceive(e, body, className, e.getEnclosedElements(), functions)) {
+                ok = false;
+            }
             FileObject java = processingEnv.getFiler().createSourceFile(pkg + '.' + className, e);
             w = new OutputStreamWriter(java.openOutputStream());
             try {

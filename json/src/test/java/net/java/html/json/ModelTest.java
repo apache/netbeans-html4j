@@ -162,6 +162,12 @@ public class ModelTest {
         }
     }
     
+    @OnReceive(url = "{protocol}://{host}?query={query}")
+    static void loadPeople(People p) {
+        Modelik m = null;
+        m.loadPeople("http", "apidesign.org", "query");
+    }
+    
     @Function 
     static void doSomething() {
     }
