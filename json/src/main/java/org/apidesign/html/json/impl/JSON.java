@@ -20,6 +20,9 @@
  */
 package org.apidesign.html.json.impl;
 
+import net.java.html.json.Context;
+import org.apidesign.html.json.spi.Technology;
+
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
@@ -29,15 +32,17 @@ public final class JSON {
     private JSON() {
     }
 
-    public static void extract(Object value, String[] props, Object[] values) {
+    public static void extract(Context c, Object value, String[] props, Object[] values) {
+        Technology<?> t = ContextAccessor.findTechnology(c);
+        t.extract(value, props, values);
     }
     
-    private static Object getProperty(Object obj, String prop) {
+    private static Object getProperty(Context c, Object obj, String prop) {
         if (prop == null) return obj;
         
         String[] arr = { prop };
         Object[] val = { null };
-        extract(obj, arr, val);
+        extract(c, obj, arr, val);
         return val[0];
     }
 
@@ -60,10 +65,18 @@ public final class JSON {
         return value.toString();
     }
 
-    public static String toString(Object obj, String prop) {
-        obj = getProperty(obj, prop);
+    public static String toString(Context c, Object obj, String prop) {
+        obj = getProperty(c, obj, prop);
         return obj instanceof String ? (String)obj : null;
     }
+    public static Number toNumber(Context c, Object obj, String prop) {
+        obj = getProperty(c, obj, prop);
+        if (!(obj instanceof Number)) {
+            obj = Double.NaN;
+        }
+        return (Number)obj;
+    }
+
     
     public static String createJSONP(Object[] res, Runnable callback) {
         return null;

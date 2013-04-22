@@ -261,5 +261,9 @@ public class ModelTest {
         public Object wrapArray(Object[] arr) {
             return arr;
         }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+        }
     }
 }

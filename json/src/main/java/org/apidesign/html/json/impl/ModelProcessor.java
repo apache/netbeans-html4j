@@ -254,7 +254,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     values++;
                 }
                 w.append("    Object[] ret = new Object[" + values + "];\n");
-                w.append("    org.apidesign.html.json.impl.JSON.extract(json, new String[] {\n");
+                w.append("    org.apidesign.html.json.impl.JSON.extract(context, json, new String[] {\n");
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     Prprt p = findPrprt(props, propsGetSet.get(i));
                     if (p == null) {
@@ -834,18 +834,21 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             first = false;
             String toCall = null;
+            String toFinish = null;
             if (ve.asType() == stringType) {
                 if (ve.getSimpleName().contentEquals("id")) {
                     params.append('"').append(id).append('"');
                     continue;
                 }
-                toCall = "org.apidesign.html.json.impl.JSON.toString(";
+                toCall = "org.apidesign.html.json.impl.JSON.toString(context, ";
             }
             if (ve.asType().getKind() == TypeKind.DOUBLE) {
-                toCall = "org.apidesign.html.json.impl.JSON.toDouble(";
+                toCall = "org.apidesign.html.json.impl.JSON.toNumber(context, ";
+                toFinish = ".doubleValue()";
             }
             if (ve.asType().getKind() == TypeKind.INT) {
-                toCall = "org.apidesign.html.json.impl.JSON.toInt(";
+                toCall = "org.apidesign.html.json.impl.JSON.toNumber(context, ";
+                toFinish = ".intValue()";
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
                 toCall = "org.apidesign.html.json.impl.JSON.toModel(" + ve.asType() + ".class, ";
@@ -871,6 +874,9 @@ public final class ModelProcessor extends AbstractProcessor {
                     params.append("\"");
                 }
                 params.append(")");
+                if (toFinish != null) {
+                    params.append(toFinish);
+                }
                 continue;
             }
             String rn = fqn(ve.asType(), ee);

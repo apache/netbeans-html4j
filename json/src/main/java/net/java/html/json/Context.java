@@ -85,5 +85,12 @@ public final class Context {
         public Object wrapArray(Object[] arr) {
             return arr;
         }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = null;
+            }
+        }
     }
 }

@@ -111,7 +111,7 @@ public class MapModelTest {
         assertEquals(p.getSex(), Sex.FEMALE, "Changed");
     }
 
-    private static final class One {
+    static final class One {
         int changes;
         final PropertyBinding pb;
         final FunctionBinding fb;
@@ -134,7 +134,7 @@ public class MapModelTest {
         }
     }
     
-    private static final class MapTechnology implements Technology<Map<String,One>> {
+    static final class MapTechnology implements Technology<Map<String,One>> {
 
         @Override
         public Map<String, One> wrapModel(Object model) {
@@ -175,6 +175,21 @@ public class MapModelTest {
         @Override
         public Object wrapArray(Object[] arr) {
             return arr;
+        }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            Map<?,?> map = obj instanceof Map ? (Map<?,?>)obj : null;
+            for (int i = 0; i < Math.min(props.length, values.length); i++) {
+                if (map == null) {
+                    values[i] = null;
+                } else {
+                    values[i] = map.get(props[i]);
+                    if (values[i] instanceof One) {
+                        values[i] = ((One)values[i]).pb.getValue();
+                    }
+                }
+            }
         }
     }
 }

@@ -69,4 +69,15 @@ public interface Technology<Data> {
      * @return wrapped array
      */
     public Object wrapArray(Object[] arr);
+
+    /** Called to inspect properties of an object (usually a JSON or JavaScript
+     * wrapper. 
+     * 
+     * @param obj the object to inspect
+     * @param props the names of properties to check on the object <code>obj</code>
+     * @param values array of the same length as <code>props</code> should be filled
+     *   by values of properties on the <code>obj</code>. If a property is not
+     *   defined, a <code>null</code> value should be stored in the array
+     */
+    public void extract(Object obj, String[] props, Object[] values);
 }
