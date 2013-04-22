@@ -71,6 +71,7 @@ public class JSONListTest implements Technology<Object> {
         
         People people = new People(c);
         people.getInfo().add(p);
+        assertEquals(people.getInfo().toString(), "[{\"firstName\":\"1\",\"lastName\":\"2\",\"sex\":\"MALE\"}]", "Converted to real JSON");
         
         PropertyBinding pb = bindings.get("info");
         assertNotNull(pb, "Binding for info found");

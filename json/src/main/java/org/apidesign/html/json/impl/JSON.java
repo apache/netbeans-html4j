@@ -32,8 +32,23 @@ public final class JSON {
     public static void extract(Object value, String[] props, Object[] values) {
     }
 
-    public static Object toJSON(Object prop_firstName) {
-        return null;
+    public static Object toJSON(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof Enum) {
+            value = value.toString();
+        }
+        if (value instanceof String) {
+            return '"' + 
+                ((String)value).
+                    replace("\"", "\\\"").
+                    replace("\n", "\\n").
+                    replace("\r", "\\r").
+                    replace("\t", "\\t")
+                + '"';
+        }
+        return value.toString();
     }
 
     public static String toString(Object obj, String prop) {
