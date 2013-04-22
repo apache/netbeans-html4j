@@ -83,6 +83,24 @@ public class JSONListTest implements Technology<Object> {
         assertEquals(this, arr[0], "I am the right model");
     }
     
+    @Test public void testNicknames() {
+        Context c = ContextBuilder.create().withTechnology(this).build();
+        
+        People people = new People(c);
+        people.getNicknames().add("One");
+        people.getNicknames().add("Two");
+        
+        PropertyBinding pb = bindings.get("nicknames");
+        assertNotNull(pb, "Binding for info found");
+        
+        Object real = pb.getValue();
+        assertTrue(real instanceof Object[], "It is an array: " + real);
+        Object[] arr = (Object[])real;
+        assertEquals(arr.length, 2, "Length two");
+        assertEquals(arr[0], "One", "Text should be in the model");
+        assertEquals(arr[1], "Two", "2nd text in the model");
+    }
+    
     @Test public void testConvertorOnAnArrayWithWrapper() {
         this.replaceArray = true;
         Context c = ContextBuilder.create().withTechnology(this).build();
