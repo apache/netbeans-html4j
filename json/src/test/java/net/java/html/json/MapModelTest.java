@@ -138,6 +138,9 @@ public class MapModelTest {
                 throw new IllegalStateException(ex);
             }
         }
-    
+
+        @Override
+        public void applyBindings(Map<String, One> data) {
+        }
     }
 }

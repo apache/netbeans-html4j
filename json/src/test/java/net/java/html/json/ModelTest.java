@@ -165,6 +165,7 @@ public class ModelTest {
     @OnReceive(url = "{protocol}://{host}?query={query}")
     static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
+        m.applyBindings();
         m.loadPeople("http", "apidesign.org", "query");
     }
     
@@ -250,6 +251,10 @@ public class ModelTest {
 
         @Override
         public void expose(FunctionBinding fb, Object model, Object d) {
+        }
+
+        @Override
+        public void applyBindings(Object data) {
         }
     }
 }

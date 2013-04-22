@@ -56,4 +56,9 @@ public interface Technology<Data> {
     public void valueHasMutated(Data data, String propertyName);
 
     public void expose(FunctionBinding fb, Object model, Data d);
+    
+    /** Applies given data to current context (usually an HTML page).
+     * @param data the data to apply
+     */
+    public void applyBindings(Data data);
 }

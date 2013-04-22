@@ -76,4 +76,8 @@ public final class Bindings<Data> {
     public void valueHasMutated(String firstName) {
         bp.valueHasMutated(data, firstName);
     }
+    
+    public void applyBindings() {
+        bp.applyBindings(data);
+    }
 }

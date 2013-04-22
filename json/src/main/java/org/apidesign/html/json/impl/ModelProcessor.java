@@ -273,6 +273,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 writeToString(props, w);
                 writeClone(className, props, w);
+                w.write("public " + className + " applyBindings() {\n");
+                w.write("  ko.applyBindings();\n");
+                w.write("  return this;\n");
+                w.write("}\n");
                 w.append("  public Object koData() {\n");
                 w.append("    return intKnckt().koData();\n");
                 w.append("  }\n");

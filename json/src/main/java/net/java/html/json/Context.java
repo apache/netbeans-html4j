@@ -76,5 +76,9 @@ public final class Context {
         @Override
         public void expose(FunctionBinding fb, Object model, Object d) {
         }
+
+        @Override
+        public void applyBindings(Object data) {
+        }
     }
 }
