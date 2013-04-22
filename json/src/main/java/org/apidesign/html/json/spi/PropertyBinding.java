@@ -45,8 +45,8 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected FunctionBinding newFunction(List<String> params) {
-                return new FunctionBinding(params);
+            protected <M> FunctionBinding newFunction(FBData<M> d) {
+                return new FunctionBinding(d);
             }
         };
     }

@@ -48,20 +48,20 @@ public abstract class PropertyBindingAccessor {
     }
 
     protected abstract <M> PropertyBinding newBinding(PBData<M> d);
-    protected abstract FunctionBinding newFunction(List<String> params);
+    protected abstract <M> FunctionBinding newFunction(FBData<M> d);
     
     static <M> PropertyBinding create(PBData<M> d) {
         return DEFAULT.newBinding(d);
     }
-    static FunctionBinding createFunction(List<String> subList) {
-        return DEFAULT.newFunction(subList);
+    static <M> FunctionBinding createFunction(FBData<M> d) {
+        return DEFAULT.newFunction(d);
     }
 
     public static final class PBData<M> {
         public final String name;
-        public final M model;
-        public final SetAndGet<M> access;
         public final boolean readOnly;
+        private final M model;
+        private final SetAndGet<M> access;
 
         public PBData(String name, M model, SetAndGet<M> access, boolean readOnly) {
             this.name = name;
@@ -81,5 +81,22 @@ public abstract class PropertyBindingAccessor {
         public boolean isReadOnly() {
             return readOnly;
         }
-    }
+    } // end of PBData
+    
+    public static final class FBData<M> {
+        public final String name;
+        private final M model;
+        private final Callback<M> access;
+
+        public FBData(String name, M model, Callback<M> access) {
+            this.name = name;
+            this.model = model;
+            this.access = access;
+        }
+
+
+        public void call(Object data, Object ev) {
+            access.call(model, data, ev);
+        }
+    } // end of FBData
 }

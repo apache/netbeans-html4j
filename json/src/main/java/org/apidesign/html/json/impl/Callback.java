@@ -18,35 +18,13 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.json.spi;
 
-import net.java.html.json.Function;
-import net.java.html.json.Model;
-import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
+package org.apidesign.html.json.impl;
 
-/** Describes a function provided by the {@link Model} and 
- * annotated by {@link Function} annotation.
+/**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FunctionBinding {
-    private final FBData<?> fb;
-    
-    FunctionBinding(FBData<?> fb) {
-        this.fb = fb;
-    }
-
-    public String getFunctionName() {
-        return fb.name;
-    }
-    
-    /** Calls the function provided data associated with current element,
-     * as well as information about the event that triggered the event.
-     * 
-     * @param data data associated with selected element
-     * @param ev event (with additional properties) that triggered the event
-     */
-    public void call(Object data, Object ev) {
-        fb.call(data, ev);
-    }
+public interface Callback<Data> {
+    public void call(Data model, Object data, Object ev);
 }

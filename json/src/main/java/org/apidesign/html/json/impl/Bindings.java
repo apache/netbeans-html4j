@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.json.Context;
+import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.Technology;
@@ -46,31 +47,22 @@ public final class Bindings<Data> {
         bp.bind(pb, model, data);
         return pb;
     }
+
+    public <M> FunctionBinding registerFunction(String name, M model, Callback<M> access) {
+        FunctionBinding fb = PropertyBindingAccessor.createFunction(new FBData<>(name, model, access));
+        bp.expose(fb, model, data);
+        return fb;
+    }
     
-    public static Bindings<?> apply(Context c, Object model, String[] functions) {
+    public static Bindings<?> apply(Context c, Object model) {
         Technology<?> bp = ContextAccessor.findTechnology(c);
-        return apply(bp, model, null, functions);
+        return apply(bp, model);
     }
     
     private static <Data> Bindings<Data> apply(
-        Technology<Data> bp, Object model, 
-        PropertyBinding[] propBindings, String[] methodsAndSignatures
+        Technology<Data> bp, Object model
     ) {
         Data d = bp.wrapModel(model);
-        
-        if (propBindings != null) {
-            for (int i = 0; i < propBindings.length; i++) {
-                PropertyBinding pb = propBindings[i];
-                bp.bind(pb, model, d);
-            }
-        }
-        
-        List<String> arr = Arrays.asList(methodsAndSignatures);
-        for (int i = 0; i < methodsAndSignatures.length; i += 2) {
-            FunctionBinding fb = PropertyBindingAccessor.createFunction(arr.subList(i, i + 2));
-            bp.expose(fb, model, d);
-        }
-        
         return new Bindings<>(d, bp);
     }
     

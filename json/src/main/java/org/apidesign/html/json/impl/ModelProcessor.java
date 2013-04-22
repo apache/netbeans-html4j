@@ -197,16 +197,19 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
-                w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this, ");
-                writeStringArray(functions, w);
-                w.append("    );\n");
+                w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     w.append("    ko.registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
                     w.append((i / 5) + "), " + (propsGetSet.get(i + 2) == null) + ");\n");
                 }
+                for (int i = 0; i < functions.size(); i += 2) {
+                    w.append("    ko.registerFunction(\"").append(functions.get(i)).append("\", this, new P(");
+                    w.append((i / 2) + "));\n");
+                }
                 w.append("    return ko;\n");
                 w.append("  };\n");
-                w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + "> {\n");
+                w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + ">,\n");
+                w.append("  org.apidesign.html.json.impl.Callback<" + className + "> {\n");
                 w.append("    private final int type;\n");
                 w.append("    P(int t) { type = t; };\n");
                 w.append("    public void setValue(" + className + " data, Object value) {\n");
@@ -227,6 +230,15 @@ public final class ModelProcessor extends AbstractProcessor {
                     if (get != null) {
                         w.append("        case " + (i / 5) + ": return data." + strip(get) + "();\n");
                     }
+                }
+                w.append("      }\n");
+                w.append("      throw new UnsupportedOperationException();\n");
+                w.append("    }\n");
+                w.append("    public void call(" + className + " model, Object data, Object ev) {\n");
+                w.append("      switch (type) {\n");
+                for (int i = 0; i < functions.size(); i += 2) {
+                    final String name = functions.get(i);
+                    w.append("        case " + (i / 2) + ": model." + name + "(data, ev); return;\n");
                 }
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");

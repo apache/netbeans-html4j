@@ -21,7 +21,6 @@
 package net.java.html.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.apidesign.html.json.impl.WrapperObject;
@@ -85,16 +84,28 @@ public class MapModelTest {
         Map m = (Map)WrapperObject.find(p);
         Object o = m.get("changeSex");
         assertNotNull(o, "Function registered in the model");
-
-        // TBD: invoke
+        assertEquals(o.getClass(), One.class);
+        
+        One one = (One)o;
+        assertNotNull(one.fb, "Function binding specified");
+        
+        one.fb.call("Hello", new Object());
+        
+        assertEquals(p.getSex(), Sex.FEMALE, "Changed");
     }
 
     private static final class One {
         int changes;
         final PropertyBinding pb;
+        final FunctionBinding fb;
     
         One(Object m, PropertyBinding pb) throws NoSuchMethodException {
             this.pb = pb;
+            this.fb = null;
+        }
+        One(Object m, FunctionBinding fb) throws NoSuchMethodException {
+            this.pb = null;
+            this.fb = fb;
         }
         
         Object get() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -134,7 +145,7 @@ public class MapModelTest {
         @Override
         public void expose(FunctionBinding fb, Object model, Map<String, One> data) {
             try {
-                data.put(fb.getFunctionName(), new One(model, null));
+                data.put(fb.getFunctionName(), new One(model, fb));
             } catch (NoSuchMethodException ex) {
                 throw new IllegalStateException(ex);
             }
