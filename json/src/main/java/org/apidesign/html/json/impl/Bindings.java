@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.json.Context;
+import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.Technology;
 
@@ -35,31 +36,36 @@ public final class Bindings<Data> {
     private final Data data;
     private final Technology<Data> bp;
 
-    public Bindings(Data data, Technology<Data> bp) {
+    private Bindings(Data data, Technology<Data> bp) {
         this.data = data;
         this.bp = bp;
     }
     
-    public static Bindings<?> apply(Context c, Object model, String[] propsAndGetters, String[] functions) {
+    public <M> PropertyBinding registerProperty(String propName, M model, SetAndGet<M> access, boolean readOnly) {
+        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<>(propName, model, access, readOnly));
+        bp.bind(pb, model, data);
+        return pb;
+    }
+    
+    public static Bindings<?> apply(Context c, Object model, String[] functions) {
         Technology<?> bp = ContextAccessor.findTechnology(c);
-        return apply(bp, model, propsAndGetters, functions);
+        return apply(bp, model, null, functions);
     }
     
     private static <Data> Bindings<Data> apply(
         Technology<Data> bp, Object model, 
-        String[] propsAndGetters, String[] methodsAndSignatures
+        PropertyBinding[] propBindings, String[] methodsAndSignatures
     ) {
         Data d = bp.wrapModel(model);
         
-        List<String> arr = Arrays.asList(propsAndGetters);
-        for (int i = 0; i < propsAndGetters.length; i += 4) {
-            PropertyBinding pb = PropertyBindingAccessor.create(
-                arr.subList(i, i + 4)
-            );
-            bp.bind(pb, model, d);
+        if (propBindings != null) {
+            for (int i = 0; i < propBindings.length; i++) {
+                PropertyBinding pb = propBindings[i];
+                bp.bind(pb, model, d);
+            }
         }
-
-        arr = Arrays.asList(methodsAndSignatures);
+        
+        List<String> arr = Arrays.asList(methodsAndSignatures);
         for (int i = 0; i < methodsAndSignatures.length; i += 2) {
             FunctionBinding fb = PropertyBindingAccessor.createFunction(arr.subList(i, i + 2));
             bp.expose(fb, model, d);
@@ -79,5 +85,9 @@ public final class Bindings<Data> {
     
     public void applyBindings() {
         bp.applyBindings(data);
+    }
+
+    Object wrapArray(Object[] arr) {
+        return bp.wrapArray(arr);
     }
 }

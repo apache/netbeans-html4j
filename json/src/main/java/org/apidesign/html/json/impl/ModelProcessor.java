@@ -197,15 +197,44 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
-                w.append("    return ko = org.apidesign.html.json.impl.Bindings.apply(context, this, ");
-                writeStringArray(propsGetSet, w);
-                w.append(", ");
+                w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this, ");
                 writeStringArray(functions, w);
                 w.append("    );\n");
+                for (int i = 0; i < propsGetSet.size(); i += 5) {
+                    w.append("    ko.registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
+                    w.append((i / 5) + "), " + (propsGetSet.get(i + 2) == null) + ");\n");
+                }
+                w.append("    return ko;\n");
                 w.append("  };\n");
+                w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + "> {\n");
+                w.append("    private final int type;\n");
+                w.append("    P(int t) { type = t; };\n");
+                w.append("    public void setValue(" + className + " data, Object value) {\n");
+                w.append("      switch (type) {\n");
+                for (int i = 0; i < propsGetSet.size(); i += 5) {
+                    final String set = propsGetSet.get(i + 2);
+                    final String tn = propsGetSet.get(i + 4);
+                    if (set != null) {
+                        w.append("        case " + (i / 5) + ": data." + strip(set) + "((" + tn + ")value); return;\n");
+                    }
+                }
+                w.append("      }\n");
+                w.append("    }\n");
+                w.append("    public Object getValue(" + className + " data) {\n");
+                w.append("      switch (type) {\n");
+                for (int i = 0; i < propsGetSet.size(); i += 5) {
+                    final String get = propsGetSet.get(i + 1);
+                    if (get != null) {
+                        w.append("        case " + (i / 5) + ": return data." + strip(get) + "();\n");
+                    }
+                }
+                w.append("      }\n");
+                w.append("      throw new UnsupportedOperationException();\n");
+                w.append("    }\n");
+                w.append("  }\n");
                 w.append("  ").append(className).append("(Object json) {\n");
                 int values = 0;
-                for (int i = 0; i < propsGetSet.size(); i += 4) {
+                for (int i = 0; i < propsGetSet.size(); i += 5) {
                     Prprt p = findPrprt(props, propsGetSet.get(i));
                     if (p == null) {
                         continue;
@@ -214,7 +243,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("    Object[] ret = new Object[" + values + "];\n");
                 w.append("    org.apidesign.html.json.impl.JSON.extract(json, new String[] {\n");
-                for (int i = 0; i < propsGetSet.size(); i += 4) {
+                for (int i = 0; i < propsGetSet.size(); i += 5) {
                     Prprt p = findPrprt(props, propsGetSet.get(i));
                     if (p == null) {
                         continue;
@@ -222,7 +251,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.append("      \"").append(propsGetSet.get(i)).append("\",\n");
                 }
                 w.append("    }, ret);\n");
-                for (int i = 0, cnt = 0, prop = 0; i < propsGetSet.size(); i += 4) {
+                for (int i = 0, cnt = 0, prop = 0; i < propsGetSet.size(); i += 5) {
                     final String pn = propsGetSet.get(i);
                     Prprt p = findPrprt(props, pn);
                     if (p == null) {
@@ -307,7 +336,8 @@ public final class ModelProcessor extends AbstractProcessor {
             final String tn;
             tn = typeName(where, p);
             String[] gs = toGetSet(p.name(), tn, p.array());
-
+            String castTo;
+            
             if (p.array()) {
                 w.write("private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(\""
                     + p.name() + "\"");
@@ -331,13 +361,15 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.write("}})");
                 }
                 w.write(";\n");
-                
+            
+                castTo = "java.util.List";
                 w.write("public java.util.List<" + tn + "> " + gs[0] + "() {\n");
                 w.write("  if (locked) throw new IllegalStateException();\n");
                 w.write("  prop_" + p.name() + ".assign(this.intKnckt());\n");
                 w.write("  return prop_" + p.name() + ";\n");
                 w.write("}\n");
             } else {
+                castTo = tn;
                 w.write("private " + tn + " prop_" + p.name() + ";\n");
                 w.write("public " + tn + " " + gs[0] + "() {\n");
                 w.write("  if (locked) throw new IllegalStateException();\n");
@@ -369,6 +401,7 @@ public final class ModelProcessor extends AbstractProcessor {
             props.add(gs[2]);
             props.add(gs[3]);
             props.add(gs[0]);
+            props.add(castTo);
         }
         return ok;
     }
@@ -440,6 +473,7 @@ public final class ModelProcessor extends AbstractProcessor {
             props.add(gs[2]);
             props.add(null);
             props.add(gs[0]);
+            props.add(tn);
         }
         
         return ok;
@@ -1092,6 +1126,15 @@ public final class ModelProcessor extends AbstractProcessor {
             error("Two sets of properties for ", e);
         }
         return ret;
+    }
+    
+    private static String strip(String s) {
+        int indx = s.indexOf("__");
+        if (indx >= 0) {
+            return s.substring(0, indx);
+        } else {
+            return s;
+        }
     }
     
     private static class Prprt {

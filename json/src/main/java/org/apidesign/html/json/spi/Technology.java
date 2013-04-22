@@ -61,4 +61,12 @@ public interface Technology<Data> {
      * @param data the data to apply
      */
     public void applyBindings(Data data);
+
+    /** Some technologies may require wrapping a Java array into a special
+     * object. In such case they may return it from this method.
+     * 
+     * @param arr original array
+     * @return wrapped array
+     */
+    public Object wrapArray(Object[] arr);
 }

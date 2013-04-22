@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.json.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.java.html.json.Context;
 import net.java.html.json.People;
 import net.java.html.json.Person;
@@ -29,6 +31,7 @@ import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -36,8 +39,14 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public class JSONListTest implements Technology<Object> {
+    private boolean replaceArray;
+    private final Map<String,PropertyBinding> bindings = new HashMap<>();
     
     public JSONListTest() {
+    }
+    
+    @BeforeMethod public void clear() {
+        replaceArray = false;
     }
 
     @Test public void testConvertorOnAnObject() {
@@ -62,12 +71,44 @@ public class JSONListTest implements Technology<Object> {
         
         People people = new People(c);
         people.getInfo().add(p);
-
-        Object real = WrapperObject.find(people.getInfo());
+        
+        PropertyBinding pb = bindings.get("info");
+        assertNotNull(pb, "Binding for info found");
+        
+        Object real = pb.getValue();
         assertTrue(real instanceof Object[], "It is an array: " + real);
         Object[] arr = (Object[])real;
         assertEquals(arr.length, 1, "Size is one");
         assertEquals(this, arr[0], "I am the right model");
+    }
+    
+    @Test public void testConvertorOnAnArrayWithWrapper() {
+        this.replaceArray = true;
+        Context c = ContextBuilder.create().withTechnology(this).build();
+        
+        Person p = new Person(c);
+        p.setFirstName("1");
+        p.setLastName("2");
+        p.setSex(Sex.MALE);
+        
+        People people = new People(c);
+        people.getInfo().add(p);
+
+        Object real = WrapperObject.find(people.getInfo());
+        assertEquals(real, this, "I am the model of the array");
+    }
+
+    @Test public void bindingsOnArray() {
+        this.replaceArray = true;
+        Context c = ContextBuilder.create().withTechnology(this).build();
+        
+        People p = new People(c);
+        p.getAge().add(30);
+        
+        PropertyBinding pb = bindings.get("age");
+        assertNotNull(pb, "There is a binding for age list");
+        
+        assertEquals(pb.getValue(), this, "I am the model of the array");
     }
 
     @Override
@@ -77,6 +118,7 @@ public class JSONListTest implements Technology<Object> {
 
     @Override
     public void bind(PropertyBinding b, Object model, Object data) {
+        bindings.put(b.getPropertyName(), b);
     }
 
     @Override
@@ -89,6 +131,11 @@ public class JSONListTest implements Technology<Object> {
 
     @Override
     public void applyBindings(Object data) {
+    }
+
+    @Override
+    public Object wrapArray(Object[] arr) {
+        return replaceArray ? this : arr;
     }
     
 }

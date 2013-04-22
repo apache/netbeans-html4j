@@ -21,31 +21,13 @@
 
 package org.apidesign.html.json.impl;
 
-/** A way to extract real object from a model classes.
+import org.apidesign.html.json.spi.PropertyBinding;
+
+/** A way to implement a {@link PropertyBinding}.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class WrapperObject {
-    private Object ko;
-    
-    private WrapperObject() {
-    }
-    
-    public void setRealObject(Object ko) {
-        this.ko = ko;
-    }
-    
-    
-    public static Object find(Object model) {
-        if (model == null) {
-            return null;
-        }
-        if (model instanceof JSONList) {
-            return ((JSONList<?>)model).koData();
-        }
-        
-        WrapperObject ro = new WrapperObject();
-        model.equals(ro);
-        return ro.ko;
-    }
+public interface SetAndGet<Data> {
+    public void setValue(Data data, Object value);
+    public Object getValue(Data data);
 }

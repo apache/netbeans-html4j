@@ -22,6 +22,8 @@ package org.apidesign.html.json.spi;
 
 import java.util.List;
 import org.apidesign.html.json.impl.PropertyBindingAccessor;
+import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
+import org.apidesign.html.json.impl.WrapperObject;
 
 /** Describes a property when one is asked to 
  * bind it 
@@ -29,17 +31,17 @@ import org.apidesign.html.json.impl.PropertyBindingAccessor;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class PropertyBinding {
-    private final List<String> params;
+    private final PBData<?> data;
     
-    private PropertyBinding(List<String> p) {
-        this.params = p;
+    private PropertyBinding(PBData<?> p) {
+        this.data = p;
     }
 
     static {
         new PropertyBindingAccessor() {
             @Override
-            protected PropertyBinding newBinding(List<String> params) {
-                return new PropertyBinding(params);
+            protected <M> PropertyBinding newBinding(PBData<M> d) {
+                return new PropertyBinding(d);
             }
 
             @Override
@@ -50,27 +52,20 @@ public final class PropertyBinding {
     }
 
     public String getPropertyName() {
-        return params.get(0);
-    }
-    
-    public String getGetterName() {
-        final String g = params.get(1);
-        int end = g.indexOf("__");
-        if (end == -1) {
-            end = g.length();
-        }
-        return g.substring(0, end);
+        return data.name;
     }
 
-    public String getSetterName() {
-        final String g = params.get(2);
-        if (g == null) {
-            return null;
-        }
-        int end = g.indexOf("__");
-        if (end == -1) {
-            end = g.length();
-        }
-        return g.substring(0, end);
+    public void setValue(Object v) {
+        data.setValue(v);
+    }
+    
+    public Object getValue() {
+        Object v = data.getValue();
+        Object r = WrapperObject.find(v);
+        return r == null ? v : r;
+    }
+    
+    public boolean isReadOnly() {
+        return data.isReadOnly();
     }
 }

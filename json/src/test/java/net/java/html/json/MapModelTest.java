@@ -56,6 +56,7 @@ public class MapModelTest {
         assertEquals(v.getClass(), One.class, "It is instance of One");
         One o = (One)v;
         assertEquals(o.changes, 1, "One change so far");
+        assertFalse(o.pb.isReadOnly(), "Mutable property");
         
         assertEquals(o.get(), "Jarda", "Value should be in the map");
         
@@ -63,6 +64,17 @@ public class MapModelTest {
         
         assertEquals(p.getFirstName(), "Karle", "Model value updated");
         assertEquals(o.changes, 2, "Snd change");
+    }
+    
+    @Test public void derivedProperty() throws Exception {
+        Person p = new Person(c);
+        
+        Map m = (Map)WrapperObject.find(p);
+        Object v = m.get("fullName");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertTrue(o.pb.isReadOnly(), "Mutable property");
     }
     
     @Test public void changeSex() {
@@ -79,30 +91,18 @@ public class MapModelTest {
 
     private static final class One {
         int changes;
-        private final Method getter;
-        private final Object model;
-        private final Method setter;
+        final PropertyBinding pb;
     
-        One(Object m, String get, String set) throws NoSuchMethodException {
-            this.model = m;
-            if (get != null) {
-                this.getter = m.getClass().getMethod(get);
-            } else {
-                this.getter = null;
-            }
-            if (set != null) {
-                this.setter = m.getClass().getMethod(set, this.getter.getReturnType());
-            } else {
-                this.setter = null;
-            }
+        One(Object m, PropertyBinding pb) throws NoSuchMethodException {
+            this.pb = pb;
         }
         
         Object get() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            return getter.invoke(model);
+            return pb.getValue();
         }
         
         void set(Object v) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-            setter.invoke(model, v);
+            pb.setValue(v);
         }
     }
     
@@ -124,7 +124,7 @@ public class MapModelTest {
         @Override
         public void bind(PropertyBinding b, Object model, Map<String, One> data) {
             try {
-                One o = new One(model, b.getGetterName(), b.getSetterName());
+                One o = new One(model, b);
                 data.put(b.getPropertyName(), o);
             } catch (NoSuchMethodException ex) {
                 throw new IllegalStateException(ex);
@@ -134,7 +134,7 @@ public class MapModelTest {
         @Override
         public void expose(FunctionBinding fb, Object model, Map<String, One> data) {
             try {
-                data.put(fb.getFunctionName(), new One(model, null, null));
+                data.put(fb.getFunctionName(), new One(model, null));
             } catch (NoSuchMethodException ex) {
                 throw new IllegalStateException(ex);
             }
@@ -142,6 +142,11 @@ public class MapModelTest {
 
         @Override
         public void applyBindings(Map<String, One> data) {
+        }
+
+        @Override
+        public Object wrapArray(Object[] arr) {
+            return arr;
         }
     }
 }

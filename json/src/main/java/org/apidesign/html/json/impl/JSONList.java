@@ -162,20 +162,12 @@ public final class JSONList<T> extends ArrayList<T> {
         return ko;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof WrapperObject) {
-            ((WrapperObject)o).setRealObject(koData());
-        }
-        return super.equals(o);
-    }
-
-    private Object[] koData() {
+    public Object koData() {
         Object[] arr = toArray();
         for (int i = 0; i < arr.length; i++) {
             arr[i] = WrapperObject.find(arr[i]);
         }
-        return arr;
+        return model.wrapArray(arr);
     }
     
 }

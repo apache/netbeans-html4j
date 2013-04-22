@@ -80,5 +80,10 @@ public final class Context {
         @Override
         public void applyBindings(Object data) {
         }
+
+        @Override
+        public Object wrapArray(Object[] arr) {
+            return arr;
+        }
     }
 }
