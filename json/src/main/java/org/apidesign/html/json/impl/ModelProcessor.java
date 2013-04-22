@@ -273,14 +273,18 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 writeToString(props, w);
                 writeClone(className, props, w);
-                w.write("public " + className + " applyBindings() {\n");
-                w.write("  ko.applyBindings();\n");
-                w.write("  return this;\n");
+                w.write("  public " + className + " applyBindings() {\n");
+                w.write("    ko.applyBindings();\n");
+                w.write("    return this;\n");
+                w.write("  }\n");
+                w.write("  public boolean equals(Object o) {\n");
+                w.write("    if (o == this) return true;\n");
+                w.write("    if (o instanceof org.apidesign.html.json.impl.WrapperObject) {\n");
+                w.write("      ((org.apidesign.html.json.impl.WrapperObject)o).setRealObject(intKnckt().koData());\n");
+                w.write("    }\n");
+                w.write("    return false;\n");
+                w.write("  }\n");
                 w.write("}\n");
-                w.append("  public Object koData() {\n");
-                w.append("    return intKnckt().koData();\n");
-                w.append("  }\n");
-                w.append("}\n");
             } finally {
                 w.close();
             }

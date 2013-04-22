@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import org.apidesign.html.json.impl.WrapperObject;
 import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
@@ -49,7 +50,7 @@ public class MapModelTest {
         Person p = new Person(c);
         p.setFirstName("Jarda");
         
-        Map m = (Map)p.koData();
+        Map m = (Map)WrapperObject.find(p);
         Object v = m.get("firstName");
         assertNotNull(v, "Value should be in the map");
         assertEquals(v.getClass(), One.class, "It is instance of One");
@@ -69,7 +70,7 @@ public class MapModelTest {
         p.setFirstName("Trans");
         p.setSex(Sex.MALE);
         
-        Map m = (Map)p.koData();
+        Map m = (Map)WrapperObject.find(p);
         Object o = m.get("changeSex");
         assertNotNull(o, "Function registered in the model");
 
