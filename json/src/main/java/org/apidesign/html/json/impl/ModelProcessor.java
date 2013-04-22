@@ -873,6 +873,9 @@ public final class ModelProcessor extends AbstractProcessor {
     }
     
     private boolean isModel(TypeMirror tm) {
+        if (tm.getKind() == TypeKind.ERROR) {
+            return true;
+        }
         final Element e = processingEnv.getTypeUtils().asElement(tm);
         if (e == null) {
             return false;

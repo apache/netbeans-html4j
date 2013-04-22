@@ -163,7 +163,7 @@ public class ModelTest {
     }
     
     @OnReceive(url = "{protocol}://{host}?query={query}")
-    static void loadPeople(People p) {
+    static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
         m.loadPeople("http", "apidesign.org", "query");
     }

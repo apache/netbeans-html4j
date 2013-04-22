@@ -36,6 +36,14 @@ public final class JSON {
         return null;
     }
 
+    public static String toString(Object obj, String prop) {
+        return null;
+    }
+    
+    public static String createJSONP(Object[] res, Runnable callback) {
+        return null;
+    }
+
     public static Object loadJSON(String url, Object[] res, Runnable callback, String jsonp) {
         return null;
     }
