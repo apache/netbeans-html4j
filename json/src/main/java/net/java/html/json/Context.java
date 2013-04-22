@@ -21,6 +21,7 @@
 package net.java.html.json;
 
 import org.apidesign.html.json.impl.ContextAccessor;
+import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 
@@ -70,6 +71,10 @@ public final class Context {
 
         @Override
         public void bind(PropertyBinding b, Object model, Object data) {
+        }
+
+        @Override
+        public void expose(FunctionBinding fb, Object model, Object d) {
         }
     }
 }

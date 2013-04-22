@@ -54,4 +54,6 @@ public interface Technology<Data> {
      * @param propertyName name of the model property that changed
      */
     public void valueHasMutated(Data data, String propertyName);
+
+    public void expose(FunctionBinding fb, Object model, Data d);
 }

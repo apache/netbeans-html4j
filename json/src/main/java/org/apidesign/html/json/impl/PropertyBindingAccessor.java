@@ -21,6 +21,7 @@
 package org.apidesign.html.json.impl;
 
 import java.util.List;
+import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
 /**
@@ -47,10 +48,15 @@ public abstract class PropertyBindingAccessor {
     }
 
     protected abstract PropertyBinding newBinding(List<String> params);
+    protected abstract FunctionBinding newFunction(List<String> params);
     
-    public static PropertyBinding create(
+    static PropertyBinding create(
         List<String> params
     ) {
         return DEFAULT.newBinding(params);
     }
+    static FunctionBinding createFunction(List<String> subList) {
+        return DEFAULT.newFunction(subList);
+    }
+
 }

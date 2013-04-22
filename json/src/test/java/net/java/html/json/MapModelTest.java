@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.testng.annotations.BeforeMethod;
@@ -63,7 +64,17 @@ public class MapModelTest {
         assertEquals(o.changes, 2, "Snd change");
     }
     
-    
+    @Test public void changeSex() {
+        Person p = new Person(c);
+        p.setFirstName("Trans");
+        p.setSex(Sex.MALE);
+        
+        Map m = (Map)p.koData();
+        Object o = m.get("changeSex");
+        assertNotNull(o, "Function registered in the model");
+
+        // TBD: invoke
+    }
 
     private static final class One {
         int changes;
@@ -73,7 +84,11 @@ public class MapModelTest {
     
         One(Object m, String get, String set) throws NoSuchMethodException {
             this.model = m;
-            this.getter = m.getClass().getMethod(get);
+            if (get != null) {
+                this.getter = m.getClass().getMethod(get);
+            } else {
+                this.getter = null;
+            }
             if (set != null) {
                 this.setter = m.getClass().getMethod(set, this.getter.getReturnType());
             } else {
@@ -110,6 +125,15 @@ public class MapModelTest {
             try {
                 One o = new One(model, b.getGetterName(), b.getSetterName());
                 data.put(b.getPropertyName(), o);
+            } catch (NoSuchMethodException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        @Override
+        public void expose(FunctionBinding fb, Object model, Map<String, One> data) {
+            try {
+                data.put(fb.getFunctionName(), new One(model, null, null));
             } catch (NoSuchMethodException ex) {
                 throw new IllegalStateException(ex);
             }

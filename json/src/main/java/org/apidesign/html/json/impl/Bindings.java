@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.json.Context;
+import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.Technology;
 
 /**
@@ -46,7 +47,7 @@ public final class Bindings<Data> {
     
     private static <Data> Bindings<Data> apply(
         Technology<Data> bp, Object model, 
-        String[] propsAndGetters, String[] functions
+        String[] propsAndGetters, String[] methodsAndSignatures
     ) {
         Data d = bp.wrapModel(model);
         
@@ -56,6 +57,12 @@ public final class Bindings<Data> {
                 arr.subList(i, i + 4)
             );
             bp.bind(pb, model, d);
+        }
+
+        arr = Arrays.asList(methodsAndSignatures);
+        for (int i = 0; i < methodsAndSignatures.length; i += 2) {
+            FunctionBinding fb = PropertyBindingAccessor.createFunction(arr.subList(i, i + 2));
+            bp.expose(fb, model, d);
         }
         
         return new Bindings<>(d, bp);

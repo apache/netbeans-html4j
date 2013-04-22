@@ -21,56 +21,22 @@
 package org.apidesign.html.json.spi;
 
 import java.util.List;
-import org.apidesign.html.json.impl.PropertyBindingAccessor;
+import net.java.html.json.Function;
+import net.java.html.json.Model;
 
-/** Describes a property when one is asked to 
- * bind it 
+/** Describes a function provided by the {@link Model} and 
+ * annotated by {@link Function} annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class PropertyBinding {
+public final class FunctionBinding {
     private final List<String> params;
     
-    private PropertyBinding(List<String> p) {
+    FunctionBinding(List<String> p) {
         this.params = p;
     }
 
-    static {
-        new PropertyBindingAccessor() {
-            @Override
-            protected PropertyBinding newBinding(List<String> params) {
-                return new PropertyBinding(params);
-            }
-
-            @Override
-            protected FunctionBinding newFunction(List<String> params) {
-                return new FunctionBinding(params);
-            }
-        };
-    }
-
-    public String getPropertyName() {
+    public String getFunctionName() {
         return params.get(0);
-    }
-    
-    public String getGetterName() {
-        final String g = params.get(1);
-        int end = g.indexOf("__");
-        if (end == -1) {
-            end = g.length();
-        }
-        return g.substring(0, end);
-    }
-
-    public String getSetterName() {
-        final String g = params.get(2);
-        if (g == null) {
-            return null;
-        }
-        int end = g.indexOf("__");
-        if (end == -1) {
-            end = g.length();
-        }
-        return g.substring(0, end);
     }
 }
