@@ -60,11 +60,14 @@ public class JSONListTest implements Technology<Object> {
         p.setLastName("2");
         p.setSex(Sex.MALE);
         
-        People arr = new People(c);
-        arr.getInfo().add(p);
+        People people = new People(c);
+        people.getInfo().add(p);
 
-        Object real = WrapperObject.find(p);
-        assertEquals(this, real, "I am the right model");
+        Object real = WrapperObject.find(people.getInfo());
+        assertTrue(real instanceof Object[], "It is an array: " + real);
+        Object[] arr = (Object[])real;
+        assertEquals(arr.length, 1, "Size is one");
+        assertEquals(this, arr[0], "I am the right model");
     }
 
     @Override

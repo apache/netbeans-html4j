@@ -141,10 +141,6 @@ public final class JSONList<T> extends ArrayList<T> {
         return sb.toString();
     }
 
-    public Object koData() {
-        return toArray();
-    }
-
     private void notifyChange() {
         Bindings m = model;
         if (m != null) {
@@ -165,4 +161,21 @@ public final class JSONList<T> extends ArrayList<T> {
         ko.model = null;
         return ko;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof WrapperObject) {
+            ((WrapperObject)o).setRealObject(koData());
+        }
+        return super.equals(o);
+    }
+
+    private Object[] koData() {
+        Object[] arr = toArray();
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = WrapperObject.find(arr[i]);
+        }
+        return arr;
+    }
+    
 }
