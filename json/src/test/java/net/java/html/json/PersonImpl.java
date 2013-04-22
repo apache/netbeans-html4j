@@ -41,7 +41,11 @@ final class PersonImpl {
     }
     
     @Function
-    static void changeSex(Person p) {
+    static void changeSex(Person p, String data) {
+        if (data != null) {
+            p.setSex(Sex.valueOf(data));
+            return;
+        }
         if (p.getSex() == Sex.MALE) {
             p.setSex(Sex.FEMALE);
         } else {

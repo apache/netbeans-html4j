@@ -89,7 +89,24 @@ public class MapModelTest {
         One one = (One)o;
         assertNotNull(one.fb, "Function binding specified");
         
-        one.fb.call("Hello", new Object());
+        one.fb.call(null, null);
+        
+        assertEquals(p.getSex(), Sex.FEMALE, "Changed");
+    }
+    
+    @Test public void setSex() {
+        Person p = new Person(c);
+        p.setFirstName("Trans");
+        
+        Map m = (Map)WrapperObject.find(p);
+        Object o = m.get("changeSex");
+        assertNotNull(o, "Function registered in the model");
+        assertEquals(o.getClass(), One.class);
+        
+        One one = (One)o;
+        assertNotNull(one.fb, "Function binding specified");
+        
+        one.fb.call("FEMALE", new Object());
         
         assertEquals(p.getSex(), Sex.FEMALE, "Changed");
     }

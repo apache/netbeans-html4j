@@ -31,6 +31,15 @@ public final class JSON {
 
     public static void extract(Object value, String[] props, Object[] values) {
     }
+    
+    private static Object getProperty(Object obj, String prop) {
+        if (prop == null) return obj;
+        
+        String[] arr = { prop };
+        Object[] val = { null };
+        extract(obj, arr, val);
+        return val[0];
+    }
 
     public static Object toJSON(Object value) {
         if (value == null) {
@@ -52,7 +61,8 @@ public final class JSON {
     }
 
     public static String toString(Object obj, String prop) {
-        return null;
+        obj = getProperty(obj, prop);
+        return obj instanceof String ? (String)obj : null;
     }
     
     public static String createJSONP(Object[] res, Runnable callback) {
