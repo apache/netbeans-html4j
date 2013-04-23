@@ -22,7 +22,6 @@ package org.apidesign.html.json.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import net.java.html.json.Context;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.Transfer;
@@ -80,6 +79,9 @@ public final class JSON {
         }
         return (Number)obj;
     }
+    public static <M> M toModel(Class<M> aClass, Object data, Object object) {
+        return aClass.cast(data);
+    }
 
     
     public static void loadJSON(
@@ -93,23 +95,40 @@ public final class JSON {
     
     private static final Map<Class,FromJSON<?>> froms;
     static {
-        Map<Class,FromJSON<?>> m;
-        try {
-            m = new WeakHashMap<>();
-        } catch (LinkageError ex) {
-            m = new HashMap<>();
-        }
+        Map<Class,FromJSON<?>> m = new HashMap<>();
         froms = m;
     }
     public static void register(FromJSON<?> from) {
-        froms.put(from.getClass(), from);
+        froms.put(from.factoryFor(), from);
     }
     
     public static <T> T read(Context c, Class<T> modelClazz, Object data) {
-        FromJSON<?> from = froms.get(modelClazz);
-        if (from == null) {
-            throw new NullPointerException();
+        for (int i = 0; i < 2; i++) {
+            FromJSON<?> from = froms.get(modelClazz);
+            if (from == null) {
+                initClass(modelClazz);
+            } else {
+                return modelClazz.cast(from.read(c, data));
+            }
         }
-        return modelClazz.cast(from.read(c, data));
+        throw new NullPointerException();
+    }
+    static void initClass(Class<?> modelClazz) {
+        try {
+            // try to resolve the class
+            ClassLoader l;
+            try {
+                l = modelClazz.getClassLoader();
+            } catch (SecurityException ex) {
+                l = null;
+            }
+            if (l != null) {
+                Class.forName(modelClazz.getName(), true, l);
+            }
+            modelClazz.newInstance();
+        } catch (ClassNotFoundException | InstantiationException |
+            IllegalAccessException | SecurityException ex) {
+            // ignore and try again
+        }
     }
 }

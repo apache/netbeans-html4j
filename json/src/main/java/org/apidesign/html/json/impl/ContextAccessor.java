@@ -34,7 +34,11 @@ public abstract class ContextAccessor {
     private static ContextAccessor DEFAULT;
     static {
         // run initializers
-        Context.EMPTY.getClass();
+        try {
+            Context.EMPTY.getClass();
+        } catch (NullPointerException ex) {
+            // ignore
+        }
     }
     
     protected ContextAccessor() {

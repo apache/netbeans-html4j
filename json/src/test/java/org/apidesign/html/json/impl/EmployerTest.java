@@ -18,25 +18,24 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-
 package org.apidesign.html.json.impl;
 
+import net.java.html.json.Context;
 import net.java.html.json.Model;
-import net.java.html.json.OnReceive;
-import net.java.html.json.Person;
 import net.java.html.json.Property;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@Model(className = "Employee", properties = {
-    @Property(name = "person", type = Person.class),
-    @Property(name = "employer", type = Employer.class)
+@Model(className = "Employer", properties = {
+    @Property(name = "name", type = String.class)
 })
-public class EmployeeImpl {
-    @OnReceive(url = "some/url")
-    static void changePersonality(Employee e, Person p) {
-        e.setPerson(p);
+public class EmployerTest {
+    @Test public void preLoadsTheClass() {
+        Employer em = JSON.read(Context.EMPTY, Employer.class, this);
+        Assert.assertNotNull(em, "Class loaded");
     }
 }

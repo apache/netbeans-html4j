@@ -37,14 +37,7 @@ public abstract class PropertyBindingAccessor {
     }
     
     static {
-        try {
-            // run initializers
-            Class.forName(PropertyBinding.class.getName(), 
-                true, PropertyBinding.class.getClassLoader());
-        } catch (Exception ex) {
-            // OK
-            throw new IllegalStateException(ex);
-        }
+        JSON.initClass(PropertyBinding.class);
     }
 
     protected abstract <M> PropertyBinding newBinding(PBData<M> d);
