@@ -78,6 +78,7 @@
                   <strictCheck>true</strictCheck>
                   <excludes>
                        <exclude>*</exclude>
+                       <exclude>.*/**</exclude>
                   </excludes>
               </configuration>
           </plugin>
