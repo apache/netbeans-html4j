@@ -199,7 +199,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    return ko;\n");
                 w.append("  };\n");
                 w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + ">,\n");
-                w.append("  org.apidesign.html.json.impl.Callback<" + className + "> {\n");
+                w.append("  org.apidesign.html.json.impl.Callback<" + className + ">,\n");
+                w.append("  org.apidesign.html.json.impl.FromJSON<" + className + "> {\n");
                 w.append("    private final int type;\n");
                 w.append("    P(int t) { type = t; };\n");
                 w.append("    public void setValue(" + className + " data, Object value) {\n");
@@ -233,8 +234,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
+                w.append("    public Class<" + className + "> factoryFor() { return " + className + ".class; }\n");
+                w.append("    public " + className + " read(Context c, Object json) { return new " + className + "(c, json); }\n");
                 w.append("  }\n");
-                w.append("  ").append(className).append("(Context c, Object json) {\n");
+                w.append("  static { org.apidesign.html.json.impl.JSON.register(new P(0)); }\n");
+                w.append("  private ").append(className).append("(Context c, Object json) {\n");
                 w.append("    this.context = c;\n");
                 int values = 0;
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
@@ -268,8 +272,8 @@ public final class ModelProcessor extends AbstractProcessor {
                         w.append("if (ret[" + cnt + "] instanceof Object[]) {\n");
                         w.append("  for (Object e : ((Object[])ret[" + cnt + "])) {\n");
                         if (isModel[0]) {
-                            w.append("    this.prop_").append(pn).append(".add(new ");
-                            w.append(type).append("(c, e));\n");
+                            w.append("    this.prop_").append(pn).append(".add(org.apidesign.html.json.impl.JSON.read");
+                            w.append("(c, " + type + ".class, e));\n");
                         } else if (isEnum[0]) {
                             w.append("    this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
@@ -777,11 +781,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 "        Object[] data = ((Object[])value);\n" +
                 "        arr = new " + modelClass + "[data.length];\n" +
                 "        for (int i = 0; i < data.length; i++) {\n" +
-                "          arr[i] = new " + modelClass + "(context, data[i]);\n" +
+                "          arr[i] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, data[i]);\n" +
                 "        }\n" +
                 "      } else {\n" +
                 "        arr = new " + modelClass + "[1];\n" +
-                "        arr[0] = new " + modelClass + "(context, value);\n" +
+                "        arr[0] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, value);\n" +
                 "      }\n"
             );
             {

@@ -20,6 +20,9 @@
  */
 package org.apidesign.html.json.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.java.html.json.Context;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.Transfer;
@@ -86,5 +89,27 @@ public final class JSON {
         JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter);
         Transfer t = ContextAccessor.findTransfer(c);
         t.loadJSON(call);
+    }
+    
+    private static final Map<Class,FromJSON<?>> froms;
+    static {
+        Map<Class,FromJSON<?>> m;
+        try {
+            m = new WeakHashMap<>();
+        } catch (LinkageError ex) {
+            m = new HashMap<>();
+        }
+        froms = m;
+    }
+    public static void register(FromJSON<?> from) {
+        froms.put(from.getClass(), from);
+    }
+    
+    public static <T> T read(Context c, Class<T> modelClazz, Object data) {
+        FromJSON<?> from = froms.get(modelClazz);
+        if (from == null) {
+            throw new NullPointerException();
+        }
+        return modelClazz.cast(from.read(c, data));
     }
 }
