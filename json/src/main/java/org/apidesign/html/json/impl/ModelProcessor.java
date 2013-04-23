@@ -21,7 +21,6 @@
 package org.apidesign.html.json.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -60,7 +59,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
-import javax.tools.StandardLocation;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
 import net.java.html.json.Function;
