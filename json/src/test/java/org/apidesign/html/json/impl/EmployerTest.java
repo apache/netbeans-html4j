@@ -37,5 +37,6 @@ public class EmployerTest {
     @Test public void preLoadsTheClass() {
         Employer em = JSON.read(Context.EMPTY, Employer.class, this);
         Assert.assertNotNull(em, "Class loaded");
+        em.applyBindings();
     }
 }

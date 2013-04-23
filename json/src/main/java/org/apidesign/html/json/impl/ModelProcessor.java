@@ -309,7 +309,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 writeToString(props, w);
                 writeClone(className, props, w);
                 w.write("  public " + className + " applyBindings() {\n");
-                w.write("    ko.applyBindings();\n");
+                w.write("    intKnckt().applyBindings();\n");
                 w.write("    return this;\n");
                 w.write("  }\n");
                 w.write("  public boolean equals(Object o) {\n");
