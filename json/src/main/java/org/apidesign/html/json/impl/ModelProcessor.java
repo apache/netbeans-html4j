@@ -52,6 +52,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -715,7 +716,14 @@ public final class ModelProcessor extends AbstractProcessor {
             {
                 for (VariableElement ve : e.getParameters()) {
                     TypeMirror modelType = null;
-                    if (ve.asType().toString().equals(className)) {
+                    final TypeMirror type = ve.asType();
+                    CharSequence simpleName;
+                    if (type.getKind() == TypeKind.DECLARED) {
+                        simpleName = ((DeclaredType)type).asElement().getSimpleName();
+                    } else {
+                        simpleName = type.toString();
+                    }
+                    if (simpleName.toString().equals(className)) {
                         args.add(className + ".this");
                     } else if (isModel(ve.asType())) {
                         modelType = ve.asType();
