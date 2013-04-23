@@ -244,7 +244,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
                 w.append("  }\n");
-                w.append("  ").append(className).append("(Object json) {\n");
+                w.append("  ").append(className).append("(Context c, Object json) {\n");
+                w.append("    this.context = c;\n");
                 int values = 0;
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     Prprt p = findPrprt(props, propsGetSet.get(i));
@@ -278,7 +279,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         w.append("  for (Object e : ((Object[])ret[" + cnt + "])) {\n");
                         if (isModel[0]) {
                             w.append("    this.prop_").append(pn).append(".add(new ");
-                            w.append(type).append("(e));\n");
+                            w.append(type).append("(c, e));\n");
                         } else if (isEnum[0]) {
                             w.append("    this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
@@ -786,11 +787,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 "        Object[] data = ((Object[])value);\n" +
                 "        arr = new " + modelClass + "[data.length];\n" +
                 "        for (int i = 0; i < data.length; i++) {\n" +
-                "          arr[i] = new " + modelClass + "(data[i]);\n" +
+                "          arr[i] = new " + modelClass + "(context, data[i]);\n" +
                 "        }\n" +
                 "      } else {\n" +
                 "        arr = new " + modelClass + "[1];\n" +
-                "        arr[0] = new " + modelClass + "(value);\n" +
+                "        arr[0] = new " + modelClass + "(context, value);\n" +
                 "      }\n"
             );
             {
