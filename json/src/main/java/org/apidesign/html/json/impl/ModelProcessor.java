@@ -134,16 +134,6 @@ public final class ModelProcessor extends AbstractProcessor {
         return ok;
     }
 
-    private InputStream openStream(String pkg, String name) throws IOException {
-        try {
-            FileObject fo = processingEnv.getFiler().getResource(
-                StandardLocation.SOURCE_PATH, pkg, name);
-            return fo.openInputStream();
-        } catch (IOException ex) {
-            return processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, pkg, name).openInputStream();
-        }
-    }
-
     private void error(String msg, Element e) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg, e);
     }
@@ -952,21 +942,6 @@ public final class ModelProcessor extends AbstractProcessor {
             }
         }
         return models.values().contains(e.getSimpleName().toString());
-    }
-
-    private void writeStringArray(List<String> strings, Writer w) throws IOException {
-        w.write("new String[] {\n");
-        String sep = "";
-        for (String n : strings) {
-            w.write(sep);
-            if (n == null) {
-                w.write("    null");
-            } else {
-                w.write("    \"" + n + "\"");
-            }
-            sep = ",\n";
-        }
-        w.write("\n  }");
     }
     
     private void writeToString(Prprt[] props, Writer w) throws IOException {
