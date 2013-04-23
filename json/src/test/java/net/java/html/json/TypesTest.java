@@ -48,7 +48,7 @@ public class TypesTest {
 
     @BeforeMethod public void initTechnology() {
         t = new MapModelTest.MapTechnology();
-        c = ContextBuilder.create().withTechnology(t).build();
+        c = ContextBuilder.create().withTechnology(t).withTransfer(t).build();
     }
     @Function static void readFromEvent(int intX, 
         /*

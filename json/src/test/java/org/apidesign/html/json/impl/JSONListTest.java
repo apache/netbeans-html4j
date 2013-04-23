@@ -157,8 +157,4 @@ public class JSONListTest implements Technology<Object> {
         return replaceArray ? this : arr;
     }
 
-    @Override
-    public void extract(Object obj, String[] props, Object[] values) {
-    }
-    
 }

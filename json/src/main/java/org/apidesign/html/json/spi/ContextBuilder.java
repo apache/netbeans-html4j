@@ -32,8 +32,12 @@ import org.apidesign.html.json.impl.ContextAccessor;
  */
 public final class ContextBuilder {
     private Technology<?> t;
+    private Transfer r;
     
     private ContextBuilder() {
+        EmptyTech et = new EmptyTech();
+        t = et;
+        r = et;
     }
     
     /** Creates new, empty builder for creation of {@link Context}. At the
@@ -45,12 +49,23 @@ public final class ContextBuilder {
         return new ContextBuilder();
     }
     
-    /** Provides technology for the context
+    /** Provides technology for the context.
+     * 
      * @param technology
      * @return this
      */
     public ContextBuilder withTechnology(Technology<?> technology) {
         this.t = technology;
+        return this;
+    }
+
+    /** Provides transfer for the context.
+     * 
+     * @param transfer
+     * @return this
+     */
+    public ContextBuilder withTransfer(Transfer transfer) {
+        this.r = transfer;
         return this;
     }
     
@@ -60,6 +75,43 @@ public final class ContextBuilder {
      * @return new, immutable instance of {@link Context}
      */
     public Context build() {
-        return ContextAccessor.create(t);
+        return ContextAccessor.create(t, r);
     }
+    
+    private static final class EmptyTech
+    implements Technology<Object>, Transfer {
+        @Override
+        public Object wrapModel(Object model) {
+            return model;
+        }
+
+        @Override
+        public void valueHasMutated(Object data, String propertyName) {
+        }
+
+        @Override
+        public void bind(PropertyBinding b, Object model, Object data) {
+        }
+
+        @Override
+        public void expose(FunctionBinding fb, Object model, Object d) {
+        }
+
+        @Override
+        public void applyBindings(Object data) {
+        }
+
+        @Override
+        public Object wrapArray(Object[] arr) {
+            return arr;
+        }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = null;
+            }
+        }
+    }
+    
 }

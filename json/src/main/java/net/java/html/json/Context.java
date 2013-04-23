@@ -21,9 +21,11 @@
 package net.java.html.json;
 
 import org.apidesign.html.json.impl.ContextAccessor;
+import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 
 /** Represents context where the {@link Model} and other objects
  * operate in. The context is usually a particular HTML page in a browser.
@@ -36,61 +38,34 @@ import org.apidesign.html.json.spi.Technology;
  */
 public final class Context {
     private final Technology<?> t;
+    private final Transfer r;
     
-    private Context(Technology<?> t) {
+    private Context(Technology<?> t, Transfer r) {
         t.getClass();
+        r.getClass();
         this.t = t;
+        this.r = r;
     }
     static {
         new ContextAccessor() {
             @Override
-            protected Context newContext(Technology<?> t) {
-                return new Context(t);
+            protected Context newContext(Technology<?> t, Transfer r) {
+                return new Context(t, r);
             }
-
+            
             @Override
             protected Technology<?> technology(Context c) {
                 return c.t;
+            }
+
+            @Override
+            protected Transfer transfer(Context c) {
+                return c.r;
             }
         };
     }
     /** Dummy context without binding to any real browser or technology. 
      * Useful for simple unit testing of behavior of model classes.
      */
-    public static final Context EMPTY = new Context(new EmptyTech());
-    
-    private static final class EmptyTech implements Technology<Object> {
-        @Override
-        public Object wrapModel(Object model) {
-            return model;
-        }
-
-        @Override
-        public void valueHasMutated(Object data, String propertyName) {
-        }
-
-        @Override
-        public void bind(PropertyBinding b, Object model, Object data) {
-        }
-
-        @Override
-        public void expose(FunctionBinding fb, Object model, Object d) {
-        }
-
-        @Override
-        public void applyBindings(Object data) {
-        }
-
-        @Override
-        public Object wrapArray(Object[] arr) {
-            return arr;
-        }
-
-        @Override
-        public void extract(Object obj, String[] props, Object[] values) {
-            for (int i = 0; i < values.length; i++) {
-                values[i] = null;
-            }
-        }
-    }
+    public static final Context EMPTY = ContextBuilder.create().build();
 }

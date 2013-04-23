@@ -22,6 +22,7 @@ package org.apidesign.html.json.impl;
 
 import net.java.html.json.Context;
 import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 
 /**
  *
@@ -33,7 +34,7 @@ public final class JSON {
     }
 
     public static void extract(Context c, Object value, String[] props, Object[] values) {
-        Technology<?> t = ContextAccessor.findTechnology(c);
+        Transfer t = ContextAccessor.findTransfer(c);
         t.extract(value, props, values);
     }
     

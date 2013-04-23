@@ -23,6 +23,7 @@ package org.apidesign.html.json.impl;
 import net.java.html.json.Context;
 import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 
 /** Internal communication between API (e.g. {@link Context}), SPI
  * (e.g. {@link ContextBuilder}) and the implementation package.
@@ -41,15 +42,19 @@ public abstract class ContextAccessor {
         DEFAULT = this;
     }
     
-    protected abstract Context newContext(Technology<?> t);
+    protected abstract Context newContext(Technology<?> t, Transfer r);
     protected abstract Technology<?> technology(Context c);
+    protected abstract Transfer transfer(Context c);
     
     
-    public static Context create(Technology<?> t) {
-        return DEFAULT.newContext(t);
+    public static Context create(Technology<?> t, Transfer r) {
+        return DEFAULT.newContext(t, r);
     }
     
     static Technology<?> findTechnology(Context c) {
         return DEFAULT.technology(c);
+    }
+    static Transfer findTransfer(Context c) {
+        return DEFAULT.transfer(c);
     }
 }

@@ -28,6 +28,7 @@ import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -42,7 +43,7 @@ public class MapModelTest {
 
     @BeforeMethod public void initTechnology() {
         t = new MapTechnology();
-        c = ContextBuilder.create().withTechnology(t).build();
+        c = ContextBuilder.create().withTechnology(t).withTransfer(t).build();
     }
     
     @Test public void isThereABinding() throws Exception {
@@ -134,7 +135,8 @@ public class MapModelTest {
         }
     }
     
-    static final class MapTechnology implements Technology<Map<String,One>> {
+    static final class MapTechnology 
+    implements Technology<Map<String,One>>, Transfer {
 
         @Override
         public Map<String, One> wrapModel(Object model) {

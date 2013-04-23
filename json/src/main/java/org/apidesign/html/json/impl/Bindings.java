@@ -20,8 +20,6 @@
  */
 package org.apidesign.html.json.impl;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.json.Context;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
