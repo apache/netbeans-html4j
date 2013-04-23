@@ -749,12 +749,13 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             String n = e.getSimpleName().toString();
             body.append("public void ").append(n).append("(");
-            StringBuilder assembleURL = new StringBuilder();
+            StringBuilder urlBefore = new StringBuilder();
+            StringBuilder urlAfter = new StringBuilder();
             String jsonpVarName = null;
             {
                 String sep = "";
                 boolean skipJSONP = onR.jsonp().isEmpty();
-                for (String p : findParamNames(e, onR.url(), assembleURL)) {
+                for (String p : findParamNames(e, onR.url(), onR.jsonp(), urlBefore, urlAfter)) {
                     if (!skipJSONP && p.equals(onR.jsonp())) {
                         skipJSONP = true;
                         jsonpVarName = p;
@@ -807,13 +808,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 "  }\n"
             );
             body.append("  ProcessResult pr = new ProcessResult();\n");
+            body.append("  org.apidesign.html.json.impl.JSON.loadJSON(context, pr, result,\n      ");
+            body.append(urlBefore).append(", ");
             if (jsonpVarName != null) {
-                body.append("  String ").append(jsonpVarName).
-                    append(" = org.apidesign.html.json.impl.JSON.createJSONP(result, pr);\n");
+                body.append(urlAfter);
+            } else {
+                body.append("null");
             }
-            body.append("  org.apidesign.html.json.impl.JSON.loadJSON(\n      ");
-            body.append(assembleURL);
-            body.append(", result, pr, ").append(jsonpVarName).append("\n  );\n");
+            body.append(");\n");
 //            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
 //            body.append(wrapParams(e, null, className, "ev", "data"));
 //            body.append(");\n");
@@ -1084,13 +1086,16 @@ public final class ModelProcessor extends AbstractProcessor {
         return false;
     }
 
-    private Iterable<String> findParamNames(Element e, String url, StringBuilder assembleURL) {
+    private Iterable<String> findParamNames(
+        Element e, String url, String jsonParam, StringBuilder... both
+    ) {
         List<String> params = new ArrayList<>();
+        int wasJSON = 0;
 
         for (int pos = 0; ;) {
             int next = url.indexOf('{', pos);
             if (next == -1) {
-                assembleURL.append('"')
+                both[wasJSON].append('"')
                     .append(url.substring(pos))
                     .append('"');
                 return params;
@@ -1102,9 +1107,16 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             final String paramName = url.substring(next + 1, close);
             params.add(paramName);
-            assembleURL.append('"')
-                .append(url.substring(pos, next))
-                .append("\" + ").append(paramName).append(" + ");
+            if (paramName.equals(jsonParam) && !jsonParam.isEmpty()) {
+                both[wasJSON].append('"')
+                    .append(url.substring(pos, next))
+                    .append('"');
+                wasJSON = 1;
+            } else {
+                both[wasJSON].append('"')
+                    .append(url.substring(pos, next))
+                    .append("\" + ").append(paramName).append(" + ");
+            }
             pos = close + 1;
         }
     }

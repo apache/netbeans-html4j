@@ -21,7 +21,7 @@
 package org.apidesign.html.json.impl;
 
 import net.java.html.json.Context;
-import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.Transfer;
 
 /**
@@ -79,11 +79,12 @@ public final class JSON {
     }
 
     
-    public static String createJSONP(Object[] res, Runnable callback) {
-        return null;
-    }
-
-    public static Object loadJSON(String url, Object[] res, Runnable callback, String jsonp) {
-        return null;
+    public static void loadJSON(
+        Context c, Runnable whenDone, Object[] result, 
+        String urlBefore, String urlAfter
+    ) {
+        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter);
+        Transfer t = ContextAccessor.findTransfer(c);
+        t.loadJSON(call);
     }
 }

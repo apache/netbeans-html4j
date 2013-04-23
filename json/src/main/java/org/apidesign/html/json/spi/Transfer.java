@@ -40,4 +40,10 @@ public interface Transfer {
      */
     public void extract(Object obj, String[] props, Object[] values);
     
+    /** Starts the JSON or JSONP query. 
+     * 
+     * @param call description of the call to make
+     */
+    public void loadJSON(JSONCall call);
+    
 }

@@ -112,6 +112,11 @@ public final class ContextBuilder {
                 values[i] = null;
             }
         }
+
+        @Override
+        public void loadJSON(JSONCall call) {
+            call.notifyError(new UnsupportedOperationException());
+        }
     }
     
 }

@@ -20,7 +20,6 @@
  */
 package org.apidesign.html.json.spi;
 
-import java.util.List;
 import org.apidesign.html.json.impl.PropertyBindingAccessor;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
 import org.apidesign.html.json.impl.WrapperObject;
@@ -47,6 +46,11 @@ public final class PropertyBinding {
             @Override
             protected <M> FunctionBinding newFunction(FBData<M> d) {
                 return new FunctionBinding(d);
+            }
+
+            @Override
+            protected JSONCall newCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter) {
+                return new JSONCall(whenDone, result, urlBefore, urlAfter);
             }
         };
     }

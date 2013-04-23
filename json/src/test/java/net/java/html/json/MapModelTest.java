@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apidesign.html.json.impl.WrapperObject;
 import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.FunctionBinding;
+import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
@@ -192,6 +193,11 @@ public class MapModelTest {
                     }
                 }
             }
+        }
+
+        @Override
+        public void loadJSON(JSONCall call) {
+            call.notifyError(new UnsupportedOperationException());
         }
     }
 }

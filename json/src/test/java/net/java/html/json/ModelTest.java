@@ -168,6 +168,13 @@ public class ModelTest {
         m.applyBindings();
         m.loadPeople("http", "apidesign.org", "query");
     }
+
+    @OnReceive(url = "{protocol}://{host}?callback={back}&query={query}", jsonp = "back")
+    static void loadPeopleViaJSONP(Modelik thiz, People p) {
+        Modelik m = null;
+        m.applyBindings();
+        m.loadPeopleViaJSONP("http", "apidesign.org", "query");
+    }
     
     @Function 
     static void doSomething() {
