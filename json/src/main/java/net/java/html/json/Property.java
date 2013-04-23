@@ -25,8 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 
-/** Represents a property. Either in a generated model of an HTML
- * {@link Page} or in a class defined by {@link Model}.
+/** Represents a property in a class defined with {@link Model} annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -41,7 +40,7 @@ public @interface Property {
     String name();
     
     /** Type of the property. Can either be primitive type (like <code>int.class</code>,
-     * <code>double.class</code>, etc.), {@link String} or complex model
+     * <code>double.class</code>, etc.), {@link String}, {@link Enum enum} or complex model
      * class (defined by {@link Model} property).
      * 
      * @return the class of the property

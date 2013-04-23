@@ -25,15 +25,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Static methods in classes annotated by {@link Page}
+/** Static methods in classes annotated by {@link Model}
  * can be marked by this annotation to establish a 
  * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a>
  * communication point.
- * The associated model page then gets new method to invoke a network
+ * The associated model class then gets new method to invoke a network
  * connection. Example follows:
  * 
  * <pre>
- * {@link Page @Page}(className="MyModel", xhtml="page.html", properties={
+ * {@link Model @Model}(className="MyModel", properties={
  *   {@link Property @Property}(name = "people", type=Person.class, array=true)
  * })
  * class MyModelImpl {
@@ -50,7 +50,7 @@ import java.lang.annotation.Target;
  * 
  *   {@link OnReceive @OnReceive}(url = "{protocol}://your.server.com/person/{name}")
  *   static void getANewPerson(MyModel m, Person p) {
- *     {@link Element#alert Element.alert}("Adding " + p.getFullName() + '!');
+ *     alert("Adding " + p.getFullName() + '!');
  *     m.getPeople().add(p);
  *   }
  * 
@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
  *   // which asynchronously contacts the server and in case of success calls
  *   // your {@link OnReceive @OnReceive} with parsed in data
  * 
- *   {@link On @On}(event={@link OnEvent#CLICK OnEvent.CLICK}, id="rqst")
+ *   {@link Function @Function}
  *   static void requestSmith(MyModel m) {
  *     m.getANewPerson("http", "Smith");
  *   }

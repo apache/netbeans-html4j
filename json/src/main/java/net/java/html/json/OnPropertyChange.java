@@ -25,8 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Represents a property. Either in a generated model of an HTML
- * {@link Page} or in a class defined by {@link Model}.
+/** Defines a method that is supposed to be notified when a 
+ * property defined by {@link Model} has been changed.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

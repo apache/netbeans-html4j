@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Methods in class annotated by {@link Model} or {@link Page} can be 
+/** Methods in class annotated by {@link Model} can be 
  * annotated by this annotation to signal that they should be available
  * as functions to users of the model classes.
  *

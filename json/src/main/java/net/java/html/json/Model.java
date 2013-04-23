@@ -26,13 +26,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /** Defines a model class named {@link #className()} which contains
- * defined {@link #properties()}. This class can have methods 
+ * properties defined via {@link #properties()}. This class can have methods 
  * annotated by {@link ComputedProperty} which define derived
  * properties in the model class.
  * <p>
  * The {@link #className() generated class}'s <code>toString</code>
  * converts the state of the object into 
- * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> format.
+ * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> format. 
+ * <p>
+ * An example where one defines class <code>Person</code> with three 
+ * properties (<code>firstName</code>, <code>lastName</code> and
+ * <code>fullName</code>) follows:
+ * <pre>
+ * {@link Model @Model}(className="Person", properties={
+ *   {@link Property @Property}(name = "firstName", type=String.class),
+ *   {@link Property @Property}(name = "lastName", type=String.class)
+ * })
+ * static class PersonImpl {
+ *   {@link ComputedProperty @ComputedProperty}
+ *   static String fullName(String firstName, String lastName) {
+ *     return firstName + " " + lastName;
+ *   }
+ * }
+ * </pre>
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

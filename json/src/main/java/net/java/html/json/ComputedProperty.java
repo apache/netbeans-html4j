@@ -25,12 +25,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Can be used in classes annotated with {@link Page} annotation to
+/** Can be used in classes annotated with {@link Model} annotation to
  * define a derived property. Value of derived property is based on values
- * of {@link Property} as enumerated by {@link Page#properties()}.
+ * of {@link Property} as enumerated by {@link Model#properties()}.
  * <p>
  * The name of the derived property is the name of the method. The arguments
- * of the method define the property names (from {@link Page#properties()} list)
+ * of the method define the property names (from {@link Model#properties()} list)
  * the value of property depends on. 
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
