@@ -25,7 +25,6 @@ import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
-import org.apidesign.html.json.tck.KnockoutTCK;
 import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.HtmlFragment;
@@ -49,7 +48,7 @@ public final class KnockoutTest {
         "<button id=\"hello\">Say Hello!</button>\n"
     )
     @BrwsrTest public void modifyValueAssertChangeInModel() {
-        KnockoutModel m = new KnockoutModel(KnockoutTCK.newContext());
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.setName("Kukuc");
         m.applyBindings();
         
@@ -80,7 +79,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArray() {
-        KnockoutModel m = new KnockoutModel(KnockoutTCK.newContext());
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -104,7 +103,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfDerivedArray() {
-        KnockoutModel m = new KnockoutModel(KnockoutTCK.newContext());
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -123,9 +122,9 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArrayOfPeople() {
-        KnockoutModel m = new KnockoutModel(KnockoutTCK.newContext());
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
         
-        final Person first = new Person(KnockoutTCK.newContext());
+        final Person first = new Person(Utils.newContext());
         first.setFirstName("first");
         m.getPeople().add(first);
         
@@ -134,7 +133,7 @@ public final class KnockoutTest {
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
         
-        final Person second = new Person(KnockoutTCK.newContext());
+        final Person second = new Person(Utils.newContext());
         second.setFirstName("second");
         m.getPeople().add(second);
 
@@ -181,9 +180,9 @@ public final class KnockoutTest {
     }
     
     private void trasfertToFemale() {
-        KnockoutModel m = new KnockoutModel(KnockoutTCK.newContext());
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
 
-        final Person first = new Person(KnockoutTCK.newContext());
+        final Person first = new Person(Utils.newContext());
         first.setFirstName("first");
         first.setSex(Sex.MALE);
         m.getPeople().add(first);

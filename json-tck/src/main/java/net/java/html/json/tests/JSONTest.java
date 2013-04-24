@@ -23,7 +23,6 @@ package net.java.html.json.tests;
 import net.java.html.json.Model;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.apidesign.html.json.tck.KnockoutTCK;
 import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.Http;
@@ -44,7 +43,7 @@ public final class JSONTest {
     private Integer orig;
     
     @BrwsrTest public void toJSONInABrowser() throws Throwable {
-        Person p = new Person(KnockoutTCK.newContext());
+        Person p = new Person(Utils.newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jarda");
         p.setLastName("Tulach");
@@ -56,7 +55,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + p).initCause(ex);
         }
         
-        Person p2 = JSON.read(KnockoutTCK.newContext(), Person.class, json);
+        Person p2 = JSON.read(Utils.newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
@@ -95,7 +94,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
 
             js.fetch("person.json");
@@ -127,7 +126,7 @@ public final class JSONTest {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
 
             js.fetchViaJSONP("person.json");
@@ -159,7 +158,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
 
             js.fetchArray("person.json");
@@ -181,7 +180,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
         
             js.fetch("person.json");
@@ -203,7 +202,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
         
             js.fetchPeople("people.json");
@@ -229,7 +228,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
         
             js.fetchPeopleAge("people.json");
@@ -256,7 +255,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
         
             js.fetchPeopleSex("people.json");
@@ -283,7 +282,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(KnockoutTCK.newContext());
+            js = new JSONik(Utils.newContext());
             js.applyBindings();
             js.fetchArray("person.json");
         }

@@ -20,8 +20,8 @@
  */
 package net.java.html.json.tests;
 
-import org.apidesign.html.json.tck.KnockoutTCK;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
+import java.util.HashMap;
+import java.util.Map;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.json.impl.JSON;
@@ -31,19 +31,21 @@ import org.apidesign.html.json.impl.JSON;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    @JavaScriptBody(args = { "includeSex" }, body = "var json = new Object();"
-        + "json.firstName = 'son';\n"
-        + "json.lastName = 'dj';\n"
-        + "if (includeSex) json.sex = 'MALE';\n"
-        + "return json;"
-    )
-    private static native Object createJSON(boolean includeSex);
+    private static Object createJSON(boolean includeSex) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("firstName", "son");
+        map.put("lastName", "dj");
+        if (includeSex) {
+            map.put("sex", "MALE");
+        }
+        return Utils.createObject(map);
+    }
     
     @BrwsrTest
     public void testConvertToPeople() throws Exception {
         final Object o = createJSON(true);
         
-        Person p = JSON.read(KnockoutTCK.newContext(), Person.class, o);
+        Person p = JSON.read(Utils.newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
@@ -54,7 +56,7 @@ public final class ConvertTypesTest {
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
-        Person p = JSON.read(KnockoutTCK.newContext(), Person.class, o);
+        Person p = JSON.read(Utils.newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();

@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.json.tck;
 
+import java.util.Map;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
@@ -55,7 +56,12 @@ public abstract class KnockoutTCK {
     /** Implement to create new context for the test. 
      * Use {@link ContextBuilder} to implement context for your technology.
      */
-    protected abstract Context createContext();
+    public abstract Context createContext();
+    
+    /** Create a JSON object as seen by the technology
+     * @param values mapping from names to values of properties
+     */
+    public abstract Object createJSON(Map<String,Object> values);
     
     
     /** Gives you list of classes included in the TCK. Send them
@@ -69,23 +75,6 @@ public abstract class KnockoutTCK {
             JSONTest.class,
             KnockoutTest.class
         };
-    }
-    
-
-    /** Finds registered implementation of {@link KnockoutTCK} and obtains
-     * new context. 
-     * 
-     * @return context to use for currently running test
-     * @throws AssertionError if no context has been found
-     */
-    public static Context newContext() {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
-            Context c = tck.createContext();
-            if (c != null) {
-                return c;
-            }
-        }
-        throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
     
 }
