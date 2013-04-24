@@ -34,7 +34,7 @@ public interface Technology<Data> {
      * with {@link Model} annotation.
      * 
      * @param model the model generated from {@link Model}
-     * @return 
+     * @return internal object representing the model
      */
     public Data wrapModel(Object model);
     

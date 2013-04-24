@@ -8,9 +8,9 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
-  <artifactId>net.java.html.json</artifactId>
+  <artifactId>net.java.html.json.tck</artifactId>
   <version>0.1-SNAPSHOT</version>
-  <name>JSON Model in Java</name>
+  <name>TCK for JSON Model</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,35 +21,31 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
-                  <subpackages>net.java.html.json</subpackages>
+                  <subpackages>org.apidesign.html.json.tck:org.apidesign.html.json.spi</subpackages>
                   <skip>false</skip>
+                  <includeDependencySources>true</includeDependencySources>
               </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-source-plugin</artifactId>
-              <version>2.2.1</version>
-              <executions>
-                  <execution>
-                      <id>prepare-sources</id>
-                      <goals>
-                          <goal>jar</goal>
-                      </goals>
-                      <phase>package</phase>
-                  </execution>
-              </executions>
           </plugin>
       </plugins>
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
+      <groupId>org.apidesign.html</groupId>
+      <artifactId>net.java.html.json</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-openide-util-lookup</artifactId>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>compile</scope>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apidesign.bck2brwsr</groupId>
+      <artifactId>vmtest</artifactId>
+      <version>0.6</version>
+      <type>jar</type>
     </dependency>
   </dependencies>
 </project>
