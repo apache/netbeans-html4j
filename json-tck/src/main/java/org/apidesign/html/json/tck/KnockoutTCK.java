@@ -62,7 +62,14 @@ public abstract class KnockoutTCK {
      * @param values mapping from names to values of properties
      */
     public abstract Object createJSON(Map<String,Object> values);
-    
+
+    /** Executes script in the context of current window
+     * 
+     * @param script the JavaScript code to execute
+     * @param arguments arguments sent to the script (can be referenced as <code>arguments[0]</code>)
+     * @return the output of the execution
+     */
+    public abstract Object executeScript(String script, Object[] arguments);
     
     /** Gives you list of classes included in the TCK. Send them
      * to {@link VMTest#create(java.lang.Class)} factory method.
@@ -76,5 +83,6 @@ public abstract class KnockoutTCK {
             KnockoutTest.class
         };
     }
+
     
 }

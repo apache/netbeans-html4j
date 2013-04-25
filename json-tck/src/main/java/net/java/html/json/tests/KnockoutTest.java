@@ -25,7 +25,6 @@ import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.HtmlFragment;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
@@ -47,7 +46,7 @@ public final class KnockoutTest {
         "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
         "<button id=\"hello\">Say Hello!</button>\n"
     )
-    @BrwsrTest public void modifyValueAssertChangeInModel() {
+    @BrwsrTest public void modifyValueAssertChangeInModel() throws Exception {
         KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.setName("Kukuc");
         m.applyBindings();
@@ -61,16 +60,19 @@ public final class KnockoutTest {
         assert "Jardo".equals(m.getName()) : "Name property updated: " + m.getName();
     }
     
-    @JavaScriptBody(args = {"value"}, body
-        = "var n = window.document.getElementById('input'); \n "
+    private static String getSetInput(String value) throws Exception {
+        String s = "var value = arguments[0];\n"
+        + "var n = window.document.getElementById('input'); \n "
         + "if (value != null) n['value'] = value; \n "
-        + "return n['value']; \n ")
-    private static String getSetInput(String value) {
-        return null;
+        + "return n['value'];";
+        return (String)Utils.executeScript(s, value);
     }
     
-    @JavaScriptBody(args = { "id", "ev" }, body = "ko.utils.triggerEvent(window.document.getElementById(id), ev);")
-    public static void triggerEvent(String id, String ev) {
+    public static void triggerEvent(String id, String ev) throws Exception {
+        Utils.executeScript(
+            "ko.utils.triggerEvent(window.document.getElementById(arguments[0]), arguments[1]);",
+            id, ev
+        );
     }
     
     @HtmlFragment(
@@ -78,7 +80,7 @@ public final class KnockoutTest {
         + "  <li data-bind='text: $data, click: $root.call'/>\n"
         + "</ul>\n"
     )
-    @BrwsrTest public void displayContentOfArray() {
+    @BrwsrTest public void displayContentOfArray() throws Exception {
         KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
@@ -102,7 +104,7 @@ public final class KnockoutTest {
         + "  <li><b data-bind='text: $data'></b></li>\n"
         + "</ul>\n"
     )
-    @BrwsrTest public void displayContentOfDerivedArray() {
+    @BrwsrTest public void displayContentOfDerivedArray() throws Exception {
         KnockoutModel m = new KnockoutModel(Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
@@ -121,7 +123,7 @@ public final class KnockoutTest {
         + "  <li data-bind='text: $data.firstName, click: $root.removePerson'></li>\n"
         + "</ul>\n"
     )
-    @BrwsrTest public void displayContentOfArrayOfPeople() {
+    @BrwsrTest public void displayContentOfArrayOfPeople() throws Exception {
         KnockoutModel m = new KnockoutModel(Utils.newContext());
         
         final Person first = new Person(Utils.newContext());
@@ -166,7 +168,7 @@ public final class KnockoutTest {
         + "  <span data-bind='text: firstName, click: changeSex'></span>\n"
         + "</p>\n"
     )
-    @BrwsrTest public void accessFirstPersonWithOnFunction() {
+    @BrwsrTest public void accessFirstPersonWithOnFunction() throws Exception {
         trasfertToFemale();
     }
     
@@ -175,11 +177,11 @@ public final class KnockoutTest {
         + "  <li data-bind='text: $data.firstName, click: changeSex'></li>\n"
         + "</ul>\n"
     )
-    @BrwsrTest public void onPersonFunction() {
+    @BrwsrTest public void onPersonFunction() throws Exception {
         trasfertToFemale();
     }
     
-    private void trasfertToFemale() {
+    private void trasfertToFemale() throws Exception {
         KnockoutModel m = new KnockoutModel(Utils.newContext());
 
         final Person first = new Person(Utils.newContext());
@@ -226,25 +228,29 @@ public final class KnockoutTest {
         return VMTest.create(KnockoutTest.class);
     }
     
-    @JavaScriptBody(args = { "id" }, body = 
-          "var e = window.document.getElementById(id);\n "
+    private static int countChildren(String id) throws Exception {
+        return ((Number)Utils.executeScript(
+          "var e = window.document.getElementById(arguments[0]);\n "
         + "if (typeof e === 'undefined') return -2;\n "
-        + "return e.children.length;\n "
-    )
-    private static native int countChildren(String id);
+        + "return e.children.length;", 
+            id
+        )).intValue();
+    }
 
-    @JavaScriptBody(args = { "id", "pos" }, body = 
-          "var e = window.document.getElementById(id);\n "
-        + "var ev = window.document.createEvent('MouseEvents');\n "
-        + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-        + "e.children[pos].dispatchEvent(ev);\n "
-    )
-    private static native void triggerChildClick(String id, int pos);
+    private static void triggerChildClick(String id, int pos) throws Exception {
+        String s = "var id = arguments[0]; var pos = arguments[1];"
+            + "var e = window.document.getElementById(id);\n "
+            + "var ev = window.document.createEvent('MouseEvents');\n "
+            + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
+            + "e.children[pos].dispatchEvent(ev);\n ";
+        Utils.executeScript(s, id, pos);
+    }
 
-    @JavaScriptBody(args = { "id", "pos" }, body = 
-          "var e = window.document.getElementById(id);\n "
+    private static String childText(String id, int pos) throws Exception {
+        String s = "var id = arguments[0]; var pos = arguments[1];"
+        + "var e = window.document.getElementById(id);\n "
         + "var t = e.children[pos].innerHTML;\n "
-        + "return t ? t : null;"
-    )
-    private static native String childText(String id, int pos);
+        + "return t ? t : null;";
+        return (String)Utils.executeScript(s, id, pos);
+    }
 }

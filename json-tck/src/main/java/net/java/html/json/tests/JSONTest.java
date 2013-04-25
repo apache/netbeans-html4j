@@ -23,7 +23,6 @@ package net.java.html.json.tests;
 import net.java.html.json.Model;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.Http;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
@@ -120,7 +119,7 @@ public final class JSONTest {
         mimeType = "application/javascript",
         parameters = { "callme" }
     ))
-    @BrwsrTest public void loadAndParseJSONP() throws InterruptedException {
+    @BrwsrTest public void loadAndParseJSONP() throws InterruptedException, Exception {
         
         if (js == null) {
             orig = scriptElements();
@@ -145,11 +144,13 @@ public final class JSONTest {
         assert orig == now : "The set of elements is unchanged. Delta: " + (now - orig);
     }
     
-    @JavaScriptBody(args = {  }, body = "return window.document.getElementsByTagName('script').length;")
-    private static native int scriptElements();
+    private static int scriptElements() throws Exception {
+        return ((Number)Utils.executeScript("return window.document.getElementsByTagName('script').length;")).intValue();
+    }
 
-    @JavaScriptBody(args = { "s" }, body = "return window.JSON.parse(s);")
-    private static native Object parseJSON(String s);
+    private static Object parseJSON(String s) throws Exception {
+        return Utils.executeScript("return window.JSON.parse(arguments[0]);", s);
+    }
     
     @Http(@Http.Resource(
         content = "{'firstName': 'Sitar', 'sex': 'MALE'}", 

@@ -51,5 +51,11 @@ final class Utils {
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
+    static Object executeScript(String script, Object... arguments) throws Exception {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
+            return tck.executeScript(script, arguments);
+        }
+        throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
+    }
     
 }
