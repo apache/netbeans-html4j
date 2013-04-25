@@ -19,6 +19,7 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
+    <module>ko-fx</module>
   </modules>
   <licenses>
       <license>
@@ -80,6 +81,7 @@
                   <excludes>
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
+                       <exclude>ko-fx/src/main/resources/org/apidesign/html/kofx/knockout*.js</exclude>
                   </excludes>
               </configuration>
           </plugin>
