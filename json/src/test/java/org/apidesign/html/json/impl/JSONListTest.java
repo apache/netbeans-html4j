@@ -157,4 +157,9 @@ public class JSONListTest implements Technology<Object> {
         return replaceArray ? this : arr;
     }
 
+    @Override
+    public <M> M toModel(Class<M> modelClass, Object data) {
+        return modelClass.cast(data);
+    }
+
 }

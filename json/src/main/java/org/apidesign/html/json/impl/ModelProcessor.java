@@ -854,7 +854,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 toFinish = ".intValue()";
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
-                toCall = "org.apidesign.html.json.impl.JSON.toModel(" + ve.asType() + ".class, ";
+                toCall = "org.apidesign.html.json.impl.JSON.toModel(context, " + ve.asType() + ".class, ";
             }
 
             if (toCall != null) {

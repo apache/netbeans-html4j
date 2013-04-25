@@ -117,6 +117,11 @@ public final class ContextBuilder {
         public void loadJSON(JSONCall call) {
             call.notifyError(new UnsupportedOperationException());
         }
+
+        @Override
+        public <M> M toModel(Class<M> modelClass, Object data) {
+            return modelClass.cast(data);
+        }
     }
     
 }

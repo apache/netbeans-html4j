@@ -86,4 +86,12 @@ public final class FXContext implements Callable<Context>, Technology<JSObject>,
     public void loadJSON(final JSONCall call) {
         LoadJSON.loadJSON(call);
     }
+
+    @Override
+    public <M> M toModel(Class<M> modelClass, Object data) {
+        if (data instanceof JSObject) {
+            data = ((JSObject)data).getMember("ko-fx.model"); // NOI18N
+        }
+        return modelClass.cast(data);
+    }
 }

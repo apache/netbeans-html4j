@@ -268,5 +268,10 @@ public class ModelTest {
         public Object wrapArray(Object[] arr) {
             return arr;
         }
+
+        @Override
+        public <M> M toModel(Class<M> modelClass, Object data) {
+            return modelClass.cast(data);
+        }
     }
 }

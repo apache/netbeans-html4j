@@ -23,7 +23,9 @@ package org.apidesign.html.json.impl;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.json.Context;
+import static org.apidesign.html.json.impl.ContextAccessor.findTechnology;
 import org.apidesign.html.json.spi.JSONCall;
+import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 
 /**
@@ -79,8 +81,10 @@ public final class JSON {
         }
         return (Number)obj;
     }
-    public static <M> M toModel(Class<M> aClass, Object data, Object object) {
-        return aClass.cast(data);
+    public static <M> M toModel(Context c, Class<M> aClass, Object data, Object object) {
+        Technology<?> t = findTechnology(c);
+        Object o = t.toModel(aClass, data);
+        return aClass.cast(o);
     }
 
     
