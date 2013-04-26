@@ -25,24 +25,31 @@ import java.util.logging.Logger;
 import net.java.html.json.Context;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.json.spi.ContextProvider;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FXContext implements Callable<Context>, Technology<JSObject>, Transfer {
+@ServiceProvider(service = ContextProvider.class)
+public final class FXContext
+implements Technology<JSObject>, Transfer, ContextProvider {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
-    
-    
+
     @Override
-    public Context call() throws Exception {
-        return ContextBuilder.create().withTechnology(this).
-            withTransfer(this).build();
+    public Context findContext(Class<?> requestor) {
+        if (Knockout.web() != null) {
+            return ContextBuilder.create().withTechnology(this).
+                withTransfer(this).build();
+        } else {
+            return null;
+        }
     }
 
     @Override
