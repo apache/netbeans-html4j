@@ -20,10 +20,10 @@
  */
 package net.java.html.json;
 
+import java.util.ServiceLoader;
 import org.apidesign.html.json.impl.ContextAccessor;
 import org.apidesign.html.json.spi.ContextBuilder;
-import org.apidesign.html.json.spi.FunctionBinding;
-import org.apidesign.html.json.spi.PropertyBinding;
+import org.apidesign.html.json.spi.ContextProvider;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 
@@ -68,4 +68,23 @@ public final class Context {
      * Useful for simple unit testing of behavior of model classes.
      */
     public static final Context EMPTY = ContextBuilder.create().build();
+    
+    /** Seeks for the default context that is associated with the requesting
+     * class. If no suitable context is found, a warning message is
+     * printed and {@link #EMPTY} context is returned.
+     * 
+     * @param requestor the class that makes the request
+     * @return appropriate context for the request
+     */
+    public static Context findDefault(Class<?> requestor) {
+        for (ContextProvider cp : ServiceLoader.load(ContextProvider.class)) {
+            Context c = cp.findContext(requestor);
+            if (c != null) {
+                return c;
+            }
+        }
+        // XXX: print out a warning
+        return Context.EMPTY;
+    }
+    
 }
