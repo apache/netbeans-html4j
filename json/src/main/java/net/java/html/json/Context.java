@@ -83,6 +83,12 @@ public final class Context {
                 return c;
             }
         }
+        for (ContextProvider cp : ServiceLoader.load(ContextProvider.class, ContextProvider.class.getClassLoader())) {
+            Context c = cp.findContext(requestor);
+            if (c != null) {
+                return c;
+            }
+        }
         // XXX: print out a warning
         return Context.EMPTY;
     }
