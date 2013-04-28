@@ -41,8 +41,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
     }
 
     @Factory public static Object[] compatibilityTests() {
-        System.setProperty("vmtest.brwsrs", "fx");
-        return VMTest.create(testClasses());
+        return VMTest.newTests().addClass(testClasses()).addLauncher("fxbrwsr").build();
     }
 
     @Override
