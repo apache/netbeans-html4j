@@ -66,10 +66,12 @@ public final class Knockout {
     public static void valueHasMutated(JSObject model, String prop) {
         LOG.log(Level.FINE, "property mutated: {0}", prop);
         try {
-            JSObject koProp = (JSObject) ((JSObject) model).getMember(prop);
-            koProp.call("valueHasMutated");
+            Object koProp = model.getMember(prop);
+            if (koProp instanceof JSObject) {
+                ((JSObject)koProp).call("valueHasMutated");
+            }
         } catch (Throwable t) {
-            LOG.log(Level.WARNING, "valueHasMutated failed for {0}", model);
+            LOG.log(Level.WARNING, "valueHasMutated failed for " + model + " prop: " + prop, t);
         }
     }
 
