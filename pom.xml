@@ -19,6 +19,7 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
+    <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
   </modules>
   <licenses>
