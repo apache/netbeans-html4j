@@ -24,7 +24,6 @@ import java.util.Map;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
-import java.util.ServiceLoader;
 import net.java.html.json.Context;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
