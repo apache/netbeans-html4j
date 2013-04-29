@@ -41,7 +41,7 @@ public final class Bck2BrwsrKnockoutTest extends KnockoutTCK {
     }
 
     {@code @Factory} public static Object[] create() {
-        return VMTest.create({@link KnockoutTCK#testClasses}());
+        return VMTest.newTests().withClasses({@link KnockoutTCK#testClasses}()).build();
     }
 }
  * </pre>
