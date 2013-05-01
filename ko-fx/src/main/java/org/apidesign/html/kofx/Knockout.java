@@ -27,13 +27,18 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.web.WebEngine;
+import net.java.html.json.Context;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
-/** Provides binding between {@link Model models} and knockout.js running
- * inside a JavaFX WebView.
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
+ * <p>
+ * Provides binding between {@link Model models} and knockout.js running
+ * inside a JavaFX WebView. 
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

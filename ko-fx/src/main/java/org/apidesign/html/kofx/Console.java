@@ -24,11 +24,15 @@ import java.util.logging.Logger;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
-/**
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
+ * <p>
+ * Redirects JavaScript's messages to Java's {@link Logger}.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class Console {
+public final class Console {
     private static final Logger LOG = Logger.getLogger(Console.class.getName());
     
     private Console() {
