@@ -40,7 +40,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-/**
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

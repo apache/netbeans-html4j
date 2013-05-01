@@ -20,7 +20,7 @@
  */
 package org.apidesign.html.kofx;
 
-import java.util.concurrent.Callable;
+import java.util.ServiceLoader;
 import java.util.logging.Logger;
 import net.java.html.json.Context;
 import netscape.javascript.JSObject;
@@ -33,7 +33,11 @@ import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.openide.util.lookup.ServiceProvider;
 
-/**
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
+ * <p>
+ * Registers {@link ContextProvider}, so {@link ServiceLoader} can find it.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
