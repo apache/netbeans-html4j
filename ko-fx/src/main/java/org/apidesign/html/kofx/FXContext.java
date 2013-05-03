@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.kofx;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 import net.java.html.json.Context;
@@ -104,5 +106,10 @@ implements Technology<JSObject>, Transfer, ContextProvider {
             data = ((JSObject)data).getMember("ko-fx.model"); // NOI18N
         }
         return modelClass.cast(data);
+    }
+
+    @Override
+    public Object toJSON(InputStream is) throws IOException {
+        return LoadJSON.parse(is);
     }
 }

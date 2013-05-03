@@ -21,6 +21,9 @@
 
 package org.apidesign.html.json.spi;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /** A {@link ContextBuilder service provider interface} responsible for 
  * conversion of JSON objects to Java ones and vice-versa.
  *
@@ -39,6 +42,17 @@ public interface Transfer {
      * not defined, a <code>null</code> value should be stored in the array
      */
     public void extract(Object obj, String[] props, Object[] values);
+    
+    /** Reads content of a stream and creates its JSON representation.
+     * The returned object is implementation dependant. It however needs
+     * to be acceptable as first argument of {@link #extract(java.lang.Object, java.lang.String[], java.lang.Object[]) extract}
+     * method.
+     * 
+     * @param is input stream to read data from
+     * @return an object representing the JSON data
+     * @throws IOException if something goes wrong
+     */
+    public Object toJSON(InputStream is) throws IOException;
     
     /** Starts the JSON or JSONP query. 
      * 

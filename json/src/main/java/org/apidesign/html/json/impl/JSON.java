@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.json.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.json.Context;
@@ -118,6 +120,11 @@ public final class JSON {
         return false;
     }
     
+    public static <T> T readStream(Context c, Class<T> modelClazz, InputStream data) 
+    throws IOException {
+        Transfer tr = ContextAccessor.findTransfer(c);
+        return read(c, modelClazz, tr.toJSON((InputStream)data));
+    }
     public static <T> T read(Context c, Class<T> modelClazz, Object data) {
         for (int i = 0; i < 2; i++) {
             FromJSON<?> from = froms.get(modelClazz);

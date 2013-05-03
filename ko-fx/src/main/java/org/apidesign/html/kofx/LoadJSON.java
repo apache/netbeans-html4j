@@ -21,6 +21,7 @@
 package org.apidesign.html.kofx;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.io.Reader;
@@ -39,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.openide.util.Exceptions;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -164,6 +166,16 @@ final class LoadJSON implements Runnable {
                 Object val = obj.getMember(props[i]);
                 values[i] = isDefined(val) ? val : null;
             }
+        }
+    }
+    
+    public static Object parse(InputStream is) throws IOException {
+        try {
+            InputStreamReader r = new InputStreamReader(is, "UTF-8");
+            JSONTokener t = new JSONTokener(r);
+            return new JSONObject(t);
+        } catch (JSONException ex) {
+            throw new IOException(ex);
         }
     }
     

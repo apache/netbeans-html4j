@@ -20,8 +20,13 @@
  */
 package net.java.html.json.tests;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import net.java.html.json.Context;
+import net.java.html.json.Models;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.json.impl.JSON;
@@ -31,7 +36,19 @@ import org.apidesign.html.json.impl.JSON;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    private static Object createJSON(boolean includeSex) {
+    private static InputStream createIS(boolean includeSex) 
+    throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"firstName\" : \"son\",\n");
+        sb.append("  \"lastName\" : \"dj\" \n");
+        if (includeSex) {
+            sb.append(",  \"sex\" : \"MALE\" ");
+        }
+        sb.append("}\n");
+        return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+    }
+    private static Object createJSON(boolean includeSex) 
+    throws UnsupportedEncodingException {
         Map<String,Object> map = new HashMap<>();
         map.put("firstName", "son");
         map.put("lastName", "dj");
@@ -53,10 +70,33 @@ public final class ConvertTypesTest {
     }
 
     @BrwsrTest
+    public void parseConvertToPeople() throws Exception {
+        final Context c = Utils.newContext();
+        final InputStream o = createIS(true);
+        
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+    }
+
+    @BrwsrTest
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
         Person p = JSON.read(Utils.newContext(), Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+    
+    @BrwsrTest
+    public void parseConvertToPeopleWithoutSex() throws Exception {
+        final Context c = Utils.newContext();
+        final InputStream o = createIS(false);
+        Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();

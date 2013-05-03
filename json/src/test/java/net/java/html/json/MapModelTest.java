@@ -20,6 +20,8 @@
  */
 package net.java.html.json;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -203,6 +205,11 @@ public class MapModelTest {
         @Override
         public <M> M toModel(Class<M> modelClass, Object data) {
             return modelClass.cast(data);
+        }
+
+        @Override
+        public Object toJSON(InputStream is) throws IOException {
+            throw new IOException();
         }
     }
 }

@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.json.spi;
 
+import java.io.IOException;
+import java.io.InputStream;
 import net.java.html.json.Context;
 import org.apidesign.html.json.impl.ContextAccessor;
 
@@ -121,6 +123,11 @@ public final class ContextBuilder {
         @Override
         public <M> M toModel(Class<M> modelClass, Object data) {
             return modelClass.cast(data);
+        }
+
+        @Override
+        public Object toJSON(InputStream is) throws IOException {
+            throw new IOException("Not supported");
         }
     }
     
