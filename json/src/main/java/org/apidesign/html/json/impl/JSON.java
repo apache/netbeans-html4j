@@ -106,6 +106,18 @@ public final class JSON {
         froms.put(from.factoryFor(), from);
     }
     
+    public static boolean isModel(Class<?> clazz) {
+        for (int i = 0; i < 2; i++) {
+            FromJSON<?> from = froms.get(clazz);
+            if (from == null) {
+                initClass(clazz);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static <T> T read(Context c, Class<T> modelClazz, Object data) {
         for (int i = 0; i < 2; i++) {
             FromJSON<?> from = froms.get(modelClazz);
