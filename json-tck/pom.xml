@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.apidesign</groupId>
     <artifactId>html</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>net.java.html.json.tck</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>TCK for JSON Model</name>
   <url>http://maven.apache.org</url>
   <properties>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.apidesign.html</groupId>
       <artifactId>net.java.html.json</artifactId>
-      <version>0.2-SNAPSHOT</version>
+      <version>0.2</version>
       <type>jar</type>
     </dependency>
     <dependency>
