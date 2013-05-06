@@ -271,26 +271,26 @@ public final class ModelProcessor extends AbstractProcessor {
                     boolean isPrimitive[] = { false };
                     String type = checkType(props[prop++], isModel, isEnum, isPrimitive);
                     if (p.array()) {
-                        w.append("if (ret[" + cnt + "] instanceof Object[]) {\n");
-                        w.append("  for (Object e : ((Object[])ret[" + cnt + "])) {\n");
+                        w.append("    if (ret[" + cnt + "] instanceof Object[]) {\n");
+                        w.append("      for (Object e : ((Object[])ret[" + cnt + "])) {\n");
                         if (isModel[0]) {
-                            w.append("    this.prop_").append(pn).append(".add(org.apidesign.html.json.impl.JSON.read");
+                            w.append("        this.prop_").append(pn).append(".add(org.apidesign.html.json.impl.JSON.read");
                             w.append("(c, " + type + ".class, e));\n");
                         } else if (isEnum[0]) {
-                            w.append("    this.prop_").append(pn);
+                            w.append("        this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
                             w.append(type).append(".valueOf((String)e));\n");
                         } else {
                             if (isPrimitive(type)) {
-                                w.append("    this.prop_").append(pn).append(".add(((Number)e).");
+                                w.append("        this.prop_").append(pn).append(".add(((Number)e).");
                                 w.append(type).append("Value());\n");
                             } else {
-                                w.append("    this.prop_").append(pn).append(".add((");
+                                w.append("        this.prop_").append(pn).append(".add((");
                                 w.append(type).append(")e);\n");
                             }
                         }
-                        w.append("  }\n");
-                        w.append("}\n");
+                        w.append("      }\n");
+                        w.append("    }\n");
                     } else {
                         if (isEnum[0]) {
                             w.append("    this.prop_").append(pn);
@@ -348,7 +348,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String castTo;
             
             if (p.array()) {
-                w.write("private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(\""
+                w.write("  private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(\""
                     + p.name() + "\"");
                 Collection<String> dependants = deps.get(p.name());
                 if (dependants != null) {
@@ -365,45 +365,45 @@ public final class ModelProcessor extends AbstractProcessor {
                 if (dependants != null) {
                     w.write(".onChange(new Runnable() { public void run() {\n");
                     for (String call : dependants) {
-                        w.append(call);
+                        w.append("  ").append(call);
                     }
-                    w.write("}})");
+                    w.write("  }})");
                 }
                 w.write(";\n");
             
                 castTo = "java.util.List";
-                w.write("public java.util.List<" + tn + "> " + gs[0] + "() {\n");
-                w.write("  if (locked) throw new IllegalStateException();\n");
-                w.write("  prop_" + p.name() + ".assign(this.intKnckt());\n");
-                w.write("  return prop_" + p.name() + ";\n");
-                w.write("}\n");
+                w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
+                w.write("    if (locked) throw new IllegalStateException();\n");
+                w.write("    prop_" + p.name() + ".assign(this.intKnckt());\n");
+                w.write("    return prop_" + p.name() + ";\n");
+                w.write("  }\n");
             } else {
                 castTo = tn;
-                w.write("private " + tn + " prop_" + p.name() + ";\n");
-                w.write("public " + tn + " " + gs[0] + "() {\n");
-                w.write("  if (locked) throw new IllegalStateException();\n");
-                w.write("  return prop_" + p.name() + ";\n");
-                w.write("}\n");
-                w.write("public void " + gs[1] + "(" + tn + " v) {\n");
-                w.write("  if (locked) throw new IllegalStateException();\n");
-                w.write("  prop_" + p.name() + " = v;\n");
-                w.write("  org.apidesign.html.json.impl.Bindings b = intKnckt();\n");
-                w.write("  if (b != null) {\n");
-                w.write("    b.valueHasMutated(\"" + p.name() + "\");\n");
+                w.write("  private " + tn + " prop_" + p.name() + ";\n");
+                w.write("  public " + tn + " " + gs[0] + "() {\n");
+                w.write("    if (locked) throw new IllegalStateException();\n");
+                w.write("    return prop_" + p.name() + ";\n");
+                w.write("  }\n");
+                w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
+                w.write("    if (locked) throw new IllegalStateException();\n");
+                w.write("    prop_" + p.name() + " = v;\n");
+                w.write("    org.apidesign.html.json.impl.Bindings b = intKnckt();\n");
+                w.write("    if (b != null) {\n");
+                w.write("      b.valueHasMutated(\"" + p.name() + "\");\n");
                 Collection<String> dependants = deps.get(p.name());
                 if (dependants != null) {
                     for (String depProp : dependants) {
-                        w.write("    b.valueHasMutated(\"" + depProp + "\");\n");
+                        w.write("      b.valueHasMutated(\"" + depProp + "\");\n");
                     }
                 }
-                w.write("  }\n");
+                w.write("    }\n");
                 dependants = functionDeps.get(p.name());
                 if (dependants != null) {
                     for (String call : dependants) {
-                        w.append(call);
+                        w.append("  ").append(call);
                     }
                 }
-                w.write("}\n");
+                w.write("  }\n");
             }
             
             props.add(p.name());
@@ -441,8 +441,8 @@ public final class ModelProcessor extends AbstractProcessor {
             final String sn = ee.getSimpleName().toString();
             String[] gs = toGetSet(sn, tn, array);
             
-            w.write("public " + tn + " " + gs[0] + "() {\n");
-            w.write("  if (locked) throw new IllegalStateException();\n");
+            w.write("  public " + tn + " " + gs[0] + "() {\n");
+            w.write("    if (locked) throw new IllegalStateException();\n");
             int arg = 0;
             for (VariableElement pe : ee.getParameters()) {
                 final String dn = pe.getSimpleName().toString();
@@ -453,7 +453,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 
                 final String dt = fqn(pe.asType(), ee);
                 String[] call = toGetSet(dn, dt, false);
-                w.write("  " + dt + " arg" + (++arg) + " = ");
+                w.write("    " + dt + " arg" + (++arg) + " = ");
                 w.write(call[0] + "();\n");
                 
                 Collection<String> depends = deps.get(dn);
@@ -463,9 +463,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 depends.add(sn);
             }
-            w.write("  try {\n");
-            w.write("    locked = true;\n");
-            w.write("    return " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + e.getSimpleName() + "(");
+            w.write("    try {\n");
+            w.write("      locked = true;\n");
+            w.write("      return " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + e.getSimpleName() + "(");
             String sep = "";
             for (int i = 1; i <= arg; i++) {
                 w.write(sep);
@@ -473,10 +473,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 sep = ", ";
             }
             w.write(");\n");
-            w.write("  } finally {\n");
-            w.write("    locked = false;\n");
+            w.write("    } finally {\n");
+            w.write("      locked = false;\n");
+            w.write("    }\n");
             w.write("  }\n");
-            w.write("}\n");
 
             props.add(e.getSimpleName().toString());
             props.add(gs[2]);
@@ -617,11 +617,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 return false;
             }
             String n = e.getSimpleName().toString();
-            body.append("private void ").append(n).append("(Object data, Object ev) {\n");
-            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("  private void ").append(n).append("(Object data, Object ev) {\n");
+            body.append("    ").append(clazz.getSimpleName()).append(".").append(n).append("(");
             body.append(wrapParams(e, null, className, "ev", "data"));
             body.append(");\n");
-            body.append("}\n");
+            body.append("  }\n");
             
             functions.add(n);
             functions.add(n + "__VLjava_lang_Object_2Ljava_lang_Object_2");
@@ -752,7 +752,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("The method needs to have one @Model class as parameter", e);
             }
             String n = e.getSimpleName().toString();
-            body.append("public void ").append(n).append("(");
+            body.append("  public void ").append(n).append("(");
             StringBuilder urlBefore = new StringBuilder();
             StringBuilder urlAfter = new StringBuilder();
             String jsonpVarName = null;
@@ -777,28 +777,28 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             body.append(") {\n");
-            body.append("  final Object[] result = { null };\n");
+            body.append("    final Object[] result = { null };\n");
             body.append(
-                "  class ProcessResult implements Runnable {\n" +
-                "    @Override\n" +
-                "    public void run() {\n" +
-                "      Object value = result[0];\n");
+                "    class ProcessResult implements Runnable {\n" +
+                "      @Override\n" +
+                "      public void run() {\n" +
+                "        Object value = result[0];\n");
             body.append(
-                "      " + modelClass + "[] arr;\n");
+                "        " + modelClass + "[] arr;\n");
             body.append(
-                "      if (value instanceof Object[]) {\n" +
-                "        Object[] data = ((Object[])value);\n" +
-                "        arr = new " + modelClass + "[data.length];\n" +
-                "        for (int i = 0; i < data.length; i++) {\n" +
-                "          arr[i] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, data[i]);\n" +
-                "        }\n" +
-                "      } else {\n" +
-                "        arr = new " + modelClass + "[1];\n" +
-                "        arr[0] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, value);\n" +
-                "      }\n"
+                "        if (value instanceof Object[]) {\n" +
+                "          Object[] data = ((Object[])value);\n" +
+                "          arr = new " + modelClass + "[data.length];\n" +
+                "          for (int i = 0; i < data.length; i++) {\n" +
+                "            arr[i] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, data[i]);\n" +
+                "          }\n" +
+                "        } else {\n" +
+                "          arr = new " + modelClass + "[1];\n" +
+                "          arr[0] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, value);\n" +
+                "        }\n"
             );
             {
-                body.append(clazz.getSimpleName()).append(".").append(n).append("(");
+                body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
                 String sep = "";
                 for (String arg : args) {
                     body.append(sep);
@@ -808,11 +808,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 body.append(");\n");
             }
             body.append(
-                "    }\n" +
-                "  }\n"
+                "      }\n" +
+                "    }\n"
             );
-            body.append("  ProcessResult pr = new ProcessResult();\n");
-            body.append("  org.apidesign.html.json.impl.JSON.loadJSON(context, pr, result,\n      ");
+            body.append("    ProcessResult pr = new ProcessResult();\n");
+            body.append("    org.apidesign.html.json.impl.JSON.loadJSON(context, pr, result,\n        ");
             body.append(urlBefore).append(", ");
             if (jsonpVarName != null) {
                 body.append(urlAfter);
@@ -823,7 +823,7 @@ public final class ModelProcessor extends AbstractProcessor {
 //            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
 //            body.append(wrapParams(e, null, className, "ev", "data"));
 //            body.append(");\n");
-            body.append("}\n");
+            body.append("  }\n");
         }
         return true;
     }
