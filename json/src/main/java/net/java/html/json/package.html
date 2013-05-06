@@ -1,0 +1,43 @@
+<body>
+    
+    <p>
+    This API allows you to write your application logic in Java and 
+    present it using modern HTML rendering technologies like 
+    <a href="http://knockoutjs.com">Knockout</a>
+    <img src="doc-files/html4j.png">.
+    </p>
+    <p>
+    Use <a href="Model.html">@Model</a> annotation to define one or more
+    model classes with <a href="Property.html">properties</a>. Don't waste
+    time writing setters or getters - they will be generated for you. 
+    Just instantiate your classes and use them!
+    </p>
+    <p>
+    The class generator does not stop with getters and setters -- internally
+    it generates bindings for various HTML technologies. Just include appropriate
+    technology implementation on classpath of your application and your model
+    class(es) will automatically be bound to your HTML elements (after calling
+    <code>applyBindings()</code> on your model).
+    </p>
+    <p>
+    You don't have bother with JavaScript. All your application logic is in
+    Java. The necessary JavaScript needed for the HTML bindings remains hidden
+    as an implementation detail of communication between the generated model
+    class(es) and appropriate technology bridge (like artifact with id <code>ko-fx</code>
+    and group id <code>org.apidesign.html</code>).
+    </p>
+    <p>
+    The model classes can be used for JSON based server communication. Just
+    use <a href="OnReceive.html">@OnReceive</a> annotation to define a communication
+    point in the model class. Please note, that the model classes can easily
+    be used on server as well (tested with Jersey) - the same code can run
+    in your browser as well as on your server.
+    </p>
+    <p>
+    Behavior of model classes can be enriched by using 
+    <a href="ComputedProperty.html">@ComputedProperty</a> annotation (to
+    define <em>derived</em> properties) and by 
+    <a href="Function.html">@Function</a> annotation to define handlers
+    to be invoked from the HTML elements.
+    </p>
+</body>
