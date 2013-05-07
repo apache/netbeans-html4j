@@ -56,18 +56,23 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     private final String pkg;
     private final String cls;
     private final String html;
+    private final String sourceLevel;
 
-    private Compile(String html, String code) throws IOException {
+    private Compile(String html, String code, String sl) throws IOException {
         this.pkg = findPkg(code);
         this.cls = findCls(code);
         this.html = html;
+        this.sourceLevel = sl;
         classes = compile(html, code);
     }
 
     /** Performs compilation of given HTML page and associated Java code
      */
     public static Compile create(String html, String code) throws IOException {
-        return new Compile(html, code);
+        return create(html, code, "1.7");
+    }
+    static Compile create(String html, String code, String sourceLevel) throws IOException {
+        return new Compile(html, code, sourceLevel);
     }
     
     /** Checks for given class among compiled resources */
@@ -134,7 +139,13 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 
                 if (kind == Kind.SOURCE) {
                     final String n = className.replace('.', '/') + ".java";
-                    return new SimpleJavaFileObject(scratch/*sibling.toUri()*/, kind) {
+                    final URI un;
+                    try {
+                        un = new URI("mem://" + n);
+                    } catch (URISyntaxException ex) {
+                        throw new IOException(ex);
+                    }
+                    return new SimpleJavaFileObject(un/*sibling.toUri()*/, kind) {
                         private final ByteArrayOutputStream data = new ByteArrayOutputStream();
                         @Override
                         public OutputStream openOutputStream() throws IOException {
@@ -172,7 +183,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             
         };
 
-        ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", "1.7", "-target", "1.7"), null, Arrays.asList(file)).call();
+        ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", "1.7"), null, Arrays.asList(file)).call();
 
         Map<String, byte[]> result = new HashMap<>();
 

@@ -209,7 +209,13 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String set = propsGetSet.get(i + 2);
-                    final String tn = propsGetSet.get(i + 4);
+                    String tn = propsGetSet.get(i + 4);
+                    if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) < 0) {
+                        String btn = findBoxedType(tn);
+                        if (btn != null) {
+                            tn = btn;
+                        }
+                    }
                     if (set != null) {
                         w.append("        case " + (i / 5) + ": data." + strip(set) + "((" + tn + ")value); return;\n");
                     }
