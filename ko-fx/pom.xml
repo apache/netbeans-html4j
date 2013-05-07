@@ -12,6 +12,7 @@
   <name>Knockout.fx</name>
   <url>http://maven.apache.org</url>
   <properties>
+    <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <build>
@@ -31,7 +32,7 @@
         <artifactId>javafx</artifactId>
         <version>2.2</version>
         <scope>system</scope>
-        <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
+        <systemPath>${jfxrt.jar}</systemPath>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
