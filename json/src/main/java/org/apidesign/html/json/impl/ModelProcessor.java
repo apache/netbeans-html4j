@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Completion;
@@ -1269,11 +1270,12 @@ public final class ModelProcessor extends AbstractProcessor {
 
     @Override
     public Iterable<? extends Completion> getCompletions(Element element, AnnotationMirror annotation, ExecutableElement member, String userText) {
-        LOG.info(" element: " + element);
-        LOG.info(" annotation: " + annotation);
-        LOG.info(" member: " + member);
-        LOG.info(" userText: " + userText);
-        LOG.info("str: " + annotation.getAnnotationType().toString());
+        final Level l = Level.FINE;
+        LOG.log(l, " element: {0}", element);
+        LOG.log(l, " annotation: {0}", annotation);
+        LOG.log(l, " member: {0}", member);
+        LOG.log(l, " userText: {0}", userText);
+        LOG.log(l, "str: {0}", annotation.getAnnotationType().toString());
         if (annotation.getAnnotationType().toString().equals(OnReceive.class.getName())) {
             if (member.getSimpleName().contentEquals("method")) {
                 return Arrays.asList(
