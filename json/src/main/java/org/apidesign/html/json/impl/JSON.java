@@ -126,6 +126,9 @@ public final class JSON {
         return read(c, modelClazz, tr.toJSON((InputStream)data));
     }
     public static <T> T read(Context c, Class<T> modelClazz, Object data) {
+        if (modelClazz == String.class) {
+            return modelClazz.cast(data.toString());
+        }
         for (int i = 0; i < 2; i++) {
             FromJSON<?> from = froms.get(modelClazz);
             if (from == null) {

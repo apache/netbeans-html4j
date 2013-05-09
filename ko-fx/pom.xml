@@ -65,7 +65,7 @@
     <dependency>
       <groupId>org.apidesign.bck2brwsr</groupId>
       <artifactId>launcher.fx</artifactId>
-      <version>${bck2brwsr.version}</version>
+      <version>0.8-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

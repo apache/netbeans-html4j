@@ -94,6 +94,7 @@ final class LoadJSON implements Runnable {
             final URL u = new URL(base, url.replace(" ", "%20"));
             final PushbackInputStream is = new PushbackInputStream(u.openStream(), 1);
             boolean array = false;
+            boolean string = false;
             if (call.isJSONP()) {
                 for (;;) {
                     int ch = is.read();
@@ -114,13 +115,33 @@ final class LoadJSON implements Runnable {
                 int ch = is.read();
                 array = ch == '[';
                 is.unread(ch);
+                if (!array && ch != '{') {
+                    string = true;
+                }
             }
-            Reader r = new InputStreamReader(is, "UTF-8");
+            try {
+                if (string) {
+                    throw new JSONException("");
+                }
+                Reader r = new InputStreamReader(is, "UTF-8");
 
-            JSONTokener tok = new JSONTokener(r);
-            Object obj = array ? new JSONArray(tok) : new JSONObject(tok);
-            json = convertToArray(obj);
-        } catch (JSONException | IOException ex) {
+                JSONTokener tok = new JSONTokener(r);
+                Object obj;
+                obj = array ? new JSONArray(tok) : new JSONObject(tok);
+                json = convertToArray(obj);
+            } catch (JSONException ex) {
+                Reader r = new InputStreamReader(is, "UTF-8");
+                StringBuilder sb = new StringBuilder();
+                for (;;) {
+                    int ch = r.read();
+                    if (ch == -1) {
+                        break;
+                    }
+                    sb.append((char)ch);
+                }
+                json = sb.toString();
+            }
+        } catch (IOException ex) {
             error = ex;
             LOG.log(Level.WARNING, "Cannot connect to " + url, ex);
         } finally {

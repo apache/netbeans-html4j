@@ -726,7 +726,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("@OnReceive method should return void", e);
                 return false;
             }
-            TypeMirror dataMirror = findDataSpecified(e, onR);
+            if (!onR.jsonp().isEmpty() && !"GET".equals(onR.method())) {
+                error("JSONP works only with GET transport method", e);
+            }
+            String dataMirror = findDataSpecified(e, onR);
             if ("PUT".equals(onR.method()) && dataMirror == null) {
                 error("PUT method needs to specify a data() class", e);
                 return false;
@@ -798,6 +801,9 @@ public final class ModelProcessor extends AbstractProcessor {
                         "Name of jsonp attribute ('" + onR.jsonp() + 
                         "') is not used in url attribute '" + onR.url() + "'", e
                     );
+                }
+                if (dataMirror != null) {
+                    body.append(sep).append(dataMirror.toString()).append(" data");
                 }
             }
             body.append(") {\n");
@@ -1181,7 +1187,16 @@ public final class ModelProcessor extends AbstractProcessor {
         }
     }
 
-    private TypeMirror findDataSpecified(ExecutableElement e, OnReceive onR) {
+    private String findDataSpecified(ExecutableElement e, OnReceive onR) {
+        try {
+            return onR.data().getName();
+        } catch (MirroredTypeException ex) {
+            String name = ex.getTypeMirror().toString();
+            return "java.lang.Object".equals(name) ? null : name;
+        } catch (Exception ex) {
+            // fallback
+        }
+        
         AnnotationMirror found = null;
         for (AnnotationMirror am : e.getAnnotationMirrors()) {
             if (am.getAnnotationType().toString().equals(OnReceive.class.getName())) {
@@ -1196,8 +1211,14 @@ public final class ModelProcessor extends AbstractProcessor {
             ExecutableElement ee = entry.getKey();
             AnnotationValue av = entry.getValue();
             if (ee.getSimpleName().contentEquals("data")) {
-                List<? extends Object> values = getAnnoValues(processingEnv, ee, found);
-                return ee.asType();
+                List<? extends Object> values = getAnnoValues(processingEnv, e, found);
+                for (Object v : values) {
+                    String sv = v.toString();
+                    if (sv.startsWith("data = ") && sv.endsWith(".class")) {
+                        return sv.substring(7, sv.length() - 6);
+                    }
+                }
+                return "error";
             }
         }
         return null;

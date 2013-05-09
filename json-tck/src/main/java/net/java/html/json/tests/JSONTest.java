@@ -36,6 +36,7 @@ import org.apidesign.html.json.impl.JSON;
 @Model(className = "JSONik", properties = {
     @Property(name = "fetched", type = Person.class),
     @Property(name = "fetchedCount", type = int.class),
+    @Property(name = "fetchedResponse", type = String.class),
     @Property(name = "fetchedSex", type = Sex.class, array = true)
 })
 public final class JSONTest {
@@ -150,15 +151,15 @@ public final class JSONTest {
     @OnReceive(url="{url}", method = "PUT", data = Person.class)
     static void putPerson(JSONik model, String reply) {
         model.setFetchedCount(1);
+        model.setFetchedResponse(reply);
     }
-    /*
     @Http(@Http.Resource(
-        content = "", 
+        content = "$0\n$1", 
         path="/person.json", 
         mimeType = "text/plain",
-        parameters = { }
+        parameters = { "http.method", "http.requestBody" }
     ))
-    @BrwsrTest public void putPeople() throws InterruptedException, Exception {
+    @BrwsrTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
         if (js == null) {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
@@ -175,10 +176,20 @@ public final class JSONTest {
         if (cnt == 0) {
             throw new InterruptedException();
         }
-
-        org.testng.Assert.fail("OK");
+        String res = js.getFetchedResponse();
+        int line = res.indexOf('\n');
+        String msg;
+        if (line >= 0) {
+            msg = res.substring(0, line);
+            res = res.substring(0, line);
+        } else {
+            msg = res;
+        }
+        
+        assert "PUT".equals(res) : "Server was queried with PUT method: " + js.getFetchedResponse();
+        
+        assert msg.contains("Jarda") : "Data transferred to the server: " + msg;
     }
-    */
     
     private static int scriptElements() throws Exception {
         return ((Number)Utils.executeScript("return window.document.getElementsByTagName('script').length;")).intValue();

@@ -115,4 +115,35 @@ public class ModelProcessorTest {
         fail("Needs an error message about missing data():\n" + c.getErrors());
         
     }
+    
+    
+    @Test public void jsonNeedsToUseGet () throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(method=\"POST\", jsonp=\"callback\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+        
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("JSONP works only with GET")) {
+                return;
+            }
+        }
+        fail("Needs an error message about wrong method:\n" + c.getErrors());
+        
+    }
 }
