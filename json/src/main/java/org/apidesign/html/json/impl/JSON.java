@@ -94,7 +94,11 @@ public final class JSON {
         Context c, Runnable whenDone, Object[] result, 
         String urlBefore, String urlAfter
     ) {
-        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter);
+        loadJSON(c, whenDone, result, urlBefore, urlAfter, null);
+    }
+
+    public static void loadJSON(Context c, Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method) {
+        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter, method);
         Transfer t = ContextAccessor.findTransfer(c);
         t.loadJSON(call);
     }

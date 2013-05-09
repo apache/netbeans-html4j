@@ -31,12 +31,18 @@ public final class JSONCall {
     private final Object[] result;
     private final String urlBefore;
     private final String urlAfter;
+    private final String method;
 
-    JSONCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter) {
+    JSONCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method) {
         this.whenDone = whenDone;
         this.result = result;
         this.urlBefore = urlBefore;
         this.urlAfter = urlAfter;
+        this.method = method;
+    }
+    
+    public String getMethod() {
+        return method;
     }
     
     public boolean isJSONP() {

@@ -49,8 +49,8 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected JSONCall newCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter) {
-                return new JSONCall(whenDone, result, urlBefore, urlAfter);
+            protected JSONCall newCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method) {
+                return new JSONCall(whenDone, result, urlBefore, urlAfter, method);
             }
         };
     }

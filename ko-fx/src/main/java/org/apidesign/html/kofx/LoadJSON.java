@@ -25,8 +25,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -92,7 +94,16 @@ final class LoadJSON implements Runnable {
         }
         try {
             final URL u = new URL(base, url.replace(" ", "%20"));
-            final PushbackInputStream is = new PushbackInputStream(u.openStream(), 1);
+            URLConnection conn = u.openConnection();
+            if (conn instanceof HttpURLConnection) {
+                HttpURLConnection huc = (HttpURLConnection) conn;
+                if (call.getMethod() != null) {
+                    huc.setRequestMethod(call.getMethod());
+                }
+            }
+            final PushbackInputStream is = new PushbackInputStream(
+                conn.getInputStream(), 1
+            );
             boolean array = false;
             boolean string = false;
             if (call.isJSONP()) {

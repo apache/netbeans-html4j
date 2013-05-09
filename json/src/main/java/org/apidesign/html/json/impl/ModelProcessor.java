@@ -849,6 +849,9 @@ public final class ModelProcessor extends AbstractProcessor {
             } else {
                 body.append("null");
             }
+            if (!"GET".equals(onR.method())) {
+                body.append(", \"").append(onR.method()).append('"');
+            }
             body.append(");\n");
 //            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
 //            body.append(wrapParams(e, null, className, "ev", "data"));
