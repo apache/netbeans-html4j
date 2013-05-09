@@ -77,4 +77,42 @@ public class ModelProcessorTest {
         Compile c = Compile.create(html, code, "1.5");
         assertTrue(c.getErrors().isEmpty(), "No errors: " + c.getErrors());
     }
+    
+    @Test public void putNeedsDataArgument() throws Exception {
+        needsAnArg("PUT");
+    }
+
+    @Test public void postNeedsDataArgument() throws Exception {
+        needsAnArg("POST");
+    }
+    
+    private void needsAnArg(String method) throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(method=\"" + method + "\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+        
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("specify a data()")) {
+                return;
+            }
+        }
+        fail("Needs an error message about missing data():\n" + c.getErrors());
+        
+    }
 }

@@ -145,26 +145,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                     } catch (URISyntaxException ex) {
                         throw new IOException(ex);
                     }
-                    return new SimpleJavaFileObject(un/*sibling.toUri()*/, kind) {
-                        private final ByteArrayOutputStream data = new ByteArrayOutputStream();
-                        @Override
-                        public OutputStream openOutputStream() throws IOException {
-                            return data;
-                        }
-
-                        @Override
-                        public String getName() {
-                            return n;
-                        }
-                        
-                        
-
-                        @Override
-                        public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
-                            data.close();
-                            return new String(data.toByteArray());
-                        }
-                    };
+                    return new VirtFO(un/*sibling.toUri()*/, kind, n);
                 }
                 
                 throw new IllegalStateException();
@@ -180,7 +161,42 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 
                 return null;
             }
-            
+
+            @Override
+            public boolean isSameFile(FileObject a, FileObject b) {
+                if (a instanceof VirtFO && b instanceof VirtFO) {
+                    return ((VirtFO)a).getName().equals(((VirtFO)b).getName());
+                }
+                
+                return super.isSameFile(a, b);
+            }
+
+            class VirtFO extends SimpleJavaFileObject {
+
+                private final String n;
+
+                public VirtFO(URI uri, Kind kind, String n) {
+                    super(uri, kind);
+                    this.n = n;
+                }
+                private final ByteArrayOutputStream data = new ByteArrayOutputStream();
+
+                @Override
+                public OutputStream openOutputStream() throws IOException {
+                    return data;
+                }
+
+                @Override
+                public String getName() {
+                    return n;
+                }
+
+                @Override
+                public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+                    data.close();
+                    return new String(data.toByteArray());
+                }
+            }
         };
 
         ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", "1.7"), null, Arrays.asList(file)).call();

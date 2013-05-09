@@ -93,4 +93,27 @@ public @interface OnReceive {
      *    callback function.
      */
     String jsonp() default "";
+    
+    /** The model class to be send to the server as JSON data.
+     * By default no data are sent. However certain {@link #method() transport methods}
+     * (like <code>"PUT"</code> and <code>"POST"</code>) require the 
+     * data to be specified.
+     * 
+     * @return name of a class generated using {@link Model @Model} annotation
+     * @since 0.3
+     */
+    Class<?> data() default Object.class;
+    
+    /** The HTTP transfer method to use. Defaults to <code>"GET"</code>.
+     * Other typical methods include <code>"HEAD"</code>, 
+     * <code>"DELETE"</code>, <code>"POST"</code>, <code>"PUT"</code>.
+     * The last two mentioned methods require {@link #data()} to be specified.
+     * <p>
+     * When {@link #jsonp() JSONP} transport is requested, the method 
+     * has to be <code>"GET"</code>.
+     * 
+     * @return name of the HTTP transfer method
+     * @since 0.3
+     */
+    String method() default "GET";
 }

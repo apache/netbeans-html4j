@@ -28,6 +28,7 @@ import java.lang.annotation.AnnotationTypeMismatchException;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,9 +36,13 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.logging.Logger;
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Completion;
+import javax.annotation.processing.Completions;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -70,8 +75,8 @@ import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
 import org.openide.util.lookup.ServiceProvider;
 
-/** Annotation processor to process an XHTML page and generate appropriate 
- * "id" file.
+/** Annotation processor to process {@link Model @Model} annotations and
+ * generate appropriate model classes.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -86,6 +91,7 @@ import org.openide.util.lookup.ServiceProvider;
     "net.java.html.json.Property"
 })
 public final class ModelProcessor extends AbstractProcessor {
+    private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
     private final Map<Element,String> models = new WeakHashMap<>();
     private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
     @Override
@@ -719,6 +725,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("@OnReceive method should return void", e);
                 return false;
             }
+            if ("PUT".equals(onR.method()) && !isDataSpecified(onR)) {
+                error("PUT method needs to specify a data() class", e);
+                return false;
+            }
+            if ("POST".equals(onR.method()) && !isDataSpecified(onR)) {
+                error("POST method needs to specify a data() class", e);
+                return false;
+            }
             String modelClass = null;
             boolean expectsList = false;
             List<String> args = new ArrayList<>();
@@ -1162,6 +1176,14 @@ public final class ModelProcessor extends AbstractProcessor {
             return s;
         }
     }
+
+    private boolean isDataSpecified(OnReceive onR) {
+        try {
+            return onR.data() != Object.class;
+        } catch (MirroredTypeException ex) {
+            return !ex.getTypeMirror().toString().equals("java.lang.Object"); // NOI18N
+        }
+    }
     
     private static class Prprt {
         private final Element e;
@@ -1244,5 +1266,31 @@ public final class ModelProcessor extends AbstractProcessor {
             }
         }
     }
+
+    @Override
+    public Iterable<? extends Completion> getCompletions(Element element, AnnotationMirror annotation, ExecutableElement member, String userText) {
+        LOG.info(" element: " + element);
+        LOG.info(" annotation: " + annotation);
+        LOG.info(" member: " + member);
+        LOG.info(" userText: " + userText);
+        LOG.info("str: " + annotation.getAnnotationType().toString());
+        if (annotation.getAnnotationType().toString().equals(OnReceive.class.getName())) {
+            if (member.getSimpleName().contentEquals("method")) {
+                return Arrays.asList(
+                    methodOf("GET"),
+                    methodOf("POST"),
+                    methodOf("PUT"),
+                    methodOf("DELETE"),
+                    methodOf("HEAD")
+                );
+            }
+        }
+        
+        return super.getCompletions(element, annotation, member, userText);
+    }
     
+    private static final Completion methodOf(String method) {
+        ResourceBundle rb = ResourceBundle.getBundle("org.apidesign.html.json.impl.Bundle");
+        return Completions.of('"' + method + '"', rb.getString("MSG_Completion_" + method));
+    }
 }
