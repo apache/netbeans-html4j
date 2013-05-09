@@ -20,8 +20,10 @@
  */
 package net.java.html.json.tests;
 
+import java.io.ByteArrayInputStream;
 import net.java.html.json.Context;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
@@ -345,7 +347,24 @@ public final class JSONTest {
         assert "Gitar".equals(p.getFirstName()) : "Expecting Gitar: " + p.getFirstName();
         assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
     }
-
+    
+    @Model(className = "NameAndValue", properties = {
+        @Property(name = "name", type = String.class),
+        @Property(name = "value", type = long.class),
+        @Property(name = "small", type = byte.class)
+    })
+    static class NandV {
+    }
+    
+    @BrwsrTest public void parseNullNumber() throws Exception {
+        String txt = "{ \"name\":\"M\" }";
+        ByteArrayInputStream is = new ByteArrayInputStream(txt.getBytes("UTF-8"));
+        NameAndValue v = Models.parse(Utils.newContext(), NameAndValue.class, is);
+        assert "M".equals(v.getName()) : "Name is 'M': " + v.getName();
+        assert 0 == v.getValue() : "Value is empty: " + v.getValue();
+        assert 0 == v.getSmall() : "Small value is empty: " + v.getSmall();
+    }
+    
     static Object[] create() {
         return VMTest.create(JSONTest.class);
     }

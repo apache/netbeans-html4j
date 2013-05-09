@@ -311,7 +311,8 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.append(type).append(".valueOf((String)ret[" + cnt + "]);\n");
                         } else if (isPrimitive(type)) {
                             w.append("    this.prop_").append(pn);
-                            w.append(" = ((Number)").append("ret[" + cnt + "]).");
+                            w.append(" = ret[" + cnt + "] == null ? (").append(type).append(")0 : ");
+                            w.append("((Number)").append("ret[" + cnt + "]).");
                             w.append(type).append("Value();\n");
                         } else {
                             w.append("    this.prop_").append(pn);
