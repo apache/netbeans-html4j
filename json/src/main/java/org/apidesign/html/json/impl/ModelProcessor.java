@@ -726,11 +726,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("@OnReceive method should return void", e);
                 return false;
             }
-            if ("PUT".equals(onR.method()) && !isDataSpecified(onR)) {
+            TypeMirror dataMirror = findDataSpecified(e, onR);
+            if ("PUT".equals(onR.method()) && dataMirror == null) {
                 error("PUT method needs to specify a data() class", e);
                 return false;
             }
-            if ("POST".equals(onR.method()) && !isDataSpecified(onR)) {
+            if ("POST".equals(onR.method()) && dataMirror == null) {
                 error("POST method needs to specify a data() class", e);
                 return false;
             }
@@ -754,6 +755,8 @@ public final class ModelProcessor extends AbstractProcessor {
                     } else if (ve.asType().getKind() == TypeKind.ARRAY) {
                         modelType = ((ArrayType)ve.asType()).getComponentType();
                         expectsList = true;
+                    } else if (ve.asType().toString().equals("java.lang.String")) {
+                        modelType = ve.asType();
                     }
                     if (modelType != null) {
                         if (modelClass != null) {
@@ -1178,11 +1181,41 @@ public final class ModelProcessor extends AbstractProcessor {
         }
     }
 
-    private boolean isDataSpecified(OnReceive onR) {
+    private TypeMirror findDataSpecified(ExecutableElement e, OnReceive onR) {
+        AnnotationMirror found = null;
+        for (AnnotationMirror am : e.getAnnotationMirrors()) {
+            if (am.getAnnotationType().toString().equals(OnReceive.class.getName())) {
+                found = am;
+            }
+        }
+        if (found == null) {
+            return null;
+        }
+        
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : found.getElementValues().entrySet()) {
+            ExecutableElement ee = entry.getKey();
+            AnnotationValue av = entry.getValue();
+            if (ee.getSimpleName().contentEquals("data")) {
+                List<? extends Object> values = getAnnoValues(processingEnv, ee, found);
+                return ee.asType();
+            }
+        }
+        return null;
+    }
+
+    static List<? extends Object> getAnnoValues(ProcessingEnvironment pe, Element e, AnnotationMirror am) {
         try {
-            return onR.data() != Object.class;
-        } catch (MirroredTypeException ex) {
-            return !ex.getTypeMirror().toString().equals("java.lang.Object"); // NOI18N
+            Class<?> trees = Class.forName("com.sun.tools.javac.api.JavacTrees");
+            Method m = trees.getMethod("instance", ProcessingEnvironment.class);
+            Object instance = m.invoke(null, pe);
+            m = instance.getClass().getMethod("getPath", Element.class, AnnotationMirror.class);
+            Object path = m.invoke(instance, e, am);
+            m = path.getClass().getMethod("getLeaf");
+            Object leaf = m.invoke(path);
+            m = leaf.getClass().getMethod("getArguments");
+            return (List) m.invoke(leaf);
+        } catch (Exception ex) {
+            return Collections.emptyList();
         }
     }
     
@@ -1209,7 +1242,7 @@ public final class ModelProcessor extends AbstractProcessor {
             try {
                 return p.type().getName();
             } catch (IncompleteAnnotationException | AnnotationTypeMismatchException ex) {
-                for (Object v : getAnnoValues(env)) {
+                for (Object v : getAnnoValues(env, e, tm)) {
                     String s = v.toString().replace(" ", "");
                     if (s.startsWith("type=") && s.endsWith(".class")) {
                         return s.substring(5, s.length() - 6);
@@ -1249,22 +1282,6 @@ public final class ModelProcessor extends AbstractProcessor {
                 
             }
             return ret;
-        }
-        
-        private List<? extends Object> getAnnoValues(ProcessingEnvironment pe) {
-            try {
-                Class<?> trees = Class.forName("com.sun.tools.javac.api.JavacTrees");
-                Method m = trees.getMethod("instance", ProcessingEnvironment.class);
-                Object instance = m.invoke(null, pe);
-                m = instance.getClass().getMethod("getPath", Element.class, AnnotationMirror.class);
-                Object path = m.invoke(instance, e, tm);
-                m = path.getClass().getMethod("getLeaf");
-                Object leaf = m.invoke(path);
-                m = leaf.getClass().getMethod("getArguments");
-                return (List)m.invoke(leaf);
-            } catch (Exception ex) {
-                return Collections.emptyList();
-            }
         }
     }
 

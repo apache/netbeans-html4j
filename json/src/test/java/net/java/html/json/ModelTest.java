@@ -162,7 +162,7 @@ public class ModelTest {
         }
     }
     
-    @OnReceive(url = "{protocol}://{host}?query={query}")
+    @OnReceive(url = "{protocol}://{host}?query={query}", data = Person.class)
     static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
         m.applyBindings();

@@ -20,6 +20,7 @@
  */
 package net.java.html.json.tests;
 
+import net.java.html.json.Context;
 import net.java.html.json.Model;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
@@ -143,6 +144,41 @@ public final class JSONTest {
         
         assert orig == now : "The set of elements is unchanged. Delta: " + (now - orig);
     }
+    
+    
+    
+    @OnReceive(url="{url}", method = "PUT", data = Person.class)
+    static void putPerson(JSONik model, String reply) {
+        model.setFetchedCount(1);
+    }
+    /*
+    @Http(@Http.Resource(
+        content = "", 
+        path="/person.json", 
+        mimeType = "text/plain",
+        parameters = { }
+    ))
+    @BrwsrTest public void putPeople() throws InterruptedException, Exception {
+        if (js == null) {
+            orig = scriptElements();
+            assert orig > 0 : "There should be some scripts on the page";
+            
+            js = new JSONik(Utils.newContext());
+            js.applyBindings();
+
+            Person p = new Person(Context.EMPTY);
+            p.setFirstName("Jarda");
+            js.putPerson("person.json", p);
+        }
+    
+        int cnt = js.getFetchedCount();
+        if (cnt == 0) {
+            throw new InterruptedException();
+        }
+
+        org.testng.Assert.fail("OK");
+    }
+    */
     
     private static int scriptElements() throws Exception {
         return ((Number)Utils.executeScript("return window.document.getElementsByTagName('script').length;")).intValue();
