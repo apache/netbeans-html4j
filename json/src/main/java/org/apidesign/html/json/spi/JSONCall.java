@@ -21,6 +21,9 @@
 
 package org.apidesign.html.json.spi;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /** Description of a JSON call request that is supposed to be processed
  * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.
  *
@@ -32,13 +35,32 @@ public final class JSONCall {
     private final String urlBefore;
     private final String urlAfter;
     private final String method;
+    private final Object data;
 
-    JSONCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method) {
+    JSONCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method, Object data) {
         this.whenDone = whenDone;
         this.result = result;
         this.urlBefore = urlBefore;
         this.urlAfter = urlAfter;
         this.method = method;
+        this.data = data;
+    }
+    
+    /** Do we have some data to send? Can the {@link #writeData(java.io.OutputStream)} method be 
+     * called?
+     * 
+     * @return true, if the call has some data to send
+     */
+    public boolean isDoOutput() {
+        return this.data != null;
+    }
+    
+    public void writeData(OutputStream os) throws IOException {
+        if (this.data == null) {
+            throw new IOException("No data!");
+        }
+        os.write(this.data.toString().getBytes("UTF-8"));
+        os.flush();
     }
     
     public String getMethod() {

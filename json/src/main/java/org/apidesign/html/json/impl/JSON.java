@@ -94,11 +94,15 @@ public final class JSON {
         Context c, Runnable whenDone, Object[] result, 
         String urlBefore, String urlAfter
     ) {
-        loadJSON(c, whenDone, result, urlBefore, urlAfter, null);
+        loadJSON(c, whenDone, result, urlBefore, urlAfter, null, null);
     }
 
-    public static void loadJSON(Context c, Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method) {
-        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter, method);
+    public static void loadJSON(
+        Context c, Runnable whenDone, Object[] result,
+        String urlBefore, String urlAfter, String method,
+        Object data
+    ) {
+        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter, method, data);
         Transfer t = ContextAccessor.findTransfer(c);
         t.loadJSON(call);
     }

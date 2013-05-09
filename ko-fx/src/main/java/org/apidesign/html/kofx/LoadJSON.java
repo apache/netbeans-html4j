@@ -23,6 +23,7 @@ package org.apidesign.html.kofx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -42,7 +43,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.openide.util.Exceptions;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -99,6 +99,12 @@ final class LoadJSON implements Runnable {
                 HttpURLConnection huc = (HttpURLConnection) conn;
                 if (call.getMethod() != null) {
                     huc.setRequestMethod(call.getMethod());
+                }
+                if (call.isDoOutput()) {
+                    huc.setDoOutput(true);
+                    final OutputStream os = huc.getOutputStream();
+                    call.writeData(os);
+                    os.flush();
                 }
             }
             final PushbackInputStream is = new PushbackInputStream(

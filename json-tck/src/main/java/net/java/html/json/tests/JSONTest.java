@@ -180,7 +180,7 @@ public final class JSONTest {
         int line = res.indexOf('\n');
         String msg;
         if (line >= 0) {
-            msg = res.substring(0, line);
+            msg = res.substring(line + 1);
             res = res.substring(0, line);
         } else {
             msg = res;
