@@ -21,6 +21,7 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
+    <module>ko-archetype</module>
     <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
   </modules>
@@ -84,6 +85,7 @@
                   <excludes>
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
+                       <exclude>ko-archetype/src/main/resources/**</exclude>
                        <exclude>ko-fx/src/main/resources/org/apidesign/html/kofx/knockout*.js</exclude>
                   </excludes>
               </configuration>
