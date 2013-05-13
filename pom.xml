@@ -22,6 +22,7 @@
     <module>json</module>
     <module>json-tck</module>
     <module>ko-archetype</module>
+    <module>ko-archetype-test</module>
     <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
   </modules>
