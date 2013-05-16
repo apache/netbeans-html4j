@@ -13,7 +13,7 @@
   </parent>  
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <bck2brwsr.version>0.7</bck2brwsr.version>
+      <bck2brwsr.version>0.7.2</bck2brwsr.version>
       <bck2brwsr.launcher.version>0.7.2</bck2brwsr.launcher.version>
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
