@@ -8,7 +8,7 @@
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>net.java.html.json</artifactId>
-  <version>0.3</version>
+  <version>0.3.1</version>
   <name>JSON Model in Java</name>
   <url>http://maven.apache.org</url>
   <properties>

@@ -143,7 +143,7 @@ public class MapModelTest {
 
         @Override
         public Map<String, One> wrapModel(Object model) {
-            return new HashMap<>();
+            return new HashMap<String, One>();
         }
 
         @Override

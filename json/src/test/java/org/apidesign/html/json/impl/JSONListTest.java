@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  */
 public class JSONListTest implements Technology<Object> {
     private boolean replaceArray;
-    private final Map<String,PropertyBinding> bindings = new HashMap<>();
+    private final Map<String,PropertyBinding> bindings = new HashMap<String,PropertyBinding>();
     
     public JSONListTest() {
     }

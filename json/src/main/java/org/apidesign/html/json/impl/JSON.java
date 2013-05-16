@@ -109,7 +109,7 @@ public final class JSON {
     
     private static final Map<Class,FromJSON<?>> froms;
     static {
-        Map<Class,FromJSON<?>> m = new HashMap<>();
+        Map<Class,FromJSON<?>> m = new HashMap<Class,FromJSON<?>>();
         froms = m;
     }
     public static void register(FromJSON<?> from) {
@@ -160,8 +160,7 @@ public final class JSON {
                 Class.forName(modelClazz.getName(), true, l);
             }
             modelClazz.newInstance();
-        } catch (ClassNotFoundException | InstantiationException |
-            IllegalAccessException | SecurityException ex) {
+        } catch (Exception ex) {
             // ignore and try again
         }
     }

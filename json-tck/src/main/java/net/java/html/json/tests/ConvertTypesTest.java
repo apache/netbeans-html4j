@@ -49,7 +49,7 @@ public final class ConvertTypesTest {
     }
     private static Object createJSON(boolean includeSex) 
     throws UnsupportedEncodingException {
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("firstName", "son");
         map.put("lastName", "dj");
         if (includeSex) {

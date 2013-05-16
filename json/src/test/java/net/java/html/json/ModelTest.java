@@ -240,7 +240,7 @@ public class ModelTest {
     }
     
     private static class MockTechnology implements Technology<Object> {
-        private final List<String> mutated = new ArrayList<>();
+        private final List<String> mutated = new ArrayList<String>();
 
         @Override
         public Object wrapModel(Object model) {
