@@ -51,7 +51,8 @@ import javax.tools.ToolProvider;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class Compile implements DiagnosticListener<JavaFileObject> {
-    private final List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
+    private final List<Diagnostic<? extends JavaFileObject>> errors = 
+            new ArrayList<Diagnostic<? extends JavaFileObject>>();
     private final Map<String, byte[]> classes;
     private final String pkg;
     private final String cls;
@@ -83,7 +84,8 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     /** Obtains errors created during compilation.
      */
     public List<Diagnostic<? extends JavaFileObject>> getErrors() {
-        List<Diagnostic<? extends JavaFileObject>> err = new ArrayList<>();
+        List<Diagnostic<? extends JavaFileObject>> err;
+        err = new ArrayList<Diagnostic<? extends JavaFileObject>>();
         for (Diagnostic<? extends JavaFileObject> diagnostic : errors) {
             if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
                 err.add(diagnostic);
@@ -95,7 +97,8 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     private Map<String, byte[]> compile(final String html, final String code) throws IOException {
         StandardJavaFileManager sjfm = ToolProvider.getSystemJavaCompiler().getStandardFileManager(this, null, null);
 
-        final Map<String, ByteArrayOutputStream> class2BAOS = new HashMap<>();
+        final Map<String, ByteArrayOutputStream> class2BAOS;
+        class2BAOS = new HashMap<String, ByteArrayOutputStream>();
 
         JavaFileObject file = new SimpleJavaFileObject(URI.create("mem://mem"), Kind.SOURCE) {
             @Override
@@ -201,7 +204,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
 
         ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", "1.7"), null, Arrays.asList(file)).call();
 
-        Map<String, byte[]> result = new HashMap<>();
+        Map<String, byte[]> result = new HashMap<String, byte[]>();
 
         for (Map.Entry<String, ByteArrayOutputStream> e : class2BAOS.entrySet()) {
             result.put(e.getKey(), e.getValue().toByteArray());

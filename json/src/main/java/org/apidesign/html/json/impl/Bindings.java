@@ -41,13 +41,13 @@ public final class Bindings<Data> {
     }
     
     public <M> PropertyBinding registerProperty(String propName, M model, SetAndGet<M> access, boolean readOnly) {
-        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<>(propName, model, access, readOnly));
+        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<M>(propName, model, access, readOnly));
         bp.bind(pb, model, data);
         return pb;
     }
 
     public <M> FunctionBinding registerFunction(String name, M model, Callback<M> access) {
-        FunctionBinding fb = PropertyBindingAccessor.createFunction(new FBData<>(name, model, access));
+        FunctionBinding fb = PropertyBindingAccessor.createFunction(new FBData<M>(name, model, access));
         bp.expose(fb, model, data);
         return fb;
     }
@@ -61,7 +61,7 @@ public final class Bindings<Data> {
         Technology<Data> bp, Object model
     ) {
         Data d = bp.wrapModel(model);
-        return new Bindings<>(d, bp);
+        return new Bindings<Data>(d, bp);
     }
     
     

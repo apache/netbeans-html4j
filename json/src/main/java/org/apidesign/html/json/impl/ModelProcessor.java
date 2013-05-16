@@ -82,7 +82,7 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service=Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({
     "net.java.html.json.Model",
     "net.java.html.json.Function",
@@ -93,8 +93,8 @@ import org.openide.util.lookup.ServiceProvider;
 })
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
-    private final Map<Element,String> models = new WeakHashMap<>();
-    private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
+    private final Map<Element,String> models = new WeakHashMap<Element,String>();
+    private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
@@ -159,10 +159,10 @@ public final class ModelProcessor extends AbstractProcessor {
         models.put(e, className);
         try {
             StringWriter body = new StringWriter();
-            List<String> propsGetSet = new ArrayList<>();
-            List<String> functions = new ArrayList<>();
-            Map<String, Collection<String>> propsDeps = new HashMap<>();
-            Map<String, Collection<String>> functionDeps = new HashMap<>();
+            List<String> propsGetSet = new ArrayList<String>();
+            List<String> functions = new ArrayList<String>();
+            Map<String, Collection<String>> propsDeps = new HashMap<String, Collection<String>>();
+            Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
             Prprt[] props = createProps(e, m.properties());
             
             if (!generateComputedProperties(body, props, e.getEnclosedElements(), propsGetSet, propsDeps)) {
@@ -217,7 +217,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String set = propsGetSet.get(i + 2);
                     String tn = propsGetSet.get(i + 4);
-                    if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) < 0) {
+                    if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_6) <= 0) {
                         String btn = findBoxedType(tn);
                         if (btn != null) {
                             tn = btn;
@@ -311,8 +311,15 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.append(type).append(".valueOf((String)ret[" + cnt + "]);\n");
                         } else if (isPrimitive(type)) {
                             w.append("    this.prop_").append(pn);
-                            w.append(" = ret[" + cnt + "] == null ? (").append(type).append(")0 : ");
-                            w.append("((Number)").append("ret[" + cnt + "]).");
+                            w.append(" = ret[" + cnt + "] == null ? ");
+                            if ("char".equals(type)) {
+                                w.append("0 : ((Character)");
+                            } else if ("boolean".equals(type)) {
+                                w.append("false : ((Boolean)");
+                            } else {
+                                w.append("0 : ((Number)");
+                            }
+                            w.append("ret[" + cnt + "]).");
                             w.append(type).append("Value();\n");
                         } else {
                             w.append("    this.prop_").append(pn);
@@ -472,7 +479,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 
                 Collection<String> depends = deps.get(dn);
                 if (depends == null) {
-                    depends = new LinkedHashSet<>();
+                    depends = new LinkedHashSet<String>();
                     deps.put(dn, depends);
                 }
                 depends.add(sn);
@@ -685,14 +692,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 
                 Collection<String> change = functionDeps.get(pn);
                 if (change == null) {
-                    change = new ArrayList<>();
+                    change = new ArrayList<String>();
                     functionDeps.put(pn, change);
                 }
                 change.add(call.toString());
                 for (String dpn : findDerivedFrom(propDeps, pn)) {
                     change = functionDeps.get(dpn);
                     if (change == null) {
-                        change = new ArrayList<>();
+                        change = new ArrayList<String>();
                         functionDeps.put(dpn, change);
                     }
                     change.add(call.toString());
@@ -741,7 +748,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             String modelClass = null;
             boolean expectsList = false;
-            List<String> args = new ArrayList<>();
+            List<String> args = new ArrayList<String>();
             {
                 for (VariableElement ve : e.getParameters()) {
                     TypeMirror modelType = null;
@@ -1117,7 +1124,7 @@ public final class ModelProcessor extends AbstractProcessor {
     private Iterable<String> findParamNames(
         Element e, String url, String jsonParam, StringBuilder... both
     ) {
-        List<String> params = new ArrayList<>();
+        List<String> params = new ArrayList<String>();
         int wasJSON = 0;
 
         for (int pos = 0; ;) {
@@ -1165,11 +1172,13 @@ public final class ModelProcessor extends AbstractProcessor {
             "long".equals(type) ||
             "short".equals(type) ||
             "byte".equals(type) ||
+            "char".equals(type) ||
+            "boolean".equals(type) ||
             "float".equals(type);
     }
 
     private static Collection<String> findDerivedFrom(Map<String, Collection<String>> propsDeps, String derivedProp) {
-        Set<String> names = new HashSet<>();
+        Set<String> names = new HashSet<String>();
         for (Map.Entry<String, Collection<String>> e : propsDeps.entrySet()) {
             if (e.getValue().contains(derivedProp)) {
                 names.add(e.getKey());
@@ -1269,17 +1278,21 @@ public final class ModelProcessor extends AbstractProcessor {
         }
 
         String typeName(ProcessingEnvironment env) {
+            RuntimeException ex;
             try {
                 return p.type().getName();
-            } catch (IncompleteAnnotationException | AnnotationTypeMismatchException ex) {
-                for (Object v : getAnnoValues(env, e, tm)) {
-                    String s = v.toString().replace(" ", "");
-                    if (s.startsWith("type=") && s.endsWith(".class")) {
-                        return s.substring(5, s.length() - 6);
-                    }
-                }
-                throw ex;
+            } catch (IncompleteAnnotationException e) {
+                ex = e;
+            } catch (AnnotationTypeMismatchException e) {
+                ex = e;
             }
+            for (Object v : getAnnoValues(env, e, tm)) {
+                String s = v.toString().replace(" ", "");
+                if (s.startsWith("type=") && s.endsWith(".class")) {
+                    return s.substring(5, s.length() - 6);
+                }
+            }
+            throw ex;
         }
         
         
