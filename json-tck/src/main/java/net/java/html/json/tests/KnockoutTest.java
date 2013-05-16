@@ -37,7 +37,8 @@ import org.apidesign.bck2brwsr.vmtest.VMTest;
     @Property(name="name", type=String.class),
     @Property(name="results", type=String.class, array = true),
     @Property(name="callbackCount", type=int.class),
-    @Property(name="people", type=PersonImpl.class, array = true)
+    @Property(name="people", type=PersonImpl.class, array = true),
+    @Property(name="enabled", type=boolean.class)
 }) 
 public final class KnockoutTest {
     
@@ -98,6 +99,22 @@ public final class KnockoutTest {
         assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
         assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
     }
+
+    @HtmlFragment(
+        "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
+    )
+    @BrwsrTest public void checkBoxToBooleanBinding() throws Exception {
+        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        m.applyBindings();
+        
+        assert !m.isEnabled() : "Is disabled";
+
+        triggerClick("b");
+        
+        assert m.isEnabled() : "Now the model is enabled";
+    }
+    
+    
     
     @HtmlFragment(
         "<ul id='ul' data-bind='foreach: cmpResults'>\n"
@@ -237,6 +254,14 @@ public final class KnockoutTest {
         )).intValue();
     }
 
+    private static void triggerClick(String id) throws Exception {
+        String s = "var id = arguments[0];"
+            + "var e = window.document.getElementById(id);\n "
+            + "var ev = window.document.createEvent('MouseEvents');\n "
+            + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
+            + "e.dispatchEvent(ev);\n ";
+        Utils.executeScript(s, id);
+    }
     private static void triggerChildClick(String id, int pos) throws Exception {
         String s = "var id = arguments[0]; var pos = arguments[1];"
             + "var e = window.document.getElementById(id);\n "
