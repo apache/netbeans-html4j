@@ -24,6 +24,7 @@ import java.util.List;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.HtmlFragment;
@@ -48,7 +49,7 @@ public final class KnockoutTest {
         "<button id=\"hello\">Say Hello!</button>\n"
     )
     @BrwsrTest public void modifyValueAssertChangeInModel() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
         m.setName("Kukuc");
         m.applyBindings();
         
@@ -82,7 +83,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArray() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -104,7 +105,7 @@ public final class KnockoutTest {
         "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
     )
     @BrwsrTest public void checkBoxToBooleanBinding() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
         m.applyBindings();
         
         assert !m.isEnabled() : "Is disabled";
@@ -122,7 +123,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfDerivedArray() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -141,9 +142,9 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArrayOfPeople() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
         
-        final Person first = new Person(Utils.newContext());
+        final Person first = Models.bind(new Person(), Utils.newContext());
         first.setFirstName("first");
         m.getPeople().add(first);
         
@@ -152,7 +153,7 @@ public final class KnockoutTest {
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
         
-        final Person second = new Person(Utils.newContext());
+        final Person second = Models.bind(new Person(), Utils.newContext());
         second.setFirstName("second");
         m.getPeople().add(second);
 
@@ -199,9 +200,9 @@ public final class KnockoutTest {
     }
     
     private void trasfertToFemale() throws Exception {
-        KnockoutModel m = new KnockoutModel(Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
 
-        final Person first = new Person(Utils.newContext());
+        final Person first = Models.bind(new Person(), Utils.newContext());
         first.setFirstName("first");
         first.setSex(Sex.MALE);
         m.getPeople().add(first);
