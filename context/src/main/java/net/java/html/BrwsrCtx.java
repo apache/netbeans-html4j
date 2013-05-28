@@ -72,9 +72,16 @@ public final class BrwsrCtx {
             cp.fillContext(cb, requestor);
             found = true;
         }
-        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class, org.apidesign.html.context.spi.Contexts.Provider.class.getClassLoader())) {
-            cp.fillContext(cb, requestor);
-            found = true;
+        try {
+            for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class, org.apidesign.html.context.spi.Contexts.Provider.class.getClassLoader())) {
+                cp.fillContext(cb, requestor);
+                found = true;
+            }
+        } catch (SecurityException ex) {
+            if (!found) {
+                throw ex;
+            }
+            // if we have some data from regular provides, go on
         }
         if (!found) {
             // XXX: print out a warning
