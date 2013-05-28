@@ -15,10 +15,10 @@
  * this program. Look for COPYING file in the top folder. If not, see
  * http://opensource.org/licenses/GPL-2.0.
  */
-package net.java.html.sound.api;
+package net.java.html.sound;
 
 import java.util.ServiceLoader;
-import net.java.html.sound.spi.AudioEnvironment;
+import org.apidesign.html.sound.spi.AudioEnvironment;
 
 /**
  *

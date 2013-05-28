@@ -15,9 +15,9 @@
  * this program. Look for COPYING file in the top folder. If not, see
  * http://opensource.org/licenses/GPL-2.0.
  */
-package net.java.html.sound.spi;
+package org.apidesign.html.sound.spi;
 
-import net.java.html.sound.api.AudioClip;
+import net.java.html.sound.AudioClip;
 
 /**
  *
