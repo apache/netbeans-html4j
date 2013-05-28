@@ -21,7 +21,7 @@
 
 package org.apidesign.html.json.impl;
 
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 
 /**
  *
@@ -29,5 +29,5 @@ import net.java.html.json.Context;
  */
 public interface FromJSON<Data> {
     public Class<Data> factoryFor();
-    public Data read(Context c, Object d);
+    public Data read(BrwsrCtx c, Object d);
 }

@@ -21,7 +21,7 @@
 package org.apidesign.html.json.impl;
 
 import org.apidesign.html.json.spi.PropertyBinding;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -52,8 +52,8 @@ public final class Bindings<Data> {
         return fb;
     }
     
-    public static Bindings<?> apply(Context c, Object model) {
-        Technology<?> bp = ContextAccessor.findTechnology(c);
+    public static Bindings<?> apply(BrwsrCtx c, Object model) {
+        Technology<?> bp = JSON.findTechnology(c);
         return apply(bp, model);
     }
     

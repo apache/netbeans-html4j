@@ -21,7 +21,7 @@
 package net.java.html.json.tests;
 
 import java.io.ByteArrayInputStream;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
@@ -169,7 +169,7 @@ public final class JSONTest {
             js = new JSONik(Utils.newContext());
             js.applyBindings();
 
-            Person p = new Person(Context.EMPTY);
+            Person p = new Person(BrwsrCtx.EMPTY);
             p.setFirstName("Jarda");
             js.putPerson("person.json", p);
         }

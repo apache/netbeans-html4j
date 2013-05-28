@@ -18,14 +18,12 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package net.java.html.json;
+package net.java.html;
 
 import java.util.ServiceLoader;
-import org.apidesign.html.json.impl.ContextAccessor;
-import org.apidesign.html.json.spi.ContextBuilder;
-import org.apidesign.html.json.spi.ContextProvider;
-import org.apidesign.html.json.spi.Technology;
-import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.context.impl.CtxAccssr;
+import org.apidesign.html.context.impl.CtxImpl;
+import org.apidesign.html.context.spi.Contexts;
 
 /** Represents context where the {@link Model} and other objects
  * operate in. The context is usually a particular HTML page in a browser.
@@ -36,38 +34,29 @@ import org.apidesign.html.json.spi.Transfer;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Context {
-    private final Technology<?> t;
-    private final Transfer r;
-    
-    private Context(Technology<?> t, Transfer r) {
-        t.getClass();
-        r.getClass();
-        this.t = t;
-        this.r = r;
+public final class BrwsrCtx {
+    private final CtxImpl impl;
+    private BrwsrCtx(CtxImpl impl) {
+        this.impl = impl;
     }
     static {
-        new ContextAccessor() {
+        new CtxAccssr() {
             @Override
-            protected Context newContext(Technology<?> t, Transfer r) {
-                return new Context(t, r);
-            }
-            
-            @Override
-            protected Technology<?> technology(Context c) {
-                return c.t;
+            protected BrwsrCtx newContext(CtxImpl impl) {
+                return new BrwsrCtx(impl);
             }
 
             @Override
-            protected Transfer transfer(Context c) {
-                return c.r;
+            protected CtxImpl find(BrwsrCtx context) {
+                return context.impl;
             }
         };
     }
     /** Dummy context without binding to any real browser or technology. 
-     * Useful for simple unit testing of behavior of model classes.
+     * Useful for simple unit testing of behavior of various business logic
+     * code.
      */
-    public static final Context EMPTY = ContextBuilder.create().build();
+    public static final BrwsrCtx EMPTY = Contexts.newBuilder().build();
     
     /** Seeks for the default context that is associated with the requesting
      * class. If no suitable context is found, a warning message is
@@ -76,21 +65,22 @@ public final class Context {
      * @param requestor the class that makes the request
      * @return appropriate context for the request
      */
-    public static Context findDefault(Class<?> requestor) {
-        for (ContextProvider cp : ServiceLoader.load(ContextProvider.class)) {
-            Context c = cp.findContext(requestor);
-            if (c != null) {
-                return c;
-            }
+    public static BrwsrCtx findDefault(Class<?> requestor) {
+        org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
+        boolean found = false;
+        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class)) {
+            cp.fillContext(cb, requestor);
+            found = true;
         }
-        for (ContextProvider cp : ServiceLoader.load(ContextProvider.class, ContextProvider.class.getClassLoader())) {
-            Context c = cp.findContext(requestor);
-            if (c != null) {
-                return c;
-            }
+        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class, org.apidesign.html.context.spi.Contexts.Provider.class.getClassLoader())) {
+            cp.fillContext(cb, requestor);
+            found = true;
         }
-        // XXX: print out a warning
-        return Context.EMPTY;
+        if (!found) {
+            // XXX: print out a warning
+            return EMPTY;
+        }
+        return cb.build();
     }
     
 }

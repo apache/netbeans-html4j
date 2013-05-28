@@ -187,11 +187,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("import net.java.html.json.*;\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private boolean locked;\n");
-                w.append("  private net.java.html.json.Context context;\n");
+                w.append("  private net.java.html.BrwsrCtx context;\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings ko;\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
-                w.append("  public ").append(className).append("(Context context) {\n");
+                w.append("  public ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
                 w.append("    this.context = context;\n");
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
@@ -250,10 +250,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
                 w.append("    public Class<" + className + "> factoryFor() { return " + className + ".class; }\n");
-                w.append("    public " + className + " read(Context c, Object json) { return new " + className + "(c, json); }\n");
+                w.append("    public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
                 w.append("  }\n");
                 w.append("  static { org.apidesign.html.json.impl.JSON.register(new P(0)); }\n");
-                w.append("  private ").append(className).append("(Context c, Object json) {\n");
+                w.append("  private ").append(className).append("(net.java.html.BrwsrCtx c, Object json) {\n");
                 w.append("    this.context = c;\n");
                 int values = 0;
                 for (int i = 0; i < propsGetSet.size(); i += 5) {

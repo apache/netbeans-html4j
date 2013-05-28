@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
@@ -71,7 +71,7 @@ public final class ConvertTypesTest {
 
     @BrwsrTest
     public void parseConvertToPeople() throws Exception {
-        final Context c = Utils.newContext();
+        final BrwsrCtx c = Utils.newContext();
         final InputStream o = createIS(true);
         
         Person p = Models.parse(c, Person.class, o);
@@ -94,7 +94,7 @@ public final class ConvertTypesTest {
     
     @BrwsrTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
-        final Context c = Utils.newContext();
+        final BrwsrCtx c = Utils.newContext();
         final InputStream o = createIS(false);
         Person p = Models.parse(c, Person.class, o);
         

@@ -22,11 +22,11 @@ package org.apidesign.html.json.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.People;
 import net.java.html.json.Person;
 import net.java.html.json.Sex;
-import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
@@ -50,7 +50,7 @@ public class JSONListTest implements Technology<Object> {
     }
 
     @Test public void testConvertorOnAnObject() {
-        Context c = ContextBuilder.create().withTechnology(this).build();
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
         Person p = new Person(c);
         p.setFirstName("1");
@@ -62,7 +62,7 @@ public class JSONListTest implements Technology<Object> {
     }
     
     @Test public void testConvertorOnAnArray() {
-        Context c = ContextBuilder.create().withTechnology(this).build();
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
         Person p = new Person(c);
         p.setFirstName("1");
@@ -84,7 +84,7 @@ public class JSONListTest implements Technology<Object> {
     }
     
     @Test public void testNicknames() {
-        Context c = ContextBuilder.create().withTechnology(this).build();
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
         People people = new People(c);
         people.getNicknames().add("One");
@@ -103,7 +103,7 @@ public class JSONListTest implements Technology<Object> {
     
     @Test public void testConvertorOnAnArrayWithWrapper() {
         this.replaceArray = true;
-        Context c = ContextBuilder.create().withTechnology(this).build();
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
         Person p = new Person(c);
         p.setFirstName("1");
@@ -119,7 +119,7 @@ public class JSONListTest implements Technology<Object> {
 
     @Test public void bindingsOnArray() {
         this.replaceArray = true;
-        Context c = ContextBuilder.create().withTechnology(this).build();
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
         People p = new People(c);
         p.getAge().add(30);

@@ -20,6 +20,7 @@
  */
 package net.java.html.json;
 
+import net.java.html.BrwsrCtx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -54,7 +55,7 @@ public final class Models {
      * @return new instance of the model class
      * @since 0.2
      */
-    public static <M> M parse(Context c, Class<M> model, InputStream is) throws IOException {
+    public static <M> M parse(BrwsrCtx c, Class<M> model, InputStream is) throws IOException {
         return JSON.readStream(c, model, is);
     }
 }
