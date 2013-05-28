@@ -1040,7 +1040,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ";\n");
                     continue;
                 }
-                w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ".clone();\n");
+                w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + "  == null ? null : prop_" + p.name() + ".clone();\n");
             } else {
                 w.write("    ret.prop_" + p.name() + ".addAll(prop_" + p.name() + ");\n");
             }
