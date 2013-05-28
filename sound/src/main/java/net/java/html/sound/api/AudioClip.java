@@ -37,10 +37,10 @@ public final class AudioClip {
         audioEnvironment = loader.iterator().next();
     }
 
-    public static AudioClip create(String src){
+    public static AudioClip create(String src) {
         return new AudioClip(src);
     }
-    
+
     public void play() {
         Object nativeClip = audioEnvironment.play(this, cached);
         cache(nativeClip);
@@ -55,13 +55,13 @@ public final class AudioClip {
         Object nativeClip = audioEnvironment.stop(this, cached);
         cache(nativeClip);
     }
-    
+
     public void setVolume(int volume) {
         Object nativeClip = audioEnvironment.setVolume(this, volume, cached);
         cache(nativeClip);
     }
-    
-    public void playFrom(int seconds){
+
+    public void playFrom(int seconds) {
         Object nativeClip = audioEnvironment.playFrom(this, seconds, cached);
         cache(nativeClip);
     }
@@ -82,7 +82,7 @@ public final class AudioClip {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + (this.src != null ? this.src.hashCode() : 0);
+        hash = 59 * hash + (this.src != null ? this.src.hashCode() : 0) ^ (cached==null? 1231 : 1237);
         return hash;
     }
 
@@ -96,6 +96,9 @@ public final class AudioClip {
         }
         final AudioClip other = (AudioClip) obj;
         if ((this.src == null) ? (other.src != null) : !this.src.equals(other.src)) {
+            return false;
+        }
+        if ((this.cached == null) != (other.cached == null)) {
             return false;
         }
         return true;
