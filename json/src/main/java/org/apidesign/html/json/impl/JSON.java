@@ -129,15 +129,27 @@ public final class JSON {
     }
     
     public static boolean isModel(Class<?> clazz) {
+        return findFrom(clazz) != null; 
+    }
+    
+    private static FromJSON<?> findFrom(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
             FromJSON<?> from = froms.get(clazz);
             if (from == null) {
                 initClass(clazz);
             } else {
-                return true;
+                return from;
             }
         }
-        return false;
+        return null;
+    }
+    
+    public static <Model> Model bindTo(Model model, BrwsrCtx c) {
+        FromJSON<?> from = findFrom(model.getClass());
+        if (from == null) {
+            throw new IllegalArgumentException();
+        }
+        return (Model) from.cloneTo(model, c);
     }
     
     public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 

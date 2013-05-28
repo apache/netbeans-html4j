@@ -76,7 +76,7 @@ public class TypesTest {
     }
     
     @Test public void canParseEventAttributes() {
-        Types t = new Types(c);
+        Types t = Models.bind(new Types(), c);
         t.setIntX(33);
         t.setDoubleX(180.5);
         t.setStringX("Ahoj");
@@ -91,7 +91,7 @@ public class TypesTest {
         
         Object json = WrapperObject.find(t);
         
-        Types copy = new Types(c);
+        Types copy = Models.bind(new Types(), c);
         Map copyMap = (Map) WrapperObject.find(copy);
         One o = (One) copyMap.get("readFromEvent");
         o.fb.call(null, json);

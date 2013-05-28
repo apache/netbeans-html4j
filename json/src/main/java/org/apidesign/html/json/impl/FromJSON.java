@@ -30,4 +30,5 @@ import net.java.html.BrwsrCtx;
 public interface FromJSON<Data> {
     public Class<Data> factoryFor();
     public Data read(BrwsrCtx c, Object d);
+    public Data cloneTo(Object d, BrwsrCtx c);
 }

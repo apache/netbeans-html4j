@@ -52,7 +52,7 @@ public class MapModelTest {
     }
     
     @Test public void isThereABinding() throws Exception {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Jarda");
         
         Map m = (Map)WrapperObject.find(p);
@@ -72,7 +72,7 @@ public class MapModelTest {
     }
     
     @Test public void derivedProperty() throws Exception {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         
         Map m = (Map)WrapperObject.find(p);
         Object v = m.get("fullName");
@@ -83,7 +83,7 @@ public class MapModelTest {
     }
     
     @Test public void changeSex() {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Trans");
         p.setSex(Sex.MALE);
         
@@ -101,7 +101,7 @@ public class MapModelTest {
     }
     
     @Test public void setSex() {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Trans");
         
         Map m = (Map)WrapperObject.find(p);

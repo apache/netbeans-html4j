@@ -23,6 +23,7 @@ package org.apidesign.html.json.impl;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
+import net.java.html.json.Models;
 import net.java.html.json.People;
 import net.java.html.json.Person;
 import net.java.html.json.Sex;
@@ -52,7 +53,7 @@ public class JSONListTest implements Technology<Object> {
     @Test public void testConvertorOnAnObject() {
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("1");
         p.setLastName("2");
         p.setSex(Sex.MALE);
@@ -64,12 +65,12 @@ public class JSONListTest implements Technology<Object> {
     @Test public void testConvertorOnAnArray() {
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("1");
         p.setLastName("2");
         p.setSex(Sex.MALE);
         
-        People people = new People(c);
+        People people = Models.bind(new People(), c);
         people.getInfo().add(p);
         assertEquals(people.getInfo().toString(), "[{\"firstName\":\"1\",\"lastName\":\"2\",\"sex\":\"MALE\"}]", "Converted to real JSON");
         
@@ -86,7 +87,7 @@ public class JSONListTest implements Technology<Object> {
     @Test public void testNicknames() {
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        People people = new People(c);
+        People people = Models.bind(new People(), c);
         people.getNicknames().add("One");
         people.getNicknames().add("Two");
         
@@ -105,12 +106,12 @@ public class JSONListTest implements Technology<Object> {
         this.replaceArray = true;
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("1");
         p.setLastName("2");
         p.setSex(Sex.MALE);
         
-        People people = new People(c);
+        People people = Models.bind(new People(), c);
         people.getInfo().add(p);
 
         Object real = WrapperObject.find(people.getInfo());
@@ -121,7 +122,7 @@ public class JSONListTest implements Technology<Object> {
         this.replaceArray = true;
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        People p = new People(c);
+        People p = Models.bind(new People(), c);
         p.getAge().add(30);
         
         PropertyBinding pb = bindings.get("age");

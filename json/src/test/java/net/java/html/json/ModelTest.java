@@ -55,7 +55,8 @@ public class ModelTest {
     @BeforeMethod
     public void createModel() {
         my = new MockTechnology();
-        model = new Modelik(Contexts.newBuilder().register(Technology.class, my, 1).build());
+        final BrwsrCtx c = Contexts.newBuilder().register(Technology.class, my, 1).build();
+        model = Models.bind(new Modelik(), c);
     }
     
     @Test public void classGeneratedWithSetterGetter() {
@@ -167,7 +168,7 @@ public class ModelTest {
     static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
         m.applyBindings();
-        m.loadPeople("http", "apidesign.org", "query", new Person(BrwsrCtx.EMPTY));
+        m.loadPeople("http", "apidesign.org", "query", new Person());
     }
 
     @OnReceive(url = "{protocol}://{host}?callback={back}&query={query}", jsonp = "back")
