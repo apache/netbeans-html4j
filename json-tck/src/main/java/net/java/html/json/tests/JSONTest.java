@@ -21,7 +21,7 @@
 package net.java.html.json.tests;
 
 import java.io.ByteArrayInputStream;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
@@ -46,7 +46,7 @@ public final class JSONTest {
     private Integer orig;
     
     @BrwsrTest public void toJSONInABrowser() throws Throwable {
-        Person p = new Person(Utils.newContext());
+        Person p = Models.bind(new Person(), Utils.newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jarda");
         p.setLastName("Tulach");
@@ -97,7 +97,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
 
             js.fetch("person.json");
@@ -129,7 +129,7 @@ public final class JSONTest {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
 
             js.fetchViaJSONP("person.json");
@@ -166,10 +166,10 @@ public final class JSONTest {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
 
-            Person p = new Person(Context.EMPTY);
+            Person p = Models.bind(new Person(), BrwsrCtx.EMPTY);
             p.setFirstName("Jarda");
             js.putPerson("person.json", p);
         }
@@ -208,7 +208,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
 
             js.fetchArray("person.json");
@@ -230,7 +230,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
         
             js.fetch("person.json");
@@ -252,7 +252,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
         
             js.fetchPeople("people.json");
@@ -278,7 +278,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
         
             js.fetchPeopleAge("people.json");
@@ -305,7 +305,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
         
             js.fetchPeopleSex("people.json");
@@ -332,7 +332,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
-            js = new JSONik(Utils.newContext());
+            js = Models.bind(new JSONik(), Utils.newContext());
             js.applyBindings();
             js.fetchArray("person.json");
         }

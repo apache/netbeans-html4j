@@ -21,13 +21,12 @@
 package org.apidesign.html.json.tck;
 
 import java.util.Map;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
-import net.java.html.json.Context;
 import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
-import org.apidesign.html.json.spi.ContextBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
@@ -55,7 +54,7 @@ public abstract class KnockoutTCK {
     /** Implement to create new context for the test. 
      * Use {@link ContextBuilder} to implement context for your technology.
      */
-    public abstract Context createContext();
+    public abstract BrwsrCtx createContext();
     
     /** Create a JSON object as seen by the technology
      * @param values mapping from names to values of properties

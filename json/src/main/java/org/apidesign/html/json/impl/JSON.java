@@ -20,13 +20,16 @@
  */
 package org.apidesign.html.json.impl;
 
+import org.apidesign.html.context.impl.CtxAccssr;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import net.java.html.json.Context;
-import static org.apidesign.html.json.impl.ContextAccessor.findTechnology;
+import net.java.html.BrwsrCtx;
+import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
+import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 
@@ -35,16 +38,25 @@ import org.apidesign.html.json.spi.Transfer;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JSON {
-
     private JSON() {
     }
 
-    public static void extract(Context c, Object value, String[] props, Object[] values) {
-        Transfer t = ContextAccessor.findTransfer(c);
+    static Technology<?> findTechnology(BrwsrCtx c) {
+        Technology<?> t = Contexts.find(c, Technology.class);
+        return t == null ? EmptyTech.EMPTY : t;
+    }
+
+    static Transfer findTransfer(BrwsrCtx c) {
+        Transfer t = Contexts.find(c, Transfer.class);
+        return t == null ? EmptyTech.EMPTY : t;
+    }
+    
+    public static void extract(BrwsrCtx c, Object value, String[] props, Object[] values) {
+        Transfer t = findTransfer(c);
         t.extract(value, props, values);
     }
     
-    private static Object getProperty(Context c, Object obj, String prop) {
+    private static Object getProperty(BrwsrCtx c, Object obj, String prop) {
         if (prop == null) return obj;
         
         String[] arr = { prop };
@@ -72,18 +84,18 @@ public final class JSON {
         return value.toString();
     }
 
-    public static String toString(Context c, Object obj, String prop) {
+    public static String toString(BrwsrCtx c, Object obj, String prop) {
         obj = getProperty(c, obj, prop);
         return obj instanceof String ? (String)obj : null;
     }
-    public static Number toNumber(Context c, Object obj, String prop) {
+    public static Number toNumber(BrwsrCtx c, Object obj, String prop) {
         obj = getProperty(c, obj, prop);
         if (!(obj instanceof Number)) {
             obj = Double.NaN;
         }
         return (Number)obj;
     }
-    public static <M> M toModel(Context c, Class<M> aClass, Object data, Object object) {
+    public static <M> M toModel(BrwsrCtx c, Class<M> aClass, Object data, Object object) {
         Technology<?> t = findTechnology(c);
         Object o = t.toModel(aClass, data);
         return aClass.cast(o);
@@ -91,19 +103,19 @@ public final class JSON {
 
     
     public static void loadJSON(
-        Context c, Runnable whenDone, Object[] result, 
+        BrwsrCtx c, Runnable whenDone, Object[] result, 
         String urlBefore, String urlAfter
     ) {
         loadJSON(c, whenDone, result, urlBefore, urlAfter, null, null);
     }
 
     public static void loadJSON(
-        Context c, Runnable whenDone, Object[] result,
+        BrwsrCtx c, Runnable whenDone, Object[] result,
         String urlBefore, String urlAfter, String method,
         Object data
     ) {
         JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter, method, data);
-        Transfer t = ContextAccessor.findTransfer(c);
+        Transfer t = findTransfer(c);
         t.loadJSON(call);
     }
     
@@ -117,23 +129,35 @@ public final class JSON {
     }
     
     public static boolean isModel(Class<?> clazz) {
+        return findFrom(clazz) != null; 
+    }
+    
+    private static FromJSON<?> findFrom(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
             FromJSON<?> from = froms.get(clazz);
             if (from == null) {
                 initClass(clazz);
             } else {
-                return true;
+                return from;
             }
         }
-        return false;
+        return null;
     }
     
-    public static <T> T readStream(Context c, Class<T> modelClazz, InputStream data) 
+    public static <Model> Model bindTo(Model model, BrwsrCtx c) {
+        FromJSON<?> from = findFrom(model.getClass());
+        if (from == null) {
+            throw new IllegalArgumentException();
+        }
+        return (Model) from.cloneTo(model, c);
+    }
+    
+    public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 
     throws IOException {
-        Transfer tr = ContextAccessor.findTransfer(c);
+        Transfer tr = findTransfer(c);
         return read(c, modelClazz, tr.toJSON((InputStream)data));
     }
-    public static <T> T read(Context c, Class<T> modelClazz, Object data) {
+    public static <T> T read(BrwsrCtx c, Class<T> modelClazz, Object data) {
         if (modelClazz == String.class) {
             return modelClazz.cast(data.toString());
         }
@@ -164,4 +188,57 @@ public final class JSON {
             // ignore and try again
         }
     }
+    
+    private static final class EmptyTech implements Technology<Object>, Transfer {
+        private static final EmptyTech EMPTY = new EmptyTech();
+
+        @Override
+        public Object wrapModel(Object model) {
+            return model;
+        }
+
+        @Override
+        public void valueHasMutated(Object data, String propertyName) {
+        }
+
+        @Override
+        public void bind(PropertyBinding b, Object model, Object data) {
+        }
+
+        @Override
+        public void expose(FunctionBinding fb, Object model, Object d) {
+        }
+
+        @Override
+        public void applyBindings(Object data) {
+        }
+
+        @Override
+        public Object wrapArray(Object[] arr) {
+            return arr;
+        }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = null;
+            }
+        }
+
+        @Override
+        public void loadJSON(JSONCall call) {
+            call.notifyError(new UnsupportedOperationException());
+        }
+
+        @Override
+        public <M> M toModel(Class<M> modelClass, Object data) {
+            return modelClass.cast(data);
+        }
+
+        @Override
+        public Object toJSON(InputStream is) throws IOException {
+            throw new IOException("Not supported");
+        }
+    }
+    
 }

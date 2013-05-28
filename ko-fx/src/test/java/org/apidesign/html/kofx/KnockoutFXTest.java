@@ -21,10 +21,12 @@
 package org.apidesign.html.kofx;
 
 import java.util.Map;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import netscape.javascript.JSObject;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
-import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.tck.KnockoutTCK;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,10 +47,12 @@ public final class KnockoutFXTest extends KnockoutTCK {
     }
 
     @Override
-    public Context createContext() {
+    public BrwsrCtx createContext() {
         FXContext fx = new FXContext();
-        return ContextBuilder.create().
-            withTechnology(fx).withTransfer(fx).build();
+        return Contexts.newBuilder().
+            register(Technology.class, fx, 10).
+            register(Transfer.class, fx, 10).
+            build();
     }
 
     @Override

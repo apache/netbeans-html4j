@@ -148,10 +148,10 @@ public final class JSONList<T> extends ArrayList<T> {
             for (String dependant : deps) {
                 m.valueHasMutated(dependant);
             }
-        }
-        Runnable r = onchange;
-        if (r != null) {
-            r.run();
+            Runnable r = onchange;
+            if (r != null) {
+                r.run();
+            }
         }
     }
 

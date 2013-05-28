@@ -22,7 +22,7 @@ package net.java.html.json.tests;
 
 import java.util.Map;
 import java.util.ServiceLoader;
-import net.java.html.json.Context;
+import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.tck.KnockoutTCK;
 
 /**
@@ -33,9 +33,9 @@ final class Utils {
     private Utils() {
     }
 
-    static Context newContext() {
+    static  BrwsrCtx newContext() {
         for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
-            Context c = tck.createContext();
+            BrwsrCtx c = tck.createContext();
             if (c != null) {
                 return c;
             }

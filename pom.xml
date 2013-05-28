@@ -25,6 +25,7 @@
     <module>ko-archetype-test</module>
     <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
+    <module>context</module>
   </modules>
   <licenses>
       <license>

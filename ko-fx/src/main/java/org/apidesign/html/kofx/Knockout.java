@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.web.WebEngine;
-import net.java.html.json.Context;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.FunctionBinding;

@@ -20,12 +20,13 @@
  */
 package net.java.html.json;
 
+import net.java.html.BrwsrCtx;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
@@ -54,7 +55,8 @@ public class ModelTest {
     @BeforeMethod
     public void createModel() {
         my = new MockTechnology();
-        model = new Modelik(ContextBuilder.create().withTechnology(my).build());
+        final BrwsrCtx c = Contexts.newBuilder().register(Technology.class, my, 1).build();
+        model = Models.bind(new Modelik(), c);
     }
     
     @Test public void classGeneratedWithSetterGetter() {
@@ -166,7 +168,7 @@ public class ModelTest {
     static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
         m.applyBindings();
-        m.loadPeople("http", "apidesign.org", "query", new Person(Context.EMPTY));
+        m.loadPeople("http", "apidesign.org", "query", new Person());
     }
 
     @OnReceive(url = "{protocol}://{host}?callback={back}&query={query}", jsonp = "back")

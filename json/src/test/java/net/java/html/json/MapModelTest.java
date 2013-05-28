@@ -20,13 +20,14 @@
  */
 package net.java.html.json;
 
+import net.java.html.BrwsrCtx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.impl.WrapperObject;
-import org.apidesign.html.json.spi.ContextBuilder;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
@@ -42,15 +43,16 @@ import static org.testng.Assert.*;
  */
 public class MapModelTest {
     private MapTechnology t;
-    private Context c;
+    private BrwsrCtx c;
 
     @BeforeMethod public void initTechnology() {
         t = new MapTechnology();
-        c = ContextBuilder.create().withTechnology(t).withTransfer(t).build();
+        c = Contexts.newBuilder().register(Technology.class, t, 1).
+            register(Transfer.class, t, 1).build();
     }
     
     @Test public void isThereABinding() throws Exception {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Jarda");
         
         Map m = (Map)WrapperObject.find(p);
@@ -70,7 +72,7 @@ public class MapModelTest {
     }
     
     @Test public void derivedProperty() throws Exception {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         
         Map m = (Map)WrapperObject.find(p);
         Object v = m.get("fullName");
@@ -81,7 +83,7 @@ public class MapModelTest {
     }
     
     @Test public void changeSex() {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Trans");
         p.setSex(Sex.MALE);
         
@@ -99,7 +101,7 @@ public class MapModelTest {
     }
     
     @Test public void setSex() {
-        Person p = new Person(c);
+        Person p = Models.bind(new Person(), c);
         p.setFirstName("Trans");
         
         Map m = (Map)WrapperObject.find(p);
