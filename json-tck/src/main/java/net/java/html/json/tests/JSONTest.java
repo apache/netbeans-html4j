@@ -46,7 +46,7 @@ public final class JSONTest {
     private Integer orig;
     
     @BrwsrTest public void toJSONInABrowser() throws Throwable {
-        Person p = Models.bind(new Person(), Utils.newContext());
+        Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jarda");
         p.setLastName("Tulach");
@@ -58,7 +58,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + p).initCause(ex);
         }
         
-        Person p2 = JSON.read(Utils.newContext(), Person.class, json);
+        Person p2 = JSON.read(newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
@@ -97,7 +97,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetch("person.json");
@@ -129,7 +129,7 @@ public final class JSONTest {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchViaJSONP("person.json");
@@ -166,7 +166,7 @@ public final class JSONTest {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             Person p = Models.bind(new Person(), BrwsrCtx.EMPTY);
@@ -194,11 +194,15 @@ public final class JSONTest {
     }
     
     private static int scriptElements() throws Exception {
-        return ((Number)Utils.executeScript("return window.document.getElementsByTagName('script').length;")).intValue();
+        return ((Number)Utils.executeScript(
+            JSONTest.class, 
+            "return window.document.getElementsByTagName('script').length;")).intValue();
     }
 
     private static Object parseJSON(String s) throws Exception {
-        return Utils.executeScript("return window.JSON.parse(arguments[0]);", s);
+        return Utils.executeScript(
+            JSONTest.class, 
+            "return window.JSON.parse(arguments[0]);", s);
     }
     
     @Http(@Http.Resource(
@@ -208,7 +212,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchArray("person.json");
@@ -230,7 +234,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
             js.fetch("person.json");
@@ -252,7 +256,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
             js.fetchPeople("people.json");
@@ -278,7 +282,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
             js.fetchPeopleAge("people.json");
@@ -305,7 +309,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
             js.fetchPeopleSex("people.json");
@@ -332,7 +336,7 @@ public final class JSONTest {
     ))
     @BrwsrTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
-            js = Models.bind(new JSONik(), Utils.newContext());
+            js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
             js.fetchArray("person.json");
         }
@@ -359,10 +363,14 @@ public final class JSONTest {
     @BrwsrTest public void parseNullNumber() throws Exception {
         String txt = "{ \"name\":\"M\" }";
         ByteArrayInputStream is = new ByteArrayInputStream(txt.getBytes("UTF-8"));
-        NameAndValue v = Models.parse(Utils.newContext(), NameAndValue.class, is);
+        NameAndValue v = Models.parse(newContext(), NameAndValue.class, is);
         assert "M".equals(v.getName()) : "Name is 'M': " + v.getName();
         assert 0 == v.getValue() : "Value is empty: " + v.getValue();
         assert 0 == v.getSmall() : "Small value is empty: " + v.getSmall();
+    }
+
+    private static BrwsrCtx newContext() {
+        return Utils.newContext(JSONTest.class);
     }
     
     static Object[] create() {

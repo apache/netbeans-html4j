@@ -33,8 +33,8 @@ final class Utils {
     private Utils() {
     }
 
-    static  BrwsrCtx newContext() {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
+    static  BrwsrCtx newContext(Class<?> clazz) {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
             BrwsrCtx c = tck.createContext();
             if (c != null) {
                 return c;
@@ -42,8 +42,8 @@ final class Utils {
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
-    static Object createObject(Map<String,Object> values) {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
+    static Object createObject(Map<String,Object> values, Class<?> clazz) {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
             Object o = tck.createJSON(values);
             if (o != null) {
                 return o;
@@ -51,11 +51,20 @@ final class Utils {
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
-    static Object executeScript(String script, Object... arguments) throws Exception {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class)) {
+    static Object executeScript(Class<?> clazz, 
+        String script, Object... arguments
+    ) throws Exception {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
             return tck.executeScript(script, arguments);
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
     
+    private static ClassLoader cl(Class<?> c) {
+        try {
+            return c.getClassLoader();
+        } catch (SecurityException ex) {
+            return null;
+        }
+    }
 }

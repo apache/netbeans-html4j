@@ -55,14 +55,14 @@ public final class ConvertTypesTest {
         if (includeSex) {
             map.put("sex", "MALE");
         }
-        return Utils.createObject(map);
+        return Utils.createObject(map, ConvertTypesTest.class);
     }
     
     @BrwsrTest
     public void testConvertToPeople() throws Exception {
         final Object o = createJSON(true);
         
-        Person p = JSON.read(Utils.newContext(), Person.class, o);
+        Person p = JSON.read(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
@@ -71,7 +71,7 @@ public final class ConvertTypesTest {
 
     @BrwsrTest
     public void parseConvertToPeople() throws Exception {
-        final BrwsrCtx c = Utils.newContext();
+        final BrwsrCtx c = newContext();
         final InputStream o = createIS(true);
         
         Person p = Models.parse(c, Person.class, o);
@@ -85,7 +85,7 @@ public final class ConvertTypesTest {
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
-        Person p = JSON.read(Utils.newContext(), Person.class, o);
+        Person p = JSON.read(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
@@ -94,13 +94,17 @@ public final class ConvertTypesTest {
     
     @BrwsrTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
-        final BrwsrCtx c = Utils.newContext();
+        final BrwsrCtx c = newContext();
         final InputStream o = createIS(false);
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+    
+    private static BrwsrCtx newContext() {
+        return Utils.newContext(ConvertTypesTest.class);
     }
     
     static Object[] create() {

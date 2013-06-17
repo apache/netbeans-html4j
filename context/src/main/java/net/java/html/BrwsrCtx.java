@@ -68,7 +68,17 @@ public final class BrwsrCtx {
     public static BrwsrCtx findDefault(Class<?> requestor) {
         org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = false;
-        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class)) {
+        
+        ClassLoader l;
+        try {
+            l = requestor.getClassLoader();
+        } catch (SecurityException ex) {
+            l = null;
+        }
+        
+        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(
+            org.apidesign.html.context.spi.Contexts.Provider.class, l
+        )) {
             cp.fillContext(cb, requestor);
             found = true;
         }

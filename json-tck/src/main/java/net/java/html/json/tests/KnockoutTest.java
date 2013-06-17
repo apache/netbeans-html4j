@@ -21,6 +21,7 @@
 package net.java.html.json.tests;
 
 import java.util.List;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
@@ -49,7 +50,7 @@ public final class KnockoutTest {
         "<button id=\"hello\">Say Hello!</button>\n"
     )
     @BrwsrTest public void modifyValueAssertChangeInModel() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.setName("Kukuc");
         m.applyBindings();
         
@@ -67,11 +68,15 @@ public final class KnockoutTest {
         + "var n = window.document.getElementById('input'); \n "
         + "if (value != null) n['value'] = value; \n "
         + "return n['value'];";
-        return (String)Utils.executeScript(s, value);
+        return (String)Utils.executeScript(
+            KnockoutTest.class,
+            s, value
+        );
     }
     
     public static void triggerEvent(String id, String ev) throws Exception {
         Utils.executeScript(
+            KnockoutTest.class,
             "ko.utils.triggerEvent(window.document.getElementById(arguments[0]), arguments[1]);",
             id, ev
         );
@@ -83,7 +88,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArray() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -105,7 +110,7 @@ public final class KnockoutTest {
         "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
     )
     @BrwsrTest public void checkBoxToBooleanBinding() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.applyBindings();
         
         assert !m.isEnabled() : "Is disabled";
@@ -123,7 +128,7 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfDerivedArray() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
         
@@ -142,9 +147,9 @@ public final class KnockoutTest {
         + "</ul>\n"
     )
     @BrwsrTest public void displayContentOfArrayOfPeople() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         
-        final Person first = Models.bind(new Person(), Utils.newContext());
+        final Person first = Models.bind(new Person(), newContext());
         first.setFirstName("first");
         m.getPeople().add(first);
         
@@ -153,7 +158,7 @@ public final class KnockoutTest {
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
         
-        final Person second = Models.bind(new Person(), Utils.newContext());
+        final Person second = Models.bind(new Person(), newContext());
         second.setFirstName("second");
         m.getPeople().add(second);
 
@@ -200,9 +205,9 @@ public final class KnockoutTest {
     }
     
     private void trasfertToFemale() throws Exception {
-        KnockoutModel m = Models.bind(new KnockoutModel(), Utils.newContext());
+        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
 
-        final Person first = Models.bind(new Person(), Utils.newContext());
+        final Person first = Models.bind(new Person(), newContext());
         first.setFirstName("first");
         first.setSex(Sex.MALE);
         m.getPeople().add(first);
@@ -248,6 +253,7 @@ public final class KnockoutTest {
     
     private static int countChildren(String id) throws Exception {
         return ((Number)Utils.executeScript(
+          KnockoutTest.class,
           "var e = window.document.getElementById(arguments[0]);\n "
         + "if (typeof e === 'undefined') return -2;\n "
         + "return e.children.length;", 
@@ -261,7 +267,9 @@ public final class KnockoutTest {
             + "var ev = window.document.createEvent('MouseEvents');\n "
             + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
             + "e.dispatchEvent(ev);\n ";
-        Utils.executeScript(s, id);
+        Utils.executeScript(
+            KnockoutTest.class,
+            s, id);
     }
     private static void triggerChildClick(String id, int pos) throws Exception {
         String s = "var id = arguments[0]; var pos = arguments[1];"
@@ -269,7 +277,9 @@ public final class KnockoutTest {
             + "var ev = window.document.createEvent('MouseEvents');\n "
             + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
             + "e.children[pos].dispatchEvent(ev);\n ";
-        Utils.executeScript(s, id, pos);
+        Utils.executeScript(
+            KnockoutTest.class,
+            s, id, pos);
     }
 
     private static String childText(String id, int pos) throws Exception {
@@ -277,6 +287,12 @@ public final class KnockoutTest {
         + "var e = window.document.getElementById(id);\n "
         + "var t = e.children[pos].innerHTML;\n "
         + "return t ? t : null;";
-        return (String)Utils.executeScript(s, id, pos);
+        return (String)Utils.executeScript(
+            KnockoutTest.class,
+            s, id, pos);
+    }
+
+    private static BrwsrCtx newContext() {
+        return Utils.newContext(KnockoutTest.class);
     }
 }
