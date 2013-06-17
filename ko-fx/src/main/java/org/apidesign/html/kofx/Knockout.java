@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.web.WebEngine;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
 import org.apidesign.bck2brwsr.core.JavaScriptBody;
@@ -126,14 +125,16 @@ public final class Knockout {
                     throw new IllegalStateException(ex);
                 }
             }
-            WebEngine web = (WebEngine) System.getProperties().get("webEngine");
-            web.executeScript(sb.toString());
-            Object ko = web.executeScript("ko");
+            exec(sb.toString());
+            Object ko = exec("ko");
             assert ko != null : "Knockout library successfully defined 'ko'";
 
             Console.register();
             KObject = (JSObject) kObj();
         }
+        
+        @JavaScriptBody(args = { "s" }, body = "return eval(s);")
+        private static native Object exec(String s);
         
         @JavaScriptBody(args = {}, body =
                   "  var k = {};"
