@@ -60,8 +60,9 @@ public final class Knockout {
         return InvokeJS.KObject.call("array", arr);
     }
     
+    private static int cnt;
     public static <M> Knockout createBinding(Object model) {
-        Object bindings = InvokeJS.KObject.call("create", model);
+        Object bindings = InvokeJS.create(model, ++cnt);
         return new Knockout(bindings);
     }
 
@@ -141,17 +142,18 @@ public final class Knockout {
                 "(function(scope) {"
                 + "  var kCnt = 0; "
                 + "  scope.KObject = {};"
-                + "  scope.KObject.create= function(value) {"
-                + "    var cnt = ++kCnt;"
-                + "    var ret = {};"
-                + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); };"
-                + "    return ret;"
-                + "  };"
                 + "  scope.KObject.array= function() {"
                 + "    return Array.prototype.slice.call(arguments);"
                 + "  };"
                 + "})(window); window.KObject");
         }
+        
+        @JavaScriptBody(args = { "value", "cnt " }, body =
+                  "    var ret = {};"
+                + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); };"
+                + "    return ret;"
+        )
+        static native Object create(Object value, int cnt);
         
         @JavaScriptBody(args = { "bindings", "model", "prop", "sig" }, body = 
                 "    bindings[prop] = function(data, ev) {"
