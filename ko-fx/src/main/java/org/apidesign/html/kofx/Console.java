@@ -21,8 +21,6 @@
 package org.apidesign.html.kofx;
 
 import java.util.logging.Logger;
-import javafx.scene.web.WebEngine;
-import netscape.javascript.JSObject;
 import org.apidesign.bck2brwsr.core.JavaScriptBody;
 
 /** This is an implementation package - just
@@ -39,13 +37,17 @@ public final class Console {
     private Console() {
     }
 
-    static void register(WebEngine web) {
-        ((JSObject)web.executeScript("window")).setMember("jconsole", new Console());
-        web.executeScript("console.log = function(m) { jconsole.log(m); };");
-        web.executeScript("console.info = function(m) { jconsole.log(m); };");
-        web.executeScript("console.error = function(m) { jconsole.log(m); };");
-        web.executeScript("console.warn = function(m) { jconsole.log(m); };");
+    static void register() {
+        registerImpl(new Console());
     }
+    
+    @JavaScriptBody(args = { "jconsole" }, body = 
+        "console.log = function(m) { jconsole.log(m); };" +
+        "console.info = function(m) { jconsole.log(m); };" +
+        "console.error = function(m) { jconsole.log(m); };" +
+        "console.warn = function(m) { jconsole.log(m); };"
+    )
+    private static native void registerImpl(Console c);
     
     public void log(String msg) {
         LOG.info(msg);

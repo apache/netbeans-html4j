@@ -36,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;

@@ -21,6 +21,7 @@
 package org.apidesign.html.kofx;
 
 import java.util.Map;
+import javafx.scene.web.WebEngine;
 import net.java.html.BrwsrCtx;
 import netscape.javascript.JSObject;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
@@ -72,7 +73,8 @@ public final class KnockoutFXTest extends KnockoutTCK {
     @Override
     public Object executeScript(String script, Object[] arguments) {
         if (eval == null) {
-            eval = (JSObject) Knockout.web().executeScript("(function(scope) {"
+            WebEngine web = (WebEngine) System.getProperties().get("webEngine");
+            eval = (JSObject) web.executeScript("(function(scope) {"
                 + "  scope.jko = {};"
                 + "  scope.jko.compute = function(s, args) { var f = new Function(s); return f.apply(null, args); }"
                 + "})(window); window.jko;");

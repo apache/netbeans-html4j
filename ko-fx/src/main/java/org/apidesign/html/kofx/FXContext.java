@@ -48,10 +48,8 @@ implements Technology<JSObject>, Transfer, Contexts.Provider {
 
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
-        if (Knockout.web() != null) {
-            context.register(Technology.class, this, 100);
-            context.register(Transfer.class, this, 100);
-        }
+        context.register(Technology.class, this, 100);
+        context.register(Transfer.class, this, 100);
     }
 
     @Override

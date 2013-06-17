@@ -104,14 +104,7 @@ public final class Knockout {
     }
     
     static void applyBindings(Object bindings) {
-        if (web() != null) {
-            JSObject ko = (JSObject) web().executeScript("ko");
-            ko.call("applyBindings", bindings);
-        }
-    }
-    
-    static WebEngine web() {
-        return (WebEngine) System.getProperties().get("webEngine");
+        InvokeJS.applyBindings(bindings);
     }
     
     private static final class InvokeJS {
@@ -133,20 +126,23 @@ public final class Knockout {
                     throw new IllegalStateException(ex);
                 }
             }
-            web().executeScript(sb.toString());
-            Object ko = web().executeScript("ko");
+            WebEngine web = (WebEngine) System.getProperties().get("webEngine");
+            web.executeScript(sb.toString());
+            Object ko = web.executeScript("ko");
             assert ko != null : "Knockout library successfully defined 'ko'";
 
-            Console.register(web());
-            KObject = (JSObject) web().executeScript(
-                "(function(scope) {"
-                + "  var kCnt = 0; "
-                + "  scope.KObject = {};"
-                + "  scope.KObject.array= function() {"
+            Console.register();
+            KObject = (JSObject) kObj();
+        }
+        
+        @JavaScriptBody(args = {}, body =
+                  "  var k = {};"
+                + "  k.array= function() {"
                 + "    return Array.prototype.slice.call(arguments);"
                 + "  };"
-                + "})(window); window.KObject");
-        }
+                + "  return k;"
+        )
+        private static native Object kObj();
         
         @JavaScriptBody(args = { "value", "cnt " }, body =
                   "    var ret = {};"
@@ -195,5 +191,8 @@ public final class Knockout {
                 + "    bindings[prop] = ko.computed(bnd);"
         )
         static native void bind(Object binding, Object model, String prop, String getter, String setter, boolean primitive, boolean array);
+
+        @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);")
+        private static native void applyBindings(Object bindings);
     }
 }
