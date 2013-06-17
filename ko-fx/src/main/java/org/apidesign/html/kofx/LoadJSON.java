@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
+import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -216,18 +217,17 @@ final class LoadJSON implements Runnable {
             throw new IOException(ex);
         }
     }
-    
-    private static String findBaseURL() {
-        WebEngine eng = (WebEngine) System.getProperties().get("webEngine");
-        return (String) eng.executeScript(
-            "var h;"
-            + "if (!!window && !!window.location && !!window.location.href)\n"
-            + "  h = window.location.href;\n"
-            + "else "
-            + "  h = null;"
-            + "h\n");
-    }
 
+    @JavaScriptBody(args = {  }, body = 
+          "var h;"
+        + "if (!!window && !!window.location && !!window.location.href)\n"
+        + "  h = window.location.href;\n"
+        + "else "
+        + "  h = null;"
+        + "return h;\n"
+    )
+    private static native String findBaseURL();
+    
     private static boolean isDefined(Object val) {
         return !"undefined".equals(val);
     }

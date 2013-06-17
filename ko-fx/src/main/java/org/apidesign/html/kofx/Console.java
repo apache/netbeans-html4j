@@ -23,6 +23,7 @@ package org.apidesign.html.kofx;
 import java.util.logging.Logger;
 import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
+import org.apidesign.bck2brwsr.core.JavaScriptBody;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API

@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javafx.scene.web.WebEngine;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
+import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
@@ -82,14 +83,9 @@ public final class Knockout {
     static void bind(
         Object bindings, Object model, PropertyBinding pb, boolean primitive, boolean array
     ) {
-        WebEngine e = web();
-        if (e == null) {
-            return;
-        }
-
         final String prop = pb.getPropertyName();
         try {
-            InvokeJS.KObject.call("bind", bindings, pb, prop, "getValue", pb.isReadOnly() ? null : "setValue", primitive, array);
+            InvokeJS.bind(bindings, pb, prop, "getValue", pb.isReadOnly() ? null : "setValue", primitive, array);
             
             ((JSObject)bindings).setMember("ko-fx.model", model);
             LOG.log(Level.FINE, "binding defined for {0}: {1}", new Object[]{prop, ((JSObject)bindings).getMember(prop)});
@@ -98,13 +94,9 @@ public final class Knockout {
         }
     }
     static void expose(Object bindings, FunctionBinding f) {
-        WebEngine e = web();
-        if (e == null) {
-            return;
-        }
         final String prop = f.getFunctionName();
         try {
-            InvokeJS.KObject.call("expose", bindings, f, prop, "call");
+            InvokeJS.expose(bindings, f, prop, "call");
         } catch (Throwable ex) {
             LOG.log(Level.SEVERE, "Cannot define binding for " + prop + " in model " + f, ex);
         }
@@ -120,7 +112,6 @@ public final class Knockout {
     static WebEngine web() {
         return (WebEngine) System.getProperties().get("webEngine");
     }
-    
     
     private static final class InvokeJS {
         static final JSObject KObject;
@@ -159,14 +150,20 @@ public final class Knockout {
                 + "  scope.KObject.array= function() {"
                 + "    return Array.prototype.slice.call(arguments);"
                 + "  };"
-                + "  scope.KObject.expose = function(bindings, model, prop, sig) {"
-                + "    bindings[prop] = function(data, ev) {"
-                //            + "         console.log(\"  callback on prop: \" + prop);"
-                + "      model[sig](data, ev);"
-                + "    };"
-                + "  };"
-                + "  scope.KObject.bind = function(bindings, model, prop, getter, setter, primitive, array) {"
-                + "    var bnd = {"
+                + "})(window); window.KObject");
+        }
+        
+        @JavaScriptBody(args = { "bindings", "model", "prop", "sig" }, body = 
+                "    bindings[prop] = function(data, ev) {"
+              //            + "         console.log(\"  callback on prop: \" + prop);"
+              + "      model[sig](data, ev);"
+              + "    };"
+        )
+        static native Object expose(Object bindings, Object model, String prop, String sig);
+
+        
+        @JavaScriptBody(args = { "bindings", "model", "prop", "getter", "setter", "primitive", "array" }, body = 
+                  "    var bnd = {"
                 + "      read: function() {"
                 + "      try {"
                 + "        var v = model[getter]();"
@@ -194,9 +191,7 @@ public final class Knockout {
                 + "      };"
                 + "    };"
                 + "    bindings[prop] = ko.computed(bnd);"
-                + "  };"
-                + "})(window); window.KObject");
-        }
-        
+        )
+        static native void bind(Object binding, Object model, String prop, String getter, String setter, boolean primitive, boolean array);
     }
 }
