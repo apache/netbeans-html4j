@@ -19,9 +19,7 @@
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
 
-package org.apidesign.html.boot.spi;
-
-
+package org.apidesign.html.boot.impl;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,10 +31,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.apidesign.html.boot.impl.FnUtils;
-import org.apidesign.html.boot.impl.JsClassLoaderBase;
-import org.apidesign.html.boot.impl.JsClassLoaderTest;
-import org.apidesign.html.boot.impl.JsMethods;
+import org.apidesign.html.boot.spi.Fn;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -57,7 +52,7 @@ public class FnTest extends JsClassLoaderBase {
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
         
-        class Impl implements Fn.Finder, Fn.Presenter {
+        class Impl implements FindResources, Fn.Presenter {
             @Override
             public void findResources(String path, Collection<? super URL> results, boolean oneIsEnough) {
                 URL u = ul.findResource(path);
@@ -100,15 +95,9 @@ public class FnTest extends JsClassLoaderBase {
             }
 
             @Override
-            public void loadPage(String resource) {
+            public void displayPage(URL resource, Runnable r) {
                 throw new UnsupportedOperationException();
             }
-
-            @Override
-            public void waitFinished() {
-                throw new UnsupportedOperationException();
-            }
-            
         }
         Impl impl = new Impl();
         ClassLoader loader = FnUtils.newLoader(impl, impl, parent);

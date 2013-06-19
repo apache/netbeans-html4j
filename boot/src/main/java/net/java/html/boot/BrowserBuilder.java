@@ -27,7 +27,7 @@ import java.util.Enumeration;
 import java.util.ServiceLoader;
 import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.boot.spi.Fn.Finder;
+import org.apidesign.html.boot.impl.FindResources;
 
 /**
  *
@@ -55,22 +55,32 @@ public final class BrowserBuilder {
     
     public void showAndWait() {
         FImpl impl = new FImpl(clazz.getClassLoader());
+        URL url = clazz.getResource(resource);
+        if (url == null) {
+            throw new IllegalStateException("Can't find resouce: " + resource + " relative to " + clazz);
+        }
 
         for (Fn.Presenter dfnr : ServiceLoader.load(Fn.Presenter.class)) {
-            try {
-                ClassLoader loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
-                dfnr.loadPage(resource);
-                Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
-                dfnr.waitFinished();
-            } catch (ClassNotFoundException ex) {
-                throw new IllegalStateException(ex);
+            final ClassLoader loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+
+            class OnPageLoad implements Runnable {
+                @Override
+                public void run() {
+                    try {
+                        Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                }
             }
+            dfnr.displayPage(url, new OnPageLoad());
+            return;
         }
         throw new IllegalStateException("Can't find any Fn.Definer");
     }
     
-    private static final class FImpl implements Finder {
-        private final ClassLoader l;
+    private static final class FImpl implements FindResources {
+        final ClassLoader l;
 
         public FImpl(ClassLoader l) {
             this.l = l;

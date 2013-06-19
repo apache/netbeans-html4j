@@ -32,11 +32,6 @@ public abstract class Fn {
     
     public interface Presenter {
         public Fn defineFn(String code, String... names);
-        public void loadPage(String resource);
-        public void waitFinished();
-    }
-    
-    public interface Finder {
-        public void findResources(String path, Collection<? super URL> results, boolean oneIsEnough);
+        public void displayPage(URL page, Runnable onPageLoad);
     }
 }
