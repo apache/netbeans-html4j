@@ -26,6 +26,7 @@
     <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
     <module>context</module>
+    <module>boot</module>
   </modules>
   <licenses>
       <license>
