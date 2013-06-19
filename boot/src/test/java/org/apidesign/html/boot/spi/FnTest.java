@@ -33,6 +33,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.impl.JsClassLoaderBase;
 import org.apidesign.html.boot.impl.JsClassLoaderTest;
 import org.apidesign.html.boot.impl.JsMethods;
@@ -100,7 +101,7 @@ public class FnTest extends JsClassLoaderBase {
             
         }
         Impl impl = new Impl();
-        ClassLoader loader = Fn.newLoader(impl, impl, parent);
+        ClassLoader loader = FnUtils.newLoader(impl, impl, parent);
        
         
         methodClass = loader.loadClass(JsMethods.class.getName());

@@ -22,19 +22,13 @@ package org.apidesign.html.boot.spi;
 
 import java.net.URL;
 import java.util.Collection;
-import org.apidesign.html.boot.impl.FnUtils;
 
 /**
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 public abstract class Fn {
-    public static ClassLoader newLoader(Finder f, Definer d, ClassLoader parent) {
-        return FnUtils.newLoader(f, d, parent);
-    }
-
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
-
     
     public interface Definer {
         Fn defineFn(String code, String... names);
