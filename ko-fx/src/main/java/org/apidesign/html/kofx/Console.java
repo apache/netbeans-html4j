@@ -21,7 +21,7 @@
 package org.apidesign.html.kofx;
 
 import java.util.logging.Logger;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
+import net.java.html.js.JavaScriptBody;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API

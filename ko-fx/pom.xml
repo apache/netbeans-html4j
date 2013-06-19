@@ -43,12 +43,11 @@
     <dependency>
       <groupId>org.apidesign.html</groupId>
       <artifactId>net.java.html.json</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.5.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -69,9 +68,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apidesign.bck2brwsr</groupId>
-      <artifactId>core</artifactId>
-      <version>0.7.2</version>
+      <groupId>org.apidesign.html</groupId>
+      <artifactId>net.java.html.boot</artifactId>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
   </dependencies>

@@ -26,9 +26,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.java.html.js.JavaScriptBody;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
