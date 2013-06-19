@@ -70,6 +70,9 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.equals(Fn.class.getName())) {
             return Fn.class;
         }
+        if (name.equals(FnUtils.class.getName())) {
+            return FnUtils.class;
+        }
         URL u = findResource(name.replace('.', '/') + ".class");
         if (u != null) {
             InputStream is = null;
@@ -108,7 +111,10 @@ abstract class JsClassLoader extends ClassLoader {
                 }
             }
         }
-        if (name.startsWith("org.apidesign.html.boot.spi.Fn")) {
+        if (
+            name.equals("org.apidesign.html.boot.spi.Fn") ||
+            name.equals("org.apidesign.html.boot.impl.FnUtils")
+        ) {
             return Class.forName(name);
         }
         
@@ -207,7 +213,7 @@ abstract class JsClassLoader extends ClassLoader {
                     super.visitInsn(Opcodes.AASTORE);
                 }
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, 
-                    "org/apidesign/html/boot/spi/Fn", "define", 
+                    "org/apidesign/html/boot/impl/FnUtils", "define", 
                     "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
                 );
                 // end of Fn init

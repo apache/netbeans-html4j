@@ -29,10 +29,6 @@ import org.apidesign.html.boot.impl.FnUtils;
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 public abstract class Fn {
-    public static Fn define(Class<?> caller, String code, String... names) {
-        return FnUtils.define(caller, code, names);
-    }
-    
     public static ClassLoader newLoader(Finder f, Definer d, ClassLoader parent) {
         return FnUtils.newLoader(f, d, parent);
     }
