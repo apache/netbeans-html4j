@@ -30,8 +30,10 @@ import java.util.Collection;
 public abstract class Fn {
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
     
-    public interface Definer {
-        Fn defineFn(String code, String... names);
+    public interface Presenter {
+        public Fn defineFn(String code, String... names);
+        public void loadPage(String resource);
+        public void waitFinished();
     }
     
     public interface Finder {

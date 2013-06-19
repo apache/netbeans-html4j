@@ -41,7 +41,7 @@ public final class FnUtils {
         return cl.defineFn(code, names);
     }
 
-    public static ClassLoader newLoader(final Fn.Finder f, final Fn.Definer d, ClassLoader parent) {
+    public static ClassLoader newLoader(final Fn.Finder f, final Fn.Presenter d, ClassLoader parent) {
         return new JsClassLoader(parent) {
             @Override
             protected URL findResource(String name) {

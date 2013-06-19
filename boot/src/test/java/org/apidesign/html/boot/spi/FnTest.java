@@ -57,7 +57,7 @@ public class FnTest extends JsClassLoaderBase {
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
         
-        class Impl implements Fn.Finder, Fn.Definer {
+        class Impl implements Fn.Finder, Fn.Presenter {
             @Override
             public void findResources(String path, Collection<? super URL> results, boolean oneIsEnough) {
                 URL u = ul.findResource(path);
@@ -97,6 +97,16 @@ public class FnTest extends JsClassLoaderBase {
                 } catch (ScriptException ex) {
                     throw new LinkageError("Can't parse: " + sb, ex);
                 }
+            }
+
+            @Override
+            public void loadPage(String resource) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void waitFinished() {
+                throw new UnsupportedOperationException();
             }
             
         }
