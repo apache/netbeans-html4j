@@ -27,6 +27,7 @@
     <module>ko-fx</module>
     <module>context</module>
     <module>boot</module>
+    <module>boot-fx</module>
   </modules>
   <licenses>
       <license>
