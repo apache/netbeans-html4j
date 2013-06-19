@@ -8,7 +8,7 @@
     <version>0.4-SNAPSHOT</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
-  <artifactId>boot</artifactId>
+  <artifactId>net.java.html.boot</artifactId>
   <version>0.4-SNAPSHOT</version>
   <name>Browser Bootstrap</name>
   <url>http://maven.apache.org</url>
