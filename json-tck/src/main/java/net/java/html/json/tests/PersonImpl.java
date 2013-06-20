@@ -32,7 +32,8 @@ import net.java.html.json.Property;
 @Model(className = "Person", properties = {
     @Property(name = "firstName", type = String.class),
     @Property(name = "lastName", type = String.class),
-    @Property(name = "sex", type = Sex.class)
+    @Property(name = "sex", type = Sex.class),
+    @Property(name = "address", type = Address.class)
 })
 final class PersonImpl {
     @ComputedProperty 
@@ -61,5 +62,11 @@ final class PersonImpl {
         @Property(array = true, name = "sex", type = Sex.class)
     })
     public class PeopleImpl {
+    }
+    
+    @Model(className = "Address", properties = {
+        @Property(name = "street", type = String.class)
+    })
+    static class Addrss {
     }
 }

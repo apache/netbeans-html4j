@@ -36,13 +36,16 @@ import org.apidesign.html.json.impl.JSON;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    private static InputStream createIS(boolean includeSex) 
+    private static InputStream createIS(boolean includeSex, boolean includeAddress) 
     throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"firstName\" : \"son\",\n");
         sb.append("  \"lastName\" : \"dj\" \n");
         if (includeSex) {
-            sb.append(",  \"sex\" : \"MALE\" ");
+            sb.append(",  \"sex\" : \"MALE\" \n");
+        }
+        if (includeAddress) {
+            sb.append(",  \"address\" : { \"street\" : \"Schnirchova\" } \n");
         }
         sb.append("}\n");
         return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
@@ -72,13 +75,27 @@ public final class ConvertTypesTest {
     @BrwsrTest
     public void parseConvertToPeople() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true);
+        final InputStream o = createIS(true, false);
         
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+    }
+    
+    @BrwsrTest
+    public void parseConvertToPeopleWithAddress() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, true);
+        
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assert p.getAddress() != null : "Some address provided";
+        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
     }
 
     @BrwsrTest
@@ -95,7 +112,7 @@ public final class ConvertTypesTest {
     @BrwsrTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false);
+        final InputStream o = createIS(false, false);
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
