@@ -21,10 +21,8 @@
 package org.apidesign.html.kofx;
 
 import java.util.Map;
-import javafx.scene.web.WebEngine;
 import net.java.html.BrwsrCtx;
-import netscape.javascript.JSObject;
-import org.apidesign.bck2brwsr.core.JavaScriptBody;
+import net.java.html.js.JavaScriptBody;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
