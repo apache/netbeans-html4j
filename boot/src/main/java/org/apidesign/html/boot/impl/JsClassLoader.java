@@ -164,7 +164,10 @@ abstract class JsClassLoader extends ClassLoader {
 
             @Override
             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                if ("Lnet/java/html/js/JavaScriptBody;".equals(desc)) { // NOI18N
+                if (
+                    "Lnet/java/html/js/JavaScriptBody;".equals(desc) // NOI18N
+                    || "Lorg/apidesign/bck2brwsr/core/JavaScriptBody;".equals(desc) // NOI18N
+                ) {
                     found++;
                     return new FindInAnno();
                 }
