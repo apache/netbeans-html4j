@@ -25,26 +25,9 @@
         <systemPath>${jfxrt.jar}</systemPath>
     </dependency>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>net.java.html.json.tck</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apidesign.bck2brwsr</groupId>
-      <artifactId>launcher.fx</artifactId>
-      <version>${bck2brwsr.launcher.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apidesign.html</groupId>
