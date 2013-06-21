@@ -20,9 +20,15 @@
  */
 package org.apidesign.html.kofx;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
+import org.apidesign.bck2brwsr.launcher.InvocationContext;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -78,5 +84,19 @@ public final class KnockoutFXTest extends KnockoutTCK {
         + "return f.apply(null, args);"
     )
     public native Object executeScript(String script, Object[] arguments);
-    
+
+    @Override
+    public URI prepareURL(String content, String mimeType, String[] parameters) {
+        ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes());
+        try {
+            Class<?> real = ClassLoader.getSystemClassLoader().loadClass(InvocationContext.class.getName());
+            Method m = real.getMethod("register", InputStream.class, String.class, String.class, String[].class);
+            return (URI) m.invoke(null, is, 
+                mimeType, "/dynamic/res" + content.hashCode(), 
+                parameters
+            );
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 }

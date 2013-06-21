@@ -42,6 +42,7 @@ import org.apidesign.html.json.tck.KOTest;
 public final class JSONTest {
     private JSONik js;
     private Integer orig;
+    private String url;
     
     @KOTest public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
@@ -62,24 +63,24 @@ public final class JSONTest {
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
     }
     
-    @OnReceive(url="/{url}")
+    @OnReceive(url="{url}")
     static void fetch(Person p, JSONik model) {
         model.setFetched(p);
     }
 
-    @OnReceive(url="/{url}")
+    @OnReceive(url="{url}")
     static void fetchArray(Person[] p, JSONik model) {
         model.setFetchedCount(p.length);
         model.setFetched(p[0]);
     }
     
-    @OnReceive(url="/{url}")
+    @OnReceive(url="{url}")
     static void fetchPeople(People p, JSONik model) {
         model.setFetchedCount(p.getInfo().size());
         model.setFetched(p.getInfo().get(0));
     }
 
-    @OnReceive(url="/{url}")
+    @OnReceive(url="{url}")
     static void fetchPeopleAge(People p, JSONik model) {
         int sum = 0;
         for (int a : p.getAge()) {
@@ -88,17 +89,16 @@ public final class JSONTest {
         model.setFetchedCount(sum);
     }
     
-    @Http(@Http.Resource(
-        content = "{'firstName': 'Sitar', 'sex': 'MALE'}", 
-        path="/person.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
-            js.fetch("person.json");
+            js.fetch(url);
         }
     
         Person p = js.getFetched();
@@ -115,22 +115,20 @@ public final class JSONTest {
         model.setFetched(p);
     }
     
-    @Http(@Http.Resource(
-        content = "$0({'firstName': 'Mitar', 'sex': 'MALE'})", 
-        path="/person.json", 
-        mimeType = "application/javascript",
-        parameters = { "callme" }
-    ))
     @KOTest public void loadAndParseJSONP() throws InterruptedException, Exception {
-        
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "$0({'firstName': 'Mitar', 'sex': 'MALE'})", 
+                "application/javascript",
+                "callme"
+            );
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
-            js.fetchViaJSONP("person.json");
+            js.fetchViaJSONP(url);
         }
     
         Person p = js.getFetched();
@@ -153,14 +151,14 @@ public final class JSONTest {
         model.setFetchedCount(1);
         model.setFetchedResponse(reply);
     }
-    @Http(@Http.Resource(
-        content = "$0\n$1", 
-        path="/person.json", 
-        mimeType = "text/plain",
-        parameters = { "http.method", "http.requestBody" }
-    ))
+
     @KOTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "$0\n$1", 
+                "text/plain",
+                "http.method", "http.requestBody"
+            );
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
             
@@ -169,7 +167,7 @@ public final class JSONTest {
 
             Person p = Models.bind(new Person(), BrwsrCtx.EMPTY);
             p.setFirstName("Jarda");
-            js.putPerson("person.json", p);
+            js.putPerson(url, p);
         }
     
         int cnt = js.getFetchedCount();
@@ -203,17 +201,17 @@ public final class JSONTest {
             "return window.JSON.parse(arguments[0]);", s);
     }
     
-    @Http(@Http.Resource(
-        content = "{'firstName': 'Sitar', 'sex': 'MALE'}", 
-        path="/person.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}", 
+                "application/json"
+            );
+            
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
-            js.fetchArray("person.json");
+            js.fetchArray(url);
         }
         
         Person p = js.getFetched();
@@ -225,17 +223,16 @@ public final class JSONTest {
         assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
     }
     
-    @Http(@Http.Resource(
-        content = "[{'firstName': 'Gitar', 'sex': 'FEMALE'}]", 
-        path="/person.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'}]", 
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
-            js.fetch("person.json");
+            js.fetch(url);
         }
         
         Person p = js.getFetched();
@@ -247,17 +244,16 @@ public final class JSONTest {
         assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
     }
     
-    @Http(@Http.Resource(
-        content = "{'info':[{'firstName': 'Gitar', 'sex': 'FEMALE'}]}", 
-        path="/people.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'info':[{'firstName': 'Gitar', 'sex': 'FEMALE'}]}", 
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
-            js.fetchPeople("people.json");
+            js.fetchPeople(url);
         }
         
         if (0 == js.getFetchedCount()) {
@@ -273,17 +269,16 @@ public final class JSONTest {
         assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
     }
     
-    @Http(@Http.Resource(
-        content = "{'age':[1, 2, 3]}", 
-        path="/people.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'age':[1, 2, 3]}", 
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
-            js.fetchPeopleAge("people.json");
+            js.fetchPeopleAge(url);
         }
         
         if (0 == js.getFetchedCount()) {
@@ -299,18 +294,16 @@ public final class JSONTest {
         model.getFetchedSex().addAll(p.getSex());
     }
     
-    
-    @Http(@Http.Resource(
-        content = "{'sex':['FEMALE', 'MALE', 'MALE']}", 
-        path="/people.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'sex':['FEMALE', 'MALE', 'MALE']}", 
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
-            js.fetchPeopleSex("people.json");
+            js.fetchPeopleSex(url);
         }
         
         if (0 == js.getFetchedCount()) {
@@ -325,18 +318,17 @@ public final class JSONTest {
         assert js.getFetchedSex().get(2) == Sex.MALE : "male 3rd " + js.getFetchedSex();
     }
     
-    @Http(@Http.Resource(
-        content = "[{'firstName': 'Gitar', 'sex': 'FEMALE'},"
-        + "{'firstName': 'Peter', 'sex': 'MALE'}"
-        + "]", 
-        path="/person.json", 
-        mimeType = "application/json"
-    ))
     @KOTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'},"
+                + "{'firstName': 'Peter', 'sex': 'MALE'}"
+                + "]", 
+                "application/json"
+            );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
-            js.fetchArray("person.json");
+            js.fetchArray(url);
         }
         
         

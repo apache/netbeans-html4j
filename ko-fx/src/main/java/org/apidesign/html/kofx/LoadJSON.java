@@ -130,10 +130,14 @@ final class LoadJSON implements Runnable {
                 }
             } else {
                 int ch = is.read();
-                array = ch == '[';
-                is.unread(ch);
-                if (!array && ch != '{') {
+                if (ch == -1) {
                     string = true;
+                } else {
+                    array = ch == '[';
+                    is.unread(ch);
+                    if (!array && ch != '{') {
+                        string = true;
+                    }
                 }
             }
             try {

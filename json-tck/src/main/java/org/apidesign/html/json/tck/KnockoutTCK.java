@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.json.tck;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
@@ -66,6 +68,17 @@ public abstract class KnockoutTCK {
      * @return the output of the execution
      */
     public abstract Object executeScript(String script, Object[] arguments);
+
+    /** Creates a URL which later returns content with given
+     * <code>mimeType</code> and <code>content</code>. The 
+     * content may be processed by the provided <code>parameters</code>.
+     * 
+     * @param content
+     * @param mimeType
+     * @param parameters
+     * @return 
+     */
+    public abstract URI prepareURL(String content, String mimeType, String[] parameters);
     
     /** Gives you list of classes included in the TCK. Their test methods
      * are annotated by {@link KOTest} annotation. The methods are public
@@ -81,5 +94,5 @@ public abstract class KnockoutTCK {
         };
     }
 
-    
+
 }

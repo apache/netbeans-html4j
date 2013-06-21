@@ -20,6 +20,8 @@
  */
 package net.java.html.json.tests;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
@@ -71,6 +73,17 @@ final class Utils {
         + "}\n"
         + "n.innerHTML = arguments[0]; \n ";
         return executeScript(clazz, s, html);
+    }
+
+    static String prepareURL(
+        Class<?> clazz, String content, String mimeType, String... parameters) {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+            URI o = tck.prepareURL(content, mimeType, parameters);
+            if (o != null) {
+                return o.toString();
+            }
+        }
+        throw new IllegalStateException();
     }
     
     private static ClassLoader cl(Class<?> c) {
