@@ -27,9 +27,7 @@ import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.HtmlFragment;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
@@ -44,22 +42,23 @@ import org.apidesign.bck2brwsr.vmtest.VMTest;
 }) 
 public final class KnockoutTest {
     
-    @HtmlFragment(
-        "<h1 data-bind=\"text: helloMessage\">Loading Bck2Brwsr's Hello World...</h1>\n" +
-        "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
-        "<button id=\"hello\">Say Hello!</button>\n"
-    )
-    @BrwsrTest public void modifyValueAssertChangeInModel() throws Exception {
+    @KOTest public void modifyValueAssertChangeInModel() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<h1 data-bind=\"text: helloMessage\">Loading Bck2Brwsr's Hello World...</h1>\n" +
+            "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
+            "<button id=\"hello\">Say Hello!</button>\n"
+        );
+
         KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.setName("Kukuc");
         m.applyBindings();
-        
+
         String v = getSetInput(null);
         assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
-        
+
         getSetInput("Jardo");
         triggerEvent("input", "change");
-        
+
         assert "Jardo".equals(m.getName()) : "Name property updated: " + m.getName();
     }
     
@@ -82,82 +81,86 @@ public final class KnockoutTest {
         );
     }
     
-    @HtmlFragment(
-        "<ul id='ul' data-bind='foreach: results'>\n"
-        + "  <li data-bind='text: $data, click: $root.call'/>\n"
-        + "</ul>\n"
-    )
-    @BrwsrTest public void displayContentOfArray() throws Exception {
+    @KOTest public void displayContentOfArray() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<ul id='ul' data-bind='foreach: results'>\n"
+            + "  <li data-bind='text: $data, click: $root.call'/>\n"
+            + "</ul>\n"
+        );
+
         KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
-        
+
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
-        
+
         m.getResults().add("Hi");
 
         cnt = countChildren("ul");
         assert cnt == 2 : "Two children now, but was " + cnt;
-        
+
         triggerChildClick("ul", 1);
-        
+
         assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
         assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
     }
 
-    @HtmlFragment(
-        "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
-    )
-    @BrwsrTest public void checkBoxToBooleanBinding() throws Exception {
+    @KOTest public void checkBoxToBooleanBinding() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
+        );
+
         KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.applyBindings();
-        
+
         assert !m.isEnabled() : "Is disabled";
 
         triggerClick("b");
-        
+
         assert m.isEnabled() : "Now the model is enabled";
     }
     
     
     
-    @HtmlFragment(
-        "<ul id='ul' data-bind='foreach: cmpResults'>\n"
-        + "  <li><b data-bind='text: $data'></b></li>\n"
-        + "</ul>\n"
-    )
-    @BrwsrTest public void displayContentOfDerivedArray() throws Exception {
+    @KOTest public void displayContentOfDerivedArray() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<ul id='ul' data-bind='foreach: cmpResults'>\n"
+            + "  <li><b data-bind='text: $data'></b></li>\n"
+            + "</ul>\n"
+        );
+
         KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
         m.getResults().add("Ahoj");
         m.applyBindings();
-        
+
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
-        
+
         m.getResults().add("hello");
 
         cnt = countChildren("ul");
         assert cnt == 2 : "Two children now, but was " + cnt;
     }
     
-    @HtmlFragment(
-        "<ul id='ul' data-bind='foreach: people'>\n"
-        + "  <li data-bind='text: $data.firstName, click: $root.removePerson'></li>\n"
-        + "</ul>\n"
-    )
-    @BrwsrTest public void displayContentOfArrayOfPeople() throws Exception {
+    @KOTest public void displayContentOfArrayOfPeople() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<ul id='ul' data-bind='foreach: people'>\n"
+            + "  <li data-bind='text: $data.firstName, click: $root.removePerson'></li>\n"
+            + "</ul>\n"
+        );
+
         KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
-        
+
         final Person first = Models.bind(new Person(), newContext());
         first.setFirstName("first");
         m.getPeople().add(first);
-        
+
         m.applyBindings();
-        
+
         int cnt = countChildren("ul");
         assert cnt == 1 : "One child, but was " + cnt;
-        
+
         final Person second = Models.bind(new Person(), newContext());
         second.setFirstName("second");
         m.getPeople().add(second);
@@ -166,17 +169,17 @@ public final class KnockoutTest {
         assert cnt == 2 : "Two children now, but was " + cnt;
 
         triggerChildClick("ul", 1);
-        
+
         assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
 
         cnt = countChildren("ul");
         assert cnt == 1 : "Again one child, but was " + cnt;
-        
+
         String txt = childText("ul", 0);
         assert "first".equals(txt) : "Expecting 'first': " + txt;
-        
+
         first.setFirstName("changed");
-        
+
         txt = childText("ul", 0);
         assert "changed".equals(txt) : "Expecting 'changed': " + txt;
     }
@@ -186,21 +189,23 @@ public final class KnockoutTest {
         return people.isEmpty() ? null : people.get(0);
     }
     
-    @HtmlFragment(
-        "<p id='ul' data-bind='with: firstPerson'>\n"
-        + "  <span data-bind='text: firstName, click: changeSex'></span>\n"
-        + "</p>\n"
-    )
-    @BrwsrTest public void accessFirstPersonWithOnFunction() throws Exception {
+    @KOTest public void accessFirstPersonWithOnFunction() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<p id='ul' data-bind='with: firstPerson'>\n"
+            + "  <span data-bind='text: firstName, click: changeSex'></span>\n"
+            + "</p>\n"
+        );
+
         trasfertToFemale();
     }
     
-    @HtmlFragment(
-        "<ul id='ul' data-bind='foreach: people'>\n"
-        + "  <li data-bind='text: $data.firstName, click: changeSex'></li>\n"
-        + "</ul>\n"
-    )
-    @BrwsrTest public void onPersonFunction() throws Exception {
+    @KOTest public void onPersonFunction() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<ul id='ul' data-bind='foreach: people'>\n"
+            + "  <li data-bind='text: $data.firstName, click: changeSex'></li>\n"
+            + "</ul>\n"
+        );
+
         trasfertToFemale();
     }
     
@@ -245,10 +250,6 @@ public final class KnockoutTest {
     @ComputedProperty
     static List<String> cmpResults(List<String> results) {
         return results;
-    }
-    
-    static Object[] create() {
-        return VMTest.create(KnockoutTest.class);
     }
     
     private static int countChildren(String id) throws Exception {

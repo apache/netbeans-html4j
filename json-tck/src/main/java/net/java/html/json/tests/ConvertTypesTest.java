@@ -27,9 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.json.impl.JSON;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
@@ -61,7 +60,7 @@ public final class ConvertTypesTest {
         return Utils.createObject(map, ConvertTypesTest.class);
     }
     
-    @BrwsrTest
+    @KOTest
     public void testConvertToPeople() throws Exception {
         final Object o = createJSON(true);
         
@@ -72,7 +71,7 @@ public final class ConvertTypesTest {
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
     }
 
-    @BrwsrTest
+    @KOTest
     public void parseConvertToPeople() throws Exception {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS(true, false);
@@ -84,7 +83,7 @@ public final class ConvertTypesTest {
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
     }
     
-    @BrwsrTest
+    @KOTest
     public void parseConvertToPeopleWithAddress() throws Exception {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS(true, true);
@@ -98,7 +97,7 @@ public final class ConvertTypesTest {
         assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
     }
 
-    @BrwsrTest
+    @KOTest
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
@@ -109,7 +108,7 @@ public final class ConvertTypesTest {
         assert p.getSex() == null : "No sex: " + p.getSex();
     }
     
-    @BrwsrTest
+    @KOTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS(false, false);
@@ -122,9 +121,5 @@ public final class ConvertTypesTest {
     
     private static BrwsrCtx newContext() {
         return Utils.newContext(ConvertTypesTest.class);
-    }
-    
-    static Object[] create() {
-        return VMTest.create(ConvertTypesTest.class);
     }
 }

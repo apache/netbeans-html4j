@@ -25,8 +25,6 @@ import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
@@ -69,8 +67,9 @@ public abstract class KnockoutTCK {
      */
     public abstract Object executeScript(String script, Object[] arguments);
     
-    /** Gives you list of classes included in the TCK. Send them
-     * to {@link VMTest#create(java.lang.Class)} factory method.
+    /** Gives you list of classes included in the TCK. Their test methods
+     * are annotated by {@link KOTest} annotation. The methods are public
+     * instance methods that take no arguments.
      * 
      * @return classes with methods annotated by {@link BrwsrTest} annotation
      */

@@ -26,10 +26,8 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.Http;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.json.impl.JSON;
+import org.apidesign.html.json.tck.KOTest;
 
 /** Need to verify that models produce reasonable JSON objects.
  *
@@ -45,7 +43,7 @@ public final class JSONTest {
     private JSONik js;
     private Integer orig;
     
-    @BrwsrTest public void toJSONInABrowser() throws Throwable {
+    @KOTest public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jarda");
@@ -95,7 +93,7 @@ public final class JSONTest {
         path="/person.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseJSON() throws InterruptedException {
+    @KOTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -123,7 +121,7 @@ public final class JSONTest {
         mimeType = "application/javascript",
         parameters = { "callme" }
     ))
-    @BrwsrTest public void loadAndParseJSONP() throws InterruptedException, Exception {
+    @KOTest public void loadAndParseJSONP() throws InterruptedException, Exception {
         
         if (js == null) {
             orig = scriptElements();
@@ -161,7 +159,7 @@ public final class JSONTest {
         mimeType = "text/plain",
         parameters = { "http.method", "http.requestBody" }
     ))
-    @BrwsrTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
+    @KOTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
         if (js == null) {
             orig = scriptElements();
             assert orig > 0 : "There should be some scripts on the page";
@@ -210,7 +208,7 @@ public final class JSONTest {
         path="/person.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseJSONSentToArray() throws InterruptedException {
+    @KOTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -232,7 +230,7 @@ public final class JSONTest {
         path="/person.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseJSONArraySingle() throws InterruptedException {
+    @KOTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -254,7 +252,7 @@ public final class JSONTest {
         path="/people.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseArrayInPeople() throws InterruptedException {
+    @KOTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -280,7 +278,7 @@ public final class JSONTest {
         path="/people.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
+    @KOTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -307,7 +305,7 @@ public final class JSONTest {
         path="/people.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseArrayOfEnums() throws InterruptedException {
+    @KOTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -334,7 +332,7 @@ public final class JSONTest {
         path="/person.json", 
         mimeType = "application/json"
     ))
-    @BrwsrTest public void loadAndParseJSONArray() throws InterruptedException {
+    @KOTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
@@ -360,7 +358,7 @@ public final class JSONTest {
     static class NandV {
     }
     
-    @BrwsrTest public void parseNullNumber() throws Exception {
+    @KOTest public void parseNullNumber() throws Exception {
         String txt = "{ \"name\":\"M\" }";
         ByteArrayInputStream is = new ByteArrayInputStream(txt.getBytes("UTF-8"));
         NameAndValue v = Models.parse(newContext(), NameAndValue.class, is);
@@ -371,10 +369,6 @@ public final class JSONTest {
 
     private static BrwsrCtx newContext() {
         return Utils.newContext(JSONTest.class);
-    }
-    
-    static Object[] create() {
-        return VMTest.create(JSONTest.class);
     }
     
 }

@@ -60,6 +60,19 @@ final class Utils {
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
     
+    static Object exposeHTML(Class<?> clazz, String html) throws Exception {
+        String s = 
+          "var n = window.document.getElementById('ko.test.div'); \n "
+        + "if (!n) { \n"
+        + "  n = window.document.createElement('div'); \n "
+        + "  n.id = 'ko.test.div'; \n "
+        + "  var body = window.document.getElementsByTagName('body')[0];\n"
+        + "  body.appendChild(n); return n;\n"
+        + "}\n"
+        + "n.innerHTML = arguments[0]; \n ";
+        return executeScript(clazz, s, html);
+    }
+    
     private static ClassLoader cl(Class<?> c) {
         try {
             return c.getClassLoader();

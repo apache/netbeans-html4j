@@ -73,5 +73,12 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>org.apidesign.bck2brwsr</groupId>
+      <artifactId>vmtest</artifactId>
+      <version>0.8-SNAPSHOT</version>
+      <scope>test</scope>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 </project>

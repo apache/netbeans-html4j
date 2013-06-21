@@ -27,6 +27,7 @@ import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +44,10 @@ public final class KnockoutFXTest extends KnockoutTCK {
     }
 
     @Factory public static Object[] compatibilityTests() {
-        return VMTest.newTests().withClasses(testClasses()).withLaunchers("fxbrwsr").build();
+        return VMTest.newTests().
+            withClasses(testClasses()).
+            withTestAnnotation(KOTest.class).
+            withLaunchers("fxbrwsr").build();
     }
 
     @Override
