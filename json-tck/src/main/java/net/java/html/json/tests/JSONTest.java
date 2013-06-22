@@ -110,7 +110,7 @@ public final class JSONTest {
         assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
     }
     
-    @OnReceive(url="/{url}?callme={me}", jsonp = "me")
+    @OnReceive(url="{url}?callme={me}", jsonp = "me")
     static void fetchViaJSONP(Person p, JSONik model) {
         model.setFetched(p);
     }
@@ -288,7 +288,7 @@ public final class JSONTest {
         assert js.getFetchedCount() == 6 : "1 + 2 + 3 is " + js.getFetchedCount();
     }
     
-    @OnReceive(url="/{url}")
+    @OnReceive(url="{url}")
     static void fetchPeopleSex(People p, JSONik model) {
         model.setFetchedCount(1);
         model.getFetchedSex().addAll(p.getSex());
