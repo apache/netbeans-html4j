@@ -21,7 +21,6 @@
 package org.apidesign.html.json.tck;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
@@ -30,7 +29,7 @@ import net.java.html.json.tests.JSONTest;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
- * Knockout.js in bck2brwsr or in JavaFX's WebView). Sample usage:
+ * Knockout.js in JavaFX's WebView). Sample usage:
  * <pre>
 {@link ServiceProvider @ServiceProvider}(service = KnockoutTCK.class)
 public final class Bck2BrwsrKnockoutTest extends KnockoutTCK {
