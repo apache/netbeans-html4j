@@ -48,18 +48,22 @@ public final class KnockoutTest {
             "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
             "<button id=\"hello\">Say Hello!</button>\n"
         );
+        try {
 
-        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
-        m.setName("Kukuc");
-        m.applyBindings();
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.setName("Kukuc");
+            m.applyBindings();
 
-        String v = getSetInput(null);
-        assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
+            String v = getSetInput(null);
+            assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
 
-        getSetInput("Jardo");
-        triggerEvent("input", "change");
+            getSetInput("Jardo");
+            triggerEvent("input", "change");
 
-        assert "Jardo".equals(m.getName()) : "Name property updated: " + m.getName();
+            assert "Jardo".equals(m.getName()) : "Name property updated: " + m.getName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     private static String getSetInput(String value) throws Exception {
@@ -87,38 +91,44 @@ public final class KnockoutTest {
             + "  <li data-bind='text: $data, click: $root.call'/>\n"
             + "</ul>\n"
         );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.applyBindings();
 
-        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
-        m.getResults().add("Ahoj");
-        m.applyBindings();
+            int cnt = countChildren("ul");
+            assert cnt == 1 : "One child, but was " + cnt;
 
-        int cnt = countChildren("ul");
-        assert cnt == 1 : "One child, but was " + cnt;
+            m.getResults().add("Hi");
 
-        m.getResults().add("Hi");
+            cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
 
-        cnt = countChildren("ul");
-        assert cnt == 2 : "Two children now, but was " + cnt;
+            triggerChildClick("ul", 1);
 
-        triggerChildClick("ul", 1);
-
-        assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
-        assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
+            assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
+            assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
 
     @KOTest public void checkBoxToBooleanBinding() throws Exception {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 
             "<input type='checkbox' id='b' data-bind='checked: enabled'></input>\n"
         );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.applyBindings();
 
-        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
-        m.applyBindings();
+            assert !m.isEnabled() : "Is disabled";
 
-        assert !m.isEnabled() : "Is disabled";
+            triggerClick("b");
 
-        triggerClick("b");
-
-        assert m.isEnabled() : "Now the model is enabled";
+            assert m.isEnabled() : "Now the model is enabled";
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     
@@ -129,18 +139,21 @@ public final class KnockoutTest {
             + "  <li><b data-bind='text: $data'></b></li>\n"
             + "</ul>\n"
         );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.applyBindings();
 
-        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
-        m.getResults().add("Ahoj");
-        m.applyBindings();
+            int cnt = countChildren("ul");
+            assert cnt == 1 : "One child, but was " + cnt;
 
-        int cnt = countChildren("ul");
-        assert cnt == 1 : "One child, but was " + cnt;
+            m.getResults().add("hello");
 
-        m.getResults().add("hello");
-
-        cnt = countChildren("ul");
-        assert cnt == 2 : "Two children now, but was " + cnt;
+            cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     @KOTest public void displayContentOfArrayOfPeople() throws Exception {
@@ -149,39 +162,42 @@ public final class KnockoutTest {
             + "  <li data-bind='text: $data.firstName, click: $root.removePerson'></li>\n"
             + "</ul>\n"
         );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
 
-        KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            final Person first = Models.bind(new Person(), newContext());
+            first.setFirstName("first");
+            m.getPeople().add(first);
 
-        final Person first = Models.bind(new Person(), newContext());
-        first.setFirstName("first");
-        m.getPeople().add(first);
+            m.applyBindings();
 
-        m.applyBindings();
+            int cnt = countChildren("ul");
+            assert cnt == 1 : "One child, but was " + cnt;
 
-        int cnt = countChildren("ul");
-        assert cnt == 1 : "One child, but was " + cnt;
+            final Person second = Models.bind(new Person(), newContext());
+            second.setFirstName("second");
+            m.getPeople().add(second);
 
-        final Person second = Models.bind(new Person(), newContext());
-        second.setFirstName("second");
-        m.getPeople().add(second);
+            cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
 
-        cnt = countChildren("ul");
-        assert cnt == 2 : "Two children now, but was " + cnt;
+            triggerChildClick("ul", 1);
 
-        triggerChildClick("ul", 1);
+            assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
 
-        assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
+            cnt = countChildren("ul");
+            assert cnt == 1 : "Again one child, but was " + cnt;
 
-        cnt = countChildren("ul");
-        assert cnt == 1 : "Again one child, but was " + cnt;
+            String txt = childText("ul", 0);
+            assert "first".equals(txt) : "Expecting 'first': " + txt;
 
-        String txt = childText("ul", 0);
-        assert "first".equals(txt) : "Expecting 'first': " + txt;
+            first.setFirstName("changed");
 
-        first.setFirstName("changed");
-
-        txt = childText("ul", 0);
-        assert "changed".equals(txt) : "Expecting 'changed': " + txt;
+            txt = childText("ul", 0);
+            assert "changed".equals(txt) : "Expecting 'changed': " + txt;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     @ComputedProperty
@@ -195,8 +211,11 @@ public final class KnockoutTest {
             + "  <span data-bind='text: firstName, click: changeSex'></span>\n"
             + "</p>\n"
         );
-
-        trasfertToFemale();
+        try {
+            trasfertToFemale();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     @KOTest public void onPersonFunction() throws Exception {
@@ -205,8 +224,11 @@ public final class KnockoutTest {
             + "  <li data-bind='text: $data.firstName, click: changeSex'></li>\n"
             + "</ul>\n"
         );
-
-        trasfertToFemale();
+        try {
+            trasfertToFemale();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
     }
     
     private void trasfertToFemale() throws Exception {
