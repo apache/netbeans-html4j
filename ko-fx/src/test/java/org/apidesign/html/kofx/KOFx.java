@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.kofx;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
 import org.testng.ITest;
@@ -32,6 +33,7 @@ import org.testng.annotations.Test;
 public final class KOFx implements ITest, Runnable {
     private final Method m;
     private Object result;
+    private Object inst;
 
     KOFx(Method m) {
         this.m = m;
@@ -39,7 +41,7 @@ public final class KOFx implements ITest, Runnable {
 
     @Override
     public String getTestName() {
-        return m.getDeclaringClass().getName() + "." + m.getName();
+        return m.getName();
     }
 
     @Test
@@ -58,16 +60,29 @@ public final class KOFx implements ITest, Runnable {
 
     @Override
     public synchronized void run() {
+        boolean notify = true;
         try {
-            Object inst = m.getDeclaringClass().newInstance();
+            if (inst == null) {
+                inst = m.getDeclaringClass().newInstance();
+            }
             result = m.invoke(inst);
             if (result == null) {
                 result = this;
             }
-        } catch (Throwable ex) {
+        } catch (InvocationTargetException ex) {
+            Throwable r = ex.getTargetException();
+            if (r instanceof InterruptedException) {
+                notify = false;
+                Platform.runLater(this);
+                return;
+            }
+            result = r;
+        } catch (Exception ex) {
             result = ex;
         } finally {
-            notifyAll();
+            if (notify) {
+                notifyAll();
+            }
         }
     }
     
