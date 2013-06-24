@@ -45,6 +45,7 @@ import org.objectweb.asm.signature.SignatureVisitor;
 abstract class JsClassLoader extends ClassLoader {
     JsClassLoader(ClassLoader parent) {
         super(parent);
+        setDefaultAssertionStatus(JsClassLoader.class.desiredAssertionStatus());
     }
     
     @Override
