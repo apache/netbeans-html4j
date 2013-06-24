@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
