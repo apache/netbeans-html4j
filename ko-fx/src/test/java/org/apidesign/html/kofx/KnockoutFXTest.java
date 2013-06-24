@@ -20,14 +20,18 @@
  */
 package org.apidesign.html.kofx;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.lang.reflect.Method;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.bck2brwsr.launcher.InvocationContext;
 import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -84,17 +88,37 @@ public final class KnockoutFXTest extends KnockoutTCK {
     )
     public native Object executeScript(String script, Object[] arguments);
 
+    @JavaScriptBody(args = {  }, body = 
+          "var h;"
+        + "if (!!window && !!window.location && !!window.location.href)\n"
+        + "  h = window.location.href;\n"
+        + "else "
+        + "  h = null;"
+        + "return h;\n"
+    )
+    private static native String findBaseURL();
+    
     @Override
     public URI prepareURL(String content, String mimeType, String[] parameters) {
-        ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes());
         try {
-            Class<?> real = ClassLoader.getSystemClassLoader().loadClass(InvocationContext.class.getName());
-            Method m = real.getMethod("register", InputStream.class, String.class, String.class, String[].class);
-            return (URI) m.invoke(null, is, 
-                mimeType, "/dynamic/res" + content.hashCode(), 
-                parameters
-            );
-        } catch (Exception ex) {
+            final URL baseURL = new URL(findBaseURL());
+            StringBuilder sb = new StringBuilder();
+            sb.append("/dynamic?mimeType=").append(mimeType);
+            for (int i = 0; i < parameters.length; i++) {
+                sb.append("&param" + i).append("=").append(parameters[i]);
+            }
+            String mangle = content.replace("\n", "%0a")
+                .replace("\"", "\\\"").replace(" ", "%20");
+            sb.append("&content=").append(mangle);
+
+            URL query = new URL(baseURL, sb.toString());
+            URLConnection c = query.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
+            URI connectTo = new URI(br.readLine());
+            return connectTo;
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        } catch (URISyntaxException ex) {
             throw new IllegalStateException(ex);
         }
     }
