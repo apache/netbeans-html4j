@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
+import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -45,11 +46,18 @@ import org.openide.util.lookup.ServiceProvider;
 public final class FXContext
 implements Technology<JSObject>, Transfer, Contexts.Provider {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
+    
+    @JavaScriptBody(args = {}, body = "return 1;")
+    private static int isJavaScriptEnabled() {
+        return 0;
+    }
 
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
-        context.register(Technology.class, this, 100);
-        context.register(Transfer.class, this, 100);
+        if (isJavaScriptEnabled() == 1) {
+            context.register(Technology.class, this, 100);
+            context.register(Transfer.class, this, 100);
+        }
     }
 
     @Override
