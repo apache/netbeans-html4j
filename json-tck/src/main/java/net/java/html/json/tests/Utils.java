@@ -69,7 +69,7 @@ final class Utils {
         + "  n = window.document.createElement('div'); \n "
         + "  n.id = 'ko.test.div'; \n "
         + "  var body = window.document.getElementsByTagName('body')[0];\n"
-        + "  body.appendChild(n); return n;\n"
+        + "  body.appendChild(n);\n"
         + "}\n"
         + "n.innerHTML = arguments[0]; \n ";
         return executeScript(clazz, s, html);
