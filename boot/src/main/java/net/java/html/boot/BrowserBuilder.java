@@ -36,6 +36,8 @@ import org.apidesign.html.boot.impl.FindResources;
 public final class BrowserBuilder {
     private String resource;
     private Class<?> clazz;
+    private Class[] browserClass;
+    private Runnable onLoad;
     private BrowserBuilder() {
     }
     
@@ -54,6 +56,10 @@ public final class BrowserBuilder {
     }
     
     public void showAndWait() {
+        if (resource == null) {
+            throw new IllegalStateException("Need to specify resource via loadPage method");
+        }
+        
         FImpl impl = new FImpl(clazz.getClassLoader());
         URL url = clazz.getResource(resource);
         if (url == null) {
@@ -68,6 +74,12 @@ public final class BrowserBuilder {
                 public void run() {
                     try {
                         Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
+                        if (browserClass != null) {
+                            browserClass[0] = newClazz;
+                        }
+                        if (onLoad != null) {
+                            onLoad.run();
+                        }
                     } catch (ClassNotFoundException ex) {
                         throw new IllegalStateException(ex);
                     }
@@ -77,6 +89,20 @@ public final class BrowserBuilder {
             return;
         }
         throw new IllegalStateException("Can't find any Fn.Definer");
+    }
+
+    public BrowserBuilder onClassReady(Class[] browserClass) {
+        if (browserClass.length != 1) {
+            throw new IllegalStateException("Expecting array of size one");
+        }
+        this.browserClass = browserClass;
+        return this;
+    }
+
+    // callback happens on browser thread
+    public BrowserBuilder onLoad(Runnable r) {
+        this.onLoad = r;
+        return this;
     }
     
     private static final class FImpl implements FindResources {

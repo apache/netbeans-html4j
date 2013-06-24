@@ -24,15 +24,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
+import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
@@ -42,6 +47,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.annotations.Factory;
+import static org.testng.Assert.*;
+import org.testng.ITest;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -52,11 +60,55 @@ public final class KnockoutFXTest extends KnockoutTCK {
     public KnockoutFXTest() {
     }
 
-    @Factory public static Object[] compatibilityTests() {
-        return VMTest.newTests().
-            withClasses(testClasses()).
-            withTestAnnotation(KOTest.class).
-            withLaunchers("fxbrwsr").build();
+    @Factory public static Object[] compatibilityTests() throws Exception {
+        Class[] arr = testClasses();
+        ClassLoader l = KnockoutFXTest.class.getClassLoader();
+        for (int i = 0; i < arr.length; i++) {
+            assertEquals(arr[i].getClassLoader(), l, "All classes loaded by the same classloader");
+        }
+        assertNotNull(l, "At least one class provided");
+        
+        class R implements Runnable {
+            final Class[] browserClass = { null };
+            @Override
+            public synchronized void run() {
+                notifyAll();
+            }
+            
+            synchronized ClassLoader getClassLoader() throws InterruptedException {
+                while (browserClass[0] == null) {
+                    wait();
+                }
+                return browserClass[0].getClassLoader();
+            }
+        }
+        R r = new R();
+        
+        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
+            loadPage("test.html").
+            onClassReady(r.browserClass).
+            onLoad(r);
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+            @Override
+            public void run() {
+                bb.showAndWait();
+            }
+        });
+
+        l = r.getClassLoader();
+        List<Object> res = new ArrayList<Object>();
+        for (int i = 0; i < arr.length; i++) {
+            Class<?> c = Class.forName(arr[i].getName(), true, l);
+            Class<? extends Annotation> koTest = 
+                c.getClassLoader().loadClass(KOTest.class.getName()).
+                asSubclass(Annotation.class);
+            for (Method m : c.getMethods()) {
+                if (m.getAnnotation(koTest) != null) {
+                    res.add(new KOFx(m));
+                }
+            }
+        }
+        return res.toArray();
     }
 
     @Override

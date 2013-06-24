@@ -62,23 +62,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apidesign.bck2brwsr</groupId>
-      <artifactId>launcher.fx</artifactId>
-      <version>${bck2brwsr.launcher.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apidesign.html</groupId>
       <artifactId>net.java.html.boot</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.apidesign.bck2brwsr</groupId>
-      <artifactId>vmtest</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>boot-fx</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
-      <type>jar</type>
     </dependency>
   </dependencies>
 </project>
