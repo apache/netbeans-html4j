@@ -23,10 +23,8 @@ package org.apidesign.html.kofx;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,8 +46,6 @@ import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.annotations.Factory;
 import static org.testng.Assert.*;
-import org.testng.ITest;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -59,7 +55,7 @@ import org.testng.annotations.Test;
 public final class KnockoutFXTest extends KnockoutTCK {
     public KnockoutFXTest() {
     }
-
+    
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class[] arr = testClasses();
         ClassLoader l = KnockoutFXTest.class.getClassLoader();
@@ -84,8 +80,10 @@ public final class KnockoutFXTest extends KnockoutTCK {
         }
         R r = new R();
         
+        URI uri = DynamicHTTP.initServer();
+        
         final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
-            loadPage("test.html").
+            loadPage(uri.toString()).
             onClassReady(r.browserClass).
             onLoad(r);
         Executors.newSingleThreadExecutor().submit(new Runnable() {

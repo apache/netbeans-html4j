@@ -21,6 +21,7 @@
 package net.java.html.boot;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -61,9 +62,22 @@ public final class BrowserBuilder {
         }
         
         FImpl impl = new FImpl(clazz.getClassLoader());
-        URL url = clazz.getResource(resource);
+        URL url = null;
+        MalformedURLException mal = null;
+        try {
+            url = new URL(resource);
+        } catch (MalformedURLException ex) {
+            mal = ex;
+        }
         if (url == null) {
-            throw new IllegalStateException("Can't find resouce: " + resource + " relative to " + clazz);
+            url = clazz.getResource(resource);
+        }
+        if (url == null) {
+            IllegalStateException ise = new IllegalStateException("Can't find resouce: " + resource + " relative to " + clazz);
+            if (mal != null) {
+                ise.initCause(mal);
+            }
+            throw ise;
         }
 
         for (Fn.Presenter dfnr : ServiceLoader.load(Fn.Presenter.class)) {
