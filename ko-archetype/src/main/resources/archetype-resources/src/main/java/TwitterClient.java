@@ -90,7 +90,7 @@ public class TwitterClient {
         model.queryTweets("http://search.twitter.com", sb.toString());
     }
     
-    static {
+    public static void initialize(String... args) {
         final TwitterModel model = new TwitterModel();
         final List<Tweeters> svdLst = model.getSavedLists();
         svdLst.add(newTweeters("API Design", "JaroslavTulach"));

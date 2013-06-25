@@ -53,47 +53,35 @@ import static org.testng.Assert.*;
  */
 @ServiceProvider(service = KnockoutTCK.class)
 public final class KnockoutFXTest extends KnockoutTCK {
+    private static Class<?> browserClass;
+    
     public KnockoutFXTest() {
     }
     
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class[] arr = testClasses();
-        ClassLoader l = KnockoutFXTest.class.getClassLoader();
         for (int i = 0; i < arr.length; i++) {
-            assertEquals(arr[i].getClassLoader(), l, "All classes loaded by the same classloader");
+            assertEquals(
+                arr[i].getClassLoader(),
+                KnockoutFXTest.class.getClassLoader(),
+                "All classes loaded by the same classloader"
+            );
         }
-        assertNotNull(l, "At least one class provided");
-        
-        class R implements Runnable {
-            final Class[] browserClass = { null };
-            @Override
-            public synchronized void run() {
-                notifyAll();
-            }
-            
-            synchronized ClassLoader getClassLoader() throws InterruptedException {
-                while (browserClass[0] == null) {
-                    wait();
-                }
-                return browserClass[0].getClassLoader();
-            }
-        }
-        R r = new R();
         
         URI uri = DynamicHTTP.initServer();
-        
+    
         final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
             loadPage(uri.toString()).
-            onClassReady(r.browserClass).
-            onLoad(r);
+            invoke("initialized");
+        
         Executors.newSingleThreadExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 bb.showAndWait();
             }
         });
-
-        l = r.getClassLoader();
+        
+        ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
             Class<?> c = Class.forName(arr[i].getName(), true, l);
@@ -109,6 +97,24 @@ public final class KnockoutFXTest extends KnockoutTCK {
         return res.toArray();
     }
 
+    static synchronized ClassLoader getClassLoader() throws InterruptedException {
+        while (browserClass == null) {
+            KnockoutFXTest.class.wait();
+        }
+        return browserClass.getClassLoader();
+    }
+    
+    public static synchronized void initialized(Class<?> browserCls) throws Exception {
+        browserClass = browserCls;
+        KnockoutFXTest.class.notifyAll();
+    }
+    
+    public static void initialized() throws Exception {
+        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
+        Method m = classpathClass.getMethod("initialized", Class.class);
+        m.invoke(null, KnockoutFXTest.class);
+    }
+    
     @Override
     public BrwsrCtx createContext() {
         FXContext fx = new FXContext();

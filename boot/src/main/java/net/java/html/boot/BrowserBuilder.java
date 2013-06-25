@@ -21,11 +21,15 @@
 package net.java.html.boot;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.boot.impl.FindResources;
@@ -35,10 +39,15 @@ import org.apidesign.html.boot.impl.FindResources;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class BrowserBuilder {
+    private static final Logger LOG = Logger.getLogger(BrowserBuilder.class.getName());
+    
     private String resource;
     private Class<?> clazz;
     private Class[] browserClass;
     private Runnable onLoad;
+    private String methodName;
+    private String[] methodArgs;
+    
     private BrowserBuilder() {
     }
     
@@ -53,6 +62,13 @@ public final class BrowserBuilder {
     
     public BrowserBuilder loadClass(Class<?> mainClass) {
         this.clazz = mainClass;
+        return this;
+    }
+
+    // invoked on browser thread
+    public BrowserBuilder invoke(String methodName, String... args) {
+        this.methodName = methodName;
+        this.methodArgs = args;
         return this;
     }
     
@@ -94,8 +110,29 @@ public final class BrowserBuilder {
                         if (onLoad != null) {
                             onLoad.run();
                         }
+                        INIT: if (methodName != null) {
+                            Exception firstError = null;
+                            if (methodArgs.length == 0) {
+                                try {
+                                    Method m = newClazz.getMethod(methodName);
+                                    m.invoke(null);
+                                    break INIT;
+                                } catch (Exception ex) {
+                                    firstError = ex;
+                                }
+                            }
+                            try {
+                                Method m = newClazz.getMethod(methodName, String[].class);
+                                m.invoke(m, (Object) methodArgs);
+                            } catch (Exception ex) {
+                                if (firstError != null) {
+                                    LOG.log(Level.SEVERE, "Can't call " + methodName, firstError);
+                                }
+                                LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
+                            }
+                        }
                     } catch (ClassNotFoundException ex) {
-                        throw new IllegalStateException(ex);
+                        LOG.log(Level.SEVERE, "Can't load " + clazz.getName(), ex);
                     }
                 }
             }
@@ -105,20 +142,6 @@ public final class BrowserBuilder {
         throw new IllegalStateException("Can't find any Fn.Definer");
     }
 
-    public BrowserBuilder onClassReady(Class[] browserClass) {
-        if (browserClass.length != 1) {
-            throw new IllegalStateException("Expecting array of size one");
-        }
-        this.browserClass = browserClass;
-        return this;
-    }
-
-    // callback happens on browser thread
-    public BrowserBuilder onLoad(Runnable r) {
-        this.onLoad = r;
-        return this;
-    }
-    
     private static final class FImpl implements FindResources {
         final ClassLoader l;
 
