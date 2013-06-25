@@ -32,9 +32,9 @@ import org.openide.util.lookup.ServiceProvider;
  * Knockout.js in JavaFX's WebView). Sample usage:
  * <pre>
 {@link ServiceProvider @ServiceProvider}(service = KnockoutTCK.class)
-public final class Bck2BrwsrKnockoutTest extends KnockoutTCK {
+public final class MyKnockoutBindingTest extends KnockoutTCK {
     {@link Override @Override}
-    protected Context createContext() {
+    protected BrwsrCtx createContext() {
         // use {@link ContextBuilder}.{@link ContextBuilder#build() build}();
     }
 
