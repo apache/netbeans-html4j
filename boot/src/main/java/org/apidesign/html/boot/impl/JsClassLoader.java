@@ -39,6 +39,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
+import org.objectweb.asm.signature.SignatureWriter;
 
 /** 
  *
@@ -277,16 +278,21 @@ abstract class JsClassLoader extends ClassLoader {
                     }
 
                     @Override
+                    public SignatureVisitor visitArrayType() {
+                        if (nowReturn) {
+                            throw new IllegalStateException("Not supported yet");
+                        }
+                        loadObject();
+                        return new SignatureWriter();
+                    }
+
+                    @Override
                     public void visitClassType(String name) {
                         if (nowReturn) {
                             returnType = Type.getObjectType(name);
                             return;
                         }
-                        FindInMethod.super.visitInsn(Opcodes.DUP);
-                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index);
-                        FindInMethod.super.visitVarInsn(Opcodes.ALOAD, index + offset);
-                        FindInMethod.super.visitInsn(Opcodes.AASTORE);
-                        index++;
+                        loadObject();
                     }
 
                     @Override
@@ -294,7 +300,14 @@ abstract class JsClassLoader extends ClassLoader {
                         nowReturn = true;
                         return this;
                     }
-                    
+
+                    private void loadObject() {
+                        FindInMethod.super.visitInsn(Opcodes.DUP);
+                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index);
+                        FindInMethod.super.visitVarInsn(Opcodes.ALOAD, index + offset);
+                        FindInMethod.super.visitInsn(Opcodes.AASTORE);
+                        index++;
+                    }
                     
                 }
                 SV sv = new SV();

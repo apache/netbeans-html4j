@@ -26,17 +26,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import org.apidesign.html.boot.spi.Fn;
+import org.objectweb.asm.Type;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class FnUtils {
-
     private FnUtils() {
     }
 
@@ -104,10 +101,15 @@ public final class FnUtils {
             
             String fqn = body.substring(next + 2, colon4);
             String method = body.substring(colon4 + 2, sigBeg);
-            String params = body.substring(sigBeg + 1, sigEnd);
+            String params = body.substring(sigBeg, sigEnd + 1);
             
             Class<?> clazz = Class.forName(fqn, false, loader);
-            Method m = clazz.getMethod(method);
+            final Type[] argTps = Type.getArgumentTypes(params);
+            Class<?>[] argCls = new Class<?>[argTps.length];
+            for (int i = 0; i < argCls.length; i++) {
+                argCls[i] = toClass(argTps[i], loader);
+            }
+            Method m = clazz.getMethod(method, argCls);
             
             sb.append("['").append(m.getName()).append("(");
             String sep = "";
@@ -121,5 +123,27 @@ public final class FnUtils {
         }
     }
 
+    private static Class<?> toClass(final Type t, ClassLoader loader) throws ClassNotFoundException {
+        if (t == Type.INT_TYPE) {
+            return Integer.TYPE;
+        } else if (t == Type.VOID_TYPE) {
+            return Void.TYPE;
+        } else if (t == Type.BOOLEAN_TYPE) {
+            return Boolean.TYPE;
+        } else if (t == Type.BYTE_TYPE) {
+            return Byte.TYPE;
+        } else if (t == Type.CHAR_TYPE) {
+            return Character.TYPE;
+        } else if (t == Type.SHORT_TYPE) {
+            return Short.TYPE;
+        } else if (t == Type.DOUBLE_TYPE) {
+            return Double.TYPE;
+        } else if (t == Type.FLOAT_TYPE) {
+            return Float.TYPE;
+        } else if (t == Type.LONG_TYPE) {
+            return Long.TYPE;
+        }
+        return Class.forName(t.getClassName(), false, loader);
+    }
     
 }

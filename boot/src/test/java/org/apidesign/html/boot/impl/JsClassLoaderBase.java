@@ -123,4 +123,8 @@ public class JsClassLoaderBase {
         assertEquals(r.cnt, 1, "Callback happened");
     }
     
+    @Test public void sumArray() throws Throwable {
+        Method st = methodClass.getMethod("sumArr", int[].class);
+        assertEquals(st.invoke(null, new int[] { 1, 2, 3 }), 6, "1+2+3 is six");
+    }
 }

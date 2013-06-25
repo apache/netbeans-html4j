@@ -54,4 +54,17 @@ public class JsMethods {
     
     @JavaScriptBody(args = { "r" }, javacall=true, body = "r.@java.lang.Runnable::run()()")
     public static native void callback(Runnable r);
+    
+    @JavaScriptBody(args = { "at", "arr" }, javacall = true, body =
+          "var a = 0;\n"
+        + "for (var i = 0; i < arr.length; i++) {\n"
+        + "  a = at.@org.apidesign.html.boot.impl.Arithm::sumTwo(II)(a, arr[i]);\n"
+        + "}\n"
+        + "return a;"
+    )
+    private static native int sumArr(Arithm at, int... arr);
+    
+    public static int sumArr(int... arr) {
+        return sumArr(new Arithm(), arr);
+    }
 }

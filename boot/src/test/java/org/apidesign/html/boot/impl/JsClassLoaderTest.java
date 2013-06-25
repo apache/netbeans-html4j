@@ -77,8 +77,12 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
                             Invocable inv = (Invocable)eng;
-                            Object ret = inv.invokeMethod(val, "call", all.toArray());
-                            return ret == val ? null : ret;
+                            try {
+                                Object ret = inv.invokeMethod(val, "call", all.toArray());
+                                return ret == val ? null : ret;
+                            } catch (Exception ex) {
+                                throw ex;
+                            }
                         }
                     };
                 } catch (ScriptException ex) {
