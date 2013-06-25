@@ -33,6 +33,7 @@ import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -52,7 +53,14 @@ import org.json.JSONTokener;
  */
 final class LoadJSON implements Runnable {
     private static final Logger LOG = FXContext.LOG;
-    private static final Executor REQ = Executors.newCachedThreadPool();
+    private static final Executor REQ = Executors.newCachedThreadPool(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable runnable) {
+            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     private final JSONCall call;
     private final URL base;
