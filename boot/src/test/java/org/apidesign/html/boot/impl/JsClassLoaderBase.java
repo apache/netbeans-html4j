@@ -106,4 +106,21 @@ public class JsClassLoaderBase {
         assertEquals(st.invoke(null), Boolean.TRUE, "Can return boolean");
     }
     
+    @Test public void callback() throws Throwable {
+        class R implements Runnable {
+            int cnt;
+            
+            @Override
+            public void run() {
+                cnt++;
+            }
+        }
+        R r = new R();
+        
+        Method inc = methodClass.getMethod("callback", Runnable.class);
+        inc.invoke(null, r);
+        
+        assertEquals(r.cnt, 1, "Callback happened");
+    }
+    
 }

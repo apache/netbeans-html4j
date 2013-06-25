@@ -20,11 +20,15 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import org.apidesign.html.boot.spi.Fn;
 
 /**
@@ -66,5 +70,56 @@ public final class FnUtils {
             }
         };
     }
+
+    static String callback(String body, ClassLoader loader) {
+        try {
+            return callbackImpl(body, loader);
+        } catch (ClassNotFoundException ex) {
+            throw new IllegalStateException("Can't parse " + body, ex);
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalStateException("Can't parse " + body, ex);
+        }
+    }
+    
+    private static String callbackImpl(String body, ClassLoader loader)
+    throws ClassNotFoundException, NoSuchMethodException {
+        StringBuilder sb = new StringBuilder();
+        int pos = 0;
+        for (;;) {
+            int next = body.indexOf(".@", pos);
+            if (next == -1) {
+                sb.append(body.substring(pos));
+                return sb.toString();
+            }
+            sb.append(body.substring(pos, next));
+            
+            int sigBeg = body.indexOf('(', next);
+            int sigEnd = body.indexOf(')', sigBeg);
+            
+            int colon4 = body.indexOf("::", next);
+            
+            if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
+                throw new IllegalStateException("Malformed body " + body);
+            }
+            
+            String fqn = body.substring(next + 2, colon4);
+            String method = body.substring(colon4 + 2, sigBeg);
+            String params = body.substring(sigBeg + 1, sigEnd);
+            
+            Class<?> clazz = Class.forName(fqn, false, loader);
+            Method m = clazz.getMethod(method);
+            
+            sb.append("['").append(m.getName()).append("(");
+            String sep = "";
+            for (Class<?> pt : m.getParameterTypes()) {
+                sb.append(sep).append(pt.getName());
+                sep = ",";
+            }
+            sb.append(")']");
+            
+            pos = sigEnd + 1;
+        }
+    }
+
     
 }

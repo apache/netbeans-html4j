@@ -51,4 +51,17 @@ public @interface JavaScriptBody {
      * <code>this</code>
      */
     public String body();
+
+    /** Should a special syntax for calling back into Java object be turned on?
+     * The syntax begins with <b>{@code @}</b> followed by fully qualified
+     * package name of the class. Now followed by <b>::</b> and a method in
+     * the class followed by its parameters enclosed inside <b>(...)</b>.
+     * This is the syntax one can use to call <code>run()</code> 
+     * method of {@link Runnable}:
+     * <pre>r.@java.lang.Runnable::run()()</pre>.
+     * 
+     * @return true, if the script should be scanned for special callback
+     *   syntax
+     */
+    public boolean javacall() default false;
 }

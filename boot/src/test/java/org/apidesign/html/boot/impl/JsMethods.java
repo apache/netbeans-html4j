@@ -51,4 +51,7 @@ public class JsMethods {
     public static boolean truth() {
         return false;
     }
+    
+    @JavaScriptBody(args = { "r" }, javacall=true, body = "r.@java.lang.Runnable::run()()")
+    public static native void callback(Runnable r);
 }

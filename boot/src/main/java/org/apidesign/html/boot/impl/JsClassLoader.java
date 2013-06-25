@@ -27,6 +27,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -125,7 +127,7 @@ abstract class JsClassLoader extends ClassLoader {
     protected abstract Fn defineFn(String code, String... names);
     
     
-    private static final class FindInClass extends ClassVisitor {
+    private final class FindInClass extends ClassVisitor {
         private String name;
         private int found;
         
@@ -352,6 +354,7 @@ abstract class JsClassLoader extends ClassLoader {
             private final class FindInAnno extends AnnotationVisitor {
                 private List<String> args = new ArrayList<String>();
                 private String body;
+                private boolean javacall = false;
 
                 public FindInAnno() {
                     super(Opcodes.ASM4);
@@ -361,6 +364,10 @@ abstract class JsClassLoader extends ClassLoader {
                 public void visit(String name, Object value) {
                     if (name == null) {
                         args.add((String) value);
+                        return;
+                    }
+                    if (name.equals("javacall")) { // NOI18N
+                        javacall = (Boolean)value;
                         return;
                     }
                     assert name.equals("body");
@@ -375,7 +382,10 @@ abstract class JsClassLoader extends ClassLoader {
                 @Override
                 public void visitEnd() {
                     if (body != null) {
-                        generateJSBody(args, body);
+                        generateJSBody(args, javacall ? 
+                            FnUtils.callback(body, JsClassLoader.this) : 
+                            body
+                        );
                     }
                 }
             }
