@@ -39,7 +39,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <net.java.html.version>${project.version}</net.java.html.version>
-    <brwsr.startpage>\${package.replace('.','/')}/index.html</brwsr.startpage>
   </properties>
   <build>
       <plugins>
@@ -50,16 +49,6 @@
               <configuration>
                   <source>1.7</source>
                   <target>1.7</target>
-              </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <version>2.14.1</version>
-              <configuration>
-                  <systemPropertyVariables>
-                      <vmtest.brwsrs>\${brwsr}</vmtest.brwsrs>
-                  </systemPropertyVariables>
               </configuration>
           </plugin>
           <plugin>
@@ -96,7 +85,7 @@
                       </goals>
                       <configuration>
                           <descriptors>
-                              <descriptor>src/main/assembly/fxbrwsr.xml</descriptor>
+                              <descriptor>src/main/assembly/html.java.net.xml</descriptor>
                           </descriptors>
                       </configuration>
                   </execution>

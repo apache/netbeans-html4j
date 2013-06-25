@@ -22,7 +22,6 @@ package org.apidesign.html.archetype.test;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.zip.ZipFile;
 import org.apache.maven.it.Verifier;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -32,7 +31,7 @@ import static org.testng.Assert.*;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public class VerifyArchetypeTest {
-    @Test public void fxBrwsrCompiles() throws Exception {
+    @Test public void projectCompiles() throws Exception {
         final File dir = new File("target/tests/fxcompile/").getAbsoluteFile();
         generateFromArchetype(dir);
         
@@ -51,7 +50,7 @@ public class VerifyArchetypeTest {
             }
         }
         
-        v.verifyTextInLog("fxcompile/o-a-test/target/o-a-test-1.0-SNAPSHOT-fxbrwsr.zip");
+        v.verifyTextInLog("fxcompile/o-a-test/target/o-a-test-1.0-SNAPSHOT-html.java.net.zip");
     }
     
     private Verifier generateFromArchetype(final File dir, String... params) throws Exception {
