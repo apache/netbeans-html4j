@@ -311,6 +311,13 @@ abstract class JsClassLoader extends ClassLoader {
                     super.visitTypeInsn(Opcodes.CHECKCAST, sv.returnType.getInternalName());
                     super.visitInsn(Opcodes.ARETURN);
                     break;
+                case Type.BOOLEAN:
+                    super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
+                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, 
+                        "java/lang/Boolean", "booleanValue", "()Z"
+                    );
+                    super.visitInsn(Opcodes.IRETURN);
+                    break;
                 default:
                     super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Number");
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, 

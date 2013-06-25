@@ -46,4 +46,9 @@ public class JsMethods {
     public native Object getThis();
     @JavaScriptBody(args = {"x"}, body = "return x;")
     public native int plusInst(int x);
+    
+    @JavaScriptBody(args = {}, body = "return true;")
+    public static boolean truth() {
+        return false;
+    }
 }

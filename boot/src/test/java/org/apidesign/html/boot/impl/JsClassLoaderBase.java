@@ -22,6 +22,7 @@ package org.apidesign.html.boot.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -97,6 +98,12 @@ public class JsClassLoaderBase {
         } catch (InvocationTargetException ex) {
             throw ex.getTargetException();
         }
+    }
+    
+    @Test public void truth() throws Throwable {
+        Method st = methodClass.getMethod("truth");
+        assertTrue((st.getModifiers() & Modifier.STATIC) != 0, "Is static");
+        assertEquals(st.invoke(null), Boolean.TRUE, "Can return boolean");
     }
     
 }

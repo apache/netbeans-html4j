@@ -47,14 +47,14 @@ public final class FXContext
 implements Technology<JSObject>, Transfer, Contexts.Provider {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     
-    @JavaScriptBody(args = {}, body = "return 1;")
-    private static int isJavaScriptEnabled() {
-        return 0;
+    @JavaScriptBody(args = {}, body = "return true;")
+    private static boolean isJavaScriptEnabled() {
+        return false;
     }
 
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
-        if (isJavaScriptEnabled() == 1) {
+        if (isJavaScriptEnabled()) {
             context.register(Technology.class, this, 100);
             context.register(Transfer.class, this, 100);
         }
