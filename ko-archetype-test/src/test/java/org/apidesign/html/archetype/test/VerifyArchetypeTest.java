@@ -22,7 +22,6 @@ package org.apidesign.html.archetype.test;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.zip.ZipFile;
 import org.apache.maven.it.Verifier;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -32,7 +31,7 @@ import static org.testng.Assert.*;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public class VerifyArchetypeTest {
-    @Test public void fxBrwsrCompiles() throws Exception {
+    @Test public void projectCompiles() throws Exception {
         final File dir = new File("target/tests/fxcompile/").getAbsoluteFile();
         generateFromArchetype(dir);
         
@@ -51,50 +50,9 @@ public class VerifyArchetypeTest {
             }
         }
         
-        v.verifyTextInLog("org.apidesign.bck2brwsr.launcher.FXBrwsrLauncher");
-        v.verifyTextInLog("fxcompile/o-a-test/target/o-a-test-1.0-SNAPSHOT-fxbrwsr.zip");
+        v.verifyTextInLog("fxcompile/o-a-test/target/o-a-test-1.0-SNAPSHOT-html.java.net.zip");
     }
     
-    @Test public void bck2BrwsrCompiles() throws Exception {
-        final File dir = new File("target/tests/b2bcompile/").getAbsoluteFile();
-        generateFromArchetype(dir);
-        
-        File created = new File(dir, "o-a-test");
-        assertTrue(created.isDirectory(), "Project created");
-        assertTrue(new File(created, "pom.xml").isFile(), "Pom file is in there");
-        
-        Verifier v = new Verifier(created.getAbsolutePath());
-        Properties sysProp = v.getSystemProperties();
-        if (Boolean.getBoolean("java.awt.headless")) {
-            sysProp.put("java.awt.headless", "true");
-        }
-        v.addCliOption("-Pbck2brwsr");
-        v.executeGoal("verify");
-        
-        v.verifyErrorFreeLog();
-        
-        // does pre-compilation to JavaScript
-        v.verifyTextInLog("j2js");
-        // uses Bck2BrwsrLauncher
-        v.verifyTextInLog("BaseHTTPLauncher stopServerAndBrwsr");
-        // building zip:
-        v.verifyTextInLog("b2bcompile/o-a-test/target/o-a-test-1.0-SNAPSHOT-bck2brwsr.zip");
-        
-        for (String l : v.loadFile(v.getBasedir(), v.getLogFileName(), false)) {
-            if (l.contains("fxbrwsr")) {
-                fail("No fxbrwsr:\n" + l);
-            }
-        }
-
-        File zip = new File(new File(created, "target"), "o-a-test-1.0-SNAPSHOT-bck2brwsr.zip");
-        assertTrue(zip.isFile(), "Zip file with website was created");
-        
-        ZipFile zf = new ZipFile(zip);
-        assertNotNull(zf.getEntry("public_html/index.html"), "index.html found");
-        assertNotNull(zf.getEntry("public_html/twitterExample.css"), "css file found");
-        
-    }
-
     private Verifier generateFromArchetype(final File dir, String... params) throws Exception {
         Verifier v = new Verifier(dir.getAbsolutePath());
         v.setAutoclean(false);

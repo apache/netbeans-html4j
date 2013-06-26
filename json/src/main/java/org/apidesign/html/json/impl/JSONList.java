@@ -40,6 +40,10 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     public void assign(Bindings model) {
+        if (this.model == null && isEmpty()) {
+            this.model = model;
+            return;
+        }
         if (this.model != model) {
             this.model = model;
             notifyChange();

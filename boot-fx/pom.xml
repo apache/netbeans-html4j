@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apidesign</groupId>
+    <artifactId>html</artifactId>
+    <version>0.4-SNAPSHOT</version>
+  </parent>
+  <groupId>org.apidesign.html</groupId>
+  <artifactId>boot-fx</artifactId>
+  <version>0.4-SNAPSHOT</version>
+  <name>FX WebView Bootstrap</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>javafx</artifactId>
+        <version>2.2</version>
+        <scope>system</scope>
+        <systemPath>${jfxrt.jar}</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apidesign.html</groupId>
+      <artifactId>net.java.html.boot</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+</project>

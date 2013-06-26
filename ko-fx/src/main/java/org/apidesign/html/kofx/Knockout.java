@@ -26,7 +26,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.web.WebEngine;
+import net.java.html.js.JavaScriptBody;
+import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -41,6 +42,7 @@ import org.apidesign.html.json.spi.PropertyBinding;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
+@JavaScriptResource("knockout-2.2.1.js")
 public final class Knockout {
     private static final Logger LOG = Logger.getLogger(Knockout.class.getName());
     /** used by tests */
@@ -59,8 +61,9 @@ public final class Knockout {
         return InvokeJS.KObject.call("array", arr);
     }
     
+    private static int cnt;
     public static <M> Knockout createBinding(Object model) {
-        Object bindings = InvokeJS.KObject.call("create", model);
+        Object bindings = InvokeJS.create(model, ++cnt);
         return new Knockout(bindings);
     }
 
@@ -82,14 +85,9 @@ public final class Knockout {
     static void bind(
         Object bindings, Object model, PropertyBinding pb, boolean primitive, boolean array
     ) {
-        WebEngine e = web();
-        if (e == null) {
-            return;
-        }
-
         final String prop = pb.getPropertyName();
         try {
-            InvokeJS.KObject.call("bind", bindings, pb, prop, "getValue", pb.isReadOnly() ? null : "setValue", primitive, array);
+            InvokeJS.bind(bindings, pb, prop, "getValue", pb.isReadOnly() ? null : "setValue", primitive, array);
             
             ((JSObject)bindings).setMember("ko-fx.model", model);
             LOG.log(Level.FINE, "binding defined for {0}: {1}", new Object[]{prop, ((JSObject)bindings).getMember(prop)});
@@ -98,75 +96,56 @@ public final class Knockout {
         }
     }
     static void expose(Object bindings, FunctionBinding f) {
-        WebEngine e = web();
-        if (e == null) {
-            return;
-        }
         final String prop = f.getFunctionName();
         try {
-            InvokeJS.KObject.call("expose", bindings, f, prop, "call");
+            InvokeJS.expose(bindings, f, prop, "call");
         } catch (Throwable ex) {
             LOG.log(Level.SEVERE, "Cannot define binding for " + prop + " in model " + f, ex);
         }
     }
     
     static void applyBindings(Object bindings) {
-        if (web() != null) {
-            JSObject ko = (JSObject) web().executeScript("ko");
-            ko.call("applyBindings", bindings);
-        }
+        InvokeJS.applyBindings(bindings);
     }
-    
-    static WebEngine web() {
-        return (WebEngine) System.getProperties().get("webEngine");
-    }
-    
     
     private static final class InvokeJS {
         static final JSObject KObject;
 
         static {
-            final InputStream koScript = Knockout.class.getResourceAsStream("knockout-2.2.1.js");
-            assert koScript != null : "Can't load knockout.js";
-            BufferedReader r = new BufferedReader(new InputStreamReader(koScript));
-            StringBuilder sb = new StringBuilder();
-            for (;;) {
-                try {
-                    String l = r.readLine();
-                    if (l == null) {
-                        break;
-                    }
-                    sb.append(l).append('\n');
-                } catch (IOException ex) {
-                    throw new IllegalStateException(ex);
-                }
-            }
-            web().executeScript(sb.toString());
-            Object ko = web().executeScript("ko");
-            assert ko != null : "Knockout library successfully defined 'ko'";
-
-            Console.register(web());
-            KObject = (JSObject) web().executeScript(
-                "(function(scope) {"
-                + "  var kCnt = 0; "
-                + "  scope.KObject = {};"
-                + "  scope.KObject.create= function(value) {"
-                + "    var cnt = ++kCnt;"
-                + "    var ret = {};"
-                + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); };"
-                + "    return ret;"
-                + "  };"
-                + "  scope.KObject.array= function() {"
+            Console.register();
+            KObject = (JSObject) kObj();
+        }
+        
+        @JavaScriptBody(args = { "s" }, body = "return eval(s);")
+        private static native Object exec(String s);
+        
+        @JavaScriptBody(args = {}, body =
+                  "  var k = {};"
+                + "  k.array= function() {"
                 + "    return Array.prototype.slice.call(arguments);"
                 + "  };"
-                + "  scope.KObject.expose = function(bindings, model, prop, sig) {"
-                + "    bindings[prop] = function(data, ev) {"
-                //            + "         console.log(\"  callback on prop: \" + prop);"
-                + "      model[sig](data, ev);"
-                + "    };"
-                + "  };"
-                + "  scope.KObject.bind = function(bindings, model, prop, getter, setter, primitive, array) {"
-                + "    var bnd = {"
+                + "  return k;"
+        )
+        private static native Object kObj();
+        
+        @JavaScriptBody(args = { "value", "cnt " }, body =
+                  "    var ret = {};"
+                + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); };"
+                + "    return ret;"
+        )
+        static native Object create(Object value, int cnt);
+        
+        @JavaScriptBody(args = { "bindings", "model", "prop", "sig" }, body = 
+                "    bindings[prop] = function(data, ev) {"
+              //            + "         console.log(\"  callback on prop: \" + prop);"
+              + "      model[sig](data, ev);"
+              + "    };"
+        )
+        static native Object expose(Object bindings, Object model, String prop, String sig);
+
+        
+        @JavaScriptBody(args = { "bindings", "model", "prop", "getter", "setter", "primitive", "array" }, body = 
+                  "    var bnd = {"
                 + "      read: function() {"
                 + "      try {"
                 + "        var v = model[getter]();"
@@ -194,9 +173,10 @@ public final class Knockout {
                 + "      };"
                 + "    };"
                 + "    bindings[prop] = ko.computed(bnd);"
-                + "  };"
-                + "})(window); window.KObject");
-        }
-        
+        )
+        static native void bind(Object binding, Object model, String prop, String getter, String setter, boolean primitive, boolean array);
+
+        @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);")
+        private static native void applyBindings(Object bindings);
     }
 }

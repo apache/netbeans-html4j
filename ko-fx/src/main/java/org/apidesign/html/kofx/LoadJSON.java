@@ -33,10 +33,11 @@ import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.scene.web.WebEngine;
+import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.JSONCall;
 import org.json.JSONArray;
@@ -52,7 +53,14 @@ import org.json.JSONTokener;
  */
 final class LoadJSON implements Runnable {
     private static final Logger LOG = FXContext.LOG;
-    private static final Executor REQ = Executors.newCachedThreadPool();
+    private static final Executor REQ = Executors.newCachedThreadPool(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable runnable) {
+            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     private final JSONCall call;
     private final URL base;
@@ -130,10 +138,14 @@ final class LoadJSON implements Runnable {
                 }
             } else {
                 int ch = is.read();
-                array = ch == '[';
-                is.unread(ch);
-                if (!array && ch != '{') {
+                if (ch == -1) {
                     string = true;
+                } else {
+                    array = ch == '[';
+                    is.unread(ch);
+                    if (!array && ch != '{') {
+                        string = true;
+                    }
                 }
             }
             try {
@@ -216,18 +228,17 @@ final class LoadJSON implements Runnable {
             throw new IOException(ex);
         }
     }
-    
-    private static String findBaseURL() {
-        WebEngine eng = (WebEngine) System.getProperties().get("webEngine");
-        return (String) eng.executeScript(
-            "var h;"
-            + "if (!!window && !!window.location && !!window.location.href)\n"
-            + "  h = window.location.href;\n"
-            + "else "
-            + "  h = null;"
-            + "h\n");
-    }
 
+    @JavaScriptBody(args = {  }, body = 
+          "var h;"
+        + "if (!!window && !!window.location && !!window.location.href)\n"
+        + "  h = window.location.href;\n"
+        + "else "
+        + "  h = null;"
+        + "return h;\n"
+    )
+    private static native String findBaseURL();
+    
     private static boolean isDefined(Object val) {
         return !"undefined".equals(val);
     }

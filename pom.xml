@@ -13,8 +13,6 @@
   </parent>  
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <bck2brwsr.version>0.7.2</bck2brwsr.version>
-      <bck2brwsr.launcher.version>0.7.2</bck2brwsr.launcher.version>
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
   </properties>
@@ -23,9 +21,10 @@
     <module>json-tck</module>
     <module>ko-archetype</module>
     <module>ko-archetype-test</module>
-    <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
     <module>context</module>
+    <module>boot</module>
+    <module>boot-fx</module>
   </modules>
   <licenses>
       <license>

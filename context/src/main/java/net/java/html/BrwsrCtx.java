@@ -25,9 +25,10 @@ import org.apidesign.html.context.impl.CtxAccssr;
 import org.apidesign.html.context.impl.CtxImpl;
 import org.apidesign.html.context.spi.Contexts;
 
-/** Represents context where the {@link Model} and other objects
+/** Represents context where the <code>net.java.html.json.Model</code>
+ * and other objects
  * operate in. The context is usually a particular HTML page in a browser.
- * The context is also associated with the actual HTML rendering technology
+ * The context is also associated with the actual HTML technology
  * in the HTML page - there is likely to be different context for 
  * <a href="http://knockoutjs.com">knockout.js</a> and different one
  * for <a href="http://angularjs.org">angular</a>.
@@ -68,7 +69,17 @@ public final class BrwsrCtx {
     public static BrwsrCtx findDefault(Class<?> requestor) {
         org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = false;
-        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class)) {
+        
+        ClassLoader l;
+        try {
+            l = requestor.getClassLoader();
+        } catch (SecurityException ex) {
+            l = null;
+        }
+        
+        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(
+            org.apidesign.html.context.spi.Contexts.Provider.class, l
+        )) {
             cp.fillContext(cb, requestor);
             found = true;
         }

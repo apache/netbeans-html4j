@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Bck2Brwsr's Twitter</title>
+        <title>Knockout in Java Twitter</title>
     </head>
     <body>
         <link href='twitterExample.css' rel='Stylesheet' ></link>
@@ -19,7 +19,7 @@
         </style>
         
         
-        <h2>Bck2Brwsr's Twitter</h2>
+        <h2>Knockout in Java Twitter</h2>
         
         <p>
         This code is based on original 
@@ -33,11 +33,8 @@
         dense and shorter than the original JavaScript model.
         </p>
         <p>
-        The project has two profiles. Either it executes in real Java virtual
-        machine and renders using JavaFX's WebView (use <code>fxbrwsr</code> profile
-        - the default). It can also run directly in a browser via
-        <a href="http://bck2brwsr.apidesign.org">Bck2Brwsr</a> virtual machine
-        (use <code>bck2brwsr</code> profile).
+        The project executes in real Java virtual
+        machine and renders using JavaFX's WebView.
         </p>
         
         <div class='liveExample'>
@@ -78,13 +75,5 @@
                 </table>
             </div>
         </div>
-        
-        <script src="bck2brwsr.js"></script>
-        <script type="text/javascript">
-            var vm = bck2brwsr('${artifactId}-${version}.jar');
-            vm.loadClass('${package}.TwitterClient');
-        </script>
-
-
     </body>
 </html>

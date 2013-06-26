@@ -325,7 +325,11 @@ public final class ModelProcessor extends AbstractProcessor {
                             }
                             w.append("ret[" + cnt + "]).");
                             w.append(type).append("Value();\n");
-                        } else {
+                        } else if (isModel[0]) {
+                            w.append("    this.prop_").append(pn).append(" = org.apidesign.html.json.impl.JSON.read");
+                            w.append("(c, " + type + ".class, ");
+                            w.append("ret[" + cnt + "]);\n");
+                        }else {
                             w.append("    this.prop_").append(pn);
                             w.append(" = (").append(type).append(')');
                             w.append("ret[" + cnt + "];\n");

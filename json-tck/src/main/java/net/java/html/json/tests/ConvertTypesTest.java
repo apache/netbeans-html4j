@@ -27,22 +27,24 @@ import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
 import org.apidesign.html.json.impl.JSON;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    private static InputStream createIS(boolean includeSex) 
+    private static InputStream createIS(boolean includeSex, boolean includeAddress) 
     throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"firstName\" : \"son\",\n");
         sb.append("  \"lastName\" : \"dj\" \n");
         if (includeSex) {
-            sb.append(",  \"sex\" : \"MALE\" ");
+            sb.append(",  \"sex\" : \"MALE\" \n");
+        }
+        if (includeAddress) {
+            sb.append(",  \"address\" : { \"street\" : \"Schnirchova\" } \n");
         }
         sb.append("}\n");
         return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
@@ -55,24 +57,24 @@ public final class ConvertTypesTest {
         if (includeSex) {
             map.put("sex", "MALE");
         }
-        return Utils.createObject(map);
+        return Utils.createObject(map, ConvertTypesTest.class);
     }
     
-    @BrwsrTest
+    @KOTest
     public void testConvertToPeople() throws Exception {
         final Object o = createJSON(true);
         
-        Person p = JSON.read(Utils.newContext(), Person.class, o);
+        Person p = JSON.read(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
     }
 
-    @BrwsrTest
+    @KOTest
     public void parseConvertToPeople() throws Exception {
-        final BrwsrCtx c = Utils.newContext();
-        final InputStream o = createIS(true);
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, false);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -80,22 +82,36 @@ public final class ConvertTypesTest {
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
     }
+    
+    @KOTest
+    public void parseConvertToPeopleWithAddress() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, true);
+        
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assert p.getAddress() != null : "Some address provided";
+        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+    }
 
-    @BrwsrTest
+    @KOTest
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
-        Person p = JSON.read(Utils.newContext(), Person.class, o);
+        Person p = JSON.read(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert p.getSex() == null : "No sex: " + p.getSex();
     }
     
-    @BrwsrTest
+    @KOTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
-        final BrwsrCtx c = Utils.newContext();
-        final InputStream o = createIS(false);
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false);
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
@@ -103,7 +119,7 @@ public final class ConvertTypesTest {
         assert p.getSex() == null : "No sex: " + p.getSex();
     }
     
-    static Object[] create() {
-        return VMTest.create(ConvertTypesTest.class);
+    private static BrwsrCtx newContext() {
+        return Utils.newContext(ConvertTypesTest.class);
     }
 }
