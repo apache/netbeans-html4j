@@ -6,7 +6,7 @@
   <formats>
       <format>zip</format>
   </formats>
-  <baseDirectory>${project.build.finalName}-fxbrwsr</baseDirectory>
+  <baseDirectory>${project.build.finalName}-app</baseDirectory>
   <dependencySets>
     <dependencySet>
         <useProjectArtifact>false</useProjectArtifact>

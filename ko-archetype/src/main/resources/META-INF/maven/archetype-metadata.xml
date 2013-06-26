@@ -36,7 +36,7 @@
     <fileSet filtered="true" packaged="false">
       <directory>assembly</directory>
       <includes>
-        <include>fxbrwsr-assembly.xml</include>
+        <include>html.java.net-assembly.xml</include>
       </includes>
     </fileSet>
   </fileSets>    
