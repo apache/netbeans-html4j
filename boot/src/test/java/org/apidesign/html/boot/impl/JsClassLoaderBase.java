@@ -127,4 +127,13 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("sumArr", int[].class);
         assertEquals(st.invoke(null, new int[] { 1, 2, 3 }), 6, "1+2+3 is six");
     }
+    
+    @Test public void javaScriptResource() throws Throwable {
+        try {
+            Method st = methodClass.getMethod("useExternalMul", int.class, int.class);
+            assertEquals(st.invoke(null, 6, 7), 42, "Meaning of JavaScript?");
+        } catch (InvocationTargetException ex) {
+            throw ex.getTargetException();
+        }
+    }
 }

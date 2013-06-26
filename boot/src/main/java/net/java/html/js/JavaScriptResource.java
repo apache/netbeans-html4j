@@ -18,21 +18,25 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.boot.spi;
+package net.java.html.js;
 
-import java.io.Reader;
-import java.net.URL;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import net.java.html.boot.BrowserBuilder;
 
-/**
+/** When a class annotated by this annotation is loaded into the Java virtual
+ * machine by {@link BrowserBuilder} classloader, the script referenced by
+ * this annotation gets loaded into associated JavaScript executor environment.
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public abstract class Fn {
-    public abstract Object invoke(Object thiz, Object... args) throws Exception;
-    
-    public interface Presenter {
-        public Fn defineFn(String code, String... names);
-        public void displayPage(URL page, Runnable onPageLoad);
-        public void loadScript(Reader code) throws Exception;
-    }
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+public @interface JavaScriptResource {
+    /** The JavaScript file to load in before associated class can execute.
+     * @return relative path with respect to the annotated class
+     */
+    public String value();
 }

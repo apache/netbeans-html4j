@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.io.Reader;
 import org.apidesign.html.boot.spi.Fn;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -93,6 +94,11 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
             @Override
             protected Enumeration<URL> findResources(String name) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            protected void loadScript(Reader code) throws ScriptException {
+                eng.eval(code);
             }
         };
         

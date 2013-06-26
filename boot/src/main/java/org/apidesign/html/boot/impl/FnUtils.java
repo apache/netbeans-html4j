@@ -20,6 +20,9 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,6 +67,11 @@ public final class FnUtils {
             @Override
             protected Fn defineFn(String code, String... names) {
                 return d.defineFn(code, names);
+            }
+
+            @Override
+            protected void loadScript(Reader code) throws Exception {
+                d.loadScript(code);
             }
         };
     }
@@ -145,5 +153,24 @@ public final class FnUtils {
         }
         return Class.forName(t.getClassName(), false, loader);
     }
-    
+
+    static void loadScript(JsClassLoader jcl, String resource) {
+        final InputStream script = jcl.getResourceAsStream(resource);
+        if (script == null) {
+            throw new NullPointerException("Can't find " + resource);
+        }
+        try {
+            Reader isr = null;
+            try {
+                isr = new InputStreamReader(script, "UTF-8");
+                jcl.loadScript(isr);
+            } finally {
+                if (isr != null) {
+                    isr.close();
+                }
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException("Can't execute " + resource, ex);
+        } 
+    }
 }

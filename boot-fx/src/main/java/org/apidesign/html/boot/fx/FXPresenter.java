@@ -20,6 +20,8 @@
  */
 package org.apidesign.html.boot.fx;
 
+import java.io.BufferedReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -92,6 +94,20 @@ public final class FXPresenter implements Fn.Presenter {
 
         JSObject x = (JSObject) engine.executeScript(sb.toString());
         return new JSFn(x);
+    }
+
+    @Override
+    public void loadScript(Reader code) throws Exception {
+        BufferedReader r = new BufferedReader(code);
+        StringBuilder sb = new StringBuilder();
+        for (;;) {
+            String l = r.readLine();
+            if (l == null) {
+                break;
+            }
+            sb.append(l).append('\n');
+        }
+        engine.executeScript(sb.toString());
     }
 
     @Override

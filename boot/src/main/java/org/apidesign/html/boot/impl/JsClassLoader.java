@@ -23,6 +23,7 @@ package org.apidesign.html.boot.impl;
 import org.apidesign.html.boot.spi.Fn;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -126,7 +127,7 @@ abstract class JsClassLoader extends ClassLoader {
     }
     
     protected abstract Fn defineFn(String code, String... names);
-    
+    protected abstract void loadScript(Reader code) throws Exception;
     
     private final class FindInClass extends ClassVisitor {
         private String name;
@@ -141,7 +142,14 @@ abstract class JsClassLoader extends ClassLoader {
             this.name = name;
             super.visit(version, access, name, signature, superName, interfaces);
         }
-        
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            if ("Lnet/java/html/js/JavaScriptResource;".equals(desc)) {
+                return new LoadResource();
+            }
+            return super.visitAnnotation(desc, visible);
+        }
         
 
         @Override
@@ -400,6 +408,24 @@ abstract class JsClassLoader extends ClassLoader {
                             body
                         );
                     }
+                }
+            }
+        }
+        
+        private final class LoadResource extends AnnotationVisitor {
+            public LoadResource() {
+                super(Opcodes.ASM4);
+            }
+            
+            @Override
+            public void visit(String attrName, Object value)  {
+                String relPath = (String) value;
+                if (relPath.startsWith("/")) {
+                    FnUtils.loadScript(JsClassLoader.this, relPath);
+                } else {
+                    int last = name.lastIndexOf('/');
+                    String fullPath = name.substring(0, last + 1) + relPath;
+                    FnUtils.loadScript(JsClassLoader.this, fullPath);
                 }
             }
         }

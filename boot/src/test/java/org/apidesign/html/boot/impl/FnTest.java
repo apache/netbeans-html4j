@@ -21,6 +21,7 @@
 
 package org.apidesign.html.boot.impl;
 
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -101,6 +102,11 @@ public class FnTest extends JsClassLoaderBase {
             @Override
             public void displayPage(URL resource, Runnable r) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void loadScript(Reader code) throws Exception {
+                eng.eval(code);
             }
         }
         Impl impl = new Impl();

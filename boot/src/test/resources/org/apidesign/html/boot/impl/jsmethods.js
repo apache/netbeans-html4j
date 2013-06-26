@@ -1,4 +1,4 @@
-/**
+/*
  * HTML via Java(tm) Language Bindings
  * Copyright (C) 2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  *
@@ -18,21 +18,5 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.boot.spi;
 
-import java.io.Reader;
-import java.net.URL;
-
-/**
- *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
- */
-public abstract class Fn {
-    public abstract Object invoke(Object thiz, Object... args) throws Exception;
-    
-    public interface Presenter {
-        public Fn defineFn(String code, String... names);
-        public void displayPage(URL page, Runnable onPageLoad);
-        public void loadScript(Reader code) throws Exception;
-    }
-}
+function mul(x, y) { return x * y; }

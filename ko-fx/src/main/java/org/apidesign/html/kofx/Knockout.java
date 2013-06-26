@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
+import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
 import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -41,6 +42,7 @@ import org.apidesign.html.json.spi.PropertyBinding;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
+@JavaScriptResource("knockout-2.2.1.js")
 public final class Knockout {
     private static final Logger LOG = Logger.getLogger(Knockout.class.getName());
     /** used by tests */
@@ -110,25 +112,6 @@ public final class Knockout {
         static final JSObject KObject;
 
         static {
-            final InputStream koScript = Knockout.class.getResourceAsStream("knockout-2.2.1.js");
-            assert koScript != null : "Can't load knockout.js";
-            BufferedReader r = new BufferedReader(new InputStreamReader(koScript));
-            StringBuilder sb = new StringBuilder();
-            for (;;) {
-                try {
-                    String l = r.readLine();
-                    if (l == null) {
-                        break;
-                    }
-                    sb.append(l).append('\n');
-                } catch (IOException ex) {
-                    throw new IllegalStateException(ex);
-                }
-            }
-            exec(sb.toString());
-            Object ko = exec("ko");
-            assert ko != null : "Knockout library successfully defined 'ko'";
-
             Console.register();
             KObject = (JSObject) kObj();
         }

@@ -21,12 +21,14 @@
 package org.apidesign.html.boot.impl;
 
 import net.java.html.js.JavaScriptBody;
+import net.java.html.js.JavaScriptResource;
 
 
 /**
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
+@JavaScriptResource("jsmethods.js")
 public class JsMethods {
     @JavaScriptBody(args = {}, body = "return 42;")
     public static Object fortyTwo() {
@@ -67,4 +69,7 @@ public class JsMethods {
     public static int sumArr(int... arr) {
         return sumArr(new Arithm(), arr);
     }
+    
+    @JavaScriptBody(args = { "x", "y" }, body = "return mul(x, y);")
+    public static native int useExternalMul(int x, int y);
 }
