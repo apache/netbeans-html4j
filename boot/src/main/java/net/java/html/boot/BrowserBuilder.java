@@ -30,11 +30,39 @@ import java.util.Enumeration;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.boot.impl.FindResources;
 
-/**
+/** Use this builder to launch your Java/HTML based application. Typical
+ * usage in a main method of your application looks like this: 
+ * <pre>
+ * 
+ * <b>public static void</b> <em>main</em>(String... args) {
+ *     BrowserBuilder.{@link #newBrowser}.
+ *          {@link #loadClass(java.lang.Class) loadClass(YourMain.class)}.
+ *          {@link #loadPage(java.lang.String) loadPage("index.html")}.
+ *          {@link #invoke(java.lang.String, java.lang.String[]) invoke("initialized", args)}.
+ *          {@link #showAndWait()};
+ *     System.exit(0);
+ * }
+ * </pre>
+ * The above will load <code>YourMain</code> class via
+ * a special classloader, it will locate an <code>index.html</code> (relative
+ * to <code>YourMain</code> class) and show it in a browser window. When the
+ * initialization is over, a <b>public static</b> method <em>initialized</em>
+ * in <code>YourMain</code> will be called with provided string parameters.
+ * <p>
+ * This module provides only API for building browsers. To use it properly one
+ * also needs an implementation on the classpath of one's application. For example
+ * use: <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;org.apidesign.html&lt;/groupId&gt;
+ *   &lt;artifactId&gt;boot-fx&lt;/artifactId&gt;
+ *   &lt;scope&gt;runtime&lt;/scope&gt;
+ * &lt;/dependency&gt;
+ * </pre>
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -50,31 +78,68 @@ public final class BrowserBuilder {
     
     private BrowserBuilder() {
     }
-    
+
+    /** Entry method to obtain a new browser builder. Follow by calling 
+     * its instance methods like {@link #loadClass(java.lang.Class)} and
+     * {@link #loadPage(java.lang.String)}.
+     * 
+     * @return new browser builder
+     */
     public static BrowserBuilder newBrowser() {
         return new BrowserBuilder();
     }
     
-    public BrowserBuilder loadPage(String resource) {
-        this.resource = resource;
-        return this;
-    }
-    
+    /** The class to load when the browser is initialized. This class
+     * is loaded by a special classloader (that supports {@link JavaScriptBody}
+     * and co.). 
+     * 
+     * @param mainClass the class to load and resolve when the browser is ready
+     * @return this builder
+     */
     public BrowserBuilder loadClass(Class<?> mainClass) {
         this.clazz = mainClass;
         return this;
     }
 
-    // invoked on browser thread
+    /** Page to load into the browser. If the <code>page</code> represents
+     * a {@link URL} known to the Java system, the URL is passed to the browser. 
+     * Otherwise the system seeks for the resource via {@link Class#getResource(java.lang.String)}
+     * method.
+     * 
+     * @param page the location (relative, absolute, or URL) of a page to load
+     * @return this browser
+     */
+    public BrowserBuilder loadPage(String page) {
+        this.resource = page;
+        return this;
+    }
+    
+    /** Specifies callback method to notify the application that the browser is ready.
+     * There should be a <b>public static</b> method in the class specified
+     * by {@link #loadClass(java.lang.Class)} which takes an array of {@link String}
+     * argument. The method is called on the browser dispatch thread one
+     * the browser finishes loading of the {@link #loadPage(java.lang.String) HTML page}.
+     * 
+     * @param methodName name of a method to seek for
+     * @param args parameters to pass to the method
+     * @return this builder
+     */
     public BrowserBuilder invoke(String methodName, String... args) {
         this.methodName = methodName;
         this.methodArgs = args;
         return this;
     }
-    
+
+    /** Shows the browser, loads specified page in and executes the 
+     * {@link #invoke(java.lang.String, java.lang.String[]) initialization method}.
+     * The method returns when the browser is closed.
+     * 
+     * @throws NullPointerException if some of essential parameters (like {@link #loadPage(java.lang.String) page} or
+     *    {@link #loadClass(java.lang.Class) class} have not been specified
+     */
     public void showAndWait() {
         if (resource == null) {
-            throw new IllegalStateException("Need to specify resource via loadPage method");
+            throw new NullPointerException("Need to specify resource via loadPage method");
         }
         
         FImpl impl = new FImpl(clazz.getClassLoader());
