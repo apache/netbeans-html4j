@@ -27,7 +27,9 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -93,11 +95,11 @@ abstract class JsClassLoader extends ClassLoader {
                 is.close();
                 is = null;
                 ClassReader cr = new ClassReader(arr);
-                FindInClass tst = new FindInClass(null);
+                FindInClass tst = new FindInClass(null, new HashMap<String,String>());
                 cr.accept(tst, 0);
                 if (tst.found > 0) {
                     ClassWriter w = new ClassWriterEx(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-                    FindInClass fic = new FindInClass(w);
+                    FindInClass fic = new FindInClass(w, tst.methods);
                     cr.accept(fic, 0);
                     arr = w.toByteArray();
                 }
@@ -130,9 +132,11 @@ abstract class JsClassLoader extends ClassLoader {
     private final class FindInClass extends ClassVisitor {
         private String name;
         private int found;
+        private final Map<String,String> methods;
         
-        public FindInClass(ClassVisitor cv) {
+        public FindInClass(ClassVisitor cv, Map<String,String> methods) {
             super(Opcodes.ASM4, cv);
+            this.methods = methods;
         }
 
         @Override
@@ -152,6 +156,9 @@ abstract class JsClassLoader extends ClassLoader {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            int end = desc.indexOf(')');
+            methods.put(name + desc.substring(0, end + 1), desc);
+            
             return new FindInMethod(access, name, desc,
                 super.visitMethod(access & (~Opcodes.ACC_NATIVE), name, desc, signature, exceptions)
             );
@@ -402,7 +409,7 @@ abstract class JsClassLoader extends ClassLoader {
                 public void visitEnd() {
                     if (body != null) {
                         generateJSBody(args, javacall ? 
-                            FnUtils.callback(body, JsClassLoader.this) : 
+                            FnUtils.callback(body, JsClassLoader.this, FindInClass.this.name, FindInClass.this.methods) : 
                             body
                         );
                     }

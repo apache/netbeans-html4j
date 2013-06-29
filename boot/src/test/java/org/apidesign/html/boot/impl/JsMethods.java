@@ -72,4 +72,7 @@ public class JsMethods {
     
     @JavaScriptBody(args = { "x", "y" }, body = "return mul(x, y);")
     public static native int useExternalMul(int x, int y);
+    
+    @JavaScriptBody(args = { "m" }, javacall = true, body = "return m.@org.apidesign.html.boot.impl.JsMethods::getThis()()")
+    public static native JsMethods returnYourSelf(JsMethods m);
 }

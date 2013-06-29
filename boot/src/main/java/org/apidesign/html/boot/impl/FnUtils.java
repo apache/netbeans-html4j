@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import org.apidesign.html.boot.spi.Fn;
 import org.objectweb.asm.Type;
 
@@ -76,9 +77,9 @@ public final class FnUtils {
         };
     }
 
-    static String callback(String body, ClassLoader loader) {
+    static String callback(String body, ClassLoader loader, String ownName, Map<String,String> ownMethods) {
         try {
-            return callbackImpl(body, loader);
+            return callbackImpl(body, loader, ownName, ownMethods);
         } catch (ClassNotFoundException ex) {
             throw new IllegalStateException("Can't parse " + body, ex);
         } catch (NoSuchMethodException ex) {
@@ -86,8 +87,9 @@ public final class FnUtils {
         }
     }
     
-    private static String callbackImpl(String body, ClassLoader loader)
-    throws ClassNotFoundException, NoSuchMethodException {
+    private static String callbackImpl(
+        String body, ClassLoader loader, String ownName, Map<String,String> ownMethods
+    ) throws ClassNotFoundException, NoSuchMethodException {
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         for (;;) {
@@ -111,21 +113,36 @@ public final class FnUtils {
             String method = body.substring(colon4 + 2, sigBeg);
             String params = body.substring(sigBeg, sigEnd + 1);
             
-            Class<?> clazz = Class.forName(fqn, false, loader);
-            final Type[] argTps = Type.getArgumentTypes(params);
-            Class<?>[] argCls = new Class<?>[argTps.length];
-            for (int i = 0; i < argCls.length; i++) {
-                argCls[i] = toClass(argTps[i], loader);
+            if (fqn.equals(ownName.replace('/', '.'))) {
+                if (!ownMethods.containsKey(method + params)) {
+                    throw new IllegalStateException("Wrong refernece to " + method + params);
+                }
+                sb.append("['").append(method).append("(");
+                final Type[] argTps = Type.getArgumentTypes(params);
+                Class<?>[] argCls = new Class<?>[argTps.length];
+                String sep = "";
+                for (int i = 0; i < argCls.length; i++) {
+                    sb.append(sep).append(toClass(argTps[i], loader).getName());
+                    sep = ",";
+                }
+                sb.append(")']");
+            } else {
+                Class<?> clazz = Class.forName(fqn, false, loader);
+                final Type[] argTps = Type.getArgumentTypes(params);
+                Class<?>[] argCls = new Class<?>[argTps.length];
+                for (int i = 0; i < argCls.length; i++) {
+                    argCls[i] = toClass(argTps[i], loader);
+                }
+                Method m = clazz.getMethod(method, argCls);
+
+                sb.append("['").append(m.getName()).append("(");
+                String sep = "";
+                for (Class<?> pt : m.getParameterTypes()) {
+                    sb.append(sep).append(pt.getName());
+                    sep = ",";
+                }
+                sb.append(")']");
             }
-            Method m = clazz.getMethod(method, argCls);
-            
-            sb.append("['").append(m.getName()).append("(");
-            String sep = "";
-            for (Class<?> pt : m.getParameterTypes()) {
-                sb.append(sep).append(pt.getName());
-                sep = ",";
-            }
-            sb.append(")']");
             
             pos = sigEnd + 1;
         }

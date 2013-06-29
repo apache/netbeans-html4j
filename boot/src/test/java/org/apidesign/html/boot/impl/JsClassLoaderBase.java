@@ -136,4 +136,15 @@ public class JsClassLoaderBase {
             throw ex.getTargetException();
         }
     }
+    
+    @Test public void callJavaScriptMethodOnOwnClass() throws Throwable {
+        try {
+            Object thiz = methodClass.newInstance();
+            Method st = methodClass.getMethod("returnYourSelf", methodClass);
+            assertEquals(st.invoke(null, thiz), thiz, "Returns this");
+        } catch (InvocationTargetException ex) {
+            throw ex.getTargetException();
+        }
+        
+    }
 }
