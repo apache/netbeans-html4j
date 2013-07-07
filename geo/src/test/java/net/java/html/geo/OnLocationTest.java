@@ -41,7 +41,7 @@ public class OnLocationTest {
         h.stop();
     }
     
-    @Test public void onLocationHandleCallback() {
+    @Test public void onLocationHandleCallback() throws Throwable {
         net.java.html.geo.Position.Handle h = OnLocationHandle.createQuery();
         cnt = 0;
         h.onLocation(new Position());
@@ -59,11 +59,11 @@ public class OnLocationTest {
 
     int instCnt;
     Throwable instT;
-    @OnLocation(onError = "someError") void instance(Position p) {
+    @OnLocation(onError = "someError") void instance(Position p) throws Error {
         assertNotNull(p, "Some position passed in");
         instCnt++;
     }
-    void someError(Throwable t) {
+    void someError(Throwable t) throws Exception {
         instT = t;
         instCnt++;
     }
@@ -79,14 +79,14 @@ public class OnLocationTest {
         h.stop();
     }
     
-    @Test public void onInstanceCallback() {
+    @Test public void onInstanceCallback() throws Throwable {
         OnLocationTest t = new OnLocationTest();
         net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(t);
         h.onLocation(new Position());
         assertEquals(t.instCnt, 1, "One callback made");
     }
 
-    @Test public void onInstanceError() {
+    @Test public void onInstanceError() throws Throwable {
         net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(this);
         InterruptedException e = new InterruptedException();
         h.onError(e);

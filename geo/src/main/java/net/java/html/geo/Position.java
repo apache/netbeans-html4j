@@ -62,9 +62,9 @@ public final class Position {
             this.oneTime = oneTime;
         }
 
-        protected abstract void onLocation(Position p);
+        protected abstract void onLocation(Position p) throws Throwable;
 
-        protected abstract void onError(Throwable t);
+        protected abstract void onError(Throwable t) throws Throwable;
 
         public void setHighAccuracy(boolean enable) {
             this.enableHighAccuracy = enable;
