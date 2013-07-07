@@ -58,8 +58,13 @@ public class OnLocationTest {
     }
 
     int instCnt;
-    @OnLocation void instance(Position p) {
+    Throwable instT;
+    @OnLocation(onError = "someError") void instance(Position p) {
         assertNotNull(p, "Some position passed in");
+        instCnt++;
+    }
+    void someError(Throwable t) {
+        instT = t;
         instCnt++;
     }
     
@@ -79,6 +84,14 @@ public class OnLocationTest {
         GeoHandle h = InstanceHandle.createWatch(t);
         h.onLocation(new Position());
         assertEquals(t.instCnt, 1, "One callback made");
+    }
+
+    @Test public void onInstanceError() {
+        GeoHandle h = InstanceHandle.createWatch(this);
+        InterruptedException e = new InterruptedException();
+        h.onError(e);
+        assertEquals(instCnt, 1, "One callback made");
+        assertEquals(instT, e, "The same exception passed in");
     }
 
     @Test public void createRepeatableWatch() {
