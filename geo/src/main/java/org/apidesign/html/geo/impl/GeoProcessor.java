@@ -135,6 +135,9 @@ public final class GeoProcessor extends AbstractProcessor {
             if (ol.onError().isEmpty()) {
                 w.append("    t.printStackTrace();");
             } else {
+                if (!findOnError(me, te, ol.onError(), isStatic)) {
+                    return false;
+                }
                 if (isStatic) {
                     w.append("    ").append(te.getSimpleName()).append(".");
                 } else {
@@ -160,5 +163,37 @@ public final class GeoProcessor extends AbstractProcessor {
         }
         
         return true;
+    }
+
+    private boolean findOnError(Element errElem, TypeElement te, String name, boolean onlyStatic) {
+        String err = null;
+        for (Element e : te.getEnclosedElements()) {
+            if (e.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            if (!e.getSimpleName().contentEquals(name)) {
+                continue;
+            }
+            if (onlyStatic && !e.getModifiers().contains(Modifier.STATIC)) {
+                errElem = e;
+                err = "Would have to be static";
+                continue;
+            }
+            ExecutableElement ee = (ExecutableElement) e;
+            TypeMirror excType = processingEnv.getElementUtils().getTypeElement(Exception.class.getName()).asType();
+            if (ee.getParameters().size() != 1 || 
+                !processingEnv.getTypeUtils().isAssignable(excType, ee.getParameters().get(0).asType())
+            ) {
+                errElem = e;
+                err = "Error method needs to take one Exception argument";
+                continue;
+            }
+            return true;
+        }
+        if (err == null) {
+            err = "Cannot find " + name + "(Exception) method in this class";
+        }
+        error(err, errElem);
+        return false;
     }
 }

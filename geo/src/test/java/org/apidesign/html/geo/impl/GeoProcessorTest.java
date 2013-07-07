@@ -54,4 +54,39 @@ public class GeoProcessorTest {
         res.assertError("cannot be private");
     }
     
+    @Test public void onErrorHasToExist() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "class UseOnLocation {\n"
+            + "  @net.java.html.geo.OnLocation(onError=\"doesNotExist\")\n"
+            + "  static void cantCallMe(net.java.html.geo.Position p) {}\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("not find doesNotExist");
+    }
+
+    @Test public void onErrorWouldHaveToBeStatic() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "class UseOnLocation {\n"
+            + "  @net.java.html.geo.OnLocation(onError=\"notStatic\")\n"
+            + "  static void cantCallMe(net.java.html.geo.Position p) {}\n"
+            + "  void notStatic(Exception e) {}\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("have to be static");
+    }
+
+    @Test public void onErrorMustAcceptExceptionArgument() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "class UseOnLocation {\n"
+            + "  @net.java.html.geo.OnLocation(onError=\"notStatic\")\n"
+            + "  static void cantCallMe(net.java.html.geo.Position p) {}\n"
+            + "  static void notStatic(java.io.IOException e) {}\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("take one Exception arg");
+    }
+    
 }
