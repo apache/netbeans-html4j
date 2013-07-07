@@ -121,7 +121,14 @@ public final class GeoProcessor extends AbstractProcessor {
             }
             w.append(") { return new ").append(className).append("(false, ").append(inst).append("); }\n");
             w.append("  protected void onError(Throwable t) {}\n");
-            w.append("  protected void onLocation(net.java.html.geo.Position p) {}\n");
+            w.append("  protected void onLocation(net.java.html.geo.Position p) {");
+            if (isStatic) {
+                w.append("    ").append(te.getSimpleName()).append(".");
+            } else {
+                w.append("    i.");
+            }
+            w.append(me.getSimpleName()).append("(p);\n");
+            w.append("  }\n");
             w.append("}\n");
             w.close();
         } catch (IOException ex) {

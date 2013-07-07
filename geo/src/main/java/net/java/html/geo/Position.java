@@ -25,7 +25,7 @@ package net.java.html.geo;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class Position {
-    private Position() {
+    Position() {
     }
 
     public Coordinates getCoords() {

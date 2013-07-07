@@ -21,12 +21,15 @@
 package net.java.html.geo;
 
 import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
-/**
+/** Testing correctness of the generated code.
  */
 public class OnLocationTest {
-    
+    static int cnt;
     static @OnLocation void onLocation(Position p) {
+        assertNotNull(p, "Position object provided");
+        cnt++;
     }
 
     @Test public void createOneTimeQueryStatic() {
@@ -37,6 +40,13 @@ public class OnLocationTest {
         h.start();
         h.stop();
     }
+    
+    @Test public void onLocationHandleCallback() {
+        GeoHandle h = OnLocationHandle.createQuery();
+        cnt = 0;
+        h.onLocation(new Position());
+        assertEquals(cnt, 1, "The callback has been made");
+    }
 
     @Test public void createRepeatableWatchStatic() {
         GeoHandle h = OnLocationHandle.createQuery();
@@ -46,8 +56,11 @@ public class OnLocationTest {
         h.start();
         h.stop();
     }
-    
+
+    int instCnt;
     @OnLocation void instance(Position p) {
+        assertNotNull(p, "Some position passed in");
+        instCnt++;
     }
     
     @Test public void createOneTimeQueryInstance() {
@@ -59,6 +72,13 @@ public class OnLocationTest {
         h.setMaximumAge(1000L);
         h.start();
         h.stop();
+    }
+    
+    @Test public void onInstanceCallback() {
+        OnLocationTest t = new OnLocationTest();
+        GeoHandle h = InstanceHandle.createWatch(t);
+        h.onLocation(new Position());
+        assertEquals(t.instCnt, 1, "One callback made");
     }
 
     @Test public void createRepeatableWatch() {
