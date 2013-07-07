@@ -46,4 +46,42 @@ public final class Position {
         private Double heading;
         private Double speed;
     }
+
+    /**
+     *
+     */
+    public static abstract class Handle {
+
+        private final boolean oneTime;
+        private boolean enableHighAccuracy;
+        private long timeout;
+        private long maximumAge;
+
+        protected Handle(boolean oneTime) {
+            super();
+            this.oneTime = oneTime;
+        }
+
+        protected abstract void onLocation(Position p);
+
+        protected abstract void onError(Throwable t);
+
+        public void setHighAccuracy(boolean enable) {
+            this.enableHighAccuracy = enable;
+        }
+
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
+        }
+
+        public void setMaximumAge(long age) {
+            this.maximumAge = age;
+        }
+
+        public void start() {
+        }
+
+        public void stop() {
+        }
+    }
 }

@@ -97,7 +97,7 @@ public final class GeoProcessor extends AbstractProcessor {
             JavaFileObject fo = processingEnv.getFiler().createSourceFile(fqn, e);
             Writer w = fo.openWriter();
             w.append("package ").append(pkg).append(";\n");
-            w.append("class ").append(className).append(" extends net.java.html.geo.GeoHandle {\n");
+            w.append("class ").append(className).append(" extends net.java.html.geo.Position.Handle {\n");
             w.append("  private ").append(te.getSimpleName()).append(" i;\n");
             w.append("  private ").append(className).append("(boolean oneTime");
             w.append(", ").append(te.getSimpleName()).append(" i");
@@ -106,7 +106,7 @@ public final class GeoProcessor extends AbstractProcessor {
                 w.append("    this.i = i;\n");
             }
             w.append("}\n");
-            w.append("  static net.java.html.geo.GeoHandle createQuery(");
+            w.append("  static net.java.html.geo.Position.Handle createQuery(");
             String inst;
             if (!isStatic) {
                 w.append(te.getSimpleName()).append(" instance");
@@ -115,7 +115,7 @@ public final class GeoProcessor extends AbstractProcessor {
                 inst = "null";
             }
             w.append(") { return new ").append(className).append("(true, ").append(inst).append("); }\n");
-            w.append("  static net.java.html.geo.GeoHandle createWatch(");
+            w.append("  static net.java.html.geo.Position.Handle createWatch(");
             if (!isStatic) {
                 w.append(te.getSimpleName()).append(" instance");
             }

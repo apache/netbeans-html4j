@@ -33,7 +33,7 @@ public class OnLocationTest {
     }
 
     @Test public void createOneTimeQueryStatic() {
-        GeoHandle h = OnLocationHandle.createQuery();
+        net.java.html.geo.Position.Handle h = OnLocationHandle.createQuery();
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
@@ -42,14 +42,14 @@ public class OnLocationTest {
     }
     
     @Test public void onLocationHandleCallback() {
-        GeoHandle h = OnLocationHandle.createQuery();
+        net.java.html.geo.Position.Handle h = OnLocationHandle.createQuery();
         cnt = 0;
         h.onLocation(new Position());
         assertEquals(cnt, 1, "The callback has been made");
     }
 
     @Test public void createRepeatableWatchStatic() {
-        GeoHandle h = OnLocationHandle.createQuery();
+        net.java.html.geo.Position.Handle h = OnLocationHandle.createQuery();
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
@@ -71,7 +71,7 @@ public class OnLocationTest {
     @Test public void createOneTimeQueryInstance() {
         OnLocationTest t = new OnLocationTest();
         
-        GeoHandle h = InstanceHandle.createQuery(t);
+        net.java.html.geo.Position.Handle h = InstanceHandle.createQuery(t);
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
@@ -81,13 +81,13 @@ public class OnLocationTest {
     
     @Test public void onInstanceCallback() {
         OnLocationTest t = new OnLocationTest();
-        GeoHandle h = InstanceHandle.createWatch(t);
+        net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(t);
         h.onLocation(new Position());
         assertEquals(t.instCnt, 1, "One callback made");
     }
 
     @Test public void onInstanceError() {
-        GeoHandle h = InstanceHandle.createWatch(this);
+        net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(this);
         InterruptedException e = new InterruptedException();
         h.onError(e);
         assertEquals(instCnt, 1, "One callback made");
@@ -97,7 +97,7 @@ public class OnLocationTest {
     @Test public void createRepeatableWatch() {
         OnLocationTest t = new OnLocationTest();
         
-        GeoHandle h = InstanceHandle.createWatch(t);
+        net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(t);
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
