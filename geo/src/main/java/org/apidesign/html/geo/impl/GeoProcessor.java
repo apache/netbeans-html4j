@@ -38,9 +38,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import net.java.html.geo.OnLocation;
+import net.java.html.geo.Position;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Annotation processor to generate callbacks from {@link GeoHandle} class.
@@ -77,6 +79,15 @@ public final class GeoProcessor extends AbstractProcessor {
         OnLocation ol = e.getAnnotation(OnLocation.class);
         if (ol == null) {
             return true;
+        }
+        if (me.getModifiers().contains(Modifier.PRIVATE)) {
+            error("Method annotated by @OnLocation cannot be private", e);
+            return false;
+        }
+        TypeMirror positionClass = processingEnv.getElementUtils().getTypeElement(Position.class.getName()).asType();
+        if (me.getParameters().size() != 1 || !me.getParameters().get(0).asType().equals(positionClass)) {
+            error("Method annotated by @OnLocation needs to have one net.java.html.geo.Position argument!", e);
+            return false;
         }
         String className = ol.className();
         if (className.isEmpty()) {
