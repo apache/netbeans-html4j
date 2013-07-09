@@ -20,32 +20,82 @@
  */
 package net.java.html.geo;
 
-/**
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apidesign.html.geo.impl.JsG;
+
+/** Class that represents a geolocation position provided as a callback
+ * to {@link Handle#onLocation(net.java.html.geo.Position)} method. The
+ * class getters mimic closely the structure of the position object as
+ * specified by <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
+ * W3C's Geolocation API</a>.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class Position {
-    Position() {
-    }
+    static final Logger LOG = Logger.getLogger(Position.class.getName());
+    private final long timestamp;
+    private final Coordinates coords;
 
+    Position(Object position) {
+        Object obj = JsG.get(position, "timestamp");
+        timestamp = obj instanceof Number ? ((Number)obj).longValue() : 0L;
+        coords = new Coordinates(JsG.get(position, "coords"));
+    }
+    
+    /** The actual location of the position.
+     * @return non-null coordinates
+     */
     public Coordinates getCoords() {
-        return null;
+        return coords;
     }
     
+    /** The time when the position has been recorded.
+     * @return time in milliseconds since era (e.g. Jan 1, 1970).
+     */
     public long getTimestamp() {
-        return 0L;
+        return timestamp;
     }
-    
-    public static final class Coordinates {
-        private double latitude;
-        private double longitude;
-        private double accuracy;
 
-        private Double altitude;
-        private Double altitudeAccuracy;
-        private Double heading;
-        private Double speed;
-    }
+    /** Actual location of a {@link Position}. 
+     *  Mimics closely <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
+     * W3C's Geolocation API</a>.
+     */
+    public static final class Coordinates {
+        private final Object data;
+
+        Coordinates(Object data) {
+            this.data = data;
+        }
+        
+        public double getLatitude() {
+            return ((Number)JsG.get(data, "latitude")).doubleValue(); // NOI18N
+        }
+
+        public double getLongitude() {
+            return ((Number)JsG.get(data, "longitude")).doubleValue(); // NOI18N
+        }
+
+        public double getAccuracy() {
+            return ((Number)JsG.get(data, "accuracy")).doubleValue(); // NOI18N
+        }
+        
+        public Double getAltitude() {
+            return (Double)JsG.get(data, "altitude"); // NOI18N
+        }
+        
+        public Double getAltitudeAccuracy() {
+            return (Double)JsG.get(data, "altitudeAccuracy"); // NOI18N
+        }
+        
+        public Double getHeading() {
+            return (Double)JsG.get(data, "heading"); // NOI18N
+        }
+        
+        public Double getSpeed() {
+            return (Double)JsG.get(data, "speed"); // NOI18N
+        }
+    } // end of Coordinates
 
     /** Rather than subclassing this class directly consider using {@link OnLocation}
      * annotation. Such annotation will generate a subclass for you automatically
@@ -53,11 +103,11 @@ public final class Position {
      * which can be used to obtain instance of this class.
      */
     public static abstract class Handle {
-
         private final boolean oneTime;
         private boolean enableHighAccuracy;
         private long timeout;
         private long maximumAge;
+        volatile JsH handle;
 
         /** Creates new instance of this handle.
          * 
@@ -87,7 +137,7 @@ public final class Position {
          * W3C's Geolocation API</a>. By default the mode is disabled.
          * @param enable <code>true</code> or <code>false</code>
          */
-        public void setHighAccuracy(boolean enable) {
+        public final void setHighAccuracy(boolean enable) {
             this.enableHighAccuracy = enable;
         }
 
@@ -95,7 +145,7 @@ public final class Position {
          * By default infinity.
          * @param timeout time in milliseconds to wait for a result.
          */
-        public void setTimeout(long timeout) {
+        public final void setTimeout(long timeout) {
             this.timeout = timeout;
         }
 
@@ -103,20 +153,74 @@ public final class Position {
          * returned. By default maximum age is set to zero.
          * @param age time in milliseconds of acceptable cached results
          */
-        public void setMaximumAge(long age) {
+        public final void setMaximumAge(long age) {
             this.maximumAge = age;
         }
 
         /** Initializes the <em>query</em> or <em>watch</em> request(s) and
-         * returns immediately.
+         * returns immediately. Has no effect if the query has already been
+         * started.
          */
-        public void start() {
+        public final void start() {
+            if (handle != null) {
+                return;
+            }
+            handle = new JsH();
+            handle.start();
         }
 
         /** Stops all pending requests. After this call no further callbacks
-         * can be obtained.
+         * can be obtained. Does nothing if no query or watch was in progress.
          */
-        public void stop() {
+        public final void stop() {
+            JsH h = handle;
+            if (h == null) {
+                return;
+            }
+            handle = null;
+            h.stop();
+        }
+
+        private final class JsH extends JsG {
+            long watch;
+            
+            @Override
+            public void onLocation(Object position) {
+                if (handle != this) {
+                    return;
+                }
+                if (oneTime) {
+                    stop();
+                }
+                try {
+                    Handle.this.onLocation(new Position(position));
+                } catch (Throwable ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            public void onError(Object error) {
+                if (handle != this) {
+                    return;
+                }
+                if (oneTime) {
+                    stop();
+                }
+                try {
+                    Handle.this.onError(new Exception());
+                } catch (Throwable ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+
+            final void start() {
+                watch = start(oneTime, enableHighAccuracy, timeout, maximumAge);
+            }
+
+            protected final void stop() {
+                super.stop(watch);
+            }
         }
     }
 }

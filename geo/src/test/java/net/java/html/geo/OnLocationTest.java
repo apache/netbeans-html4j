@@ -44,7 +44,7 @@ public class OnLocationTest {
     @Test public void onLocationHandleCallback() throws Throwable {
         net.java.html.geo.Position.Handle h = OnLocationHandle.createQuery();
         cnt = 0;
-        h.onLocation(new Position());
+        h.onLocation(new Position(null));
         assertEquals(cnt, 1, "The callback has been made");
     }
 
@@ -82,7 +82,7 @@ public class OnLocationTest {
     @Test public void onInstanceCallback() throws Throwable {
         OnLocationTest t = new OnLocationTest();
         net.java.html.geo.Position.Handle h = InstanceHandle.createWatch(t);
-        h.onLocation(new Position());
+        h.onLocation(new Position(null));
         assertEquals(t.instCnt, 1, "One callback made");
     }
 
