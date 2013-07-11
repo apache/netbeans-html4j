@@ -33,7 +33,8 @@ abstract class JsCallback {
             int next = body.indexOf(".@", pos);
             if (next == -1) {
                 sb.append(body.substring(pos));
-                return sb.toString();
+                body = sb.toString();
+                break;
             }
             int ident = next;
             while (ident > 0) {
@@ -62,6 +63,38 @@ abstract class JsCallback {
             if (body.charAt(paramBeg + 1) != (')')) {
                 sb.append(",");
             }
+            pos = paramBeg + 1;
+        }
+        pos = 0;
+        sb = null;
+        for (;;) {
+            int next = body.indexOf("@", pos);
+            if (next == -1) {
+                if (sb == null) {
+                    return body;
+                }
+                sb.append(body.substring(pos));
+                return sb.toString();
+            }
+            if (sb == null) {
+                sb = new StringBuilder();
+            }
+            
+            sb.append(body.substring(pos, next));
+            
+            int sigBeg = body.indexOf('(', next);
+            int sigEnd = body.indexOf(')', sigBeg);
+            int colon4 = body.indexOf("::", next);
+            if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
+                throw new IllegalStateException("Malformed body " + body);
+            }
+            String fqn = body.substring(next + 1, colon4);
+            String method = body.substring(colon4 + 2, sigBeg);
+            String params = body.substring(sigBeg, sigEnd + 1);
+
+            int paramBeg = body.indexOf('(', sigEnd + 1);
+            
+            sb.append(callMethod(null, fqn, method, params));
             pos = paramBeg + 1;
         }
     }

@@ -245,7 +245,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
                     source.append("return ");
                 }
-                if (!isStatic) {
+                if (isStatic) {
+                    source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
+                    source.append('.');
+                } else {
                     source.append("self.");
                 }
                 source.append(m.getSimpleName());

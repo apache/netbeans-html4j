@@ -82,7 +82,10 @@ public final class FnUtils {
             ) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("vm.").append(mangle(fqn, method, params));
-                sb.append("(").append(ident);
+                sb.append("(");
+                if (ident != null) {
+                    sb.append(ident);
+                }
                 return sb;
             }
 

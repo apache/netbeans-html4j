@@ -54,7 +54,7 @@ public class JsMethods {
         return false;
     }
     
-    @JavaScriptBody(args = { "r" }, javacall=true, body = "r.@java.lang.Runnable::run()()")
+    @JavaScriptBody(args = { "r" }, javacall=true, body = "r.@java.lang.Runnable::run()();")
     public static native void callback(Runnable r);
     
     @JavaScriptBody(args = { "at", "arr" }, javacall = true, body =
@@ -73,6 +73,12 @@ public class JsMethods {
     @JavaScriptBody(args = { "x", "y" }, body = "return mul(x, y);")
     public static native int useExternalMul(int x, int y);
     
-    @JavaScriptBody(args = { "m" }, javacall = true, body = "return m.@org.apidesign.html.boot.impl.JsMethods::getThis()()")
+    @JavaScriptBody(args = { "m" }, javacall = true, body = "return m.@org.apidesign.html.boot.impl.JsMethods::getThis()();")
     public static native JsMethods returnYourSelf(JsMethods m);
+    
+    @JavaScriptBody(args = { "x", "y" }, javacall = true, body = "return @org.apidesign.html.boot.impl.JsMethods::useExternalMul(II)(x, y);")
+    public static native int staticCallback(int x, int y);
+
+    @JavaScriptBody(args = { "v" }, javacall = true, body = "return @java.lang.Integer::parseInt(Ljava/lang/String;)(v);")
+    public static native int parseInt(String v);
 }

@@ -145,6 +145,15 @@ public class JsClassLoaderBase {
         } catch (InvocationTargetException ex) {
             throw ex.getTargetException();
         }
-        
+    }
+    
+    @Test public void callStaticJavaMethod() throws Throwable {
+        Method st = methodClass.getMethod("staticCallback", int.class, int.class);
+        assertEquals(st.invoke(null, 6, 7), 42, "Meaning of JavaScript?");
+    }
+
+    @Test public void callStaticStringParamMethod() throws Throwable {
+        Method st = methodClass.getMethod("parseInt", String.class);
+        assertEquals(st.invoke(null, "42"), 42, "Meaning of JavaScript?");
     }
 }

@@ -59,6 +59,8 @@ public @interface JavaScriptBody {
      * This is the syntax one can use to call <code>run()</code> 
      * method of {@link Runnable}:
      * <pre>r.@java.lang.Runnable::run()()</pre>.
+     * One can also call static methods. Just use:
+     * <pre>var ten = @java.lang.Integer::parseInt(Ljava/lang/String;)("10")</pre>
      * 
      * @return true, if the script should be scanned for special callback
      *   syntax
