@@ -38,7 +38,7 @@ public class FXPresenterTst {
     @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
     private static native void callback(Runnable r);
 
-    public static class R implements Runnable {
+    private static class R implements Runnable {
         int cnt;
 
         @Override

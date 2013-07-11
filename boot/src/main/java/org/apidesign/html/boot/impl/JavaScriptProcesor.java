@@ -22,7 +22,6 @@ package org.apidesign.html.boot.impl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -145,7 +144,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     continue;
                 }
                 if (m.getSimpleName().contentEquals(method)) {
-                    String paramTypes = findParamTypes((ExecutableElement)m, true);
+                    String paramTypes = findParamTypes((ExecutableElement)m);
                     if (paramTypes.equals(params)) {
                         found = (ExecutableElement) m;
                         break;
@@ -170,18 +169,16 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     mangledOnes = new TreeMap<String, ExecutableElement>();
                     javacalls.put(findPkg(e), mangledOnes);
                 }
-                String mangled = JsCallback.mangle(fqn, method, findParamTypes(found, false));
+                String mangled = JsCallback.mangle(fqn, method, findParamTypes(found));
                 mangledOnes.put(mangled, found);
             }
             return "";
         }
 
-        private String findParamTypes(ExecutableElement method, boolean surround) {
+        private String findParamTypes(ExecutableElement method) {
             ExecutableType t = (ExecutableType) method.asType();
             StringBuilder sb = new StringBuilder();
-            if (surround) {
-                sb.append('(');
-            }
+            sb.append('(');
             for (TypeMirror tm : t.getParameterTypes()) {
                 if (tm.getKind().isPrimitive()) {
                     switch (tm.getKind()) {
@@ -206,9 +203,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     sb.append(';');
                 }
             }
-            if (surround) {
-                sb.append(')');
-            }
+            sb.append(')');
             return sb.toString();
         }
     }
@@ -219,8 +214,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             Map<String, ExecutableElement> map = pkgEn.getValue();
             StringBuilder source = new StringBuilder();
             source.append("package ").append(pkgName).append(";\n");
-            source.append("final class $JsCallbacks$ {\n");
-            source.append("  public static final $JsCallbacks$ VM = new $JsCallbacks$();\n");
+            source.append("public final class $JsCallbacks$ {\n");
+            source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$();\n");
             source.append("  private $JsCallbacks$() {}\n");
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();

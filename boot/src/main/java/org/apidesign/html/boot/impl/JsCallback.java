@@ -36,9 +36,12 @@ abstract class JsCallback {
                 return sb.toString();
             }
             int ident = next;
-            while (ident > 0 && Character.isJavaIdentifierPart(body.charAt(--ident))) {
+            while (ident > 0) {
+                if (!Character.isJavaIdentifierPart(body.charAt(--ident))) {
+                    ident++;
+                    break;
+                }
             }
-            ident++;
             String refId = body.substring(ident, next);
             
             sb.append(body.substring(pos, ident));
@@ -52,9 +55,14 @@ abstract class JsCallback {
             String fqn = body.substring(next + 2, colon4);
             String method = body.substring(colon4 + 2, sigBeg);
             String params = body.substring(sigBeg, sigEnd + 1);
+
+            int paramBeg = body.indexOf('(', sigEnd + 1);
             
             sb.append(callMethod(refId, fqn, method, params));
-            pos = sigEnd + 1;
+            if (body.charAt(paramBeg + 1) != (')')) {
+                sb.append(",");
+            }
+            pos = paramBeg + 1;
         }
     }
 
@@ -63,6 +71,12 @@ abstract class JsCallback {
     );
 
     static String mangle(String fqn, String method, String params) {
+        if (params.startsWith("(")) {
+            params = params.substring(1);
+        }
+        if (params.endsWith(")")) {
+            params = params.substring(0, params.length() - 1);
+        }
         return 
             replace(fqn) + "__" + replace(method) + "__" + replace(params);
     }

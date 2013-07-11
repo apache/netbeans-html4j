@@ -225,11 +225,14 @@ abstract class JsClassLoader extends ClassLoader {
                 super.visitLdcInsn(body);
                 super.visitIntInsn(Opcodes.SIPUSH, args.size());
                 super.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
+                boolean needsVM = false;
                 for (int i = 0; i < args.size(); i++) {
-                    String name = args.get(i);
+                    assert !needsVM;
+                    String argName = args.get(i);
+                    needsVM = "vm".equals(argName);
                     super.visitInsn(Opcodes.DUP);
                     super.visitIntInsn(Opcodes.BIPUSH, i);
-                    super.visitLdcInsn(name);
+                    super.visitLdcInsn(argName);
                     super.visitInsn(Opcodes.AASTORE);
                 }
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, 
@@ -327,6 +330,15 @@ abstract class JsClassLoader extends ClassLoader {
                 SignatureReader sr = new SignatureReader(desc);
                 sr.accept(sv);
                 
+                if (needsVM) {
+                    FindInMethod.super.visitInsn(Opcodes.DUP);
+                    FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, sv.index);
+                    int lastSlash = FindInClass.this.name.lastIndexOf('/');
+                    String jsCallbacks = FindInClass.this.name.substring(0, lastSlash + 1) + "$JsCallbacks$";
+                    FindInMethod.super.visitFieldInsn(Opcodes.GETSTATIC, jsCallbacks, "VM", "L" + jsCallbacks + ";");
+                    FindInMethod.super.visitInsn(Opcodes.AASTORE);
+                }
+                
                 super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, 
                     "org/apidesign/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
                 );
@@ -408,10 +420,11 @@ abstract class JsClassLoader extends ClassLoader {
                 @Override
                 public void visitEnd() {
                     if (body != null) {
-                        generateJSBody(args, javacall ? 
-                            FnUtils.callback(body, JsClassLoader.this, FindInClass.this.name, FindInClass.this.methods) : 
-                            body
-                        );
+                        if (javacall) {
+                            body = FnUtils.callback(body, JsClassLoader.this, FindInClass.this.name, FindInClass.this.methods);
+                            args.add("vm");
+                        }
+                        generateJSBody(args, body);
                     }
                 }
             }
