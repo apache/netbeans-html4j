@@ -46,6 +46,7 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.fail;
 
@@ -260,5 +261,9 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             sb.append(msg);
         }
         fail(sb.toString());
+    }
+
+    void assertNoErrors() {
+        assertTrue(getErrors().isEmpty(), "No errors expected: " + getErrors());
     }
 }

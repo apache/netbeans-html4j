@@ -43,5 +43,49 @@ public class JavaScriptProcesorTest {
         c.assertErrors();
         c.assertError("java.lang.Runable"); // typo
     }
+
+    @Test public void detectCallbackToNonExistingMethod() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
+            + "    \"r.@java.lang.Runnable::cancel()();\"\n"
+            + "  )\n"
+            + "  private static native void callback(Runnable r);\n"
+            + "}\n";
+        
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("method cancel");
+    }
+
+    @Test public void detectCallbackToNonExistingParams() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
+            + "    \"r.@java.lang.Runnable::run(I)(10);\"\n"
+            + "  )\n"
+            + "  private static native void callback(Runnable r);\n"
+            + "}\n";
+        
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("wrong parameters: (I)");
+    }
+
+    @Test public void objectTypeParamsAreOK() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
+            + "    \"r.@java.lang.Object::equals(Ljava/lang/Object;)(null);\"\n"
+            + "  )\n"
+            + "  private static native void testEqual(Object r);\n"
+            + "}\n";
+        
+        Compile c = Compile.create("", code);
+        c.assertNoErrors();
+    }
     
 }

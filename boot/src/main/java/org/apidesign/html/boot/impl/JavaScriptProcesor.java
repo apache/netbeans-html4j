@@ -37,6 +37,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
@@ -114,12 +118,73 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
         @Override
         protected CharSequence callMethod(String ident, String fqn, String method, String params) {
-            if (processingEnv.getElementUtils().getTypeElement(fqn) == null) {
+            final TypeElement type = processingEnv.getElementUtils().getTypeElement(fqn);
+            if (type == null) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
                     "Callback to non-existing class " + fqn, e
                 );
+                return "";
+            }
+            Element found = null;
+            StringBuilder foundParams = new StringBuilder();
+            for (Element m : type.getEnclosedElements()) {
+                if (m.getKind() != ElementKind.METHOD) {
+                    continue;
+                }
+                if (m.getSimpleName().contentEquals(method)) {
+                    String paramTypes = findParamTypes((ExecutableElement)m);
+                    if (paramTypes.equals(params)) {
+                        found = m;
+                        break;
+                    }
+                    foundParams.append(paramTypes).append("\n");
+                }
+            }
+            if (found == null) {
+                if (foundParams.length() == 0) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                        "Callback to class " + fqn + " with unknown method " + method, e
+                    );
+                } else {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                        "Callback to " + fqn + "." + method + " with wrong parameters: " + 
+                        params + ". Only known parameters are " + foundParams, e
+                    );
+                }
             }
             return "";
+        }
+
+        private String findParamTypes(ExecutableElement method) {
+            ExecutableType t = (ExecutableType) method.asType();
+            StringBuilder sb = new StringBuilder();
+            sb.append('(');
+            for (TypeMirror tm : t.getParameterTypes()) {
+                if (tm.getKind().isPrimitive()) {
+                    switch (tm.getKind()) {
+                        case INT: sb.append('I'); break;
+                        case BOOLEAN: sb.append('Z'); break;
+                        case BYTE: sb.append('B'); break;
+                        case CHAR: sb.append('C'); break;
+                        case SHORT: sb.append('S'); break;
+                        case DOUBLE: sb.append('D'); break;
+                        case FLOAT: sb.append('F'); break;
+                        case LONG: sb.append('J'); break;
+                        default:
+                            throw new IllegalStateException("Uknown " + tm.getKind());
+                    }
+                } else {
+                    while (tm.getKind() == TypeKind.ARRAY) {
+                        sb.append('[');
+                        tm = ((ArrayType)tm).getComponentType();
+                    }
+                    sb.append('L');
+                    sb.append(tm.toString().replace('.', '/'));
+                    sb.append(';');
+                }
+            }
+            sb.append(')');
+            return sb.toString();
         }
         
     }

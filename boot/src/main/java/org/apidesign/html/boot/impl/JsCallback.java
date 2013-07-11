@@ -20,7 +20,6 @@
  */
 package org.apidesign.html.boot.impl;
 
-import org.objectweb.asm.Type;
 
 /**
  *
