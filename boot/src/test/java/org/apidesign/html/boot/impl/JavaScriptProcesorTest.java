@@ -21,6 +21,8 @@
 package org.apidesign.html.boot.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 /**
@@ -88,4 +90,9 @@ public class JavaScriptProcesorTest {
         c.assertNoErrors();
     }
     
+    @Test public void generatesCallbacksThatReturnObject() throws Exception {
+        Class<?> callbacksForTestPkg = Class.forName("org.apidesign.html.boot.impl.$JsCallbacks$");
+        Method m = callbacksForTestPkg.getDeclaredMethod("java_lang_Runnable__run__", Runnable.class);
+        assertEquals(m.getReturnType(), Object.class, "All methods always return object");
+    }
 }

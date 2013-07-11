@@ -20,11 +20,16 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.Completions;
@@ -35,6 +40,8 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
@@ -52,6 +59,9 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Processor.class)
 public final class JavaScriptProcesor extends AbstractProcessor {
+    private final Map<String,Map<String,ExecutableElement>> javacalls = 
+        new HashMap<String,Map<String,ExecutableElement>>();
+    
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> set = new HashSet<String>();
@@ -86,6 +96,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 verify.parse(jsb.body());
             }
         }
+        if (roundEnv.processingOver()) {
+            generateCallbackClass(javacalls);
+            javacalls.clear();
+        }
         return true;
     }
 
@@ -109,7 +123,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         return null;
     }
 
-
     private class VerifyCallback extends JsCallback {
         private final Element e;
         public VerifyCallback(Element e) {
@@ -125,16 +138,16 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 );
                 return "";
             }
-            Element found = null;
+            ExecutableElement found = null;
             StringBuilder foundParams = new StringBuilder();
             for (Element m : type.getEnclosedElements()) {
                 if (m.getKind() != ElementKind.METHOD) {
                     continue;
                 }
                 if (m.getSimpleName().contentEquals(method)) {
-                    String paramTypes = findParamTypes((ExecutableElement)m);
+                    String paramTypes = findParamTypes((ExecutableElement)m, true);
                     if (paramTypes.equals(params)) {
-                        found = m;
+                        found = (ExecutableElement) m;
                         break;
                     }
                     foundParams.append(paramTypes).append("\n");
@@ -151,14 +164,24 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                         params + ". Only known parameters are " + foundParams, e
                     );
                 }
+            } else {
+                Map<String,ExecutableElement> mangledOnes = javacalls.get(findPkg(e));
+                if (mangledOnes == null) {
+                    mangledOnes = new TreeMap<String, ExecutableElement>();
+                    javacalls.put(findPkg(e), mangledOnes);
+                }
+                String mangled = JsCallback.mangle(fqn, method, findParamTypes(found, false));
+                mangledOnes.put(mangled, found);
             }
             return "";
         }
 
-        private String findParamTypes(ExecutableElement method) {
+        private String findParamTypes(ExecutableElement method, boolean surround) {
             ExecutableType t = (ExecutableType) method.asType();
             StringBuilder sb = new StringBuilder();
-            sb.append('(');
+            if (surround) {
+                sb.append('(');
+            }
             for (TypeMirror tm : t.getParameterTypes()) {
                 if (tm.getKind().isPrimitive()) {
                     switch (tm.getKind()) {
@@ -183,9 +206,88 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     sb.append(';');
                 }
             }
-            sb.append(')');
+            if (surround) {
+                sb.append(')');
+            }
             return sb.toString();
         }
-        
     }
+    
+    private void generateCallbackClass(Map<String,Map<String, ExecutableElement>> process) {
+        for (Map.Entry<String, Map<String, ExecutableElement>> pkgEn : process.entrySet()) {
+            String pkgName = pkgEn.getKey();
+            Map<String, ExecutableElement> map = pkgEn.getValue();
+            StringBuilder source = new StringBuilder();
+            source.append("package ").append(pkgName).append(";\n");
+            source.append("final class $JsCallbacks$ {\n");
+            for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
+                final String mangled = entry.getKey();
+                final ExecutableElement m = entry.getValue();
+                final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
+                
+                source.append("\n  public java.lang.Object ")
+                    .append(mangled)
+                    .append("(");
+                
+                String sep = "";
+                if (!isStatic) {
+                    source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
+                    source.append(" self");
+                    sep = ", ";
+                }
+                
+                int cnt = 0;
+                for (VariableElement ve : m.getParameters()) {
+                    source.append(sep);
+                    source.append(ve.asType());
+                    source.append(" arg").append(++cnt);
+                    sep = ", ";
+                }
+                source.append(") {\n");
+                source.append("    ");
+                if (m.getReturnType().getKind() != TypeKind.VOID) {
+                    source.append("return ");
+                }
+                if (!isStatic) {
+                    source.append("self.");
+                }
+                source.append(m.getSimpleName());
+                source.append("(");
+                cnt = 0;
+                sep = "";
+                for (VariableElement ve : m.getParameters()) {
+                    source.append(sep);
+                    source.append("arg").append(++cnt);
+                    sep = ", ";
+                }
+                source.append(");\n");
+                if (m.getReturnType().getKind() == TypeKind.VOID) {
+                    source.append("    return null;\n");
+                }
+                source.append("  }\n");
+            }
+            source.append("}\n");
+            final String srcName = pkgName + ".$JsCallbacks$";
+            try {
+                Writer w = processingEnv.getFiler().createSourceFile(srcName,
+                    map.values().toArray(new Element[map.size()])
+                ).openWriter();
+                w.write(source.toString());
+                w.close();
+                return;
+            } catch (IOException ex) {
+                processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR, "Can't write " + srcName + ": " + ex.getMessage()
+                );
+            }
+        }
+    }
+    
+    private static String findPkg(Element e) {
+        while (e.getKind() != ElementKind.PACKAGE) {
+            e = e.getEnclosingElement();
+        }
+        return ((PackageElement)e).getQualifiedName().toString();
+    }
+    
 }

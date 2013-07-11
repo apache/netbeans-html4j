@@ -61,4 +61,16 @@ abstract class JsCallback {
     protected abstract CharSequence callMethod(
         String ident, String fqn, String method, String params
     );
+
+    static String mangle(String fqn, String method, String params) {
+        return 
+            replace(fqn) + "__" + replace(method) + "__" + replace(params);
+    }
+    
+    private static String replace(String orig) {
+        return orig.replace("_", "_1").
+            replace(";", "_2").
+            replace("[", "_3").
+            replace('.', '_').replace('/', '_');
+    }
 }
