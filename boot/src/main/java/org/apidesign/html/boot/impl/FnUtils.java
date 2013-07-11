@@ -79,96 +79,12 @@ public final class FnUtils {
 
     static String callback(String body, ClassLoader loader, String ownName, Map<String,String> ownMethods) {
         try {
-            return callbackImpl(body, loader, ownName, ownMethods);
+            return new JsCallback(loader, ownName, ownMethods).callbackImpl(body);
         } catch (ClassNotFoundException ex) {
             throw new IllegalStateException("Can't parse " + body, ex);
         } catch (NoSuchMethodException ex) {
             throw new IllegalStateException("Can't parse " + body, ex);
         }
-    }
-    
-    private static String callbackImpl(
-        String body, ClassLoader loader, String ownName, Map<String,String> ownMethods
-    ) throws ClassNotFoundException, NoSuchMethodException {
-        StringBuilder sb = new StringBuilder();
-        int pos = 0;
-        for (;;) {
-            int next = body.indexOf(".@", pos);
-            if (next == -1) {
-                sb.append(body.substring(pos));
-                return sb.toString();
-            }
-            sb.append(body.substring(pos, next));
-            
-            int sigBeg = body.indexOf('(', next);
-            int sigEnd = body.indexOf(')', sigBeg);
-            
-            int colon4 = body.indexOf("::", next);
-            
-            if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
-                throw new IllegalStateException("Malformed body " + body);
-            }
-            
-            String fqn = body.substring(next + 2, colon4);
-            String method = body.substring(colon4 + 2, sigBeg);
-            String params = body.substring(sigBeg, sigEnd + 1);
-            
-            if (fqn.equals(ownName.replace('/', '.'))) {
-                if (!ownMethods.containsKey(method + params)) {
-                    throw new IllegalStateException("Wrong refernece to " + method + params);
-                }
-                sb.append("['").append(method).append("(");
-                final Type[] argTps = Type.getArgumentTypes(params);
-                Class<?>[] argCls = new Class<?>[argTps.length];
-                String sep = "";
-                for (int i = 0; i < argCls.length; i++) {
-                    sb.append(sep).append(toClass(argTps[i], loader).getName());
-                    sep = ",";
-                }
-                sb.append(")']");
-            } else {
-                Class<?> clazz = Class.forName(fqn, false, loader);
-                final Type[] argTps = Type.getArgumentTypes(params);
-                Class<?>[] argCls = new Class<?>[argTps.length];
-                for (int i = 0; i < argCls.length; i++) {
-                    argCls[i] = toClass(argTps[i], loader);
-                }
-                Method m = clazz.getMethod(method, argCls);
-
-                sb.append("['").append(m.getName()).append("(");
-                String sep = "";
-                for (Class<?> pt : m.getParameterTypes()) {
-                    sb.append(sep).append(pt.getName());
-                    sep = ",";
-                }
-                sb.append(")']");
-            }
-            
-            pos = sigEnd + 1;
-        }
-    }
-
-    private static Class<?> toClass(final Type t, ClassLoader loader) throws ClassNotFoundException {
-        if (t == Type.INT_TYPE) {
-            return Integer.TYPE;
-        } else if (t == Type.VOID_TYPE) {
-            return Void.TYPE;
-        } else if (t == Type.BOOLEAN_TYPE) {
-            return Boolean.TYPE;
-        } else if (t == Type.BYTE_TYPE) {
-            return Byte.TYPE;
-        } else if (t == Type.CHAR_TYPE) {
-            return Character.TYPE;
-        } else if (t == Type.SHORT_TYPE) {
-            return Short.TYPE;
-        } else if (t == Type.DOUBLE_TYPE) {
-            return Double.TYPE;
-        } else if (t == Type.FLOAT_TYPE) {
-            return Float.TYPE;
-        } else if (t == Type.LONG_TYPE) {
-            return Long.TYPE;
-        }
-        return Class.forName(t.getClassName(), false, loader);
     }
 
     static void loadScript(JsClassLoader jcl, String resource) {
