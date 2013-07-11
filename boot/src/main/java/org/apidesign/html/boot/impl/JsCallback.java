@@ -20,26 +20,14 @@
  */
 package org.apidesign.html.boot.impl;
 
-import java.lang.reflect.Method;
-import java.util.Map;
 import org.objectweb.asm.Type;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class JsCallback {
-    private final ClassLoader loader;
-    private final String ownName;
-    private final Map<String,String> ownMethods;
-
-    JsCallback(ClassLoader l, String ownName, Map<String, String> ownMethods) {
-        this.loader = l;
-        this.ownName = ownName;
-        this.ownMethods = ownMethods;
-    }
-
-    String callbackImpl(String body) throws ClassNotFoundException, NoSuchMethodException {
+abstract class JsCallback {
+    final String parse(String body) {
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         for (;;) {
@@ -66,69 +54,12 @@ final class JsCallback {
             String method = body.substring(colon4 + 2, sigBeg);
             String params = body.substring(sigBeg, sigEnd + 1);
             
-            sb.append(workWithParams(refId, fqn, method, params));
+            sb.append(callMethod(refId, fqn, method, params));
             pos = sigEnd + 1;
         }
     }
 
-    static Class<?> toClass(final Type t, ClassLoader loader) throws ClassNotFoundException {
-        if (t == Type.INT_TYPE) {
-            return Integer.TYPE;
-        } else if (t == Type.VOID_TYPE) {
-            return Void.TYPE;
-        } else if (t == Type.BOOLEAN_TYPE) {
-            return Boolean.TYPE;
-        } else if (t == Type.BYTE_TYPE) {
-            return Byte.TYPE;
-        } else if (t == Type.CHAR_TYPE) {
-            return Character.TYPE;
-        } else if (t == Type.SHORT_TYPE) {
-            return Short.TYPE;
-        } else if (t == Type.DOUBLE_TYPE) {
-            return Double.TYPE;
-        } else if (t == Type.FLOAT_TYPE) {
-            return Float.TYPE;
-        } else if (t == Type.LONG_TYPE) {
-            return Long.TYPE;
-        }
-        return Class.forName(t.getClassName(), false, loader);
-    }
-
-    private CharSequence workWithParams(
+    protected abstract CharSequence callMethod(
         String ident, String fqn, String method, String params
-    ) throws NoSuchMethodException, ClassNotFoundException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ident);
-        if (fqn.equals(ownName.replace('/', '.'))) {
-            if (!ownMethods.containsKey(method + params)) {
-                throw new IllegalStateException("Wrong reference to " + method + params);
-            }
-            sb.append("['").append(method).append("(");
-            final Type[] argTps = Type.getArgumentTypes(params);
-            Class<?>[] argCls = new Class<?>[argTps.length];
-            String sep = "";
-            for (int i = 0; i < argCls.length; i++) {
-                sb.append(sep).append(toClass(argTps[i], loader).getName());
-                sep = ",";
-            }
-            sb.append(")']");
-        } else {
-            Class<?> clazz = Class.forName(fqn, false, loader);
-            final Type[] argTps = Type.getArgumentTypes(params);
-            Class<?>[] argCls = new Class<?>[argTps.length];
-            for (int i = 0; i < argCls.length; i++) {
-                argCls[i] = toClass(argTps[i], loader);
-            }
-            Method m = clazz.getMethod(method, argCls);
-            sb.append("['").append(m.getName()).append("(");
-            String sep = "";
-            for (Class<?> pt : m.getParameterTypes()) {
-                sb.append(sep).append(pt.getName());
-                sep = ",";
-            }
-            sb.append(")']");
-        }
-        return sb;
-    }
-    
+    );
 }

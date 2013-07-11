@@ -23,6 +23,7 @@ package org.apidesign.html.boot.impl;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Completion;
@@ -76,6 +77,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (!jsb.javacall() && jsb.body().contains(".@")) {
                 msg.printMessage(Diagnostic.Kind.WARNING, "Usage of .@ usually requires javacall=true", e);
             }
+            if (jsb.javacall()) {
+                JsCallback verify = new VerifyCallback(e);
+                verify.parse(jsb.body());
+            }
         }
         return true;
     }
@@ -100,5 +105,22 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         return null;
     }
 
-    
+
+    private class VerifyCallback extends JsCallback {
+        private final Element e;
+        public VerifyCallback(Element e) {
+            this.e = e;
+        }
+
+        @Override
+        protected CharSequence callMethod(String ident, String fqn, String method, String params) {
+            if (processingEnv.getElementUtils().getTypeElement(fqn) == null) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                    "Callback to non-existing class " + fqn, e
+                );
+            }
+            return "";
+        }
+        
+    }
 }

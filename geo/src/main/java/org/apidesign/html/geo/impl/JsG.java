@@ -43,10 +43,10 @@ public abstract class JsG {
         body = 
         "var self = this;" +
         "var ok = function (position) {" +
-        "  self.@org.apidesign.html.geo.impl.GeoImpl::onLocation(Ljava/lang/Object;)(position);" +
+        "  self.@org.apidesign.html.geo.impl.JsG::onLocation(Ljava/lang/Object;)(position);" +
         "};" +
         "var fail = function (error) {" +
-        "  self.@org.apidesign.html.geo.impl.GeoImpl::onError(Ljava/lang/Object;)(error);" +
+        "  self.@org.apidesign.html.geo.impl.JsG::onError(Ljava/lang/Object;)(error);" +
         "};" +
         "var options = {};" +
         "options.enableHighAccuracy = enableHighAccuracy;" +
