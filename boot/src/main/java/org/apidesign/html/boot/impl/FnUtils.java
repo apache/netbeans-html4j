@@ -28,9 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import org.apidesign.html.boot.spi.Fn;
-import org.objectweb.asm.Type;
 
 /**
  *
@@ -76,7 +74,7 @@ public final class FnUtils {
         };
     }
 
-    static String callback(final String body, final ClassLoader loader, final String ownName, final Map<String,String> ownMethods) {
+    static String callback(final String body) {
         return new JsCallback() {
             @Override
             protected CharSequence callMethod(
