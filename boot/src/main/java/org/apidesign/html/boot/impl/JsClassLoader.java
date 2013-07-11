@@ -152,8 +152,6 @@ abstract class JsClassLoader extends ClassLoader {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            int end = desc.indexOf(')');
-            
             return new FindInMethod(access, name, desc,
                 super.visitMethod(access & (~Opcodes.ACC_NATIVE), name, desc, signature, exceptions)
             );
