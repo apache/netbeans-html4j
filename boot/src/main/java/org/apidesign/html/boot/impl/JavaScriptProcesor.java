@@ -220,6 +220,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             StringBuilder source = new StringBuilder();
             source.append("package ").append(pkgName).append(";\n");
             source.append("final class $JsCallbacks$ {\n");
+            source.append("  public static final $JsCallbacks$ VM = new $JsCallbacks$();\n");
+            source.append("  private $JsCallbacks$() {}\n");
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();

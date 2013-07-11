@@ -21,8 +21,10 @@
 package org.apidesign.html.boot.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 /**
@@ -94,5 +96,12 @@ public class JavaScriptProcesorTest {
         Class<?> callbacksForTestPkg = Class.forName("org.apidesign.html.boot.impl.$JsCallbacks$");
         Method m = callbacksForTestPkg.getDeclaredMethod("java_lang_Runnable__run__", Runnable.class);
         assertEquals(m.getReturnType(), Object.class, "All methods always return object");
+    }
+    
+    @Test public void hasInstanceField() throws Exception {
+        Class<?> callbacksForTestPkg = Class.forName("org.apidesign.html.boot.impl.$JsCallbacks$");
+        Field f = callbacksForTestPkg.getDeclaredField("VM");
+        f.setAccessible(true);
+        assertTrue(callbacksForTestPkg.isInstance(f.get(null)), "Singleton field VM");
     }
 }
