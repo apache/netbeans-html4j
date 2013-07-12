@@ -156,4 +156,19 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("parseInt", String.class);
         assertEquals(st.invoke(null, "42"), 42, "Meaning of JavaScript?");
     }
+    
+    @Test public void firstLong() throws Throwable {
+        Method st = methodClass.getMethod("chooseLong", boolean.class, boolean.class, long.class, long.class);
+        assertEquals(st.invoke(null, true, false, 10, 20), 10L, "Take first value");
+    }
+
+    @Test public void secondLong() throws Throwable {
+        Method st = methodClass.getMethod("chooseLong", boolean.class, boolean.class, long.class, long.class);
+        assertEquals(st.invoke(null, false, true, 10, 20), 20L, "Take 2nd value");
+    }
+
+    @Test public void bothLong() throws Throwable {
+        Method st = methodClass.getMethod("chooseLong", boolean.class, boolean.class, long.class, long.class);
+        assertEquals(st.invoke(null, true, true, 10, 20), 30L, "Take both values");
+    }
 }

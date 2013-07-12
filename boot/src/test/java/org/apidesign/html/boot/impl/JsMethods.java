@@ -81,4 +81,11 @@ public class JsMethods {
 
     @JavaScriptBody(args = { "v" }, javacall = true, body = "return @java.lang.Integer::parseInt(Ljava/lang/String;)(v);")
     public static native int parseInt(String v);
+    
+    @JavaScriptBody(args = { "useA", "useB", "a", "b" }, body = "var l = 0;"
+        + "if (useA) l += a;\n"
+        + "if (useB) l += b;\n"
+        + "return l;\n"
+    )
+    public static native long chooseLong(boolean useA, boolean useB, long a, long b);
 }

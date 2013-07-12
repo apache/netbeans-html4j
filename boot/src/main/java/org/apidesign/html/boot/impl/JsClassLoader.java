@@ -252,6 +252,7 @@ abstract class JsClassLoader extends ClassLoader {
                     private boolean nowReturn;
                     private Type returnType;
                     private int index;
+                    private int loadIndex = offset;
                     
                     public SV() {
                         super(Opcodes.ASM4);
@@ -265,15 +266,15 @@ abstract class JsClassLoader extends ClassLoader {
                             return;
                         }
                         FindInMethod.super.visitInsn(Opcodes.DUP);
-                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index);
-                        FindInMethod.super.visitVarInsn(t.getOpcode(Opcodes.ILOAD), index + offset);
+                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index++);
+                        FindInMethod.super.visitVarInsn(t.getOpcode(Opcodes.ILOAD), loadIndex++);
                         String factory;
                         switch (descriptor) {
                         case 'I': factory = "java/lang/Integer"; break;
-                        case 'J': factory = "java/lang/Long"; break;
+                        case 'J': factory = "java/lang/Long"; loadIndex++; break;
                         case 'S': factory = "java/lang/Short"; break;
                         case 'F': factory = "java/lang/Float"; break;
-                        case 'D': factory = "java/lang/Double"; break;
+                        case 'D': factory = "java/lang/Double"; loadIndex++; break;
                         case 'Z': factory = "java/lang/Boolean"; break;
                         case 'C': factory = "java/lang/Character"; break;
                         case 'B': factory = "java/lang/Byte"; break;
@@ -283,7 +284,6 @@ abstract class JsClassLoader extends ClassLoader {
                             factory, "valueOf", "(" + descriptor + ")L" + factory + ";"
                         );
                         FindInMethod.super.visitInsn(Opcodes.AASTORE);
-                        index++;
                     }
 
                     @Override
@@ -312,10 +312,9 @@ abstract class JsClassLoader extends ClassLoader {
 
                     private void loadObject() {
                         FindInMethod.super.visitInsn(Opcodes.DUP);
-                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index);
-                        FindInMethod.super.visitVarInsn(Opcodes.ALOAD, index + offset);
+                        FindInMethod.super.visitIntInsn(Opcodes.SIPUSH, index++);
+                        FindInMethod.super.visitVarInsn(Opcodes.ALOAD, loadIndex++);
                         FindInMethod.super.visitInsn(Opcodes.AASTORE);
-                        index++;
                     }
                     
                 }
