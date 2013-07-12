@@ -131,6 +131,13 @@ public final class Position {
          * @throws Throwable if an exception is thrown, it will be logged by the system
          */
         protected abstract void onError(Exception ex) throws Throwable;
+        
+        /** Check whether the location API is supported.
+         * @return true, if one can call {@link #start}.
+         */
+        public final boolean isSupported() {
+            return JsG.hasGeolocation();
+        }
 
         /** Turns on high accuracy mode as specified by the 
          * <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
@@ -156,17 +163,32 @@ public final class Position {
         public final void setMaximumAge(long age) {
             this.maximumAge = age;
         }
-
+        
         /** Initializes the <em>query</em> or <em>watch</em> request(s) and
          * returns immediately. Has no effect if the query has already been
-         * started.
+         * started. If a problem appears while starting the system,
+         * it is immediately reported via the {@link #onError(java.lang.Exception)}
+         * callback. For example, if the {@link #isSupported()} method
+         * returns <code>false</code> an IllegalStateException is created
+         * and sent to the {@link #onError(java.lang.Exception) callback} method.
          */
         public final void start() {
             if (handle != null) {
                 return;
             }
             handle = new JsH();
-            handle.start();
+            try {
+                if (!isSupported()) {
+                    throw new IllegalStateException("geolocation API not supported");
+                }
+                handle.start();
+            } catch (Exception ex) {
+                try {
+                    onError(ex);
+                } catch (Throwable thr) {
+                    LOG.log(Level.INFO, "Problems delivering onError report", thr);
+                }
+            }
         }
 
         /** Stops all pending requests. After this call no further callbacks

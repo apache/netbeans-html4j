@@ -37,7 +37,7 @@ public class OnLocationTest {
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
-        h.start();
+        if (h.isSupported()) h.start();
         h.stop();
     }
     
@@ -53,7 +53,7 @@ public class OnLocationTest {
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
-        h.start();
+        if (h.isSupported()) h.start();
         h.stop();
     }
 
@@ -75,7 +75,7 @@ public class OnLocationTest {
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
-        h.start();
+        if (h.isSupported()) h.start();
         h.stop();
     }
     
@@ -101,7 +101,7 @@ public class OnLocationTest {
         h.setHighAccuracy(false);
         h.setTimeout(1000L);
         h.setMaximumAge(1000L);
-        h.start();
+        if (h.isSupported()) h.start();
         h.stop();
     }
 }

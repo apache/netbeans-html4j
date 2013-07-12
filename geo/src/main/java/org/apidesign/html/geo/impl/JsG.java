@@ -36,28 +36,33 @@ public abstract class JsG {
     
     public abstract void onLocation(Object position);
     public abstract void onError(Object error);
+    
+    @JavaScriptBody(args = {}, body = "return !!navigator.geolocation;")
+    public static boolean hasGeolocation() {
+        return false;
+    }
 
     @JavaScriptBody(
         args = { "onlyOnce", "enableHighAccuracy", "timeout", "maximumAge" }, 
         javacall = true, 
         body = 
-        "var self = this;" +
-        "var ok = function (position) {" +
-        "  self.@org.apidesign.html.geo.impl.JsG::onLocation(Ljava/lang/Object;)(position);" +
-        "};" +
-        "var fail = function (error) {" +
-        "  self.@org.apidesign.html.geo.impl.JsG::onError(Ljava/lang/Object;)(error);" +
-        "};" +
-        "var options = {};" +
-        "options.enableHighAccuracy = enableHighAccuracy;" +
-        "if (timeout >= 0) options.timeout = timeout;" +
-        "if (maximumAge >= 0) options.maximumAge = maximumAge;" +
-        "if (onlyOnce) {" +
-        "  navigator.geolocation.getCurrentPosition(ok, fail);" +
-        "  return 0;" +
-        "} else {" +
-        "  return navigator.geolocation.watchPosition(ok, fail);" +
-        "}"
+        "var self = this;\n" +
+        "var ok = function (position) {\n" +
+        "  self.@org.apidesign.html.geo.impl.JsG::onLocation(Ljava/lang/Object;)(position);\n" +
+        "};\n" +
+        "var fail = function (error) {\n" +
+        "  self.@org.apidesign.html.geo.impl.JsG::onError(Ljava/lang/Object;)(error);\n" +
+        "};\n" +
+        "var options = {};\n" +
+        "options.enableHighAccuracy = enableHighAccuracy;\n" +
+        "if (timeout >= 0) options.timeout = timeout;\n" +
+        "if (maximumAge >= 0) options.maximumAge = maximumAge;\n" +
+        "if (onlyOnce) {\n" +
+        "  navigator.geolocation.getCurrentPosition(ok, fail);\n" +
+        "  return 0;\n" +
+        "} else {\n" +
+        "  return navigator.geolocation.watchPosition(ok, fail);\n" +
+        "}\n"
     )
     protected long start(
         boolean onlyOnce, 
