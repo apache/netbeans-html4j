@@ -220,11 +220,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String set = propsGetSet.get(i + 2);
                     String tn = propsGetSet.get(i + 4);
-                    if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_6) <= 0) {
-                        String btn = findBoxedType(tn);
-                        if (btn != null) {
-                            tn = btn;
-                        }
+                    String btn = findBoxedType(tn);
+                    if (btn != null) {
+                        tn = btn;
                     }
                     if (set != null) {
                         w.append("        case " + (i / 5) + ": data." + strip(set) + "(org.apidesign.html.json.impl.JSON.extractValue(" + tn + ".class, value)); return;\n");
