@@ -38,9 +38,58 @@ import org.apidesign.html.json.tck.KOTest;
     @Property(name="results", type=String.class, array = true),
     @Property(name="callbackCount", type=int.class),
     @Property(name="people", type=PersonImpl.class, array = true),
-    @Property(name="enabled", type=boolean.class)
+    @Property(name="enabled", type=boolean.class),
+    @Property(name="latitude", type=double.class)
 }) 
 public final class KnockoutTest {
+    
+    @KOTest public void modifyValueAssertChangeInModelOnDouble() throws Throwable {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "Latitude: <input id='input' data-bind=\"value: latitude\"></input>\n"
+        );
+        try {
+
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.setLatitude(50.5);
+            m.applyBindings();
+
+            String v = getSetInput(null);
+            assert "50.5".equals(v) : "Value is really 50.5: " + v;
+
+            getSetInput("49.5");
+            triggerEvent("input", "change");
+
+            assert 49.5 == m.getLatitude() : "Double property updated: " + m.getLatitude();
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
+    @KOTest public void modifyValueAssertChangeInModelOnBoolean() throws Throwable {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "Latitude: <input id='input' data-bind=\"value: enabled\"></input>\n"
+        );
+        try {
+
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.setEnabled(true);
+            m.applyBindings();
+
+            String v = getSetInput(null);
+            assert "true".equals(v) : "Value is really true: " + v;
+
+            getSetInput("false");
+            triggerEvent("input", "change");
+
+            assert false == m.isEnabled(): "Boolean property updated: " + m.isEnabled();
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
     
     @KOTest public void modifyValueAssertChangeInModel() throws Exception {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 

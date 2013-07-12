@@ -227,7 +227,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         }
                     }
                     if (set != null) {
-                        w.append("        case " + (i / 5) + ": data." + strip(set) + "((" + tn + ")value); return;\n");
+                        w.append("        case " + (i / 5) + ": data." + strip(set) + "(org.apidesign.html.json.impl.JSON.extractValue(" + tn + ".class, value)); return;\n");
                     }
                 }
                 w.append("      }\n");
@@ -296,10 +296,10 @@ public final class ModelProcessor extends AbstractProcessor {
                         } else if (isEnum[0]) {
                             w.append("        this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
-                            w.append(type).append(".valueOf((String)e));\n");
+                            w.append(type).append(".valueOf(org.apidesign.html.json.impl.JSON.stringValue(e)));\n");
                         } else {
                             if (isPrimitive(type)) {
-                                w.append("        this.prop_").append(pn).append(".add(((Number)e).");
+                                w.append("        this.prop_").append(pn).append(".add(org.apidesign.html.json.impl.JSON.numberValue(e).");
                                 w.append(type).append("Value());\n");
                             } else {
                                 w.append("        this.prop_").append(pn).append(".add((");
@@ -312,18 +312,18 @@ public final class ModelProcessor extends AbstractProcessor {
                         if (isEnum[0]) {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? null : ");
-                            w.append(type).append(".valueOf((String)ret[" + cnt + "]);\n");
+                            w.append(type).append(".valueOf(org.apidesign.html.json.impl.JSON.stringValue(ret[" + cnt + "]));\n");
                         } else if (isPrimitive(type)) {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? ");
                             if ("char".equals(type)) {
-                                w.append("0 : ((Character)");
+                                w.append("0 : (org.apidesign.html.json.impl.JSON.charValue(");
                             } else if ("boolean".equals(type)) {
-                                w.append("false : ((Boolean)");
+                                w.append("false : (org.apidesign.html.json.impl.JSON.boolValue(");
                             } else {
-                                w.append("0 : ((Number)");
+                                w.append("0 : (org.apidesign.html.json.impl.JSON.numberValue(");
                             }
-                            w.append("ret[" + cnt + "]).");
+                            w.append("ret[" + cnt + "])).");
                             w.append(type).append("Value();\n");
                         } else if (isModel[0]) {
                             w.append("    this.prop_").append(pn).append(" = org.apidesign.html.json.impl.JSON.read");

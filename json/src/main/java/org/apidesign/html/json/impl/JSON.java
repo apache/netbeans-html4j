@@ -20,7 +20,6 @@
  */
 package org.apidesign.html.json.impl;
 
-import org.apidesign.html.context.impl.CtxAccssr;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -101,6 +100,41 @@ public final class JSON {
         return aClass.cast(o);
     }
 
+    public static <T> T extractValue(Class<T> type, Object val) {
+        if (Number.class.isAssignableFrom(type)) {
+            val = numberValue(val);
+        }
+        if (Boolean.class == type) {
+            val = boolValue(val);
+        }
+        return type.cast(val);
+    }
+    
+    public static String stringValue(Object val) {
+        return (String)val;
+    }
+
+    public static Number numberValue(Object val) {
+        if (val instanceof String) {
+            try {
+                return Double.valueOf((String)val);
+            } catch (NumberFormatException ex) {
+                return Double.NaN;
+            }
+        }
+        return (Number)val;
+    }
+
+    public static Character charValue(Object val) {
+        return (Character)val;
+    }
+
+    public static Boolean boolValue(Object val) {
+        if (val instanceof String) {
+            return Boolean.parseBoolean((String)val);
+        }
+        return Boolean.TRUE.equals(val);
+    }
     
     public static void loadJSON(
         BrwsrCtx c, Runnable whenDone, Object[] result, 
