@@ -171,4 +171,9 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("chooseLong", boolean.class, boolean.class, long.class, long.class);
         assertEquals(st.invoke(null, true, true, 10, 20), 30L, "Take both values");
     }
+    
+    @Test public void recordError() throws Throwable {
+        Method st = methodClass.getMethod("recordError", Object.class);
+        assertEquals(st.invoke(methodClass.newInstance(), "Hello"), "Hello", "The same parameter returned");
+    }
 }

@@ -240,7 +240,13 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     source.append(" arg").append(++cnt);
                     sep = ", ";
                 }
-                source.append(") {\n");
+                source.append(")");
+                sep = "\n throws ";
+                for (TypeMirror thrwn : m.getThrownTypes()) {
+                    source.append(sep).append(thrwn.toString());
+                    sep = ",";
+                }
+                source.append(" {\n");
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
                     source.append("return ");

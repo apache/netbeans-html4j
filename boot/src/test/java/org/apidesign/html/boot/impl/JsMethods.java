@@ -30,6 +30,8 @@ import net.java.html.js.JavaScriptResource;
  */
 @JavaScriptResource("jsmethods.js")
 public class JsMethods {
+    private Object value;
+    
     @JavaScriptBody(args = {}, body = "return 42;")
     public static Object fortyTwo() {
         return -42;
@@ -88,4 +90,18 @@ public class JsMethods {
         + "return l;\n"
     )
     public static native long chooseLong(boolean useA, boolean useB, long a, long b);
+    
+    protected void onError(Object o) throws Exception {
+        value = o;
+    }
+    
+    Object getError() {
+        return value;
+    }
+    
+    @JavaScriptBody(args = { "err" }, javacall = true, body = 
+        "this.@org.apidesign.html.boot.impl.JsMethods::onError(Ljava/lang/Object;)(err);"
+      + "return this.@org.apidesign.html.boot.impl.JsMethods::getError()();"
+    )
+    public native Object recordError(Object err);
 }
