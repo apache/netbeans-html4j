@@ -58,6 +58,9 @@ abstract class JsCallback {
             String params = body.substring(sigBeg, sigEnd + 1);
 
             int paramBeg = body.indexOf('(', sigEnd + 1);
+            if (paramBeg == -1) {
+                throw new IllegalStateException("Malformed body " + body);
+            }
             
             sb.append(callMethod(refId, fqn, method, params));
             if (body.charAt(paramBeg + 1) != (')')) {
