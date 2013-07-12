@@ -94,7 +94,7 @@ public class JavaScriptProcesorTest {
     
     @Test public void generatesCallbacksThatReturnObject() throws Exception {
         Class<?> callbacksForTestPkg = Class.forName("org.apidesign.html.boot.impl.$JsCallbacks$");
-        Method m = callbacksForTestPkg.getDeclaredMethod("java_lang_Runnable__run__", Runnable.class);
+        Method m = callbacksForTestPkg.getDeclaredMethod("java_lang_Runnable$run$", Runnable.class);
         assertEquals(m.getReturnType(), Object.class, "All methods always return object");
     }
     

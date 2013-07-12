@@ -111,7 +111,7 @@ abstract class JsCallback {
             params = params.substring(0, params.length() - 1);
         }
         return 
-            replace(fqn) + "__" + replace(method) + "__" + replace(params);
+            replace(fqn) + "$" + replace(method) + "$" + replace(params);
     }
     
     private static String replace(String orig) {
