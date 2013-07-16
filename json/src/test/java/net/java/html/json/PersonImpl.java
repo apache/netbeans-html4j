@@ -59,6 +59,8 @@ final class PersonImpl {
         @Property(array = true, name = "age", type = int.class),
         @Property(array = true, name = "sex", type = Sex.class)
     })
-    public class PeopleImpl {
+    public static class PeopleImpl {
+        @Function static void inInnerClass(People p) {
+        }
     }
 }

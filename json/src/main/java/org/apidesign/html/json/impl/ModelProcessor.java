@@ -645,7 +645,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             String n = e.getSimpleName().toString();
             body.append("  private void ").append(n).append("(Object data, Object ev) {\n");
-            body.append("    ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("    ").append(((TypeElement)clazz).getQualifiedName()).append(".").append(n).append("(");
             body.append(wrapParams(e, null, className, "ev", "data"));
             body.append(");\n");
             body.append("  }\n");
