@@ -44,7 +44,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
@@ -208,14 +207,7 @@ public final class FXPresenter implements Fn.Presenter {
                 FXBrwsr.class.notifyAll();
             }
             BorderPane r = new BorderPane();
-            final boolean showToolbar = "true".equals(this.getParameters().getNamed().get("toolbar")); // NOI18N
-            final boolean useFirebug = "true".equals(this.getParameters().getNamed().get("firebug")); // NOI18N
-            if (showToolbar) {
-                //final ToolBar toolbar = new BrowserToolbar(view, vbox, useFirebug, wc.dbg);
-                //root.setTop(toolbar);
-            }
             Scene scene = new Scene(r, 800, 600);
-            primaryStage.setTitle("Device Emulator");
             primaryStage.setScene(scene);
             primaryStage.show();
             this.root = r;
@@ -225,17 +217,7 @@ public final class FXPresenter implements Fn.Presenter {
             final WebView view = new WebView();
             final String nbUserDir = this.getParameters().getNamed().get("userdir"); // NOI18N
             WebController wc = new WebController(view, nbUserDir, getParameters().getUnnamed());
-
-            final VBox vbox = new VBox();
-            vbox.setAlignment(Pos.CENTER);
-            vbox.setStyle("-fx-background-color: #808080;");
-
-            HBox hbox = new HBox();
-            hbox.setStyle("-fx-background-color: #808080;");
-            hbox.setAlignment(Pos.CENTER);
-            hbox.getChildren().add(vbox);
-            vbox.getChildren().add(view);
-            root.setCenter(hbox);
+            root.setCenter(view);
 
             final Worker<Void> w = view.getEngine().getLoadWorker();
             w.stateProperty().addListener(new ChangeListener<Worker.State>() {
