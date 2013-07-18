@@ -12,5 +12,6 @@ public final class Main {
             loadClass(TwitterClient.class).
             invoke("initialize", args).
             showAndWait();
+        System.exit(0);
     }
 }
