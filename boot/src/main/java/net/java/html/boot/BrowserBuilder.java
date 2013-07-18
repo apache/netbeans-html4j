@@ -20,6 +20,7 @@
  */
 package net.java.html.boot;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -103,8 +104,14 @@ public final class BrowserBuilder {
 
     /** Page to load into the browser. If the <code>page</code> represents
      * a {@link URL} known to the Java system, the URL is passed to the browser. 
-     * Otherwise the system seeks for the resource via {@link Class#getResource(java.lang.String)}
-     * method.
+     * If system property <code>browser.rootdir</code> is specified, then a
+     * file <code>page</code> relative to this directory is used as the URL.
+     * If no such file exists, the system seeks for the 
+     * resource via {@link Class#getResource(java.lang.String)}
+     * method (relative to the {@link #loadClass(java.lang.Class) specified class}). 
+     * If such resource is not found, a file relative to the location JAR
+     * that contains the {@link #loadClass(java.lang.Class) main class} is 
+     * searched for.
      * 
      * @param page the location (relative, absolute, or URL) of a page to load
      * @return this browser
@@ -146,12 +153,26 @@ public final class BrowserBuilder {
         URL url = null;
         MalformedURLException mal = null;
         try {
-            url = new URL(resource);
+            String baseURL = System.getProperty("browser.rootdir");
+            if (baseURL != null) {
+                url = new File(baseURL, resource).toURI().toURL();
+            } else {
+                url = new URL(resource);
+            }
         } catch (MalformedURLException ex) {
             mal = ex;
         }
         if (url == null) {
             url = clazz.getResource(resource);
+        }
+        if (url == null) {
+            URL jar = clazz.getProtectionDomain().getCodeSource().getLocation();
+            try {
+                url = new URL(jar, resource);
+            } catch (MalformedURLException ex) {
+                ex.initCause(mal);
+                mal = ex;
+            }
         }
         if (url == null) {
             IllegalStateException ise = new IllegalStateException("Can't find resouce: " + resource + " relative to " + clazz);
