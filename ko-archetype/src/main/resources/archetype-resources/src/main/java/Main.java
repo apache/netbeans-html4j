@@ -8,7 +8,7 @@ public final class Main {
     
     public static void main(String... args) throws Exception {
         BrowserBuilder.newBrowser().
-            loadPage("index.html").
+            loadPage("pages/index.html").
             loadClass(TwitterClient.class).
             invoke("initialize", args).
             showAndWait();

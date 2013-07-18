@@ -7,8 +7,8 @@
         <include>**/*.java</include>
       </includes>
     </fileSet>
-    <fileSet filtered="true" packaged="true">
-      <directory>src/main/resources</directory>
+    <fileSet filtered="true" packaged="false">
+      <directory>src/main/web/pages</directory>
       <includes>
         <include>**/*.xhtml</include>
         <include>**/*.html</include>

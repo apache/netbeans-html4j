@@ -70,6 +70,12 @@
               <artifactId>exec-maven-plugin</artifactId>
               <version>1.2.1</version>
               <configuration>
+                  <systemProperties>
+                      <systemProperty>
+                          <key>browser.rootdir</key>
+                          <value>\${basedir}/src/main/web/</value>
+                      </systemProperty>
+                  </systemProperties>
                   <mainClass>\${package}.Main</mainClass>
               </configuration>
           </plugin>      
