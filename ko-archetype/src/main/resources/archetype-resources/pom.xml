@@ -73,7 +73,7 @@
                   <systemProperties>
                       <systemProperty>
                           <key>browser.rootdir</key>
-                          <value>\${basedir}/src/main/web/</value>
+                          <value>\${basedir}/src/main/webapp/</value>
                       </systemProperty>
                   </systemProperties>
                   <mainClass>\${package}.Main</mainClass>
