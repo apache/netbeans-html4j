@@ -947,7 +947,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             error(
-                "@On method can only accept String named 'id' or " + className + " arguments",
+                "@On method can only accept String named 'id', " + className + " argument or argument named 'data'",
                 ee
             );
         }
