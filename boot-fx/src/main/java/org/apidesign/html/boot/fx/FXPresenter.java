@@ -51,12 +51,15 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import net.java.html.boot.BrowserBuilder;
 import netscape.javascript.JSObject;
 import org.apidesign.html.boot.spi.Fn;
 import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 
-/**
+/** This is an implementation class, use {@link BrowserBuilder} API. Just
+ * include this JAR on classpath and the {@link BrowserBuilder} API will find
+ * this implementation automatically.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -146,6 +149,10 @@ public final class FXPresenter implements Fn.Presenter {
         }
     }
 
+    /** This is an implementation class, use {@link BrowserBuilder} API. Just
+     * include this JAR on classpath and the {@link BrowserBuilder} API will find
+     * this implementation automatically.
+     */
     public static class FXBrwsr extends Application {
         private static FXBrwsr INSTANCE;
         private static final CountDownLatch FINISHED = new CountDownLatch(1);
