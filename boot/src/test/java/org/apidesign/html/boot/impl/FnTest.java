@@ -88,7 +88,7 @@ public class FnTest extends JsClassLoaderBase {
                             Invocable inv = (Invocable)eng;
                             try {
                                 Object ret = inv.invokeMethod(val, "call", all.toArray());
-                                return ret == val ? null : ret;
+                                return val.equals(ret) ? null : ret;
                             } catch (ScriptException ex) {
                                 throw ex;
                             }

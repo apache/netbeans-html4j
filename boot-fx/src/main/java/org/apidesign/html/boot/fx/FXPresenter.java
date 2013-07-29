@@ -67,11 +67,16 @@ import org.openide.util.lookup.ServiceProvider;
 public final class FXPresenter implements Fn.Presenter {
     static {
         try {
-            Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            m.setAccessible(true);
-            URL l = new URL("file://" + System.getProperty("java.home") + "/lib/jfxrt.jar");
-//            LOG.log(Level.INFO, "url : {0}", l);
-            m.invoke(ClassLoader.getSystemClassLoader(), l);
+            try {
+                Class<?> c = Class.forName("javafx.application.Platform");
+                // OK, on classpath
+            } catch (ClassNotFoundException classNotFoundException) {
+                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                m.setAccessible(true);
+                URL l = new URL("file://" + System.getProperty("java.home") + "/lib/jfxrt.jar");
+    //            LOG.log(Level.INFO, "url : {0}", l);
+                m.invoke(ClassLoader.getSystemClassLoader(), l);
+            }
         } catch (Exception ex) {
             throw new LinkageError("Can't add jfxrt.jar on the classpath", ex);
         }

@@ -80,7 +80,7 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
                             Invocable inv = (Invocable)eng;
                             try {
                                 Object ret = inv.invokeMethod(val, "call", all.toArray());
-                                return ret == val ? null : ret;
+                                return val.equals(ret) ? null : ret;
                             } catch (Exception ex) {
                                 throw ex;
                             }
