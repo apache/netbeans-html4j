@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.apidesign</groupId>
     <artifactId>html</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>boot-fx</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <name>FX WebView Bootstrap</name>
   <url>http://maven.apache.org</url>
   <properties>
