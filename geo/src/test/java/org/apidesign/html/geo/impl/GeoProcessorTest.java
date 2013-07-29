@@ -40,7 +40,7 @@ public class GeoProcessorTest {
             + "}\n"
         );
         res.assertErrors();
-        res.assertError("one net.java.html.geo.Position argument");
+        res.assertError("first argument must be net.java.html.geo.Position");
     }
     
     @Test public void onLocationMethodCannotBePrivate() throws IOException {
@@ -86,7 +86,7 @@ public class GeoProcessorTest {
             + "}\n"
         );
         res.assertErrors();
-        res.assertError("take one Exception arg");
+        res.assertError("Error method first argument needs to be Exception");
     }
     
 }

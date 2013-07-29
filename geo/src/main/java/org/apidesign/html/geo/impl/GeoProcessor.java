@@ -22,6 +22,7 @@ package org.apidesign.html.geo.impl;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
@@ -38,6 +39,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -85,8 +87,9 @@ public final class GeoProcessor extends AbstractProcessor {
             return false;
         }
         TypeMirror positionClass = processingEnv.getElementUtils().getTypeElement(Position.class.getName()).asType();
-        if (me.getParameters().size() != 1 || !me.getParameters().get(0).asType().equals(positionClass)) {
-            error("Method annotated by @OnLocation needs to have one net.java.html.geo.Position argument!", e);
+        final List<? extends VariableElement> params = me.getParameters();
+        if (params.size() < 1 || !params.get(0).asType().equals(positionClass)) {
+            error("Method annotated by @OnLocation first argument must be net.java.html.geo.Position!", e);
             return false;
         }
         String className = ol.className();
@@ -104,17 +107,32 @@ public final class GeoProcessor extends AbstractProcessor {
         final String pkg = pe.getQualifiedName().toString();
         final String fqn = pkg + "." + className;
         final boolean isStatic = me.getModifiers().contains(Modifier.STATIC);
+        String sep;
         try {
             JavaFileObject fo = processingEnv.getFiler().createSourceFile(fqn, e);
             Writer w = fo.openWriter();
             w.append("package ").append(pkg).append(";\n");
             w.append("class ").append(className).append(" extends net.java.html.geo.Position.Handle {\n");
-            w.append("  private ").append(te.getSimpleName()).append(" i;\n");
+            if (!isStatic) {
+                w.append("  private final ").append(te.getSimpleName()).append(" $i;\n");
+            }
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append("  private final ").append(p.asType().toString()).append(" ").append(p.getSimpleName()).append(";\n");
+            }
             w.append("  private ").append(className).append("(boolean oneTime");
             w.append(", ").append(te.getSimpleName()).append(" i");
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(", ").append(p.asType().toString()).append(" ").append(p.getSimpleName());
+            }
             w.append(") {\n    super(oneTime);\n");
             if (!isStatic) {
-                w.append("    this.i = i;\n");
+                w.append("    this.$i = i;\n");
+            }
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append("  this.").append(p.getSimpleName()).append(" = ").append(p.getSimpleName()).append(";\n");
             }
             w.append("}\n");
             w.append("  static net.java.html.geo.Position.Handle createQuery(");
@@ -122,15 +140,39 @@ public final class GeoProcessor extends AbstractProcessor {
             if (!isStatic) {
                 w.append(te.getSimpleName()).append(" instance");
                 inst = "instance";
+                sep = ", ";
             } else {
                 inst = "null";
+                sep = "";
             }
-            w.append(") { return new ").append(className).append("(true, ").append(inst).append("); }\n");
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(sep).append(p.asType().toString()).append(" ").append(p.getSimpleName());
+                sep = ", ";
+            }
+            w.append(") { return new ").append(className).append("(true, ").append(inst);
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(", ").append(p.getSimpleName());
+            }
+            w.append("); }\n");
             w.append("  static net.java.html.geo.Position.Handle createWatch(");
             if (!isStatic) {
                 w.append(te.getSimpleName()).append(" instance");
+                sep = ", ";
+            } else {
+                sep = "";
             }
-            w.append(") { return new ").append(className).append("(false, ").append(inst).append("); }\n");
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(sep).append(p.asType().toString()).append(" ").append(p.getSimpleName());
+            }
+            w.append(") { return new ").append(className).append("(false, ").append(inst);
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(", ").append(p.getSimpleName());
+            }
+            w.append("); }\n");
             w.append("  @Override protected void onError(Exception t) throws Throwable {\n");
             if (ol.onError().isEmpty()) {
                 w.append("    t.printStackTrace();");
@@ -141,18 +183,28 @@ public final class GeoProcessor extends AbstractProcessor {
                 if (isStatic) {
                     w.append("    ").append(te.getSimpleName()).append(".");
                 } else {
-                    w.append("    i.");
+                    w.append("    $i.");
                 }
-                w.append(ol.onError()).append("(t);\n");
+                w.append(ol.onError()).append("(t");
+                for (int i = 1; i < params.size(); i++) {
+                    final VariableElement p = params.get(i);
+                    w.append(", ").append(p.getSimpleName());
+                }
+                w.append(");\n");
             }
             w.append("  }\n");
             w.append("  @Override protected void onLocation(net.java.html.geo.Position p) throws Throwable {\n");
             if (isStatic) {
                 w.append("    ").append(te.getSimpleName()).append(".");
             } else {
-                w.append("    i.");
+                w.append("    $i.");
             }
-            w.append(me.getSimpleName()).append("(p);\n");
+            w.append(me.getSimpleName()).append("(p");
+            for (int i = 1; i < params.size(); i++) {
+                final VariableElement p = params.get(i);
+                w.append(", ").append(p.getSimpleName());
+            }
+            w.append(");\n");
             w.append("  }\n");
             w.append("}\n");
             w.close();
@@ -165,9 +217,9 @@ public final class GeoProcessor extends AbstractProcessor {
         return true;
     }
 
-    private boolean findOnError(Element errElem, TypeElement te, String name, boolean onlyStatic) {
+    private boolean findOnError(ExecutableElement errElem, TypeElement te, String name, boolean onlyStatic) {
         String err = null;
-        for (Element e : te.getEnclosedElements()) {
+        METHODS: for (Element e : te.getEnclosedElements()) {
             if (e.getKind() != ElementKind.METHOD) {
                 continue;
             }
@@ -175,18 +227,34 @@ public final class GeoProcessor extends AbstractProcessor {
                 continue;
             }
             if (onlyStatic && !e.getModifiers().contains(Modifier.STATIC)) {
-                errElem = e;
+                errElem = (ExecutableElement) e;
                 err = "Would have to be static";
                 continue;
             }
             ExecutableElement ee = (ExecutableElement) e;
             TypeMirror excType = processingEnv.getElementUtils().getTypeElement(Exception.class.getName()).asType();
-            if (ee.getParameters().size() != 1 || 
+            final List<? extends VariableElement> params = ee.getParameters(); 
+            if (params.size() < 1 || 
                 !processingEnv.getTypeUtils().isAssignable(excType, ee.getParameters().get(0).asType())
             ) {
-                errElem = e;
-                err = "Error method needs to take one Exception argument";
+                errElem = (ExecutableElement) e;
+                err = "Error method first argument needs to be Exception";
                 continue;
+            }
+            final List<? extends Element> origParams = errElem.getParameters();
+            if (params.size() != origParams.size()) {
+                errElem = (ExecutableElement) e;
+                err = "Error method must have the same parameters as @OnLocation one";
+                continue;
+            }
+            for (int i = 1; i < origParams.size(); i++) {
+                final TypeMirror t1 = params.get(i).asType();
+                final TypeMirror t2 = origParams.get(i).asType();
+                if (!processingEnv.getTypeUtils().isSameType(t1, t2)) {
+                    errElem = (ExecutableElement) e;
+                    err = "Error method must have the same parameters as @OnLocation one";
+                    continue METHODS;
+                }
             }
             return true;
         }

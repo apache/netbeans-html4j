@@ -104,4 +104,12 @@ public class OnLocationTest {
         if (h.isSupported()) h.start();
         h.stop();
     }
+    
+    @OnLocation(onError = "errParam") void withParam(Position pos, int param) {
+        instCnt = param;
+    }
+    
+    void errParam(Exception ex, int param) {
+        instCnt = param;
+    }
 }
