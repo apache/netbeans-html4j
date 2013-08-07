@@ -1,106 +1,127 @@
 /**
- * Back 2 Browser Bytecode Translator Copyright (C) 2012 Jaroslav Tulach
- * <jaroslav.tulach@apidesign.org>
+ * HTML via Java(tm) Language Bindings
+ * Copyright (C) 2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, version 2 of the License.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details. apidesign.org
+ * designates this particular file as subject to the
+ * "Classpath" exception as provided by apidesign.org
+ * in the License file that accompanied this code.
  *
- * You should have received a copy of the GNU General Public License along with
- * this program. Look for COPYING file in the top folder. If not, see
- * http://opensource.org/licenses/GPL-2.0.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. Look for COPYING file in the top folder.
+ * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
 package net.java.html.sound;
 
 import java.util.ServiceLoader;
 import org.apidesign.html.sound.spi.AudioEnvironment;
 
-/**
+/** Handle to an audio clip which can be {@link #play() played}, {@link #pause() paused}
+ * and etc. Obtain new instance via {@link #create(java.lang.String) create} factory 
+ * method and then use it when necessary.
  *
  * @author antonepple
  */
-public final class AudioClip {
-
-    private Object cached;
-    private int cacheHash;
-    private final String src;
-    private final AudioEnvironment audioEnvironment;
-
-    private AudioClip(String src) {
-        this.src = src;
-        ServiceLoader<AudioEnvironment> loader = ServiceLoader.load(AudioEnvironment.class);
-        audioEnvironment = loader.iterator().next();
+public abstract class AudioClip {
+    private AudioClip() {
     }
 
+    /** Creates new instance of an audio clip based on the provided URL.
+     * 
+     * @param src the URL where to find the audio clip
+     * @return the audio clip handle
+     * @throws NullPointerException if src is <code>null</code>
+     */
     public static AudioClip create(String src) {
-        return new AudioClip(src);
+        src.getClass();
+        for (AudioEnvironment<?> ae : ServiceLoader.load(AudioEnvironment.class)) {
+            Impl handle = create(ae, src);
+            if (handle != null) {
+                return handle;
+            }
+        }
+        throw new IllegalStateException();
     }
+    
+    /** Plays the clip from begining to the end.
+     */
+    public abstract void play();
 
-    public void play() {
-        Object nativeClip = audioEnvironment.play(this, cached);
-        cache(nativeClip);
+    /** Pauses playback of the clip
+     */
+    public abstract void pause();
+
+    /**
+     * Specifies the volume of the audio. Must be a number between 0.0 and 1.0:
+     * <ul>
+     *   <li>1.0 - highest volume</li>
+     *   <li>0.5 - 50% volume</li>
+     *   <li>0.0 - silent</li>
+     * </ul>
+     * 
+     * @param volume for the playback
+     */
+    public abstract void setVolume(double volume);
+
+//    public abstract void playFrom(int seconds);
+
+    //
+    // Implementation
+    //
+    
+    private static <Audio> Impl<Audio> create(AudioEnvironment<Audio> env, String src) {
+        Audio a = env.create(src);
+        if (a != null) {
+            return new Impl<Audio>(env, src, a);
+        } else {
+            return null;
+        }
     }
+    
+    private static final class Impl<Audio> extends AudioClip {
+        private final String src;
+        private final Audio clip;
+        private final AudioEnvironment<Audio> env;
 
-    public void pause() {
-        Object nativeClip = audioEnvironment.pause(this, cached);
-        cache(nativeClip);
-    }
+        public Impl(AudioEnvironment<Audio> env, String src, Audio clip) {
+            this.clip = clip;
+            this.env = env;
+            this.src = src;
+        }
 
-    public void stop() {
-        Object nativeClip = audioEnvironment.stop(this, cached);
-        cache(nativeClip);
-    }
+        @Override
+        public void play() {
+            env.play(clip);
+        }
 
-    public void setVolume(int volume) {
-        Object nativeClip = audioEnvironment.setVolume(this, volume, cached);
-        cache(nativeClip);
-    }
+        @Override
+        public void pause() {
+            env.pause(clip);
+        }
 
-    public void playFrom(int seconds) {
-        Object nativeClip = audioEnvironment.playFrom(this, seconds, cached);
-        cache(nativeClip);
-    }
+        @Override
+        public void setVolume(double volume) {
+            env.setVolume(clip, volume);
+        }
 
-    void cache(Object toCache) {
-        cacheHash = hashCode();
-        this.cached = toCache;
-    }
+        @Override
+        public int hashCode() {
+            return 59 * src.hashCode();
+        }
 
-    private boolean isCached() {
-        return cacheHash == hashCode();
-    }
-
-    Object getCached() {
-        return isCached() ? cached : null;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 59 * hash + (this.src != null ? this.src.hashCode() : 0) ^ (cached==null? 1231 : 1237);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Impl) {
+                return src.equals(((Impl)obj).src);
+            }
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final AudioClip other = (AudioClip) obj;
-        if ((this.src == null) ? (other.src != null) : !this.src.equals(other.src)) {
-            return false;
-        }
-        if ((this.cached == null) != (other.cached == null)) {
-            return false;
-        }
-        return true;
-    }
+    } // end of Impl
 }

@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.apidesign</groupId>
         <artifactId>html</artifactId>
-        <version>0.4-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
-    <groupId>net.java.html</groupId>
-    <artifactId>sound</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>Sound API for Java</name>
+    <groupId>org.apidesign.html</groupId>
+    <artifactId>net.java.html.sound</artifactId>
+    <version>0.5-SNAPSHOT</version>
+    <name>Sound API via HTML</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,6 +22,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
+                    <subpackages>net.java.html.sound</subpackages>
                 </configuration>
             </plugin>
         </plugins>
@@ -30,8 +31,18 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.5.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apidesign.html</groupId>
+            <artifactId>net.java.html.boot</artifactId>
+            <version>0.5-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.netbeans.api</groupId>
+          <artifactId>org-openide-util-lookup</artifactId>
+          <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
