@@ -189,6 +189,7 @@ public final class BrowserBuilder {
                 @Override
                 public void run() {
                     try {
+                        Thread.currentThread().setContextClassLoader(loader);
                         Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
                         if (browserClass != null) {
                             browserClass[0] = newClazz;
