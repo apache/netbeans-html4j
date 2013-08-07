@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apidesign</groupId>
   <artifactId>html</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent> 
@@ -13,8 +13,6 @@
   </parent>  
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <bck2brwsr.version>0.7.2</bck2brwsr.version>
-      <bck2brwsr.launcher.version>0.7.2</bck2brwsr.launcher.version>
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
   </properties>
@@ -23,9 +21,12 @@
     <module>json-tck</module>
     <module>ko-archetype</module>
     <module>ko-archetype-test</module>
-    <module>ko-bck2brwsr</module>
     <module>ko-fx</module>
     <module>sound</module>
+    <module>context</module>
+    <module>boot</module>
+    <module>boot-fx</module>
+    <module>geo</module>
   </modules>
   <licenses>
       <license>
@@ -39,9 +40,9 @@
       <url>http://apidesign.org</url>
   </organization>
   <scm>
-      <connection>scm:hg:https://hg.java.net/hg/html~html4j</connection>
-      <developerConnection>scm:hg:https://hg.java.net/hg/html~html4j</developerConnection>
-      <url>https://hg.java.net/hg/html~html4j</url>
+      <connection>scm:hg:https://hg.apidesign.org/hg/html~html4j</connection>
+      <developerConnection>scm:hg:https://hg.apidesign.org/hg/html~html4j</developerConnection>
+      <url>https://hg.apidesign.org/hg/html~html4j</url>
       <tag>default</tag>
   </scm>
   <repositories>
@@ -256,4 +257,28 @@
         </dependency>
       </dependencies>
   </dependencyManagement>
+  <profiles>
+      <profile>
+          <id>jdk8</id>
+          <activation>
+              <file>
+                  <exists>${java.home}/lib/ext/jfxrt.jar</exists>
+              </file>
+          </activation>
+          <properties>
+            <jfxrt.jar>${java.home}/lib/ext/jfxrt.jar</jfxrt.jar>
+          </properties>
+      </profile>
+      <profile>
+          <id>jdk7</id>
+          <activation>
+              <file>
+                  <exists>${java.home}/lib/jfxrt.jar</exists>
+              </file>
+          </activation>
+          <properties>
+            <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
+          </properties>
+      </profile>
+  </profiles>
 </project>

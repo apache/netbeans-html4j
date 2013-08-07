@@ -20,10 +20,13 @@
  */
 package net.java.html.json;
 
+import net.java.html.BrwsrCtx;
 import java.util.Map;
 import net.java.html.json.MapModelTest.One;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.impl.WrapperObject;
-import org.apidesign.html.json.spi.ContextBuilder;
+import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -44,11 +47,12 @@ import static org.testng.Assert.*;
 })
 public class TypesTest {
     private MapModelTest.MapTechnology t;
-    private Context c;
+    private BrwsrCtx c;
 
     @BeforeMethod public void initTechnology() {
         t = new MapModelTest.MapTechnology();
-        c = ContextBuilder.create().withTechnology(t).withTransfer(t).build();
+        c = Contexts.newBuilder().register(Technology.class, t, 1).
+            register(Transfer.class, t, 1).build();
     }
     @Function static void readFromEvent(int intX, 
         /*
@@ -72,7 +76,7 @@ public class TypesTest {
     }
     
     @Test public void canParseEventAttributes() {
-        Types t = new Types(c);
+        Types t = Models.bind(new Types(), c);
         t.setIntX(33);
         t.setDoubleX(180.5);
         t.setStringX("Ahoj");
@@ -87,7 +91,7 @@ public class TypesTest {
         
         Object json = WrapperObject.find(t);
         
-        Types copy = new Types(c);
+        Types copy = Models.bind(new Types(), c);
         Map copyMap = (Map) WrapperObject.find(copy);
         One o = (One) copyMap.get("readFromEvent");
         o.fb.call(null, json);

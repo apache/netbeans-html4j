@@ -20,23 +20,21 @@
  */
 package org.apidesign.html.json.tck;
 
+import java.net.URI;
 import java.util.Map;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
-import net.java.html.json.Context;
-import org.apidesign.bck2brwsr.vmtest.BrwsrTest;
-import org.apidesign.bck2brwsr.vmtest.VMTest;
-import org.apidesign.html.json.spi.ContextBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
- * Knockout.js in bck2brwsr or in JavaFX's WebView). Sample usage:
+ * Knockout.js in JavaFX's WebView). Sample usage:
  * <pre>
 {@link ServiceProvider @ServiceProvider}(service = KnockoutTCK.class)
-public final class Bck2BrwsrKnockoutTest extends KnockoutTCK {
+public final class MyKnockoutBindingTest extends KnockoutTCK {
     {@link Override @Override}
-    protected Context createContext() {
+    protected BrwsrCtx createContext() {
         // use {@link ContextBuilder}.{@link ContextBuilder#build() build}();
     }
 
@@ -55,7 +53,7 @@ public abstract class KnockoutTCK {
     /** Implement to create new context for the test. 
      * Use {@link ContextBuilder} to implement context for your technology.
      */
-    public abstract Context createContext();
+    public abstract BrwsrCtx createContext();
     
     /** Create a JSON object as seen by the technology
      * @param values mapping from names to values of properties
@@ -69,9 +67,21 @@ public abstract class KnockoutTCK {
      * @return the output of the execution
      */
     public abstract Object executeScript(String script, Object[] arguments);
+
+    /** Creates a URL which later returns content with given
+     * <code>mimeType</code> and <code>content</code>. The 
+     * content may be processed by the provided <code>parameters</code>.
+     * 
+     * @param content
+     * @param mimeType
+     * @param parameters
+     * @return 
+     */
+    public abstract URI prepareURL(String content, String mimeType, String[] parameters);
     
-    /** Gives you list of classes included in the TCK. Send them
-     * to {@link VMTest#create(java.lang.Class)} factory method.
+    /** Gives you list of classes included in the TCK. Their test methods
+     * are annotated by {@link KOTest} annotation. The methods are public
+     * instance methods that take no arguments.
      * 
      * @return classes with methods annotated by {@link BrwsrTest} annotation
      */
@@ -83,5 +93,5 @@ public abstract class KnockoutTCK {
         };
     }
 
-    
+
 }

@@ -24,10 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import net.java.html.json.Context;
+import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
-import org.apidesign.html.json.spi.ContextBuilder;
-import org.apidesign.html.json.spi.ContextProvider;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
@@ -43,18 +42,21 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@ServiceProvider(service = ContextProvider.class)
+@ServiceProvider(service = Contexts.Provider.class)
 public final class FXContext
-implements Technology<JSObject>, Transfer, ContextProvider {
+implements Technology<JSObject>, Transfer, Contexts.Provider {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
+    
+    @JavaScriptBody(args = {}, body = "return true;")
+    private static boolean isJavaScriptEnabled() {
+        return false;
+    }
 
     @Override
-    public Context findContext(Class<?> requestor) {
-        if (Knockout.web() != null) {
-            return ContextBuilder.create().withTechnology(this).
-                withTransfer(this).build();
-        } else {
-            return null;
+    public void fillContext(Contexts.Builder context, Class<?> requestor) {
+        if (isJavaScriptEnabled()) {
+            context.register(Technology.class, this, 100);
+            context.register(Transfer.class, this, 100);
         }
     }
 

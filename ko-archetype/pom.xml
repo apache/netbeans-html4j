@@ -4,18 +4,18 @@
   <parent>
     <artifactId>html</artifactId>
     <groupId>org.apidesign</groupId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>knockout4j-archetype</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Knockout 4 Java Maven Archetype</name>
   <description>
       HTML page with Knockout.js bindings driven by application model
       written in Java. Use your favorite language to code. Use
-      HTML as a lightweight rendering toolkit. Deploy using JavaFX or 
-      bck2brwsr virtual machine.
+      HTML as a lightweight rendering toolkit. Deploy using JavaFX and 
+      Java virtual machine.
   </description>
   <build>
       <resources>

@@ -4,15 +4,14 @@
   <parent>
     <groupId>org.apidesign</groupId>
     <artifactId>html</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>ko-fx</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Knockout.fx</name>
   <url>http://maven.apache.org</url>
   <properties>
-    <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <build>
@@ -43,12 +42,11 @@
     <dependency>
       <groupId>org.apidesign.html</groupId>
       <artifactId>net.java.html.json</artifactId>
-      <version>0.4-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.5.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -63,9 +61,21 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apidesign.bck2brwsr</groupId>
-      <artifactId>launcher.fx</artifactId>
-      <version>${bck2brwsr.launcher.version}</version>
+      <groupId>org.apidesign.html</groupId>
+      <artifactId>net.java.html.boot</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>boot-fx</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.grizzly</groupId>
+      <artifactId>grizzly-http-server</artifactId>
+      <version>2.3.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

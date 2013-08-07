@@ -40,6 +40,10 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     public void assign(Bindings model) {
+        if (this.model == null && isEmpty()) {
+            this.model = model;
+            return;
+        }
         if (this.model != model) {
             this.model = model;
             notifyChange();
@@ -148,10 +152,10 @@ public final class JSONList<T> extends ArrayList<T> {
             for (String dependant : deps) {
                 m.valueHasMutated(dependant);
             }
-        }
-        Runnable r = onchange;
-        if (r != null) {
-            r.run();
+            Runnable r = onchange;
+            if (r != null) {
+                r.run();
+            }
         }
     }
 

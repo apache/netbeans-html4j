@@ -187,12 +187,15 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("import net.java.html.json.*;\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private boolean locked;\n");
-                w.append("  private net.java.html.json.Context context;\n");
+                w.append("  private net.java.html.BrwsrCtx context;\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings ko;\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
-                w.append("  public ").append(className).append("(Context context) {\n");
+                w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
                 w.append("    this.context = context;\n");
+                w.append("  };\n");
+                w.append("  public ").append(className).append("() {\n");
+                w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
@@ -217,14 +220,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String set = propsGetSet.get(i + 2);
                     String tn = propsGetSet.get(i + 4);
-                    if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_6) <= 0) {
-                        String btn = findBoxedType(tn);
-                        if (btn != null) {
-                            tn = btn;
-                        }
+                    String btn = findBoxedType(tn);
+                    if (btn != null) {
+                        tn = btn;
                     }
                     if (set != null) {
-                        w.append("        case " + (i / 5) + ": data." + strip(set) + "((" + tn + ")value); return;\n");
+                        w.append("        case " + (i / 5) + ": data." + strip(set) + "(org.apidesign.html.json.impl.JSON.extractValue(" + tn + ".class, value)); return;\n");
                     }
                 }
                 w.append("      }\n");
@@ -250,10 +251,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
                 w.append("    public Class<" + className + "> factoryFor() { return " + className + ".class; }\n");
-                w.append("    public " + className + " read(Context c, Object json) { return new " + className + "(c, json); }\n");
+                w.append("    public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
+                w.append("    public " + className + " cloneTo(Object o, net.java.html.BrwsrCtx c) { return ((" + className + ")o).clone(c); }\n");
                 w.append("  }\n");
                 w.append("  static { org.apidesign.html.json.impl.JSON.register(new P(0)); }\n");
-                w.append("  private ").append(className).append("(Context c, Object json) {\n");
+                w.append("  private ").append(className).append("(net.java.html.BrwsrCtx c, Object json) {\n");
                 w.append("    this.context = c;\n");
                 int values = 0;
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
@@ -292,10 +294,10 @@ public final class ModelProcessor extends AbstractProcessor {
                         } else if (isEnum[0]) {
                             w.append("        this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
-                            w.append(type).append(".valueOf((String)e));\n");
+                            w.append(type).append(".valueOf(org.apidesign.html.json.impl.JSON.stringValue(e)));\n");
                         } else {
                             if (isPrimitive(type)) {
-                                w.append("        this.prop_").append(pn).append(".add(((Number)e).");
+                                w.append("        this.prop_").append(pn).append(".add(org.apidesign.html.json.impl.JSON.numberValue(e).");
                                 w.append(type).append("Value());\n");
                             } else {
                                 w.append("        this.prop_").append(pn).append(".add((");
@@ -308,20 +310,24 @@ public final class ModelProcessor extends AbstractProcessor {
                         if (isEnum[0]) {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? null : ");
-                            w.append(type).append(".valueOf((String)ret[" + cnt + "]);\n");
+                            w.append(type).append(".valueOf(org.apidesign.html.json.impl.JSON.stringValue(ret[" + cnt + "]));\n");
                         } else if (isPrimitive(type)) {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? ");
                             if ("char".equals(type)) {
-                                w.append("0 : ((Character)");
+                                w.append("0 : (org.apidesign.html.json.impl.JSON.charValue(");
                             } else if ("boolean".equals(type)) {
-                                w.append("false : ((Boolean)");
+                                w.append("false : (org.apidesign.html.json.impl.JSON.boolValue(");
                             } else {
-                                w.append("0 : ((Number)");
+                                w.append("0 : (org.apidesign.html.json.impl.JSON.numberValue(");
                             }
-                            w.append("ret[" + cnt + "]).");
+                            w.append("ret[" + cnt + "])).");
                             w.append(type).append("Value();\n");
-                        } else {
+                        } else if (isModel[0]) {
+                            w.append("    this.prop_").append(pn).append(" = org.apidesign.html.json.impl.JSON.read");
+                            w.append("(c, " + type + ".class, ");
+                            w.append("ret[" + cnt + "]);\n");
+                        }else {
                             w.append("    this.prop_").append(pn);
                             w.append(" = (").append(type).append(')');
                             w.append("ret[" + cnt + "];\n");
@@ -639,7 +645,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             String n = e.getSimpleName().toString();
             body.append("  private void ").append(n).append("(Object data, Object ev) {\n");
-            body.append("    ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("    ").append(((TypeElement)clazz).getQualifiedName()).append(".").append(n).append("(");
             body.append(wrapParams(e, null, className, "ev", "data"));
             body.append(");\n");
             body.append("  }\n");
@@ -941,7 +947,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             error(
-                "@On method can only accept String named 'id' or " + className + " arguments",
+                "@On method can only accept String named 'id', " + className + " argument or argument named 'data'",
                 ee
             );
         }
@@ -1022,7 +1028,10 @@ public final class ModelProcessor extends AbstractProcessor {
     }
     private void writeClone(String className, Prprt[] props, Writer w) throws IOException {
         w.write("  public " + className + " clone() {\n");
-        w.write("    " + className + " ret = new " + className + "(context);\n");
+        w.write("    return clone(context);\n");
+        w.write("  }\n");
+        w.write("  private " + className + " clone(net.java.html.BrwsrCtx ctx) {\n");
+        w.write("    " + className + " ret = new " + className + "(ctx);\n");
         for (Prprt p : props) {
             if (!p.array()) {
                 boolean isModel[] = { false };
@@ -1033,9 +1042,9 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ";\n");
                     continue;
                 }
-                w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ".clone();\n");
+                w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + "  == null ? null : prop_" + p.name() + ".clone();\n");
             } else {
-                w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ".clone();\n");
+                w.write("    ret.prop_" + p.name() + ".addAll(prop_" + p.name() + ");\n");
             }
         }
         
