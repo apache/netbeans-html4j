@@ -22,6 +22,7 @@
     <module>ko-archetype</module>
     <module>ko-archetype-test</module>
     <module>ko-fx</module>
+    <module>sound</module>
     <module>context</module>
     <module>boot</module>
     <module>boot-fx</module>
