@@ -34,19 +34,38 @@ import java.lang.annotation.Target;
  * converts the state of the object into 
  * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> format. 
  * <p>
- * An example where one defines class <code>Person</code> with three 
- * properties (<code>firstName</code>, <code>lastName</code> and
+ * An example where one defines class <code>Person</code> with four
+ * properties (<code>firstName</code>, <code>lastName</code>, array of <code>addresses</code> and
  * <code>fullName</code>) follows:
  * <pre>
  * {@link Model @Model}(className="Person", properties={
  *   {@link Property @Property}(name = "firstName", type=String.class),
  *   {@link Property @Property}(name = "lastName", type=String.class)
+ *   {@link Property @Property}(name = "addresses", type=Address.class, array = true)
  * })
- * static class PersonImpl {
+ * static class PersonModel {
  *   {@link ComputedProperty @ComputedProperty}
  *   static String fullName(String firstName, String lastName) {
  *     return firstName + " " + lastName;
  *   }
+ * 
+ *   {@link Model @Model}(className="Address", properties={
+ *     {@link Property @Property}(name = "street", type=String.class),
+ *     {@link Property @Property}(name = "town", type=String.class)
+ *   })
+ *   static class AddressModel {
+ *   }
+ * }
+ * </pre>
+ * The previous model class could then represent a 
+ * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> object like this:
+ * <pre>
+ * {
+ *   "firstName" : "Jaroslav",
+ *   "lastName" : "Tulach",
+ *   "addresses" : [
+ *     { "street" : "Markoušovice", "town" : "Úpice" }
+ *   ]
  * }
  * </pre>
  *
