@@ -455,6 +455,11 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.getAnnotation(ComputedProperty.class) == null) {
                 continue;
             }
+            if (!e.getModifiers().contains(Modifier.STATIC)) {
+                error("Method " + e.getSimpleName() + " has to be static when annotated by @ComputedProperty", e);
+                ok = false;
+                continue;
+            }
             ExecutableElement ee = (ExecutableElement)e;
             final TypeMirror rt = ee.getReturnType();
             final Types tu = processingEnv.getTypeUtils();
