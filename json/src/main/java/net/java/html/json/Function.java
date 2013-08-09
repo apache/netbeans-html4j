@@ -27,8 +27,50 @@ import java.lang.annotation.Target;
 
 /** Methods in class annotated by {@link Model} can be 
  * annotated by this annotation to signal that they should be available
- * as functions to users of the model classes.
- *
+ * as functions to users of the model classes. The method
+ * should be non-private, static and return <code>void</code>.
+ * It may take up to two arguments. One argument can be the type of
+ * the associated model class, the other argument can be of any type,
+ * but has to be named <code>data</code> - this one represents the
+ * actual data the function was invoked on. Example:
+ * <pre>
+ * 
+ * {@link Model @Model}(className="Names", properties={
+ *   {@link Property @Property}(name = "selectedName", type=String.class),
+ *   {@link Property @Property}(name = "names", type=String.class, array = true)
+ * })
+ * static class NamesModel {
+ *   {@link Function @Function} static void <b>nameSelected</b>(Names myModel, String data) {
+ *     myModel.setSelectedName(data);
+ *   }
+ * 
+ *   static void initialize() {
+ *     Names pageModel = new Names("---", "Jarda", "Pepa", "Honza", "Jirka", "Tomáš");
+ *     pageModel.applyBindings();
+ *   }
+ * }
+ * 
+ * // associated <a href="http://knockoutjs.com/">Knockout</a> HTML page:
+ * 
+ * Selected name: &lt;span data-bind="text: selectedName">&lt;/span&gt;
+ * &lt;ul data-bind="foreach: names"&gt;
+ *   &lt;li data-bind="text: $data, click: <b>$root.nameSelected</b>">&lt;/li&gt;
+ * &lt;/ul&gt;
+ * </pre>
+ * The above example would render:
+ * <hr>
+ * Selected name: <span>---</span>
+ * <ul>
+ *   <li>Jarda</li>
+ *   <li>Pepa</li>
+ *   <li>Honza</li>
+ *   <li>Jirka</li>
+ *   <li>Tomáš</li>
+ * </ul>
+ * <hr>
+ * and after clicking on one of the names the <code>---</code> would be replaced
+ * by selected name.
+ * 
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @Target(ElementType.METHOD)
