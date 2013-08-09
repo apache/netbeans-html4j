@@ -543,6 +543,8 @@ public final class ModelProcessor extends AbstractProcessor {
                     // OK
                 } else if (tu.isSubtype(toCheck, enumType)) {
                     // OK
+                } else if (isModel(toCheck)) {
+                    // OK
                 } else {
                     ok = false;
                     error(sn + " cannot return " + toCheck, e);

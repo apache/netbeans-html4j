@@ -34,11 +34,17 @@ import net.java.html.json.Property;
 @Model(className = "Pair", properties = {
     @Property(name = "firstName", type = String.class),
     @Property(name = "lastName", type = String.class),
+    @Property(name = "next", type = Pair.class)
 })
 class PairModel {
     @ComputedProperty 
     static List<String> bothNames(String firstName, String lastName) {
         return Arrays.asList(firstName, lastName);
+    }
+    
+    @ComputedProperty
+    static Pair nextOne(Pair next) {
+        return next;
     }
     
     @Function 

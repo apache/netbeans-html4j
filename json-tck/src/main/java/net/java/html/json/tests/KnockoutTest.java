@@ -169,7 +169,53 @@ public final class KnockoutTest {
             + "</ul>\n"
         );
         try {
-            Pair m = Models.bind(new Pair("First", "Last"), newContext());
+            Pair m = Models.bind(new Pair("First", "Last", null), newContext());
+            m.applyBindings();
+
+            int cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
+
+            triggerChildClick("ul", 1);
+
+            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
+    @KOTest public void displayContentOfComputedArrayOnASubpair() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+              "<div data-bind='with: next'>\n"
+            + "<ul id='ul' data-bind='foreach: bothNames'>\n"
+            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
+            + "</ul>"
+            + "</div>\n"
+        );
+        try {
+            Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), newContext());
+            m.applyBindings();
+
+            int cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
+
+            triggerChildClick("ul", 1);
+
+            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
+    @KOTest public void displayContentOfComputedArrayOnComputedASubpair() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+              "<div data-bind='with: nextOne'>\n"
+            + "<ul id='ul' data-bind='foreach: bothNames'>\n"
+            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
+            + "</ul>"
+            + "</div>\n"
+        );
+        try {
+            Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), newContext());
             m.applyBindings();
 
             int cnt = countChildren("ul");
