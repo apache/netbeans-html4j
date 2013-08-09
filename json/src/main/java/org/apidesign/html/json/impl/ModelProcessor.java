@@ -209,6 +209,44 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.append("  };\n");
+                w.append("  public ").append(className).append("(");
+                Prprt firstArray = null;
+                String sep = "";
+                for (Prprt p : props) {
+                    if (p.array()) {
+                        if (firstArray == null) {
+                            firstArray = p;
+                        }
+                        continue;
+                    }
+                    String tn = typeName(e, p);
+                    w.write(sep);
+                    w.write(tn);
+                    w.write(" " + p.name());
+                    sep = ", ";
+                }
+                if (firstArray != null) {
+                    String tn = typeName(e, firstArray);
+                    w.write(sep);
+                    w.write(tn);
+                    w.write("... " + firstArray.name());
+                }
+                w.append(") {\n");
+                w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
+                for (Prprt p : props) {
+                    if (p.array()) {
+                        continue;
+                    }
+                    w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
+                }
+                if (firstArray != null) {
+                    String tn = typeName(e, firstArray);
+                    String[] gs = toGetSet(firstArray.name(), tn, true);
+                    w.write("    for(" + tn + " $item : " + firstArray.name() + ") {\n");
+                    w.write("      " + gs[0] + "().add($item);\n");
+                    w.write("    }\n");
+                }
+                w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
                 w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");

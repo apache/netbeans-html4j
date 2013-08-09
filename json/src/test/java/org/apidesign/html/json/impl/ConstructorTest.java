@@ -23,6 +23,7 @@ package org.apidesign.html.json.impl;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 /**
@@ -37,7 +38,7 @@ import org.testng.annotations.Test;
 })
 public class ConstructorTest {
     @Model(className = "Address", properties = {
-        @Property(name = "town", type = String.class)
+        @Property(name = "place", type = String.class)
     })
     static final class AddressModel {
     }
@@ -45,5 +46,13 @@ public class ConstructorTest {
     @Test public void initializedByDefault() {
         Man m = new Man();
         assertNotNull(m.getPrimary(), "Single subobjects are initialized");
+    }
+    
+    @Test public void hasRichConstructor() {
+        Man m = new Man("Jarda", new Address("home"), new Address("work"), new Address("hotel"));
+        assertEquals(m.getName(), "Jarda");
+        assertNotNull(m.getPrimary(), "Primary address specified");
+        assertNotNull(m.getPrimary().getPlace(), "home");
+        assertEquals(m.getOther().size(), 2, "Two other addresses");
     }
 }
