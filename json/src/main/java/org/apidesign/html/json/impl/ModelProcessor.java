@@ -196,6 +196,18 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 w.append("  public ").append(className).append("() {\n");
                 w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
+                for (Prprt p : props) {
+                    if (p.array()) {
+                        continue;
+                    }
+                    boolean[] isModel = {false};
+                    boolean[] isEnum = {false};
+                    boolean isPrimitive[] = {false};
+                    String tn = checkType(p, isModel, isEnum, isPrimitive);
+                    if (isModel[0]) {
+                        w.write("    prop_" + p.name() + " = new " + tn + "();\n");
+                    }
+                }
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
