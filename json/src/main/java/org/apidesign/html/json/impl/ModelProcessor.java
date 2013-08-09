@@ -523,11 +523,32 @@ public final class ModelProcessor extends AbstractProcessor {
             TypeMirror ert = tu.erasure(rt);
             String tn = fqn(ert, ee);
             boolean array = false;
+            final TypeMirror toCheck;
             if (tn.equals("java.util.List")) {
                 array = true;
+                toCheck = ((DeclaredType)rt).getTypeArguments().get(0);
+            } else {
+                toCheck = rt;
             }
             
             final String sn = ee.getSimpleName().toString();
+            
+            if (toCheck.getKind().isPrimitive()) {
+                // OK
+            } else {
+                TypeMirror stringType = processingEnv.getElementUtils().getTypeElement("java.lang.String").asType();
+                TypeMirror enumType = processingEnv.getElementUtils().getTypeElement("java.lang.Enum").asType();
+
+                if (tu.isSubtype(toCheck, stringType)) {
+                    // OK
+                } else if (tu.isSubtype(toCheck, enumType)) {
+                    // OK
+                } else {
+                    ok = false;
+                    error(sn + " cannot return " + toCheck, e);
+                }
+            }
+            
             String[] gs = toGetSet(sn, tn, array);
             
             w.write("  public " + tn + " " + gs[0] + "() {\n");
@@ -1009,7 +1030,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             error(
-                "@On method can only accept String named 'id', " + className + " argument or argument named 'data'",
+                "The annotated method can only accept " + className + " argument or argument named 'data'",
                 ee
             );
         }

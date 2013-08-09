@@ -65,7 +65,7 @@ public final class PropertyBinding {
     
     public Object getValue() {
         Object v = data.getValue();
-        Object r = WrapperObject.find(v);
+        Object r = WrapperObject.find(v, data.getBindings());
         return r == null ? v : r;
     }
     

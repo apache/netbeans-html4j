@@ -41,7 +41,7 @@ public final class Bindings<Data> {
     }
     
     public <M> PropertyBinding registerProperty(String propName, M model, SetAndGet<M> access, boolean readOnly) {
-        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<M>(propName, model, access, readOnly));
+        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<M>(this, propName, model, access, readOnly));
         bp.bind(pb, model, data);
         return pb;
     }

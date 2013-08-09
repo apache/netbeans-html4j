@@ -62,8 +62,10 @@ public abstract class PropertyBindingAccessor {
         public final boolean readOnly;
         private final M model;
         private final SetAndGet<M> access;
+        private final Bindings<?> bindings;
 
-        public PBData(String name, M model, SetAndGet<M> access, boolean readOnly) {
+        public PBData(Bindings<?> bindings, String name, M model, SetAndGet<M> access, boolean readOnly) {
+            this.bindings = bindings;
             this.name = name;
             this.model = model;
             this.access = access;
@@ -80,6 +82,10 @@ public abstract class PropertyBindingAccessor {
 
         public boolean isReadOnly() {
             return readOnly;
+        }
+
+        public Bindings getBindings() {
+            return bindings;
         }
     } // end of PBData
     

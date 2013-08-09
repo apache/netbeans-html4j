@@ -166,15 +166,18 @@ public final class JSONList<T> extends ArrayList<T> {
         return ko;
     }
 
-    final Object koData() {
-        Object[] arr = toArray();
+    static final Object koData(Collection<?> c, Bindings m) {
+        Object[] arr = c.toArray();
         for (int i = 0; i < arr.length; i++) {
-            Object r = WrapperObject.find(arr[i]);
+            Object r = WrapperObject.find(arr[i], m);
             if (r != null) {
                 arr[i] = r;
             }
         }
-        return model.wrapArray(arr);
+        return m.wrapArray(arr);
     }
-    
+
+    final Object koData() {
+        return koData(this, model);
+    }
 }

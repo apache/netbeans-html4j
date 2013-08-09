@@ -18,44 +18,31 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
+package net.java.html.json.tests;
 
-package org.apidesign.html.json.impl;
+import java.util.Arrays;
+import java.util.List;
+import net.java.html.json.ComputedProperty;
+import net.java.html.json.Function;
+import net.java.html.json.Model;
+import net.java.html.json.Property;
 
-import java.util.Collection;
-import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
-
-/** A way to extract real object from a model classes.
+/**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class WrapperObject {
-    private Object ko;
-    
-    private WrapperObject() {
+@Model(className = "Pair", properties = {
+    @Property(name = "firstName", type = String.class),
+    @Property(name = "lastName", type = String.class),
+})
+class PairModel {
+    @ComputedProperty 
+    static List<String> bothNames(String firstName, String lastName) {
+        return Arrays.asList(firstName, lastName);
     }
     
-    public void setRealObject(Object ko) {
-        this.ko = ko;
-    }
-    
-    public static Object find(Object object) {
-        return find(object, null);
-    }
-    
-    public static Object find(Object object, Bindings model) {
-        if (object == null) {
-            return null;
-        }
-        
-        if (object instanceof JSONList) {
-            return ((JSONList<?>)object).koData();
-        }
-        if (object instanceof Collection) {
-            return JSONList.koData((Collection<?>)object, model);
-        }
-        
-        WrapperObject ro = new WrapperObject();
-        object.equals(ro);
-        return ro.ko;
+    @Function 
+    static void assignFirstName(Pair m, String data) {
+        m.setFirstName(data);
     }
 }

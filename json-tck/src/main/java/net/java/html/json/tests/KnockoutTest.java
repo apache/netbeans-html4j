@@ -161,6 +161,27 @@ public final class KnockoutTest {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
     }
+    
+    @KOTest public void displayContentOfComputedArray() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "<ul id='ul' data-bind='foreach: bothNames'>\n"
+            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
+            + "</ul>\n"
+        );
+        try {
+            Pair m = Models.bind(new Pair("First", "Last"), newContext());
+            m.applyBindings();
+
+            int cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
+
+            triggerChildClick("ul", 1);
+
+            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
 
     @KOTest public void checkBoxToBooleanBinding() throws Exception {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 
