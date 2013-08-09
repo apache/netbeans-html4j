@@ -98,6 +98,7 @@ public final class JSONTest {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
+            js.setFetched(null);
             js.fetch(url);
         }
     
@@ -128,6 +129,7 @@ public final class JSONTest {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
+            js.setFetched(null);
             js.fetchViaJSONP(url);
         }
     
@@ -211,6 +213,7 @@ public final class JSONTest {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
+            js.setFetched(null);
             js.fetchArray(url);
         }
         
@@ -232,6 +235,7 @@ public final class JSONTest {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
         
+            js.setFetched(null);
             js.fetch(url);
         }
         
@@ -328,6 +332,8 @@ public final class JSONTest {
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
+            js.setFetched(null);
+            
             js.fetchArray(url);
         }
         
