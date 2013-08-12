@@ -1250,10 +1250,19 @@ public final class ModelProcessor extends AbstractProcessor {
             tm = ex.getTypeMirror();
         }
         tm = processingEnv.getTypeUtils().erasure(tm);
-        isPrimitive[0] = tm.getKind().isPrimitive();
+        if (isPrimitive[0] = tm.getKind().isPrimitive()) {
+            isEnum[0] = false;
+            isModel[0] = false;
+            return tm.toString();
+        }
         final Element e = processingEnv.getTypeUtils().asElement(tm);
-        final Model m = e == null ? null : e.getAnnotation(Model.class);
+        if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
+            isModel[0] = true;
+            isEnum[0] = false;
+            return ((TypeElement)e).getQualifiedName().toString();
+        }
         
+        final Model m = e == null ? null : e.getAnnotation(Model.class);
         String ret;
         if (m != null) {
             ret = findPkgName(e) + '.' + m.className();
