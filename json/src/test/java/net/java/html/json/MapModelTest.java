@@ -213,5 +213,10 @@ public class MapModelTest {
         public Object toJSON(InputStream is) throws IOException {
             throw new IOException();
         }
+
+        @Override
+        public void runSafe(Runnable r) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 }

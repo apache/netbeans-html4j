@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
 import org.apidesign.html.context.spi.Contexts;
@@ -113,5 +114,10 @@ implements Technology<JSObject>, Transfer, Contexts.Provider {
     @Override
     public Object toJSON(InputStream is) throws IOException {
         return LoadJSON.parse(is);
+    }
+
+    @Override
+    public void runSafe(Runnable r) {
+        Platform.runLater(r);
     }
 }

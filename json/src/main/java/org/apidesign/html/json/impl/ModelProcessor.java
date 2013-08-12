@@ -71,6 +71,7 @@ import javax.tools.FileObject;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
 import net.java.html.json.Function;
+import net.java.html.json.ModelOperation;
 import net.java.html.json.OnPropertyChange;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
@@ -85,6 +86,7 @@ import org.openide.util.lookup.ServiceProvider;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({
     "net.java.html.json.Model",
+    "net.java.html.json.ModelOperation",
     "net.java.html.json.Function",
     "net.java.html.json.OnReceive",
     "net.java.html.json.OnPropertyChange",
@@ -178,6 +180,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 ok = false;
             }
             if (!generateReceive(e, body, className, e.getEnclosedElements(), functions)) {
+                ok = false;
+            }
+            if (!generateOperation(e, body, className, e.getEnclosedElements())) {
                 ok = false;
             }
             FileObject java = processingEnv.getFiler().createSourceFile(pkg + '.' + className, e);
@@ -799,6 +804,75 @@ public final class ModelProcessor extends AbstractProcessor {
         }
         return true;
     }
+
+    private boolean generateOperation(Element clazz, 
+        StringWriter body, String className, 
+        List<? extends Element> enclosedElements
+    ) {
+        for (Element m : enclosedElements) {
+            if (m.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            ExecutableElement e = (ExecutableElement)m;
+            ModelOperation mO = e.getAnnotation(ModelOperation.class);
+            if (mO == null) {
+                continue;
+            }
+            if (!e.getModifiers().contains(Modifier.STATIC)) {
+                error("@ModelOperation method needs to be static", e);
+                return false;
+            }
+            if (e.getModifiers().contains(Modifier.PRIVATE)) {
+                error("@ModelOperation method cannot be private", e);
+                return false;
+            }
+            if (e.getReturnType().getKind() != TypeKind.VOID) {
+                error("@ModelOperation method should return void", e);
+                return false;
+            }
+            List<String> args = new ArrayList<String>();
+            {
+                body.append("  public void ").append(m.getSimpleName()).append("(");
+                String sep = "";
+                boolean checkFirst = true;
+                for (VariableElement ve : e.getParameters()) {
+                    final TypeMirror type = ve.asType();
+                    CharSequence simpleName;
+                    if (type.getKind() == TypeKind.DECLARED) {
+                        simpleName = ((DeclaredType)type).asElement().getSimpleName();
+                    } else {
+                        simpleName = type.toString();
+                    }
+                    if (simpleName.toString().equals(className)) {
+                        checkFirst = false;
+                    } else {
+                        if (checkFirst) {
+                            error("First parameter of @ModelOperation method must be " + className, m);
+                            return false;
+                        }
+                        args.add(ve.getSimpleName().toString());
+                        body.append(sep).append("final ");
+                        body.append(ve.asType().toString()).append(" ");
+                        body.append(ve.toString());
+                        sep = ", ";
+                    }
+                }
+                body.append(") {\n");
+                body.append("    org.apidesign.html.json.impl.JSON.runInBrowser(this.context, new Runnable() { public void run() {\n");
+                body.append("      ").append(clazz.getSimpleName()).append(".").append(m.getSimpleName()).append("(");
+                body.append(className).append(".this");
+                for (String s : args) {
+                    body.append(", ").append(s);
+                }
+                body.append(");\n");
+                body.append("    }});\n");
+                body.append("  }\n");
+            }
+            
+        }
+        return true;
+    }
+    
     
     private boolean generateReceive(
         Element clazz, StringWriter body, String className, 
@@ -1351,7 +1425,7 @@ public final class ModelProcessor extends AbstractProcessor {
             return Collections.emptyList();
         }
     }
-    
+
     private static class Prprt {
         private final Element e;
         private final AnnotationMirror tm;

@@ -275,5 +275,10 @@ public class ModelTest {
         public <M> M toModel(Class<M> modelClass, Object data) {
             return modelClass.cast(data);
         }
+
+        @Override
+        public void runSafe(Runnable r) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 }

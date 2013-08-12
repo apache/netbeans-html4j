@@ -163,4 +163,9 @@ public class JSONListTest implements Technology<Object> {
         return modelClass.cast(data);
     }
 
+    @Override
+    public void runSafe(Runnable r) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

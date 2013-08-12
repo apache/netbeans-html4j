@@ -50,6 +50,10 @@ public final class JSON {
         return t == null ? EmptyTech.EMPTY : t;
     }
     
+    public static void runInBrowser(BrwsrCtx c, Runnable runnable) {
+        findTechnology(c).runSafe(runnable);
+    }
+    
     public static void extract(BrwsrCtx c, Object value, String[] props, Object[] values) {
         Transfer t = findTransfer(c);
         t.extract(value, props, values);
@@ -272,6 +276,11 @@ public final class JSON {
         @Override
         public Object toJSON(InputStream is) throws IOException {
             throw new IOException("Not supported");
+        }
+
+        @Override
+        public synchronized void runSafe(Runnable r) {
+            r.run();
         }
     }
     

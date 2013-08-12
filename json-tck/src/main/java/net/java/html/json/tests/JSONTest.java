@@ -23,6 +23,7 @@ package net.java.html.json.tests;
 import java.io.ByteArrayInputStream;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
+import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
@@ -43,6 +44,10 @@ public final class JSONTest {
     private JSONik js;
     private Integer orig;
     private String url;
+    
+    @ModelOperation static void assignFetched(JSONik m, Person p) {
+        m.setFetched(p);
+    }
     
     @KOTest public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
@@ -364,7 +369,7 @@ public final class JSONTest {
         assert 0 == v.getValue() : "Value is empty: " + v.getValue();
         assert 0 == v.getSmall() : "Small value is empty: " + v.getSmall();
     }
-
+    
     private static BrwsrCtx newContext() {
         return Utils.newContext(JSONTest.class);
     }

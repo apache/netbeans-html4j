@@ -77,4 +77,14 @@ public interface Technology<Data> {
      * @return wrapped array
      */
     public Object wrapArray(Object[] arr);
+    
+    /** 
+     * Run given runnable in a safe mode. If the runnable can be executed
+     * immediately, do it. If we need to switch to some other thread, do it
+     * and invoke r asynchronously immediately returning from the call to
+     * runSafe method.
+     * 
+     * @param r the runnable to execute
+     */
+    public void runSafe(Runnable r);
 }
