@@ -1259,7 +1259,7 @@ public final class ModelProcessor extends AbstractProcessor {
         if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
             isModel[0] = true;
             isEnum[0] = false;
-            return ((TypeElement)e).getQualifiedName().toString();
+            return e.getSimpleName().toString();
         }
         
         final Model m = e == null ? null : e.getAnnotation(Model.class);
@@ -1386,7 +1386,14 @@ public final class ModelProcessor extends AbstractProcessor {
         try {
             return onR.data().getName();
         } catch (MirroredTypeException ex) {
-            String name = ex.getTypeMirror().toString();
+            final TypeMirror tm = ex.getTypeMirror();
+            String name;
+            final Element te = processingEnv.getTypeUtils().asElement(tm);
+            if (te.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
+                name = te.getSimpleName().toString();
+            } else {
+                name = tm.toString();
+            }
             return "java.lang.Object".equals(name) ? null : name;
         } catch (Exception ex) {
             // fallback
