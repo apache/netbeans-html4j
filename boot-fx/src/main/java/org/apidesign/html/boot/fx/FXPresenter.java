@@ -123,6 +123,11 @@ public final class FXPresenter implements Fn.Presenter {
     @Override
     public void displayPage(final URL resource, Runnable onLoad) {
         engine = FXBrwsr.findEngine(onLoad);
+        try {
+            FXInspect.initialize(engine);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
