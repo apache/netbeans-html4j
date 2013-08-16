@@ -65,7 +65,8 @@ public @interface OnLocation {
     
     /** Name of a method in this class which should be called in case of 
      * an error. The method has to be non-private and take {@link Exception} 
-     * parameter. By default the exception printed to console.
+     * parameter. If this method is not specified, the exception is just
+     * printed to console.
      * 
      * @return name of method in this class
      */
