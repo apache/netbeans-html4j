@@ -21,6 +21,7 @@
 package org.apidesign.html.kofx;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,6 +37,11 @@ import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.websockets.WebSocket;
+import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -52,6 +58,10 @@ final class DynamicHTTP extends HttpHandler {
     
     static URI initServer() throws Exception {
         server = HttpServer.createSimpleServer(null, new PortRange(8080, 65535));
+        final WebSocketAddOn addon = new WebSocketAddOn();
+        for (NetworkListener listener : server.getListeners()) {
+            listener.registerAddOn(addon);
+        }        
         resources = new ArrayList<Resource>();
 
         conf = server.getServerConfiguration();
@@ -61,7 +71,7 @@ final class DynamicHTTP extends HttpHandler {
         
         server.start();
 
-        return pageURL(server, "/test.html");
+        return pageURL("http", server, "/test.html");
     }
     
     @Override
@@ -75,17 +85,28 @@ final class DynamicHTTP extends HttpHandler {
         if ("/dynamic".equals(request.getRequestURI())) {
             String mimeType = request.getParameter("mimeType");
             List<String> params = new ArrayList<String>();
+            boolean webSocket = false;
             for (int i = 0;; i++) {
                 String p = request.getParameter("param" + i);
                 if (p == null) {
                     break;
+                }
+                if ("protocol:ws".equals(p)) {
+                    webSocket = true;
+                    continue;
                 }
                 params.add(p);
             }
             final String cnt = request.getParameter("content");
             String mangle = cnt.replace("%20", " ").replace("%0A", "\n");
             ByteArrayInputStream is = new ByteArrayInputStream(mangle.getBytes("UTF-8"));
-            URI url = registerResource(new Resource(is, mimeType, "/dynamic/res" + ++resourcesCount, params.toArray(new String[params.size()])));
+            URI url;
+            final Resource res = new Resource(is, mimeType, "/dynamic/res" + ++resourcesCount, params.toArray(new String[params.size()]));
+            if (webSocket) {
+                url = registerWebSocket(res);
+            } else {
+                url = registerResource(res);
+            }
             response.getWriter().write(url.toString());
             response.getWriter().write("\n");
             return;
@@ -126,20 +147,25 @@ final class DynamicHTTP extends HttpHandler {
             }
         }
     }
+    
+    private URI registerWebSocket(Resource r) {
+        WebSocketEngine.getEngine().register("", r.httpPath, new WS(r));
+        return pageURL("ws", server, r.httpPath);
+    }
 
     private URI registerResource(Resource r) {
         if (!resources.contains(r)) {
             resources.add(r);
             conf.addHttpHandler(this, r.httpPath);
         }
-        return pageURL(server, r.httpPath);
+        return pageURL("http", server, r.httpPath);
     }
     
-    private static URI pageURL(HttpServer server, final String page) {
+    private static URI pageURL(String proto, HttpServer server, final String page) {
         NetworkListener listener = server.getListeners().iterator().next();
         int port = listener.getPort();
         try {
-            return new URI("http://localhost:" + port + page);
+            return new URI(proto + "://localhost:" + port + page);
         } catch (URISyntaxException ex) {
             throw new IllegalStateException(ex);
         }
@@ -186,4 +212,25 @@ final class DynamicHTTP extends HttpHandler {
         }
     }
     
+    private static class WS extends WebSocketApplication {
+        private final Resource r;
+
+        private WS(Resource r) {
+            this.r = r;
+        }
+
+        @Override
+        public void onMessage(WebSocket socket, String text) {
+            try {
+                r.httpContent.reset();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                copyStream(r.httpContent, out, null, text);
+                String s = new String(out.toByteArray(), "UTF-8");
+                socket.send(s);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        
+    }
 }

@@ -1542,7 +1542,8 @@ public final class ModelProcessor extends AbstractProcessor {
                     methodOf("POST"),
                     methodOf("PUT"),
                     methodOf("DELETE"),
-                    methodOf("HEAD")
+                    methodOf("HEAD"),
+                    methodOf("WebSocket")
                 );
             }
         }

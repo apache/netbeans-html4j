@@ -81,7 +81,11 @@ final class LoadJSON implements Runnable {
     }
 
     public static void loadJSON(JSONCall call) {
-        REQ.execute(new LoadJSON((call)));
+        if ("WebSocket".equals(call.getMethod())) { // NOI18N
+            LoadWS.send(call);
+        } else {
+            REQ.execute(new LoadJSON((call)));
+        }
     }
 
     @Override
@@ -177,7 +181,7 @@ final class LoadJSON implements Runnable {
         }
     }
 
-    private static Object convertToArray(Object o) throws JSONException {
+    static Object convertToArray(Object o) throws JSONException {
         if (o instanceof JSONArray) {
             JSONArray ja = (JSONArray)o;
             Object[] arr = new Object[ja.length()];

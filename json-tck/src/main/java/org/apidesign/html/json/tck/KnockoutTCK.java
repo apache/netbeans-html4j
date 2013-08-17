@@ -27,6 +27,7 @@ import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
 import net.java.html.json.tests.OperationsTest;
+import net.java.html.json.tests.WebSocketTest;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
@@ -91,7 +92,8 @@ public abstract class KnockoutTCK {
             ConvertTypesTest.class,
             JSONTest.class,
             KnockoutTest.class,
-            OperationsTest.class
+            OperationsTest.class,
+            WebSocketTest.class
         };
     }
 
