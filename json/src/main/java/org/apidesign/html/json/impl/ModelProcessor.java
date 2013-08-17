@@ -989,7 +989,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 "        if (value instanceof Throwable) {\n");
             if (onR.onError().isEmpty()) {
                 body.append(
-                "          ((Throwable)value).printStackTrace();\n"
+                "          ((Throwable)value).printStackTrace(); return;\n"
                 );
             } else {
                 if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
