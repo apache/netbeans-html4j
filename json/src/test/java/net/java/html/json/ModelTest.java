@@ -164,11 +164,15 @@ public class ModelTest {
         }
     }
     
-    @OnReceive(url = "{protocol}://{host}?query={query}", data = Person.class)
+    @OnReceive(url = "{protocol}://{host}?query={query}", data = Person.class, onError = "errorState")
     static void loadPeople(Modelik thiz, People p) {
         Modelik m = null;
         m.applyBindings();
         m.loadPeople("http", "apidesign.org", "query", new Person());
+    }
+    
+    static void errorState(Modelik thiz, Exception ex) {
+        
     }
 
     @OnReceive(url = "{protocol}://{host}?callback={back}&query={query}", jsonp = "back")

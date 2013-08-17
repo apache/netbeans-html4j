@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +46,8 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 /**
  *
@@ -240,5 +243,22 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     String getHtml() {
         String fqn = "'" + pkg + '.' + cls + "'";
         return html.replace("'${fqn}'", fqn);
+    }
+    void assertErrors() {
+        assertFalse(getErrors().isEmpty(), "There are supposed to be some errors");
+    }
+
+    void assertError(String expMsg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Can't find ").append(expMsg).append(" among:");
+        for (Diagnostic<? extends JavaFileObject> e : errors) {
+            String msg = e.getMessage(Locale.US);
+            if (msg.contains(expMsg)) {
+                return;
+            }
+            sb.append("\n");
+            sb.append(msg);
+        }
+        fail(sb.toString());
     }
 }

@@ -985,7 +985,22 @@ public final class ModelProcessor extends AbstractProcessor {
                 "    class ProcessResult implements Runnable {\n" +
                 "      @Override\n" +
                 "      public void run() {\n" +
-                "        Object value = result[0];\n");
+                "        Object value = result[0];\n" +
+                "        if (value instanceof Throwable) {\n");
+            if (onR.onError().isEmpty()) {
+                body.append(
+                "          ((Throwable)value).printStackTrace();\n"
+                );
+            } else {
+                if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
+                    return false;
+                }
+                body.append("          ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+                body.append(className).append(".this, (Exception)value); return;\n");
+            }
+            body.append(
+                "        }\n"
+            );
             body.append(
                 "        " + modelClass + "[] arr;\n");
             body.append(
@@ -1539,4 +1554,48 @@ public final class ModelProcessor extends AbstractProcessor {
         ResourceBundle rb = ResourceBundle.getBundle("org.apidesign.html.json.impl.Bundle");
         return Completions.of('"' + method + '"', rb.getString("MSG_Completion_" + method));
     }
+    
+    private boolean findOnError(ExecutableElement errElem, TypeElement te, String name, String className) {
+        String err = null;
+        METHODS:
+        for (Element e : te.getEnclosedElements()) {
+            if (e.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            if (!e.getSimpleName().contentEquals(name)) {
+                continue;
+            }
+            if (!e.getModifiers().contains(Modifier.STATIC)) {
+                errElem = (ExecutableElement) e;
+                err = "Would have to be static";
+                continue;
+            }
+            ExecutableElement ee = (ExecutableElement) e;
+            TypeMirror excType = processingEnv.getElementUtils().getTypeElement(Exception.class.getName()).asType();
+            final List<? extends VariableElement> params = ee.getParameters();
+            boolean error = false;
+            if (params.size() != 2) {
+                error = true;
+            } else {
+                if (!params.get(0).asType().toString().equals(className)) {
+                    error = true;
+                }
+                if (!processingEnv.getTypeUtils().isAssignable(excType, params.get(1).asType())) {
+                    error = true;
+                }
+            }
+            if (error) {
+                errElem = (ExecutableElement) e;
+                err = "Error method first argument needs to be " + className + " and second Exception";
+                continue;
+            }
+            return true;
+        }
+        if (err == null) {
+            err = "Cannot find " + name + "(" + className + ", Exception) method in this class";
+        }
+        error(err, errElem);
+        return false;
+    }
+    
 }

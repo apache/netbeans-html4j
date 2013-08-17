@@ -73,10 +73,15 @@ public final class JSONTest {
         model.setFetched(p);
     }
 
-    @OnReceive(url="{url}")
+    @OnReceive(url="{url}", onError = "setMessage")
     static void fetchArray(Person[] p, JSONik model) {
         model.setFetchedCount(p.length);
         model.setFetched(p[0]);
+    }
+    
+    static void setMessage(JSONik m, Exception t) {
+        assert t != null;
+        m.setFetchedResponse("Exception");
     }
     
     @OnReceive(url="{url}")
@@ -351,6 +356,23 @@ public final class JSONTest {
         assert js.getFetchedCount() == 2 : "We got two values: " + js.getFetchedCount();
         assert "Gitar".equals(p.getFirstName()) : "Expecting Gitar: " + p.getFirstName();
         assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
+    }
+    
+    @KOTest public void loadError() throws InterruptedException {
+        if (js == null) {
+            js = Models.bind(new JSONik(), newContext());
+            js.applyBindings();
+            js.setFetched(null);
+            
+            js.fetchArray("file:///unknown/url/to/query/xyz.txt");
+        }
+        
+        
+        if (js.getFetchedResponse() == null) {
+            throw new InterruptedException();
+        }
+
+        assert "Exception".equals(js.getFetchedResponse()) : js.getFetchedResponse();
     }
     
     @Model(className = "NameAndValue", properties = {

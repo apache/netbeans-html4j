@@ -241,4 +241,51 @@ public class ModelProcessorTest {
         fail("Needs an error message about wrong method:\n" + c.getErrors());
         
     }
+    
+    @Test public void onErrorHasToExist() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class UseOnReceive {\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", onError=\"doesNotExist\")\n"
+            + "  static void onMessage(MyModel model, String value) {\n"
+            + "  }\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("not find doesNotExist");
+    }
+
+    @Test public void onErrorWouldHaveToBeStatic() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class UseOnReceive {\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", onError=\"notStatic\")\n"
+            + "  static void onMessage(MyModel model, String value) {\n"
+            + "  }\n"
+            + "  void notStatic(Exception e) {}\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("have to be static");
+    }
+
+    @Test public void onErrorMustAcceptExceptionArgument() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class UseOnReceive {\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", onError=\"subclass\")\n"
+            + "  static void onMessage(MyModel model, String value) {\n"
+            + "  }\n"
+            + "  static void subclass(java.io.IOException e) {}\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("Error method first argument needs to be MyModel and second Exception");
+    }
 }

@@ -172,7 +172,6 @@ final class LoadJSON implements Runnable {
             }
         } catch (IOException ex) {
             error = ex;
-            LOG.log(Level.WARNING, "Cannot connect to " + url, ex);
         } finally {
             Platform.runLater(this);
         }
