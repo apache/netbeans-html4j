@@ -34,6 +34,9 @@ public abstract class AudioClip {
     }
 
     /** Creates new instance of an audio clip based on the provided URL.
+     * If no suitable audio environment provider is found, the method 
+     * returns a dummy instance that does nothing and only returns
+     * false from its {@link #isSupported()} method.
      * 
      * @param src the URL where to find the audio clip
      * @return the audio clip handle
@@ -47,7 +50,7 @@ public abstract class AudioClip {
                 return handle;
             }
         }
-        throw new IllegalStateException();
+        return DummyClip.INSTANCE;
     }
     
     /** Plays the clip from begining to the end.
@@ -69,6 +72,12 @@ public abstract class AudioClip {
      * @param volume for the playback
      */
     public abstract void setVolume(double volume);
+    
+    /** Check whether the audio clip is supported and can be played.
+     * @return true if it is likely that after calling {@link #play()} 
+     *   a sound will be produced
+     */
+    public abstract boolean isSupported();
 
 //    public abstract void playFrom(int seconds);
 
@@ -112,6 +121,11 @@ public abstract class AudioClip {
         }
 
         @Override
+        public boolean isSupported() {
+            return env.isSupported(clip);
+        }
+
+        @Override
         public int hashCode() {
             return 59 * src.hashCode();
         }
@@ -124,4 +138,25 @@ public abstract class AudioClip {
             return false;
         }
     } // end of Impl
+    
+    private static final class DummyClip extends AudioClip {
+        static AudioClip INSTANCE = new DummyClip();
+        
+        @Override
+        public void play() {
+        }
+
+        @Override
+        public void pause() {
+        }
+
+        @Override
+        public void setVolume(double volume) {
+        }
+
+        @Override
+        public boolean isSupported() {
+            return false;
+        }
+    } // end of DummyClip
 }

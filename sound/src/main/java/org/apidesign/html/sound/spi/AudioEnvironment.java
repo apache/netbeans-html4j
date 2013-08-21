@@ -33,4 +33,6 @@ public interface AudioEnvironment<Audio> {
     public void pause(Audio a);
 
     public void setVolume(Audio a, double volume);
+    
+    public boolean isSupported(Audio a);
 }
