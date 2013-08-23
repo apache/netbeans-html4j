@@ -50,4 +50,10 @@ public final class BrowserAudioEnv implements AudioEnvironment<Object> {
     @Override @JavaScriptBody(args = { "a", "volume" }, body = "a.setVolume(volume);")
     public void setVolume(Object a, double volume) {
     }
+
+    @Override
+    @JavaScriptBody(args = "a", body = "return true;")
+    public boolean isSupported(Object a) {
+        return false;
+    }
 }
