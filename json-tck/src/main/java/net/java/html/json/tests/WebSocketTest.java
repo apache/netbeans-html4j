@@ -34,6 +34,7 @@ import org.apidesign.html.json.tck.KOTest;
 @Model(className = "WebSocketik", properties = {
     @Property(name = "fetched", type = Person.class),
     @Property(name = "fetchedCount", type = int.class),
+    @Property(name = "open", type = int.class),
     @Property(name = "fetchedResponse", type = String.class),
     @Property(name = "fetchedSex", type = Sex.class, array = true)
 })
@@ -43,7 +44,11 @@ public final class WebSocketTest {
     
     @OnReceive(url = "{url}", data = Sex.class, method = "WebSocket", onError = "error")
     static void querySex(WebSocketik model, Person data) {
-        model.setFetched(data);
+        if (data == null) {
+            model.setOpen(1);
+        } else {
+            model.setFetched(data);
+        }
     }
     
     @KOTest public void connectUsingWebSocket() throws Throwable {
@@ -58,11 +63,22 @@ public final class WebSocketTest {
             js.applyBindings();
 
             js.setFetched(null);
-            js.querySex(url, Sex.FEMALE);
+            
+            // connects to the server
+            js.querySex(url, null);
         }
         
         if (bailOutIfNotSupported(js)) {
             return;
+        }
+        
+        if (js.getOpen() == 0) {
+            throw new InterruptedException();
+        }
+        if (js.getOpen() == 1) {
+            // send a query to the server
+            js.querySex(url, Sex.FEMALE);
+            js.setOpen(2);
         }
     
         Person p = js.getFetched();
@@ -72,6 +88,17 @@ public final class WebSocketTest {
         
         assert "Mitar".equals(p.getFirstName()) : "Unexpected: " + p.getFirstName();
         assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
+
+        if (js.getOpen() == 2) {
+            // close the socket
+            js.querySex(url, null);
+            js.setOpen(3);
+        }
+        
+        if (js.getFetchedResponse() == null) {
+            throw new InterruptedException();
+        }
+        assert "null".equals(js.getFetchedResponse()) : "Should be null: " + js.getFetchedResponse();
     }
     
     @KOTest public void errorUsingWebSocket() throws Throwable {
@@ -85,7 +112,11 @@ public final class WebSocketTest {
     }
     
     static void error(WebSocketik model, Exception ex) {
-        model.setFetchedResponse(ex.getClass() + ":" + ex.getMessage());
+        if (ex != null) {
+            model.setFetchedResponse(ex.getClass() + ":" + ex.getMessage());
+        } else {
+            model.setFetchedResponse("null");
+        }
     }
     
     private static BrwsrCtx newContext() {

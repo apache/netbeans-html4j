@@ -59,8 +59,14 @@ final class LoadWS {
                 call.notifyError(new UnsupportedOperationException("WebSocket API is not supported"));
                 return;
             }
+        } else {
+            if (!call.isDoOutput()) {
+                close(load.ws);
+            }
         }
-        load.push(call);
+        if (call.isDoOutput()) {
+            load.push(call);
+        }
     }
     
     private synchronized void push(JSONCall call) {
@@ -78,9 +84,15 @@ final class LoadWS {
         }
     }
 
-    synchronized void onOpen(Object ev) {
-        Deque<JSONCall> p = pending;
-        pending = null;
+    void onOpen(Object ev) {
+        Deque<JSONCall> p;
+        synchronized (this) {
+            p = pending;
+            pending = null;
+        }
+        if (!call.isDoOutput()) {
+            call.notifySuccess(null);
+        }
         for (JSONCall c : p) {
             push(c);
         }
@@ -105,13 +117,18 @@ final class LoadWS {
         call.notifyError(new Exception(ev.toString()));
     }
 
+    void onClose(boolean wasClean, int code, String reason) {
+        call.notifyError(null);
+    }
+
     @JavaScriptBody(args = { "back", "url" }, javacall = true, body = ""
         + "if (window.WebSocket) {"
         + "  try {"
         + "    var ws = new window.WebSocket(url);"
         + "    ws.onopen = function(ev) { back.@org.apidesign.html.kofx.LoadWS::onOpen(Ljava/lang/Object;)(ev); };"
         + "    ws.onmessage = function(ev) { back.@org.apidesign.html.kofx.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data); };"
-        + "    ws.onclose = function(ev) { back.@org.apidesign.html.kofx.LoadWS::onError(Ljava/lang/Object;)(ev); };"
+        + "    ws.onerror = function(ev) { back.@org.apidesign.html.kofx.LoadWS::onError(Ljava/lang/Object;)(ev); };"
+        + "    ws.onclose = function(ev) { back.@org.apidesign.html.kofx.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason); };"
         + "    return ws;"
         + "  } catch (ex) {"
         + "    return null;"
@@ -129,5 +146,9 @@ final class LoadWS {
         + "ws.send(msg);"
     )
     private void send(Object ws, String msg) {
+    }
+
+    @JavaScriptBody(args = { "ws" }, body = "ws.close();")
+    private static void close(Object ws) {
     }
 }

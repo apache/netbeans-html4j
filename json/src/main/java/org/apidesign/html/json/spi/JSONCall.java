@@ -23,6 +23,7 @@ package org.apidesign.html.json.spi;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import org.apidesign.html.json.impl.JSON;
 
 /** Description of a JSON call request that is supposed to be processed
  * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.
@@ -88,7 +89,7 @@ public final class JSONCall {
     }
     
     public void notifyError(Throwable error) {
-        this.result[0] = error;
+        this.result[0] = error == null ? JSON.NULL : error;
         this.whenDone.run();
     }
 }

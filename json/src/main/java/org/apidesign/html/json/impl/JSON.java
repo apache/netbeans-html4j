@@ -37,6 +37,9 @@ import org.apidesign.html.json.spi.Transfer;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JSON {
+    /** represents null exception value */
+    public static final Exception NULL = new NullPointerException();
+    
     private JSON() {
     }
 
@@ -132,6 +135,16 @@ public final class JSON {
     public static Character charValue(Object val) {
         return (Character)val;
     }
+    
+    public static Exception excValue(Object val) {
+        if (val == NULL) {
+            return null;
+        }
+        if (val instanceof Exception) {
+            return (Exception)val;
+        }
+        return new Exception(val.toString());
+    }
 
     public static Boolean boolValue(Object val) {
         if (val instanceof String) {
@@ -196,6 +209,9 @@ public final class JSON {
         return read(c, modelClazz, tr.toJSON((InputStream)data));
     }
     public static <T> T read(BrwsrCtx c, Class<T> modelClazz, Object data) {
+        if (data == null) {
+            return null;
+        }
         if (modelClazz == String.class) {
             return modelClazz.cast(data.toString());
         }

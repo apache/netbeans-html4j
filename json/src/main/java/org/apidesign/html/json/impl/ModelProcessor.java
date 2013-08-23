@@ -952,6 +952,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("The method needs to have one @Model class as parameter", e);
             }
             String n = e.getSimpleName().toString();
+            if ("WebSocket".equals(onR.method())) {
+                body.append("  /** Performs WebSocket communication. Call with <code>null</code> data parameter\n");
+                body.append("  * to open the connection (even if not required). Call with non-null data to\n");
+                body.append("  * send messages to server. Call again with <code>null</code> data to close the socket.\n");
+                body.append("  */\n");
+            }
             body.append("  public void ").append(n).append("(");
             StringBuilder urlBefore = new StringBuilder();
             StringBuilder urlAfter = new StringBuilder();
@@ -996,7 +1002,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     return false;
                 }
                 body.append("          ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-                body.append(className).append(".this, (Exception)value); return;\n");
+                body.append(className).append(".this, org.apidesign.html.json.impl.JSON.excValue(value)); return;\n");
             }
             body.append(
                 "        }\n"
