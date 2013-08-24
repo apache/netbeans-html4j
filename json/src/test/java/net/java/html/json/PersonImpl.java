@@ -40,6 +40,13 @@ final class PersonImpl {
         return sex == null ? "unknown" : sex.toString();
     }
     
+    @ComputedProperty static Sex attractedBy(Sex sex) {
+        if (sex == null) {
+            return null;
+        }
+        return sex == Sex.MALE ? Sex.FEMALE : Sex.MALE;
+    }
+    
     @Function
     static void changeSex(Person p, String data) {
         if (data != null) {

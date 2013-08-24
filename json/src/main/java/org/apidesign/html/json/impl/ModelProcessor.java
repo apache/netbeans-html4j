@@ -546,7 +546,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
                 if (tu.isSubtype(toCheck, stringType)) {
                     // OK
-                } else if (tu.isSubtype(toCheck, enumType)) {
+                } else if (tu.isSubtype(tu.erasure(toCheck), tu.erasure(enumType))) {
                     // OK
                 } else if (isModel(toCheck)) {
                     // OK
