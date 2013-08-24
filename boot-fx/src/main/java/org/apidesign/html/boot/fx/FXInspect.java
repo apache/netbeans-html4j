@@ -54,17 +54,19 @@ final class FXInspect implements Runnable {
         initializeDebugger(output);
     }
     
-    static void initialize(WebEngine engine) {
+    static boolean initialize(WebEngine engine) {
         final int inspectPort = Integer.getInteger("netbeans.inspect.port", -1); // NOI18N
         if (inspectPort != -1) {
             try {
                 FXInspect inspector = new FXInspect(engine, inspectPort);
                 Thread t = new Thread(inspector, "FX<->NetBeans Inspector");
                 t.start();
+                return true;
             } catch (IOException ex) {
                 LOG.log(Level.INFO, "Cannot connect to NetBeans IDE to port " + inspectPort, ex); // NOI18N
             }
         }
+        return false;
     }
     
     private void initializeDebugger(final ObjectOutputStream output) {

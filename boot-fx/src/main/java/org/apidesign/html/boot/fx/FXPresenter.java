@@ -85,6 +85,8 @@ public final class FXPresenter implements Fn.Presenter {
         }
     }
     
+    private List<String> scripts;
+    private Runnable onLoad;
     private WebEngine engine;
     
     @Override
@@ -117,20 +119,40 @@ public final class FXPresenter implements Fn.Presenter {
             }
             sb.append(l).append('\n');
         }
-        engine.executeScript(sb.toString());
+        final String script = sb.toString();
+        if (scripts != null) {
+            scripts.add(script);
+        }
+        engine.executeScript(script);
+    }
+    
+    final void onPageLoad() {
+        if (scripts != null) {
+            for (String s : scripts) {
+                engine.executeScript(s);
+            }
+        }
+        onLoad.run();
     }
 
     @Override
-    public void displayPage(final URL resource, Runnable onLoad) {
-        engine = FXBrwsr.findEngine(resource, onLoad);
+    public void displayPage(final URL resource, final Runnable onLoad) {
+        this.onLoad = onLoad;
+        final WebView view = FXBrwsr.findWebView(resource, this); 
+        this.engine = view.getEngine();
         try {
-            FXInspect.initialize(engine);
+            if (FXInspect.initialize(engine)) {
+                scripts = new ArrayList<String>();
+            }
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                if (scripts != null) {
+                    view.setContextMenuEnabled(true);
+                }
                 engine.load(resource.toExternalForm());
             }
         });
@@ -174,7 +196,7 @@ public final class FXPresenter implements Fn.Presenter {
 
         private static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
         
-        public synchronized static WebEngine findEngine(final URL url, final Runnable onLoad) {
+        public synchronized static WebView findWebView(final URL url, final FXPresenter onLoad) {
             if (INSTANCE == null) {
                 Executors.newFixedThreadPool(1).submit(new Runnable() {
                     @Override
@@ -197,12 +219,12 @@ public final class FXPresenter implements Fn.Presenter {
                 }
             }
             if (!Platform.isFxApplicationThread()) {
-                final WebEngine[] arr = { null };
+                final WebView[] arr = { null };
                 final CountDownLatch waitForResult = new CountDownLatch(1);
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        arr[0] = INSTANCE.newEngine(url, onLoad);
+                        arr[0] = INSTANCE.newView(url, onLoad);
                         waitForResult.countDown();
                     }
                 });
@@ -216,7 +238,7 @@ public final class FXPresenter implements Fn.Presenter {
                 }
                 return arr[0];
             } else {
-                return INSTANCE.newEngine(url, onLoad);
+                return INSTANCE.newView(url, onLoad);
             }
         }
 
@@ -233,10 +255,38 @@ public final class FXPresenter implements Fn.Presenter {
             this.root = r;
         }
 
-        private WebEngine newEngine(final URL url, final Runnable onLoad) {
+        private WebView newView(final URL url, final FXPresenter onLoad) {
             final WebView view = new WebView();
-            final String nbUserDir = this.getParameters().getNamed().get("userdir"); // NOI18N
-            WebController wc = new WebController(view, nbUserDir, getParameters().getUnnamed());
+            view.setContextMenuEnabled(false);
+            view.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
+                @Override
+                public void handle(WebEvent<String> t) {
+                    final Stage dialogStage = new Stage();
+                    dialogStage.initModality(Modality.WINDOW_MODAL);
+                    dialogStage.setTitle("Warning");
+                    final Button button = new Button("Close");
+                    final Text text = new Text(t.getData());
+
+                    VBox box = new VBox();
+                    box.setAlignment(Pos.CENTER);
+                    box.setSpacing(10);
+                    box.setPadding(new Insets(10));
+                    box.getChildren().addAll(text, button);
+
+                    dialogStage.setScene(new Scene(box));
+
+                    button.setCancelButton(true);
+                    button.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent t) {
+                            dialogStage.close();
+                        }
+                    });
+
+                    dialogStage.centerOnScreen();
+                    dialogStage.showAndWait();
+                }
+            });
             root.setCenter(view);
 
             final Worker<Void> w = view.getEngine().getLoadWorker();
@@ -244,77 +294,16 @@ public final class FXPresenter implements Fn.Presenter {
                 @Override
                 public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                     if (newState.equals(Worker.State.SUCCEEDED)) {
-                        w.stateProperty().removeListener(this);
-                        onLoad.run();
+                        onLoad.onPageLoad();
                     }
                     if (newState.equals(Worker.State.FAILED)) {
                         throw new IllegalStateException("Failed to load " + url);
                     }
                 }
             });
-            return view.getEngine();
+            return view;
         }
 
-        /**
-         * Create a resizable WebView pane
-         */
-        private static class WebController {
-            private final String ud;
-
-            public WebController(WebView view, String ud, List<String> params) {
-                final WebEngine eng = view.getEngine();
-//                this.bridge = new JVMBridge(view.getEngine());
-                this.ud = ud;
-                LOG.log(Level.INFO, "Initializing WebView with {0}", params);
-
-                if (params.size() > 0) {
-                    LOG.log(Level.INFO, "loading page {0}", params.get(0));
-                    eng.load(params.get(0));
-                    LOG.fine("back from load");
-                }
-                eng.setOnAlert(new EventHandler<WebEvent<String>>() {
-                    @Override
-                    public void handle(WebEvent<String> t) {
-                        final Stage dialogStage = new Stage();
-                        dialogStage.initModality(Modality.WINDOW_MODAL);
-                        dialogStage.setTitle("Warning");
-                        final Button button = new Button("Close");
-                        final Text text = new Text(t.getData());
-
-                        VBox box = new VBox();
-                        box.setAlignment(Pos.CENTER);
-                        box.setSpacing(10);
-                        box.setPadding(new Insets(10));
-                        box.getChildren().addAll(text, button);
-
-                        dialogStage.setScene(new Scene(box));
-
-                        button.setCancelButton(true);
-                        button.setOnAction(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent t) {
-                                dialogStage.close();
-                            }
-                        });
-
-                        dialogStage.centerOnScreen();
-                        dialogStage.showAndWait();
-                    }
-                });
-                /*
-                WebDebug wd = null;
-                try {
-                    if (ud != null) {
-                        wd = WebDebug.create(eng.impl_getDebugger(), ud);
-                    }
-                } catch (Exception ex) {
-                    LOG.log(Level.WARNING, null, ex);
-                }
-                this.dbg = wd;
-                   */
-            }
-
-        }
         private static void waitFinished() {
             for (;;) {
                 try {
