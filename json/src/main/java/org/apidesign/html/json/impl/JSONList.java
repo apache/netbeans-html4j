@@ -21,6 +21,7 @@
 package org.apidesign.html.json.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -37,6 +38,16 @@ public final class JSONList<T> extends ArrayList<T> {
     public JSONList(String name, String... deps) {
         this.name = name;
         this.deps = deps;
+    }
+    
+    public void init(T... values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        if (this.model != null || !isEmpty()) {
+            throw new IllegalStateException();
+        }
+        super.addAll(Arrays.asList(values));
     }
 
     public void assign(Bindings model) {

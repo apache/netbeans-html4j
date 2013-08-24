@@ -47,10 +47,18 @@ import org.openide.util.lookup.ServiceProvider;
 public final class FXContext
 implements Technology<JSObject>, Transfer, Contexts.Provider {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
+    private static Boolean javaScriptEnabled;
     
     @JavaScriptBody(args = {}, body = "return true;")
-    private static boolean isJavaScriptEnabled() {
+    private static boolean isJavaScriptEnabledJs() {
         return false;
+    }
+    
+    private static boolean isJavaScriptEnabled() {
+        if (javaScriptEnabled != null) {
+            return javaScriptEnabled;
+        }
+        return javaScriptEnabled = isJavaScriptEnabledJs();
     }
 
     @Override

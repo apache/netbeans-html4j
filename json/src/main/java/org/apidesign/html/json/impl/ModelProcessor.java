@@ -245,11 +245,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
                 }
                 if (firstArray != null) {
-                    String tn = typeName(e, firstArray);
-                    String[] gs = toGetSet(firstArray.name(), tn, true);
-                    w.write("    for(" + tn + " $item : " + firstArray.name() + ") {\n");
-                    w.write("      " + gs[0] + "().add($item);\n");
-                    w.write("    }\n");
+                    w.write("    this.prop_" + firstArray.name() + ".init(" + firstArray.name() + ");\n");
                 }
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
