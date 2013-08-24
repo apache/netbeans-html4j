@@ -122,7 +122,7 @@ public final class FXPresenter implements Fn.Presenter {
 
     @Override
     public void displayPage(final URL resource, Runnable onLoad) {
-        engine = FXBrwsr.findEngine(onLoad);
+        engine = FXBrwsr.findEngine(resource, onLoad);
         try {
             FXInspect.initialize(engine);
         } catch (Throwable ex) {
@@ -174,7 +174,7 @@ public final class FXPresenter implements Fn.Presenter {
 
         private static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
         
-        public synchronized static WebEngine findEngine(final Runnable onLoad) {
+        public synchronized static WebEngine findEngine(final URL url, final Runnable onLoad) {
             if (INSTANCE == null) {
                 Executors.newFixedThreadPool(1).submit(new Runnable() {
                     @Override
@@ -202,7 +202,7 @@ public final class FXPresenter implements Fn.Presenter {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        arr[0] = INSTANCE.newEngine(onLoad);
+                        arr[0] = INSTANCE.newEngine(url, onLoad);
                         waitForResult.countDown();
                     }
                 });
@@ -216,7 +216,7 @@ public final class FXPresenter implements Fn.Presenter {
                 }
                 return arr[0];
             } else {
-                return INSTANCE.newEngine(onLoad);
+                return INSTANCE.newEngine(url, onLoad);
             }
         }
 
@@ -233,7 +233,7 @@ public final class FXPresenter implements Fn.Presenter {
             this.root = r;
         }
 
-        private WebEngine newEngine(final Runnable onLoad) {
+        private WebEngine newEngine(final URL url, final Runnable onLoad) {
             final WebView view = new WebView();
             final String nbUserDir = this.getParameters().getNamed().get("userdir"); // NOI18N
             WebController wc = new WebController(view, nbUserDir, getParameters().getUnnamed());
@@ -246,6 +246,9 @@ public final class FXPresenter implements Fn.Presenter {
                     if (newState.equals(Worker.State.SUCCEEDED)) {
                         w.stateProperty().removeListener(this);
                         onLoad.run();
+                    }
+                    if (newState.equals(Worker.State.FAILED)) {
+                        throw new IllegalStateException("Failed to load " + url);
                     }
                 }
             });
