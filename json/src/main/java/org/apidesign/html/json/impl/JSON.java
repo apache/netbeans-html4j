@@ -347,6 +347,7 @@ public final class JSON {
 
         @Override
         public Void open(String url, JSONCall onReply) {
+            onReply.notifyError(new UnsupportedOperationException("WebSockets not supported!"));
             return null;
         }
 

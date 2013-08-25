@@ -69,8 +69,6 @@ implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS>
             context.register(Transfer.class, this, 100);
             if (areWebSocketsSupported()) {
                 context.register(WSTransfer.class, this, 100);
-            } else {
-                throw new IllegalStateException();
             }
         }
     }
