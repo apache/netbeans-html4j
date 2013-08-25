@@ -18,7 +18,7 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.kofx;
+package org.apidesign.html.wstyrus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +42,7 @@ import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
+import org.apidesign.html.kofx.FXContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
@@ -53,10 +54,10 @@ import static org.testng.Assert.*;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service = KnockoutTCK.class)
-public final class KnockoutFXTest extends KnockoutTCK {
+public final class TyrusKnockoutTest extends KnockoutTCK {
     private static Class<?> browserClass;
     
-    public KnockoutFXTest() {
+    public TyrusKnockoutTest() {
     }
     
     @Factory public static Object[] compatibilityTests() throws Exception {
@@ -64,14 +65,14 @@ public final class KnockoutFXTest extends KnockoutTCK {
         for (int i = 0; i < arr.length; i++) {
             assertEquals(
                 arr[i].getClassLoader(),
-                KnockoutFXTest.class.getClassLoader(),
+                TyrusKnockoutTest.class.getClassLoader(),
                 "All classes loaded by the same classloader"
             );
         }
         
-        URI uri = DynamicHTTP.initServer();
+        URI uri = TyrusDynamicHTTP.initServer();
     
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(TyrusKnockoutTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
         
@@ -91,7 +92,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
                 asSubclass(Annotation.class);
             for (Method m : c.getMethods()) {
                 if (m.getAnnotation(koTest) != null) {
-                    res.add(new KOFx(m));
+                    res.add(new TyrusFX(m));
                 }
             }
         }
@@ -100,31 +101,30 @@ public final class KnockoutFXTest extends KnockoutTCK {
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
         while (browserClass == null) {
-            KnockoutFXTest.class.wait();
+            TyrusKnockoutTest.class.wait();
         }
         return browserClass.getClassLoader();
     }
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        KnockoutFXTest.class.notifyAll();
+        TyrusKnockoutTest.class.notifyAll();
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
+        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, KnockoutFXTest.class);
+        m.invoke(null, TyrusKnockoutTest.class);
     }
     
     @Override
     public BrwsrCtx createContext() {
         FXContext fx = new FXContext();
+        TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx, 10).
-            register(Transfer.class, fx, 10);
-        if (fx.areWebSocketsSupported()) {
-            cb.register(WSTransfer.class, fx, 10);
-        }
+            register(Transfer.class, fx, 10).
+            register(WSTransfer.class, tc, 10);
         return cb.build();
     }
 
@@ -180,17 +180,6 @@ public final class KnockoutFXTest extends KnockoutTCK {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {
             throw new IllegalStateException(ex);
-        }
-    }
-
-    @Override
-    public boolean canFailWebSocketTest() {
-        try {
-            Class.forName("java.util.function.Function");
-            return false;
-        } catch (ClassNotFoundException ex) {
-            // running on JDK7, FX WebView WebSocket impl does not work
-            return true;
         }
     }
 }

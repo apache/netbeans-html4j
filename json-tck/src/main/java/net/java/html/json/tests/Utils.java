@@ -21,7 +21,6 @@
 package net.java.html.json.tests;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
@@ -84,6 +83,16 @@ final class Utils {
             }
         }
         throw new IllegalStateException();
+    }
+
+    static boolean canFailWebSockets(
+        Class<?> clazz) {
+        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+            if (tck.canFailWebSocketTest()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private static ClassLoader cl(Class<?> c) {

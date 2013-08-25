@@ -97,5 +97,14 @@ public abstract class KnockoutTCK {
         };
     }
 
+    /** Some implementations cannot fully support web sockets and fail.
+     * 
+     * @return true, if UnsupportedOperationException reported from a web
+     *    socket open operation is acceptable reply
+     */
+    public boolean canFailWebSocketTest() {
+        return false;
+    }
+
 
 }

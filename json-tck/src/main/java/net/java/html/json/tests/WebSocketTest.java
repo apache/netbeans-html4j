@@ -140,7 +140,8 @@ public final class WebSocketTest {
         if (js.getFetchedResponse() == null) {
             return false;
         }
-        return js.getFetchedResponse().contains("UnsupportedOperationException");
+        return js.getFetchedResponse().contains("UnsupportedOperationException") &&
+            Utils.canFailWebSockets(WebSocketTest.class);
     }
     
 }
