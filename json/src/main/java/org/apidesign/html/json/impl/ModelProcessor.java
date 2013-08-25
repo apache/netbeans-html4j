@@ -1684,7 +1684,12 @@ public final class ModelProcessor extends AbstractProcessor {
             if (params.size() != 2) {
                 error = true;
             } else {
-                if (!params.get(0).asType().toString().equals(className)) {
+                String firstType = params.get(0).asType().toString();
+                int lastDot = firstType.lastIndexOf('.');
+                if (lastDot != -1) {
+                    firstType = firstType.substring(lastDot + 1);
+                }
+                if (!firstType.equals(className)) {
                     error = true;
                 }
                 if (!processingEnv.getTypeUtils().isAssignable(excType, params.get(1).asType())) {
