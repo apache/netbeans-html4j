@@ -79,5 +79,10 @@ public final class CtxImpl {
             }
             return clazz.getName().compareTo(o.clazz.getName());
         }
+
+        @Override
+        public String toString() {
+            return "Bind{" + "clazz=" + clazz + "@" + clazz.getClassLoader() + ", impl=" + impl + ", priority=" + priority + '}';
+        }
     }
 }
