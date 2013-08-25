@@ -81,11 +81,8 @@ final class LoadJSON implements Runnable {
     }
 
     public static void loadJSON(JSONCall call) {
-        if ("WebSocket".equals(call.getMethod())) { // NOI18N
-            LoadWS.send(call);
-        } else {
-            REQ.execute(new LoadJSON((call)));
-        }
+        assert !"WebSocket".equals(call.getMethod());
+        REQ.execute(new LoadJSON((call)));
     }
 
     @Override

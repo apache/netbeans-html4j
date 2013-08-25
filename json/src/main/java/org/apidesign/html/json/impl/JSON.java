@@ -31,6 +31,7 @@ import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.json.spi.WSTransfer;
 
 /**
  *
@@ -50,6 +51,11 @@ public final class JSON {
         return t == null ? EmptyTech.EMPTY : t;
     }
 
+    static WSTransfer<?> findWSTransfer(BrwsrCtx c) {
+        WSTransfer<?> t = Contexts.find(c, WSTransfer.class);
+        return t == null ? EmptyTech.EMPTY : t;
+    }
+    
     public static void runInBrowser(BrwsrCtx c, Runnable runnable) {
         findTechnology(c).runSafe(runnable);
     }
@@ -149,6 +155,65 @@ public final class JSON {
         Transfer t = findTransfer(c);
         t.loadJSON(call);
     }
+    public static WS openWS(
+        BrwsrCtx c, RcvrJSON r, String url, Object data
+    ) {
+        WS ws = WSImpl.create(findWSTransfer(c), r);
+        ws.send(url, data);
+        return ws;
+    }
+    
+    public static abstract class WS {
+        private WS() {
+        }
+        
+        public abstract void send(String url, Object model);
+    }
+    
+    private static final class WSImpl<Socket> extends WS {
+
+        private final WSTransfer<Socket> trans;
+        private final RcvrJSON rcvr;
+        private Socket socket;
+        private String prevURL;
+
+        private WSImpl(WSTransfer<Socket> trans, RcvrJSON rcvr) {
+            this.trans = trans;
+            this.rcvr = rcvr;
+        }
+        
+        static <Socket> WS create(WSTransfer<Socket> t, RcvrJSON r) {
+            return new WSImpl<Socket>(t, r);
+        }
+
+        @Override
+        public void send(String url, Object data) {
+            Socket s = socket;
+            if (s == null) {
+                if (data != null) {
+                    throw new IllegalStateException("WebSocket is not opened yet. Call with null data, was: " + data);
+                }
+                JSONCall call = PropertyBindingAccessor.createCall(rcvr, url, null, "WebSocket", null);
+                socket = trans.open(url, call);
+                prevURL = url;
+                return;
+            }
+            if (data == null) {
+                trans.close(s);
+                socket = null;
+                return;
+            }
+            if (!prevURL.equals(url)) {
+                throw new IllegalStateException(
+                    "Can't call to different URL " + url + " was: " + prevURL + "!"
+                    + " Close the socket by calling it will null data first!"
+                );
+            }
+            JSONCall call = PropertyBindingAccessor.createCall(rcvr, prevURL, null, "WebSocket", data);
+            trans.send(s, call);
+        }
+        
+    }
     
     private static final Map<Class,FromJSON<?>> froms;
     static {
@@ -223,7 +288,8 @@ public final class JSON {
         }
     }
     
-    private static final class EmptyTech implements Technology<Object>, Transfer {
+    private static final class EmptyTech
+    implements Technology<Object>, Transfer, WSTransfer<Void> {
         private static final EmptyTech EMPTY = new EmptyTech();
 
         @Override
@@ -277,6 +343,19 @@ public final class JSON {
         @Override
         public synchronized void runSafe(Runnable r) {
             r.run();
+        }
+
+        @Override
+        public Void open(String url, JSONCall onReply) {
+            return null;
+        }
+
+        @Override
+        public void send(Void socket, JSONCall data) {
+        }
+
+        @Override
+        public void close(Void socket) {
         }
     }
     

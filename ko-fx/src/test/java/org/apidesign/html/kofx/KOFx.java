@@ -34,6 +34,7 @@ public final class KOFx implements ITest, Runnable {
     private final Method m;
     private Object result;
     private Object inst;
+    private int count;
 
     KOFx(Method m) {
         this.m = m;
@@ -72,9 +73,11 @@ public final class KOFx implements ITest, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                notify = false;
-                Platform.runLater(this);
-                return;
+                if (count++ < 10000) {
+                    notify = false;
+                    Platform.runLater(this);
+                    return;
+                }
             }
             result = r;
         } catch (Exception ex) {

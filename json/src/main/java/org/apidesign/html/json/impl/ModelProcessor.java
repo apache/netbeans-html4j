@@ -982,79 +982,182 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             body.append(") {\n");
-            body.append(
-                "    class ProcessResult extends org.apidesign.html.json.impl.RcvrJSON {\n" +
-                "      @Override\n" +
-                "      public void onError(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
-                "        Exception value = ev.getException();\n"
-            );
-            if (onR.onError().isEmpty()) {
-                body.append(
-                "        value.printStackTrace();\n"
-                );
-            } else {
-                if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
+            boolean webSocket = onR.method().equals("WebSocket");
+            if (webSocket) {
+                if (generateWSReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
-                body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-                body.append(className).append(".this, value);\n");
-            }
-            body.append(
-                "      }\n" +
-                "      @Override\n" +
-                "      public void onMessage(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
-            );
-            if (expectsList) {
-                body.append(
-                    "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
-                );
+                body.append("  }\n");
+                body.append("  private org.apidesign.html.json.impl.JSON.WS ws_" + e.getSimpleName() + ";\n");
             } else {
-                body.append(
-                    "        " + modelClass + "[] arr = { null };\n"
-                );
-            }
-            body.append(
-                "        ev.dataRead(context, " + modelClass + ".class, arr);\n"
-            );
-            {
-                body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
-                String sep = "";
-                for (String arg : args) {
-                    body.append(sep);
-                    body.append(arg);
-                    sep = ", ";
+                if (generateJSONReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                    return false;
                 }
-                body.append(");\n");
+                body.append("  }\n");
             }
-            body.append(
-                "      }\n" +
-                "    }\n"
-            );
-            body.append("    ProcessResult pr = new ProcessResult();\n");
-            body.append("    org.apidesign.html.json.impl.JSON.loadJSON(context, pr,\n        ");
-            body.append(urlBefore).append(", ");
-            if (jsonpVarName != null) {
-                body.append(urlAfter);
-            } else {
-                body.append("null");
-            }
-            if (!"GET".equals(onR.method()) || dataMirror != null) {
-                body.append(", \"").append(onR.method()).append('"');
-                if (dataMirror != null) {
-                    body.append(", data");
-                } else {
-                    body.append(", null");
-                }
-            } else {
-                body.append(", null, null");
-            }
-            body.append(");\n");
-//            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
-//            body.append(wrapParams(e, null, className, "ev", "data"));
-//            body.append(");\n");
-            body.append("  }\n");
         }
         return true;
+    }
+
+    private boolean generateJSONReceiveBody(StringWriter body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+        body.append(
+            "    class ProcessResult extends org.apidesign.html.json.impl.RcvrJSON {\n" +
+            "      @Override\n" +
+            "      public void onError(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
+            "        Exception value = ev.getException();\n"
+            );
+        if (onR.onError().isEmpty()) {
+            body.append(
+                "        value.printStackTrace();\n"
+                );
+        } else {
+            if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
+                return true;
+            }
+            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append(className).append(".this, value);\n");
+        }
+        body.append(
+            "      }\n" +
+            "      @Override\n" +
+            "      public void onMessage(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+            );
+        if (expectsList) {
+            body.append(
+                "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
+                );
+        } else {
+            body.append(
+                "        " + modelClass + "[] arr = { null };\n"
+                );
+        }
+        body.append(
+            "        ev.dataRead(context, " + modelClass + ".class, arr);\n"
+            );
+        {
+            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            String sep = "";
+            for (String arg : args) {
+                body.append(sep);
+                body.append(arg);
+                sep = ", ";
+            }
+            body.append(");\n");
+        }
+        body.append(
+            "      }\n" +
+            "    }\n"
+            );
+        body.append("    ProcessResult pr = new ProcessResult();\n");
+        body.append("    org.apidesign.html.json.impl.JSON.loadJSON(context, pr,\n        ");
+        body.append(urlBefore).append(", ");
+        if (jsonpVarName != null) {
+            body.append(urlAfter);
+        } else {
+            body.append("null");
+        }
+        if (!"GET".equals(onR.method()) || dataMirror != null) {
+            body.append(", \"").append(onR.method()).append('"');
+            if (dataMirror != null) {
+                body.append(", data");
+            } else {
+                body.append(", null");
+            }
+        } else {
+            body.append(", null, null");
+        }
+        body.append(");\n");
+        return false;
+    }
+    
+    private boolean generateWSReceiveBody(StringWriter body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+        body.append(
+            "    class ProcessResult extends org.apidesign.html.json.impl.RcvrJSON {\n" +
+            "      @Override\n" +
+            "      public void onOpen(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+        );
+        body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+        {
+            String sep = "";
+            for (String arg : args) {
+                body.append(sep);
+                if (arg.startsWith("arr")) {
+                    body.append("null");
+                } else {
+                    body.append(arg);
+                }
+                sep = ", ";
+            }
+        }
+        body.append(");\n");
+        body.append(
+            "      }\n" +
+            "      @Override\n" +
+            "      public void onError(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
+            "        Exception value = ev.getException();\n"
+            );
+        if (onR.onError().isEmpty()) {
+            body.append(
+                "        value.printStackTrace();\n"
+                );
+        } else {
+            if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
+                return true;
+            }
+            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append(className).append(".this, value);\n");
+        }
+        body.append(
+            "      }\n" +
+            "      @Override\n" +
+            "      public void onMessage(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+        );
+        if (expectsList) {
+            body.append(
+                "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
+                );
+        } else {
+            body.append(
+                "        " + modelClass + "[] arr = { null };\n"
+                );
+        }
+        body.append(
+            "        ev.dataRead(context, " + modelClass + ".class, arr);\n"
+            );
+        {
+            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            String sep = "";
+            for (String arg : args) {
+                body.append(sep);
+                body.append(arg);
+                sep = ", ";
+            }
+            body.append(");\n");
+        }
+        body.append(
+            "      }\n"
+        );
+        if (!onR.onError().isEmpty()) {
+            body.append(
+                "      @Override\n"
+              + "      public void onClose(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+            );
+            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append(className).append(".this, null);\n");
+            body.append(
+                "      }\n"
+            );
+        }
+        body.append("    }\n");
+        body.append("    if (this.ws_").append(e.getSimpleName()).append(" == null) {\n");
+        body.append("      ProcessResult pr = new ProcessResult();\n");
+        body.append("      this.ws_").append(e.getSimpleName());
+        body.append("= org.apidesign.html.json.impl.JSON.openWS(context, pr,\n        ");
+        body.append(urlBefore).append(", data);\n");
+        body.append("    } else {\n");
+        body.append("      this.ws_").append(e.getSimpleName()).append(".send(").append(urlBefore).append(", data);\n");
+        body.append("    }\n");
+        return false;
     }
 
     private CharSequence wrapParams(

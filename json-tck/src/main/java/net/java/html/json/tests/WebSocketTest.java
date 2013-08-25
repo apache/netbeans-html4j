@@ -106,9 +106,22 @@ public final class WebSocketTest {
         js.applyBindings();
 
         js.setFetched(null);
-        js.querySex("http://wrong.protocol", Sex.MALE);
+        js.querySex("http://wrong.protocol", null);
 
         assert js.getFetchedResponse() != null : "Error reported";
+    }
+
+    @KOTest public void haveToOpenTheWebSocket() throws Throwable {
+        js = Models.bind(new WebSocketik(), newContext());
+        js.applyBindings();
+
+        js.setFetched(null);
+        try {
+            js.querySex("http://wrong.protocol", Sex.MALE);
+            assert false : "Should throw an exception";
+        } catch (IllegalStateException ex) {
+            assert ex.getMessage().contains("not open") : "Expecting 'not open' msg: " + ex.getMessage();
+        }
     }
     
     static void error(WebSocketik model, Exception ex) {

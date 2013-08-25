@@ -33,6 +33,7 @@ import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.json.spi.WSTransfer;
 import org.openide.util.lookup.ServiceProvider;
 
 /** This is an implementation package - just
@@ -45,7 +46,7 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Contexts.Provider.class)
 public final class FXContext
-implements Technology<JSObject>, Transfer, Contexts.Provider {
+implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
     
@@ -66,7 +67,16 @@ implements Technology<JSObject>, Transfer, Contexts.Provider {
         if (isJavaScriptEnabled()) {
             context.register(Technology.class, this, 100);
             context.register(Transfer.class, this, 100);
+            if (areWebSocketsSupported()) {
+                context.register(WSTransfer.class, this, 100);
+            } else {
+                throw new IllegalStateException();
+            }
         }
+    }
+
+    final boolean areWebSocketsSupported() {
+        return LoadWS.isSupported();
     }
 
     @Override
@@ -127,5 +137,20 @@ implements Technology<JSObject>, Transfer, Contexts.Provider {
     @Override
     public void runSafe(Runnable r) {
         Platform.runLater(r);
+    }
+
+    @Override
+    public LoadWS open(String url, JSONCall onReply) {
+        return new LoadWS(onReply, url);
+    }
+
+    @Override
+    public void send(LoadWS socket, JSONCall data) {
+        socket.send(data);
+    }
+
+    @Override
+    public void close(LoadWS socket) {
+        socket.close();
     }
 }

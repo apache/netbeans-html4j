@@ -20,12 +20,6 @@
  */
 package org.apidesign.html.kofx;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;
 import org.json.JSONArray;
@@ -38,63 +32,33 @@ import org.json.JSONTokener;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class LoadWS {
-    private static final Map<String,LoadWS> CONNECTIONS = new HashMap<String, LoadWS>();
+    private static final boolean SUPPORTED = isWebSocket();
     private final Object ws;
-    private Deque<JSONCall> pending = new ArrayDeque<JSONCall>();
     private final JSONCall call;
 
-    private LoadWS(JSONCall first, String url) {
+    LoadWS(JSONCall first, String url) {
         call = first;
         ws = initWebSocket(this, url);
+        if (ws == null) {
+            first.notifyError(new IllegalArgumentException("Wrong URL: " + url));
+        }
     }
     
-    static void send(JSONCall call) {
-        String url = call.composeURL(null);
-        LoadWS load = CONNECTIONS.get(url);
-        if (load == null) {
-            load = new LoadWS(call, url);
-            if (load.ws != null) {
-                CONNECTIONS.put(url, load);
-            } else {
-                call.notifyError(new UnsupportedOperationException("WebSocket API is not supported"));
-                return;
-            }
-        } else {
-            if (!call.isDoOutput()) {
-                close(load.ws);
-            }
-        }
-        if (call.isDoOutput()) {
-            load.push(call);
-        }
+    static boolean isSupported() {
+        return SUPPORTED;
+    }
+    
+    void send(JSONCall call) {
+        push(call);
     }
     
     private synchronized void push(JSONCall call) {
-        if (pending != null) {
-            pending.add(call);
-        } else {
-            try {
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                call.writeData(os);
-                String msg = new String(os.toByteArray(), "UTF-8");
-                send(ws, msg);
-            } catch (IOException ex) {
-                call.notifyError(ex);
-            }
-        }
+        send(ws, call.getMessage());
     }
 
     void onOpen(Object ev) {
-        Deque<JSONCall> p;
-        synchronized (this) {
-            p = pending;
-            pending = null;
-        }
         if (!call.isDoOutput()) {
             call.notifySuccess(null);
-        }
-        for (JSONCall c : p) {
-            push(c);
         }
     }
     
@@ -119,6 +83,11 @@ final class LoadWS {
 
     void onClose(boolean wasClean, int code, String reason) {
         call.notifyError(null);
+    }
+    
+    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
+    private static boolean isWebSocket() {
+        return false;
     }
 
     @JavaScriptBody(args = { "back", "url" }, javacall = true, body = ""
@@ -150,5 +119,9 @@ final class LoadWS {
 
     @JavaScriptBody(args = { "ws" }, body = "ws.close();")
     private static void close(Object ws) {
+    }
+
+    void close() {
+        close(ws);
     }
 }

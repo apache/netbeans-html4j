@@ -39,6 +39,7 @@ import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
 import org.json.JSONException;
@@ -118,10 +119,13 @@ public final class KnockoutFXTest extends KnockoutTCK {
     @Override
     public BrwsrCtx createContext() {
         FXContext fx = new FXContext();
-        return Contexts.newBuilder().
+        Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx, 10).
-            register(Transfer.class, fx, 10).
-            build();
+            register(Transfer.class, fx, 10);
+        if (fx.areWebSocketsSupported()) {
+            cb.register(WSTransfer.class, fx, 10);
+        }
+        return cb.build();
     }
 
     @Override

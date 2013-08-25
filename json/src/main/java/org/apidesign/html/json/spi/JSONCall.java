@@ -83,11 +83,19 @@ public final class JSONCall {
     }
 
     public void notifySuccess(Object result) {
-        RcvrJSON.MsgEvnt.createMessage(result).dispatch(whenDone);
+        if (result == null) {
+            RcvrJSON.MsgEvnt.createOpen().dispatch(whenDone);
+        } else {
+            RcvrJSON.MsgEvnt.createMessage(result).dispatch(whenDone);
+        }
     }
     
     public void notifyError(Throwable error) {
-        RcvrJSON.MsgEvnt.createError(error).dispatch(whenDone);
+        if (error == null) {
+            RcvrJSON.MsgEvnt.createClose().dispatch(whenDone);
+        } else {
+            RcvrJSON.MsgEvnt.createError(error).dispatch(whenDone);
+        }
     }
 
     public String getMessage() {
