@@ -24,6 +24,7 @@ package org.apidesign.html.json.spi;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.apidesign.html.json.impl.JSON;
+import org.apidesign.html.json.impl.RcvrJSON;
 
 /** Description of a JSON call request that is supposed to be processed
  * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.
@@ -31,16 +32,14 @@ import org.apidesign.html.json.impl.JSON;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JSONCall {
-    private final Runnable whenDone;
-    private final Object[] result;
+    private final RcvrJSON whenDone;
     private final String urlBefore;
     private final String urlAfter;
     private final String method;
     private final Object data;
 
-    JSONCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method, Object data) {
+    JSONCall(RcvrJSON whenDone, String urlBefore, String urlAfter, String method, Object data) {
         this.whenDone = whenDone;
-        this.result = result;
         this.urlBefore = urlBefore;
         this.urlAfter = urlAfter;
         this.method = method;
@@ -84,12 +83,14 @@ public final class JSONCall {
     }
 
     public void notifySuccess(Object result) {
-        this.result[0] = result;
-        this.whenDone.run();
+        RcvrJSON.MsgEvnt.createMessage(result).dispatch(whenDone);
     }
     
     public void notifyError(Throwable error) {
-        this.result[0] = error == null ? JSON.NULL : error;
-        this.whenDone.run();
+        RcvrJSON.MsgEvnt.createError(error).dispatch(whenDone);
+    }
+
+    public String getMessage() {
+        return this.data.toString();
     }
 }

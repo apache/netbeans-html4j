@@ -22,6 +22,7 @@ package org.apidesign.html.json.spi;
 
 import org.apidesign.html.json.impl.PropertyBindingAccessor;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
+import org.apidesign.html.json.impl.RcvrJSON;
 import org.apidesign.html.json.impl.WrapperObject;
 
 /** Describes a property when one is asked to 
@@ -49,8 +50,8 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected JSONCall newCall(Runnable whenDone, Object[] result, String urlBefore, String urlAfter, String method, Object data) {
-                return new JSONCall(whenDone, result, urlBefore, urlAfter, method, data);
+            protected JSONCall newCall(RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
+                return new JSONCall(callback, urlBefore, urlAfter, method, data);
             }
         };
     }

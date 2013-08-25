@@ -982,40 +982,39 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             body.append(") {\n");
-            body.append("    final Object[] result = { null };\n");
             body.append(
-                "    class ProcessResult implements Runnable {\n" +
+                "    class ProcessResult extends org.apidesign.html.json.impl.RcvrJSON {\n" +
                 "      @Override\n" +
-                "      public void run() {\n" +
-                "        Object value = result[0];\n" +
-                "        if (value instanceof Throwable) {\n");
+                "      public void onError(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
+                "        Exception value = ev.getException();\n"
+            );
             if (onR.onError().isEmpty()) {
                 body.append(
-                "          ((Throwable)value).printStackTrace(); return;\n"
+                "        value.printStackTrace();\n"
                 );
             } else {
                 if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
                     return false;
                 }
-                body.append("          ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-                body.append(className).append(".this, org.apidesign.html.json.impl.JSON.excValue(value)); return;\n");
+                body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+                body.append(className).append(".this, value);\n");
             }
             body.append(
-                "        }\n"
+                "      }\n" +
+                "      @Override\n" +
+                "      public void onMessage(org.apidesign.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
             );
+            if (expectsList) {
+                body.append(
+                    "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
+                );
+            } else {
+                body.append(
+                    "        " + modelClass + "[] arr = { null };\n"
+                );
+            }
             body.append(
-                "        " + modelClass + "[] arr;\n");
-            body.append(
-                "        if (value instanceof Object[]) {\n" +
-                "          Object[] data = ((Object[])value);\n" +
-                "          arr = new " + modelClass + "[data.length];\n" +
-                "          for (int i = 0; i < data.length; i++) {\n" +
-                "            arr[i] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, data[i]);\n" +
-                "          }\n" +
-                "        } else {\n" +
-                "          arr = new " + modelClass + "[1];\n" +
-                "          arr[0] = org.apidesign.html.json.impl.JSON.read(context, " + modelClass + ".class, value);\n" +
-                "        }\n"
+                "        ev.dataRead(context, " + modelClass + ".class, arr);\n"
             );
             {
                 body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
@@ -1032,7 +1031,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 "    }\n"
             );
             body.append("    ProcessResult pr = new ProcessResult();\n");
-            body.append("    org.apidesign.html.json.impl.JSON.loadJSON(context, pr, result,\n        ");
+            body.append("    org.apidesign.html.json.impl.JSON.loadJSON(context, pr,\n        ");
             body.append(urlBefore).append(", ");
             if (jsonpVarName != null) {
                 body.append(urlAfter);
@@ -1046,6 +1045,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 } else {
                     body.append(", null");
                 }
+            } else {
+                body.append(", null, null");
             }
             body.append(");\n");
 //            body.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");

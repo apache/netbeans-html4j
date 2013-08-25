@@ -37,9 +37,6 @@ import org.apidesign.html.json.spi.Transfer;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JSON {
-    /** represents null exception value */
-    public static final Exception NULL = new NullPointerException();
-    
     private JSON() {
     }
 
@@ -52,7 +49,7 @@ public final class JSON {
         Transfer t = Contexts.find(c, Transfer.class);
         return t == null ? EmptyTech.EMPTY : t;
     }
-    
+
     public static void runInBrowser(BrwsrCtx c, Runnable runnable) {
         findTechnology(c).runSafe(runnable);
     }
@@ -136,16 +133,6 @@ public final class JSON {
         return (Character)val;
     }
     
-    public static Exception excValue(Object val) {
-        if (val == NULL) {
-            return null;
-        }
-        if (val instanceof Exception) {
-            return (Exception)val;
-        }
-        return new Exception(val.toString());
-    }
-
     public static Boolean boolValue(Object val) {
         if (val instanceof String) {
             return Boolean.parseBoolean((String)val);
@@ -154,18 +141,11 @@ public final class JSON {
     }
     
     public static void loadJSON(
-        BrwsrCtx c, Runnable whenDone, Object[] result, 
-        String urlBefore, String urlAfter
-    ) {
-        loadJSON(c, whenDone, result, urlBefore, urlAfter, null, null);
-    }
-
-    public static void loadJSON(
-        BrwsrCtx c, Runnable whenDone, Object[] result,
+        BrwsrCtx c, RcvrJSON callback,
         String urlBefore, String urlAfter, String method,
         Object data
     ) {
-        JSONCall call = PropertyBindingAccessor.createCall(whenDone, result, urlBefore, urlAfter, method, data);
+        JSONCall call = PropertyBindingAccessor.createCall(callback, urlBefore, urlAfter, method, data);
         Transfer t = findTransfer(c);
         t.loadJSON(call);
     }
