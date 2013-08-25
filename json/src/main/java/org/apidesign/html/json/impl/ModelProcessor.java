@@ -1155,7 +1155,7 @@ public final class ModelProcessor extends AbstractProcessor {
         body.append("= org.apidesign.html.json.impl.JSON.openWS(context, pr,\n        ");
         body.append(urlBefore).append(", data);\n");
         body.append("    } else {\n");
-        body.append("      this.ws_").append(e.getSimpleName()).append(".send(").append(urlBefore).append(", data);\n");
+        body.append("      this.ws_").append(e.getSimpleName()).append(".send(context, ").append(urlBefore).append(", data);\n");
         body.append("    }\n");
         return false;
     }

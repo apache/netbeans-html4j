@@ -134,7 +134,11 @@ implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS>
 
     @Override
     public void runSafe(Runnable r) {
-        Platform.runLater(r);
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        } else {
+            Platform.runLater(r);
+        }
     }
 
     @Override

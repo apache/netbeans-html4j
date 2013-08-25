@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import javafx.application.Platform;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
@@ -109,24 +108,16 @@ public final class TyrusContext implements Contexts.Provider, WSTransfer<Comm> {
 
         @OnMessage
         public void message(final String orig, Session s) {
-            class R implements Runnable {
-                Object json;
-                public R() {
-                    String data = orig.trim();
-                    try {
-                        JSONTokener tok = new JSONTokener(data);
-                        Object obj = data.startsWith("[") ? new JSONArray(tok) : new JSONObject(tok);
-                        json = convertToArray(obj);
-                    } catch (JSONException ex) {
-                        json = data;
-                    }
-                }
-                @Override
-                public void run() {
-                    callback.notifySuccess(json);
-                }
+            Object json;
+            String data = orig.trim();
+            try {
+                JSONTokener tok = new JSONTokener(data);
+                Object obj = data.startsWith("[") ? new JSONArray(tok) : new JSONObject(tok);
+                json = convertToArray(obj);
+            } catch (JSONException ex) {
+                json = data;
             }
-            Platform.runLater(new R());
+            callback.notifySuccess(json);
         }
 
         @OnError

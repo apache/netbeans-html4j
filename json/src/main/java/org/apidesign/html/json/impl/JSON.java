@@ -151,7 +151,7 @@ public final class JSON {
         String urlBefore, String urlAfter, String method,
         Object data
     ) {
-        JSONCall call = PropertyBindingAccessor.createCall(callback, urlBefore, urlAfter, method, data);
+        JSONCall call = PropertyBindingAccessor.createCall(c, callback, urlBefore, urlAfter, method, data);
         Transfer t = findTransfer(c);
         t.loadJSON(call);
     }
@@ -159,7 +159,7 @@ public final class JSON {
         BrwsrCtx c, RcvrJSON r, String url, Object data
     ) {
         WS ws = WSImpl.create(findWSTransfer(c), r);
-        ws.send(url, data);
+        ws.send(c, url, data);
         return ws;
     }
     
@@ -167,7 +167,7 @@ public final class JSON {
         private WS() {
         }
         
-        public abstract void send(String url, Object model);
+        public abstract void send(BrwsrCtx ctx, String url, Object model);
     }
     
     private static final class WSImpl<Socket> extends WS {
@@ -187,13 +187,13 @@ public final class JSON {
         }
 
         @Override
-        public void send(String url, Object data) {
+        public void send(BrwsrCtx ctx, String url, Object data) {
             Socket s = socket;
             if (s == null) {
                 if (data != null) {
                     throw new IllegalStateException("WebSocket is not opened yet. Call with null data, was: " + data);
                 }
-                JSONCall call = PropertyBindingAccessor.createCall(rcvr, url, null, "WebSocket", null);
+                JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, url, null, "WebSocket", null);
                 socket = trans.open(url, call);
                 prevURL = url;
                 return;
@@ -209,7 +209,7 @@ public final class JSON {
                     + " Close the socket by calling it will null data first!"
                 );
             }
-            JSONCall call = PropertyBindingAccessor.createCall(rcvr, prevURL, null, "WebSocket", data);
+            JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, prevURL, null, "WebSocket", data);
             trans.send(s, call);
         }
         

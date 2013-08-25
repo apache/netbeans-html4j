@@ -23,6 +23,7 @@ package org.apidesign.html.json.spi;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.impl.JSON;
 import org.apidesign.html.json.impl.RcvrJSON;
 
@@ -37,8 +38,10 @@ public final class JSONCall {
     private final String urlAfter;
     private final String method;
     private final Object data;
+    private final BrwsrCtx ctx;
 
-    JSONCall(RcvrJSON whenDone, String urlBefore, String urlAfter, String method, Object data) {
+    JSONCall(BrwsrCtx ctx, RcvrJSON whenDone, String urlBefore, String urlAfter, String method, Object data) {
+        this.ctx = ctx;
         this.whenDone = whenDone;
         this.urlBefore = urlBefore;
         this.urlAfter = urlAfter;
@@ -84,18 +87,27 @@ public final class JSONCall {
 
     public void notifySuccess(Object result) {
         if (result == null) {
-            RcvrJSON.MsgEvnt.createOpen().dispatch(whenDone);
+            dispatch(RcvrJSON.MsgEvnt.createOpen());
         } else {
-            RcvrJSON.MsgEvnt.createMessage(result).dispatch(whenDone);
+            dispatch(RcvrJSON.MsgEvnt.createMessage(result));
         }
     }
     
     public void notifyError(Throwable error) {
         if (error == null) {
-            RcvrJSON.MsgEvnt.createClose().dispatch(whenDone);
+            dispatch(RcvrJSON.MsgEvnt.createClose());
         } else {
-            RcvrJSON.MsgEvnt.createError(error).dispatch(whenDone);
+            dispatch(RcvrJSON.MsgEvnt.createError(error));
         }
+    }
+    
+    private void dispatch(final RcvrJSON.MsgEvnt ev) {
+        JSON.runInBrowser(ctx, new Runnable() {
+            @Override
+            public void run() {
+                ev.dispatch(whenDone);
+            }
+        });
     }
 
     public String getMessage() {

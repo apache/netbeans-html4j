@@ -57,7 +57,7 @@ public abstract class RcvrJSON {
         
         public <Data> void dataRead(BrwsrCtx ctx, Class<? extends Data> type, Data[] fillTheArray) {
         }
-        
+
         public abstract void dispatch(RcvrJSON r);
         
         public static MsgEvnt createError(final Throwable t) {

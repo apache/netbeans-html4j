@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.json.impl;
 
+import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
@@ -43,7 +44,9 @@ public abstract class PropertyBindingAccessor {
     protected abstract <M> PropertyBinding newBinding(PBData<M> d);
     protected abstract <M> FunctionBinding newFunction(FBData<M> d);
     protected abstract JSONCall newCall(
-        RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data);
+        BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter,
+        String method, Object data
+    );
 
     
     static <M> PropertyBinding create(PBData<M> d) {
@@ -53,8 +56,10 @@ public abstract class PropertyBindingAccessor {
         return DEFAULT.newFunction(d);
     }
     static JSONCall createCall(
-        RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
-        return DEFAULT.newCall(callback, urlBefore, urlAfter, method, data);
+        BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, 
+        String method, Object data
+    ) {
+        return DEFAULT.newCall(ctx, callback, urlBefore, urlAfter, method, data);
     }
 
     public static final class PBData<M> {

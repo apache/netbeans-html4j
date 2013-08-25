@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.json.spi;
 
+import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.impl.PropertyBindingAccessor;
 import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
 import org.apidesign.html.json.impl.RcvrJSON;
@@ -50,8 +51,8 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected JSONCall newCall(RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
-                return new JSONCall(callback, urlBefore, urlAfter, method, data);
+            protected JSONCall newCall(BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
+                return new JSONCall(ctx, callback, urlBefore, urlAfter, method, data);
             }
         };
     }
