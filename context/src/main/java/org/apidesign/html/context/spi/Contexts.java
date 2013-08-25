@@ -85,7 +85,7 @@ public final class Contexts {
      * @author Jaroslav Tulach <jtulach@netbeans.org>
      */
     public static final class Builder {
-        private CtxImpl impl = new CtxImpl();
+        private final CtxImpl impl = new CtxImpl();
 
         Builder() {
         }
@@ -94,12 +94,19 @@ public final class Contexts {
          * exactly identified by its implementation class and can be associated
          * with (positive) priority. In case of presence of multiple technologies
          * with the same class, the one with higher lower priority takes precedence.
+         * @param <Tech> type of technology to register
+         * @param type the real class of the technology type
+         * @param impl an instance of the technology class
+         * @param position the lower position, the more important implementation 
+         *    which will be consulted sooner when seeking for a {@link Contexts#find(net.java.html.BrwsrCtx, java.lang.Class)}
+         *    an implementation
+         * @return this builder
          */
-        public <Tech> Builder register(Class<Tech> type, Tech impl, int priority) {
-            if (priority <= 0) {
+        public <Tech> Builder register(Class<Tech> type, Tech impl, int position) {
+            if (position <= 0) {
                 throw new IllegalStateException();
             }
-            this.impl.register(type, impl, priority);
+            this.impl.register(type, impl, position);
             return this;
         }
 
