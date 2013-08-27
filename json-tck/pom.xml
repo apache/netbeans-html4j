@@ -52,4 +52,6 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+    <description>Test Compatibility Kit for anyone who wants to consume the net.java.html.json APIs and
+render their objects using own technology (e.g. own browser, MVVC, etc.).</description>
 </project>

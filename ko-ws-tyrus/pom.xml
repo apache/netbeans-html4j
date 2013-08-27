@@ -23,6 +23,13 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <properties>
@@ -140,4 +147,6 @@
         <version>3.1.0</version>
     </dependency>
   </dependencies>
+    <description>An implementation module that provides support for WebSocket protocol on JDK7. 
+No need to use it when running on JDK8 with FX WebView supporting WebSocket directly.</description>
 </project>

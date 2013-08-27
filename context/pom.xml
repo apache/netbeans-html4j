@@ -28,4 +28,5 @@
   </build>
   <dependencies>
   </dependencies>
+    <description>Representation of an HTML page context a Java program operates in.</description>
 </project>

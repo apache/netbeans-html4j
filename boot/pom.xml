@@ -45,4 +45,5 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+    <description>Builder to launch your Java/HTML based application.</description>
 </project>

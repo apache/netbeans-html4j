@@ -33,6 +33,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import net.java.html.json.OnReceive;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.WSTransfer;
@@ -43,7 +44,18 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.openide.util.lookup.ServiceProvider;
 
-/**
+/** This is an implementation module that provides support for
+ * WebSocket protocol for {@link OnReceive} communication end point for
+ * JDK7.
+ * <p>
+ * Don't deal with this module directly, rather use the 
+ * {@link OnReceive @OnReceive(url="ws://...", ...)} API to establish your
+ * WebSocket connection.
+ * <p>
+ * There is no need to include this module in your application if you are
+ * running on JDK8. JDK8 WebView provides its own implementation of the
+ * WebSocket API based on WebSocket object inside a browser. This is included
+ * in the <code>org.apidesign.html:ko-fx:0.5</code> module.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -79,6 +91,9 @@ public final class TyrusContext implements Contexts.Provider, WSTransfer<Comm> {
         }
     }
     
+    /** Implementation class in an implementation. Represents a {@link ClientEndpoint} of the
+     * WebSocket channel. You are unlikely to get on hold of it.
+     */
     @ClientEndpoint
     public static final class Comm {
         private final JSONCall callback;

@@ -51,4 +51,6 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+    <description>A presentation provider to show JavaFX WebView 
+when a Java/HTML based application is about to boot.</description>
 </project>

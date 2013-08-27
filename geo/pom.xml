@@ -43,4 +43,5 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+    <description>Find out where your Java program running in an HTML page is!</description>
 </project>
