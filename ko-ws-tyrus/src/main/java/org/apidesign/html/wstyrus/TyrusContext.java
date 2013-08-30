@@ -85,7 +85,10 @@ public final class TyrusContext implements Contexts.Provider, WSTransfer<Comm> {
     @Override
     public void close(Comm socket) {
         try {
-            socket.session.close();
+            final Session s = socket.session;
+            if (s != null) {
+                s.close();
+            }
         } catch (IOException ex) {
             socket.callback.notifyError(ex);
         }

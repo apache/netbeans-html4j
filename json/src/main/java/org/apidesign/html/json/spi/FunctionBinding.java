@@ -47,6 +47,10 @@ public final class FunctionBinding {
      * @param ev event (with additional properties) that triggered the event
      */
     public void call(Object data, Object ev) {
-        fb.call(data, ev);
+        try {
+            fb.call(data, ev);
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
     }
 }
