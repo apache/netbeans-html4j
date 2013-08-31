@@ -51,7 +51,11 @@ abstract class JsCallback {
             int sigEnd = body.indexOf(')', sigBeg);
             int colon4 = body.indexOf("::", next);
             if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
-                throw new IllegalStateException("Malformed body " + body);
+                throw new IllegalStateException(
+                    "Wrong format of instance callback. "
+                    + "Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':\n" 
+                    + body
+                );
             }
             String fqn = body.substring(next + 2, colon4);
             String method = body.substring(colon4 + 2, sigBeg);
@@ -59,7 +63,11 @@ abstract class JsCallback {
 
             int paramBeg = body.indexOf('(', sigEnd + 1);
             if (paramBeg == -1) {
-                throw new IllegalStateException("Malformed body " + body);
+                throw new IllegalStateException(
+                    "Wrong format of instance callback. "
+                    + "Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':\n" 
+                    + body
+                );
             }
             
             sb.append(callMethod(refId, fqn, method, params));
@@ -89,7 +97,11 @@ abstract class JsCallback {
             int sigEnd = body.indexOf(')', sigBeg);
             int colon4 = body.indexOf("::", next);
             if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
-                throw new IllegalStateException("Malformed body " + body);
+                throw new IllegalStateException(
+                    "Wrong format of static callback. "
+                    + "Should be: '@pkg.Class::staticMethod(Ljava/lang/Object;)(param)':\n" 
+                    + body
+                );
             }
             String fqn = body.substring(next + 1, colon4);
             String method = body.substring(colon4 + 2, sigBeg);

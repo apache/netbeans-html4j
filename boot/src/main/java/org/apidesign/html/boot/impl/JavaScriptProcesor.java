@@ -92,7 +92,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             if (jsb.javacall()) {
                 JsCallback verify = new VerifyCallback(e);
-                verify.parse(jsb.body());
+                try {
+                    verify.parse(jsb.body());
+                } catch (IllegalStateException ex) {
+                    msg.printMessage(Diagnostic.Kind.ERROR, ex.getLocalizedMessage(), e);
+                }
             }
         }
         if (roundEnv.processingOver()) {
