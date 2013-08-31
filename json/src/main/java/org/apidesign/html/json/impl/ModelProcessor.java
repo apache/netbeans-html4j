@@ -251,14 +251,23 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko != null) return ko;\n");
                 w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");
-                for (int i = 0; i < propsGetSet.size(); i += 5) {
-                    w.append("    ko.registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
-                    w.append((i / 5) + "), " + (propsGetSet.get(i + 2) == null) + ");\n");
+                {
+                    w.append("    org.apidesign.html.json.spi.PropertyBinding[] propArr = {\n");
+                    for (int i = 0; i < propsGetSet.size(); i += 5) {
+                        w.append("      ko.registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
+                        w.append((i / 5) + "), " + (propsGetSet.get(i + 2) == null) + "),\n");
+                    }
+                    w.append("    };\n");
                 }
-                for (int i = 0; i < functions.size(); i += 2) {
-                    w.append("    ko.registerFunction(\"").append(functions.get(i)).append("\", this, new P(");
-                    w.append((i / 2) + "));\n");
+                {
+                    w.append("    org.apidesign.html.json.spi.FunctionBinding[] funcArr = {\n");
+                    for (int i = 0; i < functions.size(); i += 2) {
+                        w.append("      ko.registerFunction(\"").append(functions.get(i)).append("\", this, new P(");
+                        w.append((i / 2) + ")),\n");
+                    }
+                    w.append("    };\n");
                 }
+                w.append("    ko.finish(this, propArr, funcArr);\n");
                 w.append("    return ko;\n");
                 w.append("  };\n");
                 w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + ">,\n");

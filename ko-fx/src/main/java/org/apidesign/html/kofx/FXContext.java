@@ -46,7 +46,7 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Contexts.Provider.class)
 public final class FXContext
-implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS> {
+implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
     
@@ -77,6 +77,22 @@ implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS>
         return LoadWS.isSupported();
     }
 
+
+    @Override
+    public JSObject wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+        String[] propNames = new String[propArr.length];
+        boolean[] propReadOnly = new boolean[propArr.length];
+        for (int i = 0; i < propNames.length; i++) {
+            propNames[i] = propArr[i].getPropertyName();
+            propReadOnly[i] = propArr[i].isReadOnly();
+        }
+        String[] funcNames = new String[funcArr.length];
+        for (int i = 0; i < funcNames.length; i++) {
+            funcNames[i] = funcArr[i].getFunctionName();
+        }
+        return Knockout.wrapModel(model, propNames, propReadOnly, propArr, funcNames, funcArr);
+    }
+    
     @Override
     public JSObject wrapModel(Object model) {
         JSObject obj = (JSObject) Knockout.createBinding(model).koData();

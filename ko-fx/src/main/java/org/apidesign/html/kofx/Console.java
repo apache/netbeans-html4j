@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.kofx;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 
@@ -31,25 +32,28 @@ import net.java.html.js.JavaScriptBody;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Console {
+final class Console {
     private static final Logger LOG = Logger.getLogger(Console.class.getName());
     
     private Console() {
     }
 
     static void register() {
-        registerImpl(new Console());
+        registerImpl("log", Level.INFO);
+        registerImpl("info", Level.INFO);
+        registerImpl("warn", Level.WARNING);
+        registerImpl("error", Level.SEVERE);
     }
     
-    @JavaScriptBody(args = { "jconsole" }, body = 
-        "console.log = function(m) { jconsole.log(m); };" +
-        "console.info = function(m) { jconsole.log(m); };" +
-        "console.error = function(m) { jconsole.log(m); };" +
-        "console.warn = function(m) { jconsole.log(m); };"
+    @JavaScriptBody(args = { "attr", "l" }, 
+        javacall = true, body = 
+        "  window.console[attr] = function(m) {\n"
+      + "    @org.apidesign.html.kofx.Console::log(Ljava/util/logging/Level;Ljava/lang/String;)(l, m);\n"
+      + "  };\n"
     )
-    private static native void registerImpl(Console c);
+    private static native void registerImpl(String attr, Level l);
     
-    public void log(String msg) {
-        LOG.info(msg);
+    static void log(Level l, String msg) {
+        LOG.log(l, msg);
     }
 }

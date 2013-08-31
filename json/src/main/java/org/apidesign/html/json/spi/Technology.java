@@ -87,4 +87,8 @@ public interface Technology<Data> {
      * @param r the runnable to execute
      */
     public void runSafe(Runnable r);
+
+    public static interface BatchInit<D> extends Technology<D> {
+        public D wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr);
+    }
 }

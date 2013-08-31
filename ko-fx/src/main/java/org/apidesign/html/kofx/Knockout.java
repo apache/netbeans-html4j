@@ -20,10 +20,6 @@
  */
 package org.apidesign.html.kofx;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
@@ -67,15 +63,26 @@ public final class Knockout {
         return new Knockout(bindings);
     }
 
+    static JSObject wrapModel(
+        Object model, 
+        String[] propNames, boolean[] propReadOnly, PropertyBinding[] propArr, 
+        String[] funcNames, FunctionBinding[] funcArr
+    ) {
+        return InvokeJS.wrapModel(model, propNames, propReadOnly, propArr, funcNames, funcArr);
+    }
+    
+
     public void valueHasMutated(String prop) {
         valueHasMutated((JSObject) model, prop);
     }
     public static void valueHasMutated(JSObject model, String prop) {
         LOG.log(Level.FINE, "property mutated: {0}", prop);
         try {
+            if (model != null) {
             Object koProp = model.getMember(prop);
-            if (koProp instanceof JSObject) {
-                ((JSObject)koProp).call("valueHasMutated");
+                if (koProp instanceof JSObject) {
+                    ((JSObject)koProp).call("valueHasMutated");
+                }
             }
         } catch (Throwable t) {
             LOG.log(Level.WARNING, "valueHasMutated failed for " + model + " prop: " + prop, t);
@@ -126,6 +133,51 @@ public final class Knockout {
                 + "  return k;"
         )
         private static native Object kObj();
+        
+        @JavaScriptBody(
+            javacall = true,
+            args = {"model", "propNames", "propReadOnly", "propArr", "funcNames", "funcArr"},
+            body
+            = "var ret = {};\n"
+            + "ret['ko-fx.model'] = model;\n"
+            + "function koComputed(name, readOnly, prop) {\n"
+            + "  var bnd = {"
+            + "    read: function() {"
+            + "      try {"
+            + "        var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();"
+            + "        return v;"
+            + "      } catch (e) {"
+            + "        alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);"
+            + "      }"
+            + "    },"
+            + "    owner: ret\n"
+            + "  };\n"
+            + "  if (!readOnly) {\n"
+            + "    bnd.write = function(val) {\n"
+            + "      prop.@org.apidesign.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(val);\n"
+            + "    };"
+            + "  };"
+            + "  ret[name] = ko.computed(bnd);"
+            + "}\n"
+            + "for (var i = 0; i < propNames.length; i++) {\n"
+            + "  koComputed(propNames[i], propReadOnly[i], propArr[i]);\n"
+            + "}\n"
+            + "function koExpose(name, func) {\n"
+            + "  ret[name] = function(data, ev) {\n"
+            + "    func.@org.apidesign.html.json.spi.FunctionBinding::call(Ljava/lang/Object;Ljava/lang/Object;)(data, ev);\n"
+            + "  };\n"
+            + "}\n"
+            + "for (var i = 0; i < funcNames.length; i++) {\n"
+            + "  koExpose(funcNames[i], funcArr[i]);\n"
+            + "}\n"
+            + "return ret;\n"
+            )
+        static native JSObject wrapModel(
+            Object model,
+            String[] propNames, boolean[] propReadOnly, PropertyBinding[] propArr,
+            String[] funcNames, FunctionBinding[] funcArr
+        );
+        
         
         @JavaScriptBody(args = { "value", "cnt " }, body =
                   "    var ret = {};"

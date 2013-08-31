@@ -32,36 +32,44 @@ import org.apidesign.html.json.spi.Technology;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class Bindings<Data> {
-    private final Data data;
+    private Data data;
     private final Technology<Data> bp;
 
-    private Bindings(Data data, Technology<Data> bp) {
-        this.data = data;
+    private Bindings(Technology<Data> bp) {
         this.bp = bp;
     }
     
     public <M> PropertyBinding registerProperty(String propName, M model, SetAndGet<M> access, boolean readOnly) {
-        PropertyBinding pb = PropertyBindingAccessor.create(new PBData<M>(this, propName, model, access, readOnly));
-        bp.bind(pb, model, data);
-        return pb;
+        return PropertyBindingAccessor.create(new PBData<M>(this, propName, model, access, readOnly));
     }
 
     public <M> FunctionBinding registerFunction(String name, M model, Callback<M> access) {
-        FunctionBinding fb = PropertyBindingAccessor.createFunction(new FBData<M>(name, model, access));
-        bp.expose(fb, model, data);
-        return fb;
+        return PropertyBindingAccessor.createFunction(new FBData<M>(name, model, access));
     }
     
     public static Bindings<?> apply(BrwsrCtx c, Object model) {
         Technology<?> bp = JSON.findTechnology(c);
-        return apply(bp, model);
+        return apply(bp);
     }
     
-    private static <Data> Bindings<Data> apply(
-        Technology<Data> bp, Object model
-    ) {
-        Data d = bp.wrapModel(model);
-        return new Bindings<Data>(d, bp);
+    private static <Data> Bindings<Data> apply(Technology<Data> bp) {
+        return new Bindings<Data>(bp);
+    }
+    
+    public final void finish(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+        assert data == null;
+        if (bp instanceof Technology.BatchInit) {
+            Technology.BatchInit<Data> bi = (Technology.BatchInit<Data>)bp;
+            data = bi.wrapModel(model, propArr, funcArr);
+        } else {
+            data = bp.wrapModel(model);
+            for (PropertyBinding b : propArr) {
+                bp.bind(b, model, data);
+            }
+            for (FunctionBinding b : funcArr) {
+                bp.expose(b, model, data);
+            }
+        }
     }
     
     
