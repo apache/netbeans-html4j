@@ -54,7 +54,7 @@ public final class WebSocketTest {
     @KOTest public void connectUsingWebSocket() throws Throwable {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "{'firstName': 'Mitar', 'sex': $0}", 
+                JSONTest.class, "{'firstName': 'Mitar', 'sex': '$0' }", 
                 "application/javascript",
                 "protocol:ws"
             );

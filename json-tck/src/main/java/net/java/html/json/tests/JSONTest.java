@@ -364,7 +364,7 @@ public final class JSONTest {
             js.applyBindings();
             js.setFetched(null);
             
-            js.fetchArray("file:///unknown/url/to/query/xyz.txt");
+            js.fetchArray("http://127.0.0.1:54253/does/not/exist.txt");
         }
         
         
