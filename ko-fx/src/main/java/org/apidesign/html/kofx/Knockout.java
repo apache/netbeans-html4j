@@ -89,7 +89,6 @@ public final class Knockout {
         try {
             InvokeJS.bind(bindings, pb, prop, "getValue", pb.isReadOnly() ? null : "setValue", primitive, array);
             
-            ((JSObject)bindings).setMember("ko-fx.model", model);
             LOG.log(Level.FINE, "binding defined for {0}: {1}", new Object[]{prop, ((JSObject)bindings).getMember(prop)});
         } catch (Throwable ex) {
             LOG.log(Level.WARNING, "binding failed for {0} on {1}", new Object[]{prop, bindings});
