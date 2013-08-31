@@ -232,6 +232,12 @@ abstract class JsClassLoader extends ClassLoader {
                     "org/apidesign/html/boot/impl/FnUtils", "define", 
                     "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
                 );
+                super.visitInsn(Opcodes.DUP);
+                super.visitFieldInsn(
+                    Opcodes.PUTSTATIC, FindInClass.this.name, 
+                    "$$fn$$" + name + "_" + found, 
+                    "Lorg/apidesign/html/boot/spi/Fn;"
+                );
                 // end of Fn init
                 
                 super.visitLabel(ifNotNull);
