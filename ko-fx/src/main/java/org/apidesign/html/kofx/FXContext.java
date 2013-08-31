@@ -95,15 +95,12 @@ implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransf
     
     @Override
     public JSObject wrapModel(Object model) {
-        JSObject obj = (JSObject) Knockout.createBinding(model).koData();
-        return obj;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void bind(PropertyBinding b, Object model, JSObject data) {
-        final boolean isList = false;
-        final boolean isPrimitive = false;
-        Knockout.bind(data, model, b, isPrimitive, isList);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -113,7 +110,7 @@ implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransf
 
     @Override
     public void expose(FunctionBinding fb, Object model, JSObject d) {
-        Knockout.expose(d, fb);
+        throw new UnsupportedOperationException();
     }
 
     @Override
