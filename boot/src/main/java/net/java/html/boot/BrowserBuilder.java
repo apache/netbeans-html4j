@@ -198,20 +198,20 @@ public final class BrowserBuilder {
                             onLoad.run();
                         }
                         INIT: if (methodName != null) {
-                            Exception firstError = null;
+                            Throwable firstError = null;
                             if (methodArgs.length == 0) {
                                 try {
                                     Method m = newClazz.getMethod(methodName);
                                     m.invoke(null);
                                     break INIT;
-                                } catch (Exception ex) {
+                                } catch (Throwable ex) {
                                     firstError = ex;
                                 }
                             }
                             try {
                                 Method m = newClazz.getMethod(methodName, String[].class);
                                 m.invoke(m, (Object) methodArgs);
-                            } catch (Exception ex) {
+                            } catch (Throwable ex) {
                                 if (firstError != null) {
                                     LOG.log(Level.SEVERE, "Can't call " + methodName, firstError);
                                 }
