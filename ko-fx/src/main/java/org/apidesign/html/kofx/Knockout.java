@@ -129,7 +129,8 @@ public final class Knockout {
         
         @JavaScriptBody(args = { "value", "cnt " }, body =
                   "    var ret = {};"
-                + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); };"
+/*              + "    ret.toString = function() { return 'KObject' + cnt + ' value: ' + value + ' props: ' + Object.keys(this); }; " */
+                + "    ret['ko-fx.model'] = value;"
                 + "    return ret;"
         )
         static native Object create(Object value, int cnt);

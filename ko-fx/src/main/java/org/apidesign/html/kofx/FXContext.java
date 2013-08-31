@@ -80,7 +80,6 @@ implements Technology<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS>
     @Override
     public JSObject wrapModel(Object model) {
         JSObject obj = (JSObject) Knockout.createBinding(model).koData();
-        obj.setMember("ko-fx.model", model);
         return obj;
     }
 
