@@ -73,19 +73,25 @@ final class Knockout {
         
     @JavaScriptBody(
         javacall = true,
-        args = {"model", "propNames", "propReadOnly", "propArr", "funcNames", "funcArr"},
+        args = {"model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
         body
         = "var ret = {};\n"
         + "ret['ko-fx.model'] = model;\n"
-        + "function koComputed(name, readOnly, prop) {\n"
+        + "function koComputed(name, readOnly, value, prop) {\n"
+        + "  function realGetter() {\n"
+        + "    try {"
+        + "      var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();"
+        + "      return v;"
+        + "    } catch (e) {"
+        + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);"
+        + "    }"
+        + "  }\n"
+        + "  var activeGetter = function() { return value; };\n"
         + "  var bnd = {"
         + "    read: function() {"
-        + "      try {"
-        + "        var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();"
-        + "        return v;"
-        + "      } catch (e) {"
-        + "        alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);"
-        + "      }"
+        + "      var r = activeGetter();"
+        + "      activeGetter = realGetter;"
+        + "      return r;"
         + "    },"
         + "    owner: ret\n"
         + "  };\n"
@@ -97,7 +103,7 @@ final class Knockout {
         + "  ret[name] = ko.computed(bnd);"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
-        + "  koComputed(propNames[i], propReadOnly[i], propArr[i]);\n"
+        + "  koComputed(propNames[i], propReadOnly[i], propValues[i], propArr[i]);\n"
         + "}\n"
         + "function koExpose(name, func) {\n"
         + "  ret[name] = function(data, ev) {\n"
@@ -111,7 +117,7 @@ final class Knockout {
         )
     static native JSObject wrapModel(
         Object model,
-        String[] propNames, boolean[] propReadOnly, PropertyBinding[] propArr,
+        String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
         String[] funcNames, FunctionBinding[] funcArr
     );
 }

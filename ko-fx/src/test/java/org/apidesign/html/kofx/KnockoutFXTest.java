@@ -86,16 +86,22 @@ public final class KnockoutFXTest extends KnockoutTCK {
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
             Class<?> c = Class.forName(arr[i].getName(), true, l);
-            Class<? extends Annotation> koTest = 
-                c.getClassLoader().loadClass(KOTest.class.getName()).
-                asSubclass(Annotation.class);
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(koTest) != null) {
-                    res.add(new KOFx(m));
-                }
+            seekKOTests(c, res);
+        }
+        Class<?> c = Class.forName(LessCallbacksCheck.class.getName(), true, l);
+        seekKOTests(c, res);
+        return res.toArray();
+    }
+
+    private static void seekKOTests(Class<?> c, List<Object> res) throws SecurityException, ClassNotFoundException {
+        Class<? extends Annotation> koTest =
+            c.getClassLoader().loadClass(KOTest.class.getName()).
+            asSubclass(Annotation.class);
+        for (Method m : c.getMethods()) {
+            if (m.getAnnotation(koTest) != null) {
+                res.add(new KOFx(m));
             }
         }
-        return res.toArray();
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {

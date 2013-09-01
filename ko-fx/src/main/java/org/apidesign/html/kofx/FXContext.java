@@ -82,15 +82,21 @@ implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransf
     public JSObject wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
         String[] propNames = new String[propArr.length];
         boolean[] propReadOnly = new boolean[propArr.length];
+        Object[] propValues = new Object[propArr.length];
         for (int i = 0; i < propNames.length; i++) {
             propNames[i] = propArr[i].getPropertyName();
             propReadOnly[i] = propArr[i].isReadOnly();
+            propValues[i] = propArr[i].getValue();
         }
         String[] funcNames = new String[funcArr.length];
         for (int i = 0; i < funcNames.length; i++) {
             funcNames[i] = funcArr[i].getFunctionName();
         }
-        return Knockout.wrapModel(model, propNames, propReadOnly, propArr, funcNames, funcArr);
+        
+        return Knockout.wrapModel(model, 
+            propNames, propReadOnly, Knockout.toArray(propValues), propArr, 
+            funcNames, funcArr
+        );
     }
     
     @Override
