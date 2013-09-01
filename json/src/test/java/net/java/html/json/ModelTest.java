@@ -75,7 +75,16 @@ public class ModelTest {
         assertEquals(model.getNames().size(), 1, "One element");
     }
 
+    @Test public void arrayChangesNotNotifiedUntilInitied() {
+        model.getNames().add("Hello");
+        assertTrue(my.mutated.isEmpty(), "No change now " + my.mutated);
+        model.getNames().remove("Hello");
+        assertTrue(my.mutated.isEmpty(), "No change still " + my.mutated);
+        assertTrue(model.getNames().isEmpty(), "No empty");
+    }
+    
     @Test public void arrayChangesNotified() {
+        model.applyBindings();
         model.getNames().add("Hello");
         
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
@@ -215,6 +224,9 @@ public class ModelTest {
     }
 
     @Test public void changeInArray() {
+        model.getValues().add(10);
+        assertNull(model.getChangedProperty(), "No change before applyBindings");
+        model.applyBindings();
         model.getValues().add(10);
         assertEquals(model.getChangedProperty(), "values", "Something added into the array");
     }

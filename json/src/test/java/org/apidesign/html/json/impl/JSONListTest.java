@@ -70,8 +70,7 @@ public class JSONListTest implements Technology<Object> {
         p.setLastName("2");
         p.setSex(Sex.MALE);
         
-        People people = Models.bind(new People(), c);
-        people.getInfo().add(p);
+        People people = Models.bind(new People(p), c).applyBindings();
         assertEquals(people.getInfo().toString(), "[{\"firstName\":\"1\",\"lastName\":\"2\",\"sex\":\"MALE\"}]", "Converted to real JSON");
         
         PropertyBinding pb = bindings.get("info");
@@ -87,7 +86,7 @@ public class JSONListTest implements Technology<Object> {
     @Test public void testNicknames() {
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        People people = Models.bind(new People(), c);
+        People people = Models.bind(new People(), c).applyBindings();
         people.getNicknames().add("One");
         people.getNicknames().add("Two");
         
@@ -111,9 +110,9 @@ public class JSONListTest implements Technology<Object> {
         p.setLastName("2");
         p.setSex(Sex.MALE);
         
-        People people = Models.bind(new People(), c);
+        People people = Models.bind(new People(), c).applyBindings();
         people.getInfo().add(p);
-
+        
         Object real = WrapperObject.find(people.getInfo());
         assertEquals(real, this, "I am the model of the array");
     }
@@ -122,7 +121,7 @@ public class JSONListTest implements Technology<Object> {
         this.replaceArray = true;
         BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
         
-        People p = Models.bind(new People(), c);
+        People p = Models.bind(new People(), c).applyBindings();
         p.getAge().add(30);
         
         PropertyBinding pb = bindings.get("age");

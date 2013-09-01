@@ -32,10 +32,12 @@ import java.util.Iterator;
 public final class JSONList<T> extends ArrayList<T> {
     private final String name;
     private final String[] deps;
-    private Bindings model;
+    private Bindings[] model;
     private Runnable onchange;
 
-    public JSONList(String name, String... deps) {
+    public JSONList(Bindings[] model, String name, String... deps) {
+        assert model.length == 1;
+        this.model = model;
         this.name = name;
         this.deps = deps;
     }
@@ -44,21 +46,10 @@ public final class JSONList<T> extends ArrayList<T> {
         if (values == null || values.length == 0) {
             return;
         }
-        if (this.model != null || !isEmpty()) {
+        if (this.model[0] != null || !isEmpty()) {
             throw new IllegalStateException();
         }
         super.addAll(Arrays.asList(values));
-    }
-
-    public void assign(Bindings model) {
-        if (this.model == null && isEmpty()) {
-            this.model = model;
-            return;
-        }
-        if (this.model != model) {
-            this.model = model;
-            notifyChange();
-        }
     }
 
     public JSONList<T> onChange(Runnable r) {
@@ -157,7 +148,7 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     private void notifyChange() {
-        Bindings m = model;
+        Bindings m = model[0];
         if (m != null) {
             m.valueHasMutated(name);
             for (String dependant : deps) {
@@ -189,6 +180,6 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     final Object koData() {
-        return koData(this, model);
+        return koData(this, model[0]);
     }
 }

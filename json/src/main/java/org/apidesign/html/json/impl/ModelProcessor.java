@@ -193,7 +193,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private boolean locked;\n");
                 w.append("  private net.java.html.BrwsrCtx context;\n");
-                w.append("  private org.apidesign.html.json.impl.Bindings ko;\n");
+                w.append("  private org.apidesign.html.json.impl.Bindings[] ko = { null };\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
@@ -249,12 +249,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
-                w.append("    if (ko != null) return ko;\n");
-                w.append("    ko = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");
+                w.append("    if (ko[0] != null) return ko[0];\n");
+                w.append("    ko[0] = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");
                 {
                     w.append("    org.apidesign.html.json.spi.PropertyBinding[] propArr = {\n");
                     for (int i = 0; i < propsGetSet.size(); i += 5) {
-                        w.append("      ko.registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
+                        w.append("      ko[0].registerProperty(\"").append(propsGetSet.get(i)).append("\", this, new P(");
                         w.append((i / 5) + "), " + (propsGetSet.get(i + 2) == null) + "),\n");
                     }
                     w.append("    };\n");
@@ -262,13 +262,13 @@ public final class ModelProcessor extends AbstractProcessor {
                 {
                     w.append("    org.apidesign.html.json.spi.FunctionBinding[] funcArr = {\n");
                     for (int i = 0; i < functions.size(); i += 2) {
-                        w.append("      ko.registerFunction(\"").append(functions.get(i)).append("\", this, new P(");
+                        w.append("      ko[0].registerFunction(\"").append(functions.get(i)).append("\", this, new P(");
                         w.append((i / 2) + ")),\n");
                     }
                     w.append("    };\n");
                 }
-                w.append("    ko.finish(this, propArr, funcArr);\n");
-                w.append("    return ko;\n");
+                w.append("    ko[0].finish(this, propArr, funcArr);\n");
+                w.append("    return ko[0];\n");
                 w.append("  };\n");
                 w.append("  private static final class P implements org.apidesign.html.json.impl.SetAndGet<" + className + ">,\n");
                 w.append("  org.apidesign.html.json.impl.Callback<" + className + ">,\n");
@@ -442,7 +442,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String castTo;
             
             if (p.array()) {
-                w.write("  private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(\""
+                w.write("  private org.apidesign.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.apidesign.html.json.impl.JSONList<" + tn + ">(ko, \""
                     + p.name() + "\"");
                 Collection<String> dependants = deps.get(p.name());
                 if (dependants != null) {
@@ -468,7 +468,6 @@ public final class ModelProcessor extends AbstractProcessor {
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
                 w.write("    if (locked) throw new IllegalStateException();\n");
-                w.write("    prop_" + p.name() + ".assign(this.intKnckt());\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
             } else {
