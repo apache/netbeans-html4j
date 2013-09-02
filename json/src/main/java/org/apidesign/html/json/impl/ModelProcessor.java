@@ -413,8 +413,21 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    if (o == this) return true;\n");
                 w.write("    if (o instanceof org.apidesign.html.json.impl.WrapperObject) {\n");
                 w.write("      ((org.apidesign.html.json.impl.WrapperObject)o).setRealObject(intKnckt().koData());\n");
+                w.write("      return false;\n");
                 w.write("    }\n");
-                w.write("    return false;\n");
+                w.write("    if (!(o instanceof " + className + ")) return false;\n");
+                w.write("    " + className + " p = (" + className + ")o;\n");
+                for (Prprt p : props) {
+                    w.write("    if (!org.apidesign.html.json.impl.JSON.isSame(prop_" + p.name() + ", p.prop_" + p.name() + ")) return false;\n");
+                }
+                w.write("    return true;\n");
+                w.write("  }\n");
+                w.write("  public int hashCode() {\n");
+                w.write("    int h = " + className + ".class.getName().hashCode();\n");
+                for (Prprt p : props) {
+                    w.write("    h = org.apidesign.html.json.impl.JSON.hashPlus(prop_" + p.name() + ", h);\n");
+                }
+                w.write("    return h;\n");
                 w.write("  }\n");
                 w.write("}\n");
             } finally {

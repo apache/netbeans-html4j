@@ -69,6 +69,19 @@ public class ModelTest {
         assertEquals(16, model.getPowerValue());
     }
     
+    @Test public void equalsAndHashCode() {
+        Modelik m1 = new Modelik(10, 20, 30, "changed", "firstName");
+        Modelik m2 = new Modelik(10, 20, 30, "changed", "firstName");
+        
+        assertTrue(m1.equals(m2), "They are the same");
+        assertEquals(m1.hashCode(), m2.hashCode(), "Hashcode is the same");
+        
+        m1.setCount(33);
+        
+        assertFalse(m1.equals(m2), "No longer the same");
+        assertFalse(m1.hashCode() == m2.hashCode(), "No longe is hashcode is the same");
+    }
+    
     @Test public void arrayIsMutable() {
         assertEquals(model.getNames().size(), 0, "Is empty");
         model.getNames().add("Jarda");

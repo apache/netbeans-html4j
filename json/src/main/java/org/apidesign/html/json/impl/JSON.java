@@ -127,6 +127,10 @@ public final class JSON {
         }
         return a.equals(b);
     }
+    
+    public static int hashPlus(Object o, int h) {
+        return o == null ? h : h ^ o.hashCode();
+    }
 
     public static <T> T extractValue(Class<T> type, Object val) {
         if (Number.class.isAssignableFrom(type)) {
