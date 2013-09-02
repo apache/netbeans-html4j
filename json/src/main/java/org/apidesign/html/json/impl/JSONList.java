@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import net.java.html.BrwsrCtx;
 
 /**
  *
@@ -160,12 +161,24 @@ public final class JSONList<T> extends ArrayList<T> {
             }
         }
     }
+    
+    public void cloneAll(BrwsrCtx c, Collection<T> other) {
+        Boolean isModel = null;
+        for (T t : other) {
+            if (isModel == null) {
+                isModel = JSON.isModel(t.getClass());
+            }
+            if (isModel) {
+                add(JSON.bindTo(t, c));
+            } else {
+                add(t);
+            }
+        }
+    }
 
     @Override
     public JSONList clone() {
-        JSONList ko = (JSONList) super.clone();
-        ko.model = null;
-        return ko;
+        throw new UnsupportedOperationException();
     }
 
     static final Object koData(Collection<?> c, Bindings m) {
