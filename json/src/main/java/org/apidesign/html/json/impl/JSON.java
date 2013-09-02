@@ -109,6 +109,24 @@ public final class JSON {
         Object o = t.toModel(aClass, data);
         return aClass.cast(o);
     }
+    
+    public static boolean isSame(int a, int b) {
+        return a == b;
+    }
+    
+    public static boolean isSame(double a, double b) {
+        return a == b;
+    }
+    
+    public static boolean isSame(Object a, Object b) {
+        if (a == b) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.equals(b);
+    }
 
     public static <T> T extractValue(Class<T> type, Object val) {
         if (Number.class.isAssignableFrom(type)) {

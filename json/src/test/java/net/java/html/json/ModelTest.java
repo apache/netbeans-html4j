@@ -115,6 +115,7 @@ public class ModelTest {
     }
 
     @Test public void derivedArrayProp() {
+        model.applyBindings();
         model.setCount(10);
         
         List<String> arr = model.getRepeat();
@@ -133,6 +134,8 @@ public class ModelTest {
     }
     
     @Test public void derivedPropertiesAreNotified() {
+        model.applyBindings();
+        
         model.setValue(33);
         
         // not interested in change of this property

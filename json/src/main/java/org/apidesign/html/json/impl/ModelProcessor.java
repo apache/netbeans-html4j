@@ -479,8 +479,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
                 w.write("    if (locked) throw new IllegalStateException();\n");
+                w.write("    if (org.apidesign.html.json.impl.JSON.isSame(prop_" + p.name() + ", v)) return;\n");
                 w.write("    prop_" + p.name() + " = v;\n");
-                w.write("    org.apidesign.html.json.impl.Bindings b = intKnckt();\n");
+                w.write("    org.apidesign.html.json.impl.Bindings b = ko[0];\n");
                 w.write("    if (b != null) {\n");
                 w.write("      b.valueHasMutated(\"" + p.name() + "\");\n");
                 Collection<String> dependants = deps.get(p.name());

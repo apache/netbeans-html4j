@@ -52,7 +52,7 @@ public class MapModelTest {
     }
     
     @Test public void isThereABinding() throws Exception {
-        Person p = Models.bind(new Person(), c);
+        Person p = Models.bind(new Person(), c).applyBindings();
         p.setFirstName("Jarda");
         
         Map m = (Map)WrapperObject.find(p);
@@ -61,6 +61,32 @@ public class MapModelTest {
         assertEquals(v.getClass(), One.class, "It is instance of One");
         One o = (One)v;
         assertEquals(o.changes, 1, "One change so far");
+        assertFalse(o.pb.isReadOnly(), "Mutable property");
+        
+        assertEquals(o.get(), "Jarda", "Value should be in the map");
+        
+        o.set("Karle");
+        
+        assertEquals(p.getFirstName(), "Karle", "Model value updated");
+        assertEquals(o.changes, 2, "Snd change");
+    }
+    
+    
+    @Test public void dontNotifySameProperty() throws Exception {
+        Person p = Models.bind(new Person(), c);
+        p.setFirstName("Jirka");
+        
+        Map m = (Map)WrapperObject.find(p);
+        Object v = m.get("firstName");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No change so far the only one change happened before we connected");
+        
+        p.setFirstName(new String("Jirka"));
+        assertEquals(o.changes, 0, "No change so far, the value is the same");
+        
+        p.setFirstName("Jarda");
         assertFalse(o.pb.isReadOnly(), "Mutable property");
         
         assertEquals(o.get(), "Jarda", "Value should be in the map");
