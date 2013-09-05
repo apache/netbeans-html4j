@@ -92,7 +92,19 @@ abstract class JsClassLoader extends ClassLoader {
                 }
                 is.close();
                 is = null;
-                ClassReader cr = new ClassReader(arr);
+                ClassReader cr = new ClassReader(arr) {
+                    // to allow us to compile with -profile compact1 on 
+                    // JDK8 while processing the class as JDK7, the highest
+                    // class format asm 4.1 understands to
+                    @Override
+                    public short readShort(int index) {
+                        short s = super.readShort(index);
+                        if (index == 6 && s > Opcodes.V1_7) {
+                            return Opcodes.V1_7;
+                        }
+                        return s;
+                    }
+                };
                 FindInClass tst = new FindInClass(null);
                 cr.accept(tst, 0);
                 if (tst.found > 0) {
