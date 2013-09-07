@@ -214,40 +214,42 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.append("  };\n");
-                w.append("  public ").append(className).append("(");
-                Prprt firstArray = null;
-                String sep = "";
-                for (Prprt p : props) {
-                    if (p.array()) {
-                        if (firstArray == null) {
-                            firstArray = p;
+                if (props.length > 0) {
+                    w.append("  public ").append(className).append("(");
+                    Prprt firstArray = null;
+                    String sep = "";
+                    for (Prprt p : props) {
+                        if (p.array()) {
+                            if (firstArray == null) {
+                                firstArray = p;
+                            }
+                            continue;
                         }
-                        continue;
+                        String tn = typeName(e, p);
+                        w.write(sep);
+                        w.write(tn);
+                        w.write(" " + p.name());
+                        sep = ", ";
                     }
-                    String tn = typeName(e, p);
-                    w.write(sep);
-                    w.write(tn);
-                    w.write(" " + p.name());
-                    sep = ", ";
-                }
-                if (firstArray != null) {
-                    String tn = typeName(e, firstArray);
-                    w.write(sep);
-                    w.write(tn);
-                    w.write("... " + firstArray.name());
-                }
-                w.append(") {\n");
-                w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
-                for (Prprt p : props) {
-                    if (p.array()) {
-                        continue;
+                    if (firstArray != null) {
+                        String tn = typeName(e, firstArray);
+                        w.write(sep);
+                        w.write(tn);
+                        w.write("... " + firstArray.name());
                     }
-                    w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
+                    w.append(") {\n");
+                    w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
+                    for (Prprt p : props) {
+                        if (p.array()) {
+                            continue;
+                        }
+                        w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
+                    }
+                    if (firstArray != null) {
+                        w.write("    this.prop_" + firstArray.name() + ".init(" + firstArray.name() + ");\n");
+                    }
+                    w.append("  };\n");
                 }
-                if (firstArray != null) {
-                    w.write("    this.prop_" + firstArray.name() + ".init(" + firstArray.name() + ");\n");
-                }
-                w.append("  };\n");
                 w.append("  private org.apidesign.html.json.impl.Bindings intKnckt() {\n");
                 w.append("    if (ko[0] != null) return ko[0];\n");
                 w.append("    ko[0] = org.apidesign.html.json.impl.Bindings.apply(context, this);\n");
