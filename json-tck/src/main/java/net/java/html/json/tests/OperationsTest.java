@@ -47,7 +47,16 @@ public class OperationsTest {
             try {
                 // needs full JVM (not Bck2Brwsr VM) to run
                 Class<?> thread = Class.forName("java.lang.Thread");
+                Thread t = new Thread("Empty");
+                // following operations are supposed to generate SecurityException
+                // on bck2brwsr VM
+                t.setName("Different");
+                t.setDaemon(false);
+                t.interrupt();
+                t.start();
             } catch (ClassNotFoundException ex) {
+                return;
+            } catch (SecurityException ex) {
                 return;
             }
             
