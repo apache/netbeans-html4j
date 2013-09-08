@@ -1,79 +1,58 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!--
-    Copied from knockout.js Twitter example:
-    http://knockoutjs.com/examples/twitter.html
--->
-
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
     <head>
-        <title>Knockout in Java Twitter</title>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <style type="text/css">
+            @-webkit-keyframes spin {
+                0% { -webkit-transform: rotate(0deg); }
+                100% { -webkit-transform: rotate(360deg); }
+            }
+
+            .rotate {
+                -webkit-animation-name: spin;
+                -webkit-animation-duration: 3s;
+                -webkit-animation-iteration-count: infinite;
+                -webkit-animation-direction: alternate;
+            }
+
+            #scene {
+                position: relative;
+                top: 60px;
+                text-align: center;
+            }
+            
+            #words span {
+                border: 1px solid #ccc;
+                background: rgba(255,255,155,0.8);
+                text-align: center;
+                font-size: 30px;                
+                -webkit-box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
+                position: absolute;
+            }
+
+            #words span:nth-child(1) { left: 45%; top: 0px; }
+            #words span:nth-child(2) { left: 25%; top: 100px; }
+            #words span:nth-child(3) { left: 65%; top: 100px; }
+            #words span:nth-child(4) { left: 10%; top: 200px; }
+            #words span:nth-child(5) { left: 45%; top: 200px; }
+            #words span:nth-child(6) { left: 80%; top: 200px; }
+            
+        </style>
+
     </head>
     <body>
-        <link href='twitterExample.css' rel='Stylesheet' ></link>
-        
-        <style type='text/css'>
-           .liveExample select { height: 1.7em; }
-           .liveExample button { height: 2em; }
-        </style>
-        
-        
-        <h2>Knockout in Java Twitter</h2>
-        
-        <p>
-        This code is based on original 
-        <a href="http://knockoutjs.com/examples/twitter.html">knockout.js
-        Twitter example</a> and
-        uses almost unmodified HTML page. It just changes the model. The model
-        is written in Java language with the help of 
-        <a href="http://bck2brwsr.apidesign.org/javadoc/net.java.html.json/">
-            Knockout/Java binding library
-        </a>. The Java source code has about 180 lines and seems more 
-        dense and shorter than the original JavaScript model.
-        </p>
-        <p>
-        The project executes in real Java virtual
-        machine and renders using JavaFX's WebView.
-        </p>
-        
-        <div class='liveExample'>
-            <div class='configuration'>
-                <div class='listChooser'>
-                    <button data-bind='click: deleteList, enable: activeTweetersName'>Delete</button>
-                    <button data-bind='click: saveChanges, enable: hasUnsavedChanges'>Save</button> 
-                    <select data-bind='options: savedLists, optionsValue: "name", value: activeTweetersName'> </select>
-                </div>
+        <h1>Words Demo</h1>
+        <input data-bind="value: message, valueUpdate: 'afterkeydown'" size="80">
+        <br>
+        <button data-bind="enable: !on(), click: $root.turnOn">Start</button>
+        <button data-bind="enable: on, click: $root.turnOff">Stop</button>
 
-                <p>Currently viewing <span data-bind='text: activeTweetersCount'> </span> user(s):</p>
-                <div class='currentUsers' >
-                    <ul data-bind='foreach: activeTweeters'>
-                        <li>
-                            <button data-bind='click: $root.removeUser'>Remove</button>
-                            <div data-bind='text: $data'> </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <form data-bind='submit: addUser'>
-                    <label>Add user:</label>
-                    <input data-bind='value: userNameToAdd, valueUpdate: "keyup", css: { invalid: !userNameToAddIsValid() }' />
-                    <button data-bind='enable: userNameToAddIsValid' type='submit'>Add</button>
-                </form>
-            </div>
-            <div class='tweets'>
-                <div class='loadingIndicator' data-bind="visible: loading">Loading...</div>
-                <table data-bind='foreach: currentTweets' width='100%'>
-                    <tr>
-                        <td><img data-bind='attr: { src: profile_image_url }' /></td>
-                        <td>
-                            <a class='twitterUser' data-bind='attr: { href: userUrl }, text: from_user'> </a>
-                            <span data-bind='html: html'> </span>
-                            <div class='tweetInfo' data-bind='text: created_at'> </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+        <div id="scene">
+            <span id="words" data-bind="foreach: words">
+                <span data-bind="text: $data, css: { 'rotate' : $root.on } "></span>
+            </span>
         </div>
     </body>
 </html>
