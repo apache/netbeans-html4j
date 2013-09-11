@@ -66,6 +66,8 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class FXPresenter implements Fn.Presenter {
+    static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
+        
     static {
         try {
             try {
@@ -88,6 +90,8 @@ public final class FXPresenter implements Fn.Presenter {
     private List<String> scripts;
     private Runnable onLoad;
     private WebEngine engine;
+
+    private static int cnt;
     
     @Override
     public Fn defineFn(String code, String... names) {
@@ -103,9 +107,16 @@ public final class FXPresenter implements Fn.Presenter {
         sb.append(code);
         sb.append("};");
         sb.append("})()");
+    
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "defining function #{0}", ++cnt);
+            LOG.fine("-----");
+            LOG.fine(code);
+            LOG.fine("-----");
+        }
 
         JSObject x = (JSObject) engine.executeScript(sb.toString());
-        return new JSFn(x);
+        return new JSFn(x, cnt);
     }
 
     @Override
@@ -161,14 +172,20 @@ public final class FXPresenter implements Fn.Presenter {
 
     private static final class JSFn extends Fn {
         private final JSObject fn;
+        private static int call;
+        private final int id;
 
-        public JSFn(JSObject fn) {
+        public JSFn(JSObject fn, int id) {
             this.fn = fn;
+            this.id = id;
         }
         
         @Override
         public Object invoke(Object thiz, Object... args) throws Exception {
             try {
+                if (LOG.isLoggable(Level.FINE)) {
+                    LOG.log(Level.FINE, "calling {0} function #{1}", new Object[]{++call, id});
+                }
                 List<Object> all = new ArrayList<Object>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
                 all.addAll(Arrays.asList(args));
@@ -194,8 +211,6 @@ public final class FXPresenter implements Fn.Presenter {
 
         private BorderPane root;
 
-        private static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
-        
         public synchronized static WebView findWebView(final URL url, final FXPresenter onLoad) {
             if (INSTANCE == null) {
                 Executors.newFixedThreadPool(1).submit(new Runnable() {
