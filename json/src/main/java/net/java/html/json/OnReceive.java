@@ -73,7 +73,7 @@ import java.lang.annotation.Target;
  * Read the <a href="doc-files/websockets.html">tutorial</a> to see how.
  * 
  * @author Jaroslav Tulach <jtulach@netbeans.org>
- * @since 0.5
+ * @since 0.3
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
@@ -115,6 +115,9 @@ public @interface OnReceive {
      * <p>
      * When {@link #jsonp() JSONP} transport is requested, the method 
      * has to be <code>"GET"</code>.
+     * <p>
+     * Since version 0.5 one can specify "<a href="doc-files/websockets.html">WebSocket</a>"
+     * as the communication method.
      * 
      * @return name of the HTTP transfer method
      * @since 0.3
