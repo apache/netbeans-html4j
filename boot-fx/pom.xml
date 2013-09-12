@@ -21,6 +21,7 @@
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
                   <skip>false</skip>
+                  <subpackages>net.java.html.boot.fx</subpackages>
               </configuration>
           </plugin>
           <plugin>

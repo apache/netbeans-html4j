@@ -26,16 +26,34 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import net.java.html.boot.BrowserBuilder;
+import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.fx.AbstractFXPresenter;
 
-/**
+/** Utility methods for working with <em>JavaFX</em> <code>WebView</code>s.
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @since 0.6
  */
 public final class FXBrowsers {
     private FXBrowsers() {
     }
     
+    /** Enables the Java/JavaScript brige (that supports {@link JavaScriptBody} and co.)
+     * in the provided <code>webView</code>. This method returns 
+     * immediately. Once the support is active, it calls back specified
+     * method in <code>onPageLoad</code> class - the class can possibly be
+     * loaded by a different classloader (to enable replacement of
+     * methods with {@link JavaScriptBody} annotations with executable
+     * versions). The method <code>methodName</code> needs to be <code>public</code>
+     * (in a public class), <code>static</code> and take either no parameters
+     * or an array of {@link String}s.
+     * 
+     * @param webView the instance of Web View to tweak
+     * @param url the URL of the HTML page to load into the view
+     * @param onPageLoad callback class with method <code>methodName</code>
+     * @param methodName the method to call when the page is loaded
+     * @param args arguments to pass to the <code>methodName</code> method
+     */
     public static void load(
         final WebView webView, final URL url, 
         Class<?> onPageLoad, String methodName,
