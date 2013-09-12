@@ -67,9 +67,13 @@ import java.lang.annotation.Target;
  * </pre>
  * When the server returns <code>{ "firstName" : "John", "lastName" : "Smith" }</code>
  * the browser will show alert message <em>Adding John Smith!</em>.
+ * <p>
+ * One can use this method to communicate with the server
+ * via <a href="doc-files/websockets.html">WebSocket</a> protocol since version 0.6.
+ * Read the <a href="doc-files/websockets.html">tutorial</a> to see how.
  * 
  * @author Jaroslav Tulach <jtulach@netbeans.org>
- * @since 0.6
+ * @since 0.5
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
