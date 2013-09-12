@@ -145,7 +145,7 @@ public abstract class AbstractFXPresenter implements Fn.Presenter {
         }
 
         @Override
-        public Object handleInvoke(Object thiz, Object... args) throws Exception {
+        public Object invoke(Object thiz, Object... args) throws Exception {
             try {
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.log(Level.FINE, "calling {0} function #{1}", new Object[]{++call, id});

@@ -80,7 +80,7 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
                     final Object val = eng.eval(sb.toString());
                     return new Fn(this) {
                         @Override
-                        public Object handleInvoke(Object thiz, Object... args) throws Exception {
+                        public Object invoke(Object thiz, Object... args) throws Exception {
                             List<Object> all = new ArrayList<Object>(args.length + 1);
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
