@@ -76,18 +76,22 @@ public final class BrowserBuilder {
     private Runnable onLoad;
     private String methodName;
     private String[] methodArgs;
+    private final Object[] context;
     
-    private BrowserBuilder() {
+    private BrowserBuilder(Object[] context) {
+        this.context = context;
     }
 
     /** Entry method to obtain a new browser builder. Follow by calling 
      * its instance methods like {@link #loadClass(java.lang.Class)} and
      * {@link #loadPage(java.lang.String)}.
      * 
+     * @param context any instances that should be available to the builder -
+     *   implemenation dependant
      * @return new browser builder
      */
-    public static BrowserBuilder newBrowser() {
-        return new BrowserBuilder();
+    public static BrowserBuilder newBrowser(Object... context) {
+        return new BrowserBuilder(context);
     }
     
     /** The class to load when the browser is initialized. This class
@@ -149,7 +153,6 @@ public final class BrowserBuilder {
             throw new NullPointerException("Need to specify resource via loadPage method");
         }
         
-        FImpl impl = new FImpl(clazz.getClassLoader());
         URL url = null;
         MalformedURLException mal = null;
         try {
@@ -181,52 +184,79 @@ public final class BrowserBuilder {
             }
             throw ise;
         }
+        
+        Fn.Presenter dfnr = null;
+        for (Object o : context) {
+            if (o instanceof Fn.Presenter) {
+                dfnr = (Fn.Presenter)o;
+                break;
+            }
+        }
 
-        for (Fn.Presenter dfnr : ServiceLoader.load(Fn.Presenter.class)) {
-            final ClassLoader loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+        if (dfnr == null) for (Fn.Presenter o : ServiceLoader.load(Fn.Presenter.class)) {
+            dfnr = o;
+            break;
+        }
+        
+        if (dfnr == null) {
+            throw new IllegalStateException("Can't find any Fn.Presenter");
+        }
+        
+        final ClassLoader loader;
+        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
+            loader = clazz.getClassLoader();
+        } else {
+            FImpl impl = new FImpl(clazz.getClassLoader());
+            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+        }
 
-            class OnPageLoad implements Runnable {
-                @Override
-                public void run() {
-                    try {
-                        Thread.currentThread().setContextClassLoader(loader);
-                        Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
-                        if (browserClass != null) {
-                            browserClass[0] = newClazz;
-                        }
-                        if (onLoad != null) {
-                            onLoad.run();
-                        }
-                        INIT: if (methodName != null) {
-                            Throwable firstError = null;
-                            if (methodArgs.length == 0) {
-                                try {
-                                    Method m = newClazz.getMethod(methodName);
-                                    m.invoke(null);
-                                    break INIT;
-                                } catch (Throwable ex) {
-                                    firstError = ex;
-                                }
-                            }
-                            try {
-                                Method m = newClazz.getMethod(methodName, String[].class);
-                                m.invoke(m, (Object) methodArgs);
-                            } catch (Throwable ex) {
-                                if (firstError != null) {
-                                    LOG.log(Level.SEVERE, "Can't call " + methodName, firstError);
-                                }
-                                LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
-                            }
-                        }
-                    } catch (ClassNotFoundException ex) {
-                        LOG.log(Level.SEVERE, "Can't load " + clazz.getName(), ex);
+        final Fn.Presenter currentP = dfnr;
+        class OnPageLoad implements Runnable {
+            @Override
+            public void run() {
+                try {
+                    Thread.currentThread().setContextClassLoader(loader);
+                    Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
+                    if (browserClass != null) {
+                        browserClass[0] = newClazz;
                     }
+                    if (onLoad != null) {
+                        onLoad.run();
+                    }
+                    INIT: if (methodName != null) {
+                        Throwable firstError = null;
+                        if (methodArgs.length == 0) {
+                            try {
+                                Method m = newClazz.getMethod(methodName);
+                                FnUtils.currentPresenter(currentP);
+                                m.invoke(null);
+                                break INIT;
+                            } catch (Throwable ex) {
+                                firstError = ex;
+                            } finally {
+                                FnUtils.currentPresenter(null);
+                            }
+                        }
+                        try {
+                            Method m = newClazz.getMethod(methodName, String[].class);
+                            FnUtils.currentPresenter(currentP);
+                            m.invoke(m, (Object) methodArgs);
+                        } catch (Throwable ex) {
+                            if (firstError != null) {
+                                LOG.log(Level.SEVERE, "Can't call " + methodName, firstError);
+                            }
+                            LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
+                        } finally {
+                            FnUtils.currentPresenter(null);
+                        }
+                    }
+                } catch (ClassNotFoundException ex) {
+                    LOG.log(Level.SEVERE, "Can't load " + clazz.getName(), ex);
                 }
             }
-            dfnr.displayPage(url, new OnPageLoad());
-            return;
         }
-        throw new IllegalStateException("Can't find any Fn.Definer");
+        dfnr.displayPage(url, new OnPageLoad());
+        return;
     }
 
     private static final class FImpl implements FindResources {

@@ -219,8 +219,18 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             StringBuilder source = new StringBuilder();
             source.append("package ").append(pkgName).append(";\n");
             source.append("public final class $JsCallbacks$ {\n");
-            source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$();\n");
-            source.append("  private $JsCallbacks$() {}\n");
+            source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
+            source.append("  private final org.apidesign.html.boot.spi.Fn.Presenter p;\n");
+            source.append("  private $JsCallbacks$ last;\n");
+            source.append("  private $JsCallbacks$(org.apidesign.html.boot.spi.Fn.Presenter p) {\n");
+            source.append("    this.p = p;\n");
+            source.append("  }\n");
+            source.append("  final $JsCallbacks$ current() {\n");
+            source.append("    org.apidesign.html.boot.spi.Fn.Presenter now = org.apidesign.html.boot.impl.FnUtils.currentPresenter();\n");
+            source.append("    if (now == p) return this;\n");
+            source.append("    if (last != null && now == last.p) return last;\n");
+            source.append("    return last = new $JsCallbacks$(now);\n");
+            source.append("  }\n");
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();
@@ -251,6 +261,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     sep = ",";
                 }
                 source.append(" {\n");
+                source.append("    org.apidesign.html.boot.spi.Fn.Presenter $$prev = org.apidesign.html.boot.impl.FnUtils.currentPresenter(p); try { \n");
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
                     source.append("return ");
@@ -274,6 +285,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 if (m.getReturnType().getKind() == TypeKind.VOID) {
                     source.append("    return null;\n");
                 }
+                source.append("    } finally { org.apidesign.html.boot.impl.FnUtils.currentPresenter($$prev); }\n");
                 source.append("  }\n");
             }
             source.append("}\n");

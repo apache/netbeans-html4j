@@ -29,33 +29,14 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import net.java.html.boot.BrowserBuilder;
 import netscape.javascript.JSObject;
 import org.apidesign.html.boot.spi.Fn;
-import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 
 /** This is an implementation class, use {@link BrowserBuilder} API. Just
@@ -65,9 +46,7 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service = Fn.Presenter.class)
-public final class FXPresenter implements Fn.Presenter {
-    static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
-        
+public final class FXPresenter extends AbstractFXPresenter {
     static {
         try {
             try {
@@ -86,249 +65,12 @@ public final class FXPresenter implements Fn.Presenter {
             throw new LinkageError("Can't add jfxrt.jar on the classpath", ex);
         }
     }
-    
-    private List<String> scripts;
-    private Runnable onLoad;
-    private WebEngine engine;
 
-    private static int cnt;
-    
-    @Override
-    public Fn defineFn(String code, String... names) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("(function() {");
-        sb.append("  return function(");
-        String sep = "";
-        for (String n : names) {
-            sb.append(sep).append(n);
-            sep = ",";
-        }
-        sb.append(") {\n");
-        sb.append(code);
-        sb.append("};");
-        sb.append("})()");
-    
-        if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, "defining function #{0}", ++cnt);
-            LOG.fine("-----");
-            LOG.fine(code);
-            LOG.fine("-----");
-        }
-
-        JSObject x = (JSObject) engine.executeScript(sb.toString());
-        return new JSFn(x, cnt);
-    }
-
-    @Override
-    public void loadScript(Reader code) throws Exception {
-        BufferedReader r = new BufferedReader(code);
-        StringBuilder sb = new StringBuilder();
-        for (;;) {
-            String l = r.readLine();
-            if (l == null) {
-                break;
-            }
-            sb.append(l).append('\n');
-        }
-        final String script = sb.toString();
-        if (scripts != null) {
-            scripts.add(script);
-        }
-        engine.executeScript(script);
-    }
-    
-    final void onPageLoad() {
-        if (scripts != null) {
-            for (String s : scripts) {
-                engine.executeScript(s);
-            }
-        }
-        onLoad.run();
-    }
-
-    @Override
-    public void displayPage(final URL resource, final Runnable onLoad) {
-        this.onLoad = onLoad;
-        final WebView view = FXBrwsr.findWebView(resource, this); 
-        this.engine = view.getEngine();
-        try {
-            if (FXInspect.initialize(engine)) {
-                scripts = new ArrayList<String>();
-            }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if (scripts != null) {
-                    view.setContextMenuEnabled(true);
-                }
-                engine.load(resource.toExternalForm());
-            }
-        });
+    protected void waitFinished() {
         FXBrwsr.waitFinished();
     }
 
-    private static final class JSFn extends Fn {
-        private final JSObject fn;
-        private static int call;
-        private final int id;
-
-        public JSFn(JSObject fn, int id) {
-            this.fn = fn;
-            this.id = id;
-        }
-        
-        @Override
-        public Object invoke(Object thiz, Object... args) throws Exception {
-            try {
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.log(Level.FINE, "calling {0} function #{1}", new Object[]{++call, id});
-                }
-                List<Object> all = new ArrayList<Object>(args.length + 1);
-                all.add(thiz == null ? fn : thiz);
-                all.addAll(Arrays.asList(args));
-                Object ret = fn.call("call", all.toArray()); // NOI18N
-                return ret == fn ? null : ret;
-            } catch (Error t) {
-                t.printStackTrace();
-                throw t;
-            } catch (Exception t) {
-                t.printStackTrace();
-                throw t;
-            }
-        }
+    protected WebView findView(final URL resource) {
+        return FXBrwsr.findWebView(resource, this);
     }
-
-    /** This is an implementation class, use {@link BrowserBuilder} API. Just
-     * include this JAR on classpath and the {@link BrowserBuilder} API will find
-     * this implementation automatically.
-     */
-    public static class FXBrwsr extends Application {
-        private static FXBrwsr INSTANCE;
-        private static final CountDownLatch FINISHED = new CountDownLatch(1);
-
-        private BorderPane root;
-
-        public synchronized static WebView findWebView(final URL url, final FXPresenter onLoad) {
-            if (INSTANCE == null) {
-                Executors.newFixedThreadPool(1).submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            FXBrwsr.launch(FXBrwsr.class);
-                        } catch (Throwable ex) {
-                            ex.printStackTrace();
-                        } finally {
-                            FINISHED.countDown();
-                        }
-                    }
-                });
-            }
-            while (INSTANCE == null) {
-                try {
-                    FXBrwsr.class.wait();
-                } catch (InterruptedException ex) {
-                    // wait more
-                }
-            }
-            if (!Platform.isFxApplicationThread()) {
-                final WebView[] arr = { null };
-                final CountDownLatch waitForResult = new CountDownLatch(1);
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        arr[0] = INSTANCE.newView(url, onLoad);
-                        waitForResult.countDown();
-                    }
-                });
-                for (;;) {
-                    try {
-                        waitForResult.await();
-                        break;
-                    } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                }
-                return arr[0];
-            } else {
-                return INSTANCE.newView(url, onLoad);
-            }
-        }
-
-        @Override
-        public void start(Stage primaryStage) throws Exception {
-            synchronized (FXBrwsr.class) {
-                INSTANCE = this;
-                FXBrwsr.class.notifyAll();
-            }
-            BorderPane r = new BorderPane();
-            Scene scene = new Scene(r, 800, 600);
-            primaryStage.setScene(scene);
-            primaryStage.show();
-            this.root = r;
-        }
-
-        private WebView newView(final URL url, final FXPresenter onLoad) {
-            final WebView view = new WebView();
-            view.setContextMenuEnabled(false);
-            view.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
-                @Override
-                public void handle(WebEvent<String> t) {
-                    final Stage dialogStage = new Stage();
-                    dialogStage.initModality(Modality.WINDOW_MODAL);
-                    dialogStage.setTitle("Warning");
-                    final Button button = new Button("Close");
-                    final Text text = new Text(t.getData());
-
-                    VBox box = new VBox();
-                    box.setAlignment(Pos.CENTER);
-                    box.setSpacing(10);
-                    box.setPadding(new Insets(10));
-                    box.getChildren().addAll(text, button);
-
-                    dialogStage.setScene(new Scene(box));
-
-                    button.setCancelButton(true);
-                    button.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent t) {
-                            dialogStage.close();
-                        }
-                    });
-
-                    dialogStage.centerOnScreen();
-                    dialogStage.showAndWait();
-                }
-            });
-            root.setCenter(view);
-
-            final Worker<Void> w = view.getEngine().getLoadWorker();
-            w.stateProperty().addListener(new ChangeListener<Worker.State>() {
-                @Override
-                public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
-                    if (newState.equals(Worker.State.SUCCEEDED)) {
-                        onLoad.onPageLoad();
-                    }
-                    if (newState.equals(Worker.State.FAILED)) {
-                        throw new IllegalStateException("Failed to load " + url);
-                    }
-                }
-            });
-            return view;
-        }
-
-        private static void waitFinished() {
-            for (;;) {
-                try {
-                    FINISHED.await();
-                    break;
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-        }
-
-    }    
 }

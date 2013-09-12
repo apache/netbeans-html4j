@@ -73,6 +73,9 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.equals(Fn.class.getName())) {
             return Fn.class;
         }
+        if (name.equals(Fn.Presenter.class.getName())) {
+            return Fn.Presenter.class;
+        }
         if (name.equals(FnUtils.class.getName())) {
             return FnUtils.class;
         }
@@ -221,8 +224,13 @@ abstract class JsClassLoader extends ClassLoader {
                     "Lorg/apidesign/html/boot/spi/Fn;"
                 );
                 super.visitInsn(Opcodes.DUP);
+                super.visitMethodInsn(
+                    Opcodes.INVOKESTATIC, 
+                    "org/apidesign/html/boot/impl/FnUtils", "isValid", 
+                    "(Lorg/apidesign/html/boot/spi/Fn;)Z"
+                );
                 Label ifNotNull = new Label();
-                super.visitJumpInsn(Opcodes.IFNONNULL, ifNotNull);
+                super.visitJumpInsn(Opcodes.IFNE, ifNotNull);
                 
                 // init Fn
                 super.visitInsn(Opcodes.POP);
@@ -346,6 +354,7 @@ abstract class JsClassLoader extends ClassLoader {
                     int lastSlash = FindInClass.this.name.lastIndexOf('/');
                     String jsCallbacks = FindInClass.this.name.substring(0, lastSlash + 1) + "$JsCallbacks$";
                     FindInMethod.super.visitFieldInsn(Opcodes.GETSTATIC, jsCallbacks, "VM", "L" + jsCallbacks + ";");
+                    FindInMethod.super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, jsCallbacks, "current", "()L" + jsCallbacks + ";");
                     FindInMethod.super.visitInsn(Opcodes.AASTORE);
                 }
                 

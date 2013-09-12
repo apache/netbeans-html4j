@@ -23,6 +23,8 @@ package org.apidesign.html.kofx;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
+import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.annotations.Test;
 
@@ -31,12 +33,14 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class KOFx implements ITest, Runnable {
+    private final Fn.Presenter p;
     private final Method m;
     private Object result;
     private Object inst;
     private int count;
 
-    KOFx(Method m) {
+    KOFx(Fn.Presenter p, Method m) {
+        this.p = p;
         this.m = m;
     }
 
@@ -63,6 +67,7 @@ public final class KOFx implements ITest, Runnable {
     public synchronized void run() {
         boolean notify = true;
         try {
+            FnUtils.currentPresenter(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -86,6 +91,7 @@ public final class KOFx implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
+            FnUtils.currentPresenter(null);
         }
     }
     

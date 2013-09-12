@@ -34,12 +34,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public class FnTest extends JsClassLoaderBase {
+    private static Fn.Presenter presenter;
     
     public FnTest() {
     }
@@ -79,9 +81,9 @@ public class FnTest extends JsClassLoaderBase {
                 sb.append("})()");
                 try {
                     final Object val = eng.eval(sb.toString());
-                    return new Fn() {
+                    return new Fn(this) {
                         @Override
-                        public Object invoke(Object thiz, Object... args) throws Exception {
+                        public Object handleInvoke(Object thiz, Object... args) throws Exception {
                             List<Object> all = new ArrayList<Object>(args.length + 1);
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
@@ -111,9 +113,12 @@ public class FnTest extends JsClassLoaderBase {
         }
         Impl impl = new Impl();
         ClassLoader loader = FnUtils.newLoader(impl, impl, parent);
-       
+        presenter = impl;
         
         methodClass = loader.loadClass(JsMethods.class.getName());
     }
-    
+
+    @BeforeMethod public void initPresenter() {
+        FnUtils.currentPresenter(presenter);
+    }
 }

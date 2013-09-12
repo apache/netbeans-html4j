@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
+import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
@@ -44,33 +46,26 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@ServiceProvider(service = Contexts.Provider.class)
 public final class FXContext
-implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransfer<LoadWS> {
+implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
+    private final Fn.Presenter browserContext;
+
+    public FXContext(Fn.Presenter browserContext) {
+        this.browserContext = browserContext;
+    }
     
     @JavaScriptBody(args = {}, body = "return true;")
     private static boolean isJavaScriptEnabledJs() {
         return false;
     }
     
-    private static boolean isJavaScriptEnabled() {
+    static boolean isJavaScriptEnabled() {
         if (javaScriptEnabled != null) {
             return javaScriptEnabled;
         }
         return javaScriptEnabled = isJavaScriptEnabledJs();
-    }
-
-    @Override
-    public void fillContext(Contexts.Builder context, Class<?> requestor) {
-        if (isJavaScriptEnabled()) {
-            context.register(Technology.class, this, 100);
-            context.register(Transfer.class, this, 100);
-            if (areWebSocketsSupported()) {
-                context.register(WSTransfer.class, this, 100);
-            }
-        }
     }
 
     final boolean areWebSocketsSupported() {
@@ -153,11 +148,24 @@ implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransf
     }
 
     @Override
-    public void runSafe(Runnable r) {
+    public void runSafe(final Runnable r) {
+        class Wrap implements Runnable {
+            @Override public void run() {
+                Fn.Presenter prev = FnUtils.currentPresenter(browserContext);
+                try {
+                    r.run();
+                } finally {
+                    FnUtils.currentPresenter(prev);
+                }
+                
+            }
+        }
+        Wrap w = new Wrap();
+        
         if (Platform.isFxApplicationThread()) {
-            r.run();
+            w.run();
         } else {
-            Platform.runLater(r);
+            Platform.runLater(w);
         }
     }
 
@@ -174,5 +182,21 @@ implements Technology.BatchInit<JSObject>, Transfer, Contexts.Provider, WSTransf
     @Override
     public void close(LoadWS socket) {
         socket.close();
+    }
+    
+    @ServiceProvider(service = Contexts.Provider.class)
+    public static final class Prvdr implements Contexts.Provider {
+        @Override
+        public void fillContext(Contexts.Builder context, Class<?> requestor) {
+            if (isJavaScriptEnabled()) {
+                FXContext c = new FXContext(FnUtils.currentPresenter());
+                
+                context.register(Technology.class, c, 100);
+                context.register(Transfer.class, c, 100);
+                if (c.areWebSocketsSupported()) {
+                    context.register(WSTransfer.class, c, 100);
+                }
+            }
+        }
     }
 }

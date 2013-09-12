@@ -36,6 +36,8 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
@@ -56,6 +58,7 @@ import static org.testng.Assert.*;
 @ServiceProvider(service = KnockoutTCK.class)
 public final class TyrusKnockoutTest extends KnockoutTCK {
     private static Class<?> browserClass;
+    private static Fn.Presenter browserContext;
     
     public TyrusKnockoutTest() {
     }
@@ -92,7 +95,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
                 asSubclass(Annotation.class);
             for (Method m : c.getMethods()) {
                 if (m.getAnnotation(koTest) != null) {
-                    res.add(new TyrusFX(m));
+                    res.add(new TyrusFX(browserContext, m));
                 }
             }
         }
@@ -108,6 +111,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
+        browserContext = FnUtils.currentPresenter();
         TyrusKnockoutTest.class.notifyAll();
     }
     
@@ -115,11 +119,12 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
         m.invoke(null, TyrusKnockoutTest.class);
+        browserContext = FnUtils.currentPresenter();
     }
     
     @Override
     public BrwsrCtx createContext() {
-        FXContext fx = new FXContext();
+        FXContext fx = new FXContext(browserContext);
         TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx, 10).

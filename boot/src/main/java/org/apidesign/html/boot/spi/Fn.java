@@ -22,13 +22,28 @@ package org.apidesign.html.boot.spi;
 
 import java.io.Reader;
 import java.net.URL;
+import org.apidesign.html.boot.impl.FnUtils;
 
 /**
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 public abstract class Fn {
-    public abstract Object invoke(Object thiz, Object... args) throws Exception;
+    private final Presenter presenter;
+    
+    protected Fn(Presenter presenter) {
+        this.presenter = presenter;
+    }
+    
+    public final boolean isValid() {
+        return FnUtils.currentPresenter() == presenter;
+    }
+    
+    public final Object invoke(Object thiz, Object... args) throws Exception {
+        return handleInvoke(thiz, args);
+    }
+    
+    protected abstract Object handleInvoke(Object thiz, Object... args) throws Exception;
     
     public interface Presenter {
         public Fn defineFn(String code, String... names);

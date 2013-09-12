@@ -34,12 +34,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 /**
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 public class JsClassLoaderTest extends JsClassLoaderBase{
+    private static Fn.Presenter loader;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -49,13 +51,18 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
         final URL my = JsClassLoaderTest.class.getProtectionDomain().getCodeSource().getLocation();
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
-        JsClassLoader loader = new JsClassLoader(parent) {
+        class MyCL extends JsClassLoader implements Fn.Presenter {
+
+            public MyCL(ClassLoader parent) {
+                super(parent);
+            }
+            
             @Override
             protected URL findResource(String name) {
                 return ul.getResource(name);
             }
             @Override
-            protected Fn defineFn(String code, String... names) {
+            public Fn defineFn(String code, String... names) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(function() {");
                 sb.append("return function(");
@@ -71,9 +78,9 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
                 sb.append("})()");
                 try {
                     final Object val = eng.eval(sb.toString());
-                    return new Fn() {
+                    return new Fn(this) {
                         @Override
-                        public Object invoke(Object thiz, Object... args) throws Exception {
+                        public Object handleInvoke(Object thiz, Object... args) throws Exception {
                             List<Object> all = new ArrayList<Object>(args.length + 1);
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
@@ -93,16 +100,27 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
 
             @Override
             protected Enumeration<URL> findResources(String name) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException();
             }
 
             @Override
-            protected void loadScript(Reader code) throws ScriptException {
+            public void loadScript(Reader code) throws ScriptException {
                 eng.eval(code);
+            }
+
+            @Override
+            public void displayPage(URL page, Runnable onPageLoad) {
+                throw new UnsupportedOperationException();
             }
         };
         
-        methodClass = loader.loadClass(JsMethods.class.getName());
+        MyCL l = new MyCL(parent);
+        methodClass = l.loadClass(JsMethods.class.getName());
+        loader = l;
+    }
+    
+    @BeforeMethod public void initPresenter() {
+        FnUtils.currentPresenter(loader);
     }
 
     @AfterClass

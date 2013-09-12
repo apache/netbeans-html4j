@@ -35,12 +35,21 @@ import org.apidesign.html.boot.spi.Fn;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class FnUtils {
+    private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
+    
     private FnUtils() {
     }
-
+    
     public static Fn define(Class<?> caller, String code, String... names) {
-        JsClassLoader cl = (JsClassLoader)caller.getClassLoader();
-        return cl.defineFn(code, names);
+        return currentPresenter().defineFn(code, names);
+    }
+    
+    public static boolean isJavaScriptCapable(ClassLoader l) {
+        return l instanceof JsClassLoader;
+    }
+    
+    public static boolean isValid(Fn fn) {
+        return fn != null && fn.isValid();
     }
 
     public static ClassLoader newLoader(final FindResources f, final Fn.Presenter d, ClassLoader parent) {
@@ -110,5 +119,19 @@ public final class FnUtils {
         } catch (Exception ex) {
             throw new IllegalStateException("Can't execute " + resource, ex);
         } 
+    }
+
+    public static Fn.Presenter currentPresenter() {
+        Fn.Presenter p = CURRENT.get();
+        if (p == null) {
+            throw new IllegalStateException("No current WebView context around!");
+        }
+        return p;
+    }
+    
+    public static Fn.Presenter currentPresenter(Fn.Presenter p) {
+        Fn.Presenter prev = CURRENT.get();
+        CURRENT.set(p);
+        return prev;
     }
 }
