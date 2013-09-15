@@ -60,10 +60,10 @@ public abstract class AbstractFXPresenter implements Fn.Presenter {
         sb.append("};");
         sb.append("})()");
         if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, "defining function #{0}", ++cnt);
-            LOG.fine("-----");
-            LOG.fine(code);
-            LOG.fine("-----");
+            LOG.log(Level.FINE, 
+                "defining function #{0}:\n{1}\n", 
+                new Object[] { ++cnt, code }
+            );
         }
         JSObject x = (JSObject) engine.executeScript(sb.toString());
         return new JSFn(this, x, cnt);
