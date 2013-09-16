@@ -296,7 +296,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 ).openWriter();
                 w.write(source.toString());
                 w.close();
-                return;
             } catch (IOException ex) {
                 processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR, "Can't write " + srcName + ": " + ex.getMessage()
