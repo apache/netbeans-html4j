@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.apidesign</groupId>
     <artifactId>html</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.6</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>ko-ws-tyrus</artifactId>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.6</version>
   <name>Tyrus Based WebSockets</name>
   <url>http://maven.apache.org</url>
     <build>

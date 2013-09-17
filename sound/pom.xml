@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.apidesign</groupId>
         <artifactId>html</artifactId>
-        <version>0.6-SNAPSHOT</version>
+        <version>0.6</version>
     </parent>
     <groupId>org.apidesign.html</groupId>
     <artifactId>net.java.html.sound</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.6</version>
     <name>Sound API via HTML</name>
     <url>http://maven.apache.org</url>
     <properties>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.apidesign.html</groupId>
             <artifactId>net.java.html.boot</artifactId>
-            <version>0.6-SNAPSHOT</version>
+            <version>0.6</version>
             <type>jar</type>
         </dependency>
         <dependency>
