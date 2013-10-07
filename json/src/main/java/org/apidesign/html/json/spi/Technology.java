@@ -21,6 +21,7 @@
 package org.apidesign.html.json.spi;
 
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 
 /** An implementation of a binding between model classes (see {@link Model})
  * and particular technology like <a href="http://knockoutjs.com">knockout.js</a>
@@ -88,7 +89,27 @@ public interface Technology<Data> {
      */
     public void runSafe(Runnable r);
 
+    /** For certain rendering technologies it may be more efficient to register
+     * property and function bindings for one instance of the model at once, 
+     * rather then doing it incrementally via 
+     * {@link Technology#expose(org.apidesign.html.json.spi.FunctionBinding, java.lang.Object, java.lang.Object) }
+     * and 
+     * {@link Technology#bind(org.apidesign.html.json.spi.PropertyBinding, java.lang.Object, java.lang.Object) }.
+     * In such case implement the {@link #wrapModel(java.lang.Object, org.apidesign.html.json.spi.PropertyBinding[], org.apidesign.html.json.spi.FunctionBinding[]) }
+     * method of this interface and it will be called instead of the 
+     * previous two ones.
+     * 
+     * @@since 0.6
+     */
     public static interface BatchInit<D> extends Technology<D> {
+        /** Wrap the given model into redering technology appropriate object 
+         * <code>D</code> and expose given properties and functions on it.
+         * 
+         * @param model the {@link Models#isModel(java.lang.Class) model} in Java
+         * @param propArr array of property bindings to expose
+         * @param funcArr array of functions to expose
+         * @return appropriate wrapper around the model
+         */
         public D wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr);
     }
 }
