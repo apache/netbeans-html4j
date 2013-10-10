@@ -139,10 +139,50 @@ public final class JSON {
         if (Boolean.class == type) {
             val = boolValue(val);
         }
+        if (String.class == type) {
+            val = stringValue(val);
+        }
+        if (Character.class == type) {
+            val = charValue(val);
+        }
+        if (Integer.class == type) {
+            val = val instanceof Number ? ((Number)val).intValue() : 0;
+        }
+        if (Long.class == type) {
+            val = val instanceof Number  ? ((Number)val).longValue() : 0;
+        }
+        if (Short.class == type) {
+            val = val instanceof Number ? ((Number)val).shortValue() : 0;
+        }
+        if (Byte.class == type) {
+            val = val instanceof Number ? ((Number)val).byteValue() : 0;
+        }        
+        if (Double.class == type) {
+            val = val instanceof Number ? ((Number)val).doubleValue() : Double.NaN;
+        }
+        if (Float.class == type) {
+            val = val instanceof Number ? ((Number)val).floatValue() : Float.NaN;
+        }
         return type.cast(val);
     }
     
+    protected static boolean isNumeric(Object val) {
+        return ((val instanceof Integer) || (val instanceof Long) || (val instanceof Short) || (val instanceof Byte));
+    }
+    
     public static String stringValue(Object val) {
+        if (val instanceof Boolean) {
+            return ((Boolean)val ? "true" : "false");
+        }
+        if (isNumeric(val)) {
+            return Long.toString(((Number)val).longValue());
+        }
+        if (val instanceof Float) {
+            return Float.toString((Float)val);
+        }
+        if (val instanceof Double) {
+            return Double.toString((Double)val);
+        }
         return (String)val;
     }
 
@@ -154,10 +194,23 @@ public final class JSON {
                 return Double.NaN;
             }
         }
+        if (val instanceof Boolean) {
+            return (Boolean)val ? 1 : 0;
+        }
         return (Number)val;
     }
 
     public static Character charValue(Object val) {
+        if (val instanceof Number) {
+            return Character.toChars(numberValue(val).intValue())[0];
+        }
+        if (val instanceof Boolean) {
+            return (Boolean)val ? (char)1 : (char)0;
+        }
+        if (val instanceof String) {
+            String s = (String)val;
+            return s.isEmpty() ? (char)0 : s.charAt(0);
+        }
         return (Character)val;
     }
     
@@ -165,6 +218,10 @@ public final class JSON {
         if (val instanceof String) {
             return Boolean.parseBoolean((String)val);
         }
+        if (val instanceof Number) {
+            return numberValue(val).doubleValue() != 0.0;
+        }
+    
         return Boolean.TRUE.equals(val);
     }
     
