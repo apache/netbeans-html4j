@@ -26,9 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
-import static org.testng.Assert.*;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
@@ -76,7 +75,7 @@ public class BootstrapTest {
     
     public static synchronized void ready(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserPresenter = FnUtils.currentPresenter();
+        browserPresenter = FnContext.currentPresenter();
         BootstrapTest.class.notifyAll();
     }
     

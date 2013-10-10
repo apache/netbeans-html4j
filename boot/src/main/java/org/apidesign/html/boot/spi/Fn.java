@@ -22,6 +22,7 @@ package org.apidesign.html.boot.spi;
 
 import java.io.Reader;
 import java.net.URL;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.impl.FnUtils;
 
 /** Represents single JavaScript function that can be invoked. 
@@ -57,7 +58,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return FnUtils.currentPresenter() == presenter;
+        return FnContext.currentPresenter() == presenter;
     }
     
     /** Invokes the defined function with specified <code>this</code> and

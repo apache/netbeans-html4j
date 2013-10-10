@@ -36,7 +36,7 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -116,7 +116,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserContext = FnUtils.currentPresenter();
+        browserContext = FnContext.currentPresenter();
         KnockoutFXTest.class.notifyAll();
     }
     
@@ -124,7 +124,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
         m.invoke(null, KnockoutFXTest.class);
-        browserContext = FnUtils.currentPresenter();
+        browserContext = FnContext.currentPresenter();
     }
     
     @Override

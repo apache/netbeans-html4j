@@ -23,7 +23,7 @@ package org.apidesign.html.boot.fx;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
@@ -69,7 +69,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
     public synchronized void run() {
         boolean notify = true;
         try {
-            FnUtils.currentPresenter(p);
+            FnContext.currentPresenter(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -91,7 +91,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnUtils.currentPresenter(null);
+            FnContext.currentPresenter(null);
         }
     }
 

@@ -119,6 +119,6 @@ public class FnTest extends JsClassLoaderBase {
     }
 
     @BeforeMethod public void initPresenter() {
-        FnUtils.currentPresenter(presenter);
+        FnContext.currentPresenter(presenter);
     }
 }

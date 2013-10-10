@@ -226,7 +226,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("    this.p = p;\n");
             source.append("  }\n");
             source.append("  final $JsCallbacks$ current() {\n");
-            source.append("    org.apidesign.html.boot.spi.Fn.Presenter now = org.apidesign.html.boot.impl.FnUtils.currentPresenter();\n");
+            source.append("    org.apidesign.html.boot.spi.Fn.Presenter now = org.apidesign.html.boot.impl.FnContext.currentPresenter();\n");
             source.append("    if (now == p) return this;\n");
             source.append("    if (last != null && now == last.p) return last;\n");
             source.append("    return last = new $JsCallbacks$(now);\n");
@@ -261,7 +261,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     sep = ",";
                 }
                 source.append(" {\n");
-                source.append("    org.apidesign.html.boot.spi.Fn.Presenter $$prev = org.apidesign.html.boot.impl.FnUtils.currentPresenter(p); try { \n");
+                source.append("    org.apidesign.html.boot.spi.Fn.Presenter $$prev = org.apidesign.html.boot.impl.FnContext.currentPresenter(p); try { \n");
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
                     source.append("return ");
@@ -285,7 +285,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 if (m.getReturnType().getKind() == TypeKind.VOID) {
                     source.append("    return null;\n");
                 }
-                source.append("    } finally { org.apidesign.html.boot.impl.FnUtils.currentPresenter($$prev); }\n");
+                source.append("    } finally { org.apidesign.html.boot.impl.FnContext.currentPresenter($$prev); }\n");
                 source.append("  }\n");
             }
             source.append("}\n");

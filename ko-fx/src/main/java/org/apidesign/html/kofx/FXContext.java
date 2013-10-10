@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import net.java.html.js.JavaScriptBody;
 import netscape.javascript.JSObject;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -151,11 +151,11 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
     public void runSafe(final Runnable r) {
         class Wrap implements Runnable {
             @Override public void run() {
-                Fn.Presenter prev = FnUtils.currentPresenter(browserContext);
+                Fn.Presenter prev = FnContext.currentPresenter(browserContext);
                 try {
                     r.run();
                 } finally {
-                    FnUtils.currentPresenter(prev);
+                    FnContext.currentPresenter(prev);
                 }
                 
             }
@@ -189,7 +189,7 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
         @Override
         public void fillContext(Contexts.Builder context, Class<?> requestor) {
             if (isJavaScriptEnabled()) {
-                FXContext c = new FXContext(FnUtils.currentPresenter());
+                FXContext c = new FXContext(FnContext.currentPresenter());
                 
                 context.register(Technology.class, c, 100);
                 context.register(Transfer.class, c, 100);

@@ -36,6 +36,7 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
@@ -111,7 +112,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserContext = FnUtils.currentPresenter();
+        browserContext = FnContext.currentPresenter();
         TyrusKnockoutTest.class.notifyAll();
     }
     
@@ -119,7 +120,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
         m.invoke(null, TyrusKnockoutTest.class);
-        browserContext = FnUtils.currentPresenter();
+        browserContext = FnContext.currentPresenter();
     }
     
     @Override

@@ -23,7 +23,7 @@ package org.apidesign.html.wstyrus;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.annotations.Test;
@@ -67,7 +67,7 @@ public final class TyrusFX implements ITest, Runnable {
     public synchronized void run() {
         boolean notify = true;
         try {
-            FnUtils.currentPresenter(p);
+            FnContext.currentPresenter(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -91,7 +91,7 @@ public final class TyrusFX implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnUtils.currentPresenter(null);
+            FnContext.currentPresenter(null);
         }
     }
     

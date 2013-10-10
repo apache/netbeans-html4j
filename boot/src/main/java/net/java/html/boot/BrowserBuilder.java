@@ -35,6 +35,7 @@ import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.boot.impl.FindResources;
+import org.apidesign.html.boot.impl.FnContext;
 
 /** Use this builder to launch your Java/HTML based application. Typical
  * usage in a main method of your application looks like this: 
@@ -228,18 +229,18 @@ public final class BrowserBuilder {
                         if (methodArgs.length == 0) {
                             try {
                                 Method m = newClazz.getMethod(methodName);
-                                FnUtils.currentPresenter(currentP);
+                                FnContext.currentPresenter(currentP);
                                 m.invoke(null);
                                 break INIT;
                             } catch (Throwable ex) {
                                 firstError = ex;
                             } finally {
-                                FnUtils.currentPresenter(null);
+                                FnContext.currentPresenter(null);
                             }
                         }
                         try {
                             Method m = newClazz.getMethod(methodName, String[].class);
-                            FnUtils.currentPresenter(currentP);
+                            FnContext.currentPresenter(currentP);
                             m.invoke(m, (Object) methodArgs);
                         } catch (Throwable ex) {
                             if (firstError != null) {
@@ -247,7 +248,7 @@ public final class BrowserBuilder {
                             }
                             LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
                         } finally {
-                            FnUtils.currentPresenter(null);
+                            FnContext.currentPresenter(null);
                         }
                     }
                 } catch (ClassNotFoundException ex) {

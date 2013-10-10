@@ -120,7 +120,7 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
     }
     
     @BeforeMethod public void initPresenter() {
-        FnUtils.currentPresenter(loader);
+        FnContext.currentPresenter(loader);
     }
 
     @AfterClass

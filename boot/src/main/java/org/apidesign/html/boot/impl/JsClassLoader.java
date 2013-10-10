@@ -79,6 +79,13 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.equals(FnUtils.class.getName())) {
             return FnUtils.class;
         }
+        if (
+            name.equals("org.apidesign.html.boot.spi.Fn") ||
+            name.equals("org.apidesign.html.boot.impl.FnUtils") ||
+            name.equals("org.apidesign.html.boot.impl.FnContext")
+        ) {
+            return Class.forName(name);
+        }
         URL u = findResource(name.replace('.', '/') + ".class");
         if (u != null) {
             InputStream is = null;
@@ -129,13 +136,6 @@ abstract class JsClassLoader extends ClassLoader {
                 }
             }
         }
-        if (
-            name.equals("org.apidesign.html.boot.spi.Fn") ||
-            name.equals("org.apidesign.html.boot.impl.FnUtils")
-        ) {
-            return Class.forName(name);
-        }
-        
         return super.findClass(name);
     }
     
