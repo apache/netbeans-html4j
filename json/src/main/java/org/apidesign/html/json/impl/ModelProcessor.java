@@ -400,12 +400,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  };\n");
                 writeToString(props, w);
                 writeClone(className, props, w);
-                w.write("  /** Activates this model instance in the current {@link "
-                    + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. "
-                    + "In case of using Knockout technology, this means to "
-                    + "bind JSON like data in this model instance with Knockout tags in "
-                    + "the surrounding HTML page."
-                    + "*/"
+                w.write("  /** Activates this model instance in the current {@link \n"
+                    + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. \n"
+                    + "In case of using Knockout technology, this means to \n"
+                    + "bind JSON like data in this model instance with Knockout tags in \n"
+                    + "the surrounding HTML page.\n"
+                    + "*/\n"
                 );
                 w.write("  public " + className + " applyBindings() {\n");
                 w.write("    intKnckt().applyBindings();\n");
