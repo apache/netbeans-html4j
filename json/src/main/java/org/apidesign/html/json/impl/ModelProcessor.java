@@ -232,7 +232,11 @@ public final class ModelProcessor extends AbstractProcessor {
                         sep = ", ";
                     }
                     if (firstArray != null) {
-                        String tn = typeName(e, firstArray);
+                        String tn;
+                        boolean[] isModel = {false};
+                        boolean[] isEnum = {false};
+                        boolean isPrimitive[] = {false};
+                        tn = checkType(firstArray, isModel, isEnum, isPrimitive);
                         w.write(sep);
                         w.write(tn);
                         w.write("... " + firstArray.name());

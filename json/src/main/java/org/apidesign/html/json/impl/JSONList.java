@@ -20,10 +20,12 @@
  */
 package org.apidesign.html.json.impl;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import net.java.html.BrwsrCtx;
 
 /**
@@ -52,7 +54,21 @@ public final class JSONList<T> extends ArrayList<T> {
         }
         super.addAll(Arrays.asList(values));
     }
-
+    
+    public void init(Object values) {
+        int len;
+        if (values == null || (len = Array.getLength(values)) == 0) {
+            return;
+        }
+        if (this.model[0] != null || !isEmpty()) {
+            throw new IllegalStateException();
+        }
+        for (int i = 0; i < len; i++) {
+            Object data = Array.get(values, i);
+            super.add((T)data);
+        }
+    }
+    
     public JSONList<T> onChange(Runnable r) {
         if (this.onchange != null) {
             throw new IllegalStateException();
