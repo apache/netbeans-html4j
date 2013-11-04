@@ -9,6 +9,7 @@
   <groupId>org.apidesign.html</groupId>
   <artifactId>ko-fx</artifactId>
   <version>0.7-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <name>Knockout.fx</name>
   <url>http://maven.apache.org</url>
   <properties>
@@ -16,6 +17,10 @@
   </properties>
   <build>
       <plugins>
+          <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+          </plugin>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>

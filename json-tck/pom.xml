@@ -9,18 +9,24 @@
   <groupId>org.apidesign.html</groupId>
   <artifactId>net.java.html.json.tck</artifactId>
   <version>0.7-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <name>TCK for JSON Model</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <publicPackages>org.apidesign.html.json.tck</publicPackages>
   </properties>
   <build>
       <plugins>
           <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+          </plugin>
+          <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
-                  <subpackages>org.apidesign.html.json.tck:org.apidesign.html.json.spi</subpackages>
+                  <subpackages>org.apidesign.html.json.tck,org.apidesign.html.json.spi</subpackages>
                   <skip>false</skip>
                   <includeDependencySources>true</includeDependencySources>
               </configuration>

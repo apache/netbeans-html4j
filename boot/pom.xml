@@ -9,20 +9,18 @@
   <groupId>org.apidesign.html</groupId>
   <artifactId>net.java.html.boot</artifactId>
   <version>0.7-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <name>Browser Bootstrap</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <publicPackages>net.java.html.js,net.java.html.boot</publicPackages>
   </properties>
   <build>
       <plugins>
           <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <configuration>
-                  <subpackages>net.java.html.js:net.java.html.boot</subpackages>
-                  <skip>false</skip>
-              </configuration>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
           </plugin>
       </plugins>
   </build>

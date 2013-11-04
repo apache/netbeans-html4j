@@ -9,6 +9,7 @@
   <groupId>org.apidesign.html</groupId>
   <artifactId>ko-ws-tyrus</artifactId>
   <version>0.7-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <name>Tyrus Based WebSockets</name>
   <url>http://maven.apache.org</url>
     <build>
@@ -21,6 +22,10 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
