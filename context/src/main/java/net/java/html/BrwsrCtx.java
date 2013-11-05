@@ -21,6 +21,7 @@
 package net.java.html;
 
 import java.util.ServiceLoader;
+import java.util.logging.Logger;
 import org.apidesign.html.context.impl.CtxAccssr;
 import org.apidesign.html.context.impl.CtxImpl;
 import org.apidesign.html.context.spi.Contexts;
@@ -36,6 +37,7 @@ import org.apidesign.html.context.spi.Contexts;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class BrwsrCtx {
+    private static final Logger LOG = Logger.getLogger(BrwsrCtx.class.getName());
     private final CtxImpl impl;
     private BrwsrCtx(CtxImpl impl) {
         this.impl = impl;
@@ -95,7 +97,13 @@ public final class BrwsrCtx {
             // if we have some data from regular provides, go on
         }
         if (!found) {
-            // XXX: print out a warning
+            for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class)) {
+                cp.fillContext(cb, requestor);
+                found = true;
+            }
+        }
+        if (!found) {
+            LOG.warning("No browser context found. Returning empty technology!");
             return EMPTY;
         }
         return cb.build();
