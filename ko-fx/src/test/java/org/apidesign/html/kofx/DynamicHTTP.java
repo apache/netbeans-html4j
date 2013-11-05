@@ -30,6 +30,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -41,13 +43,13 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
-import org.openide.util.Exceptions;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class DynamicHTTP extends HttpHandler {
+    private static final Logger LOG = Logger.getLogger(DynamicHTTP.class.getName());
     private static int resourcesCount;
     private static List<Resource> resources;
     private static ServerConfiguration conf;
@@ -228,9 +230,8 @@ final class DynamicHTTP extends HttpHandler {
                 String s = new String(out.toByteArray(), "UTF-8");
                 socket.send(s);
             } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.WARNING, "Error processing message " + text, ex);
             }
         }
-        
     }
 }

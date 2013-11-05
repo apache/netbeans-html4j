@@ -23,6 +23,8 @@ package org.apidesign.html.boot.fx;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -41,13 +43,13 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.openide.util.Exceptions;
 
 /** This is an implementation class, use {@link BrowserBuilder} API. Just
  * include this JAR on classpath and the {@link BrowserBuilder} API will find
  * this implementation automatically.
  */
 public class FXBrwsr extends Application {
+    private static final Logger LOG = Logger.getLogger(FXBrwsr.class.getName());
     private static FXBrwsr INSTANCE;
     private static final CountDownLatch FINISHED = new CountDownLatch(1);
     private BorderPane root;
@@ -89,7 +91,7 @@ public class FXBrwsr extends Application {
                     waitForResult.await();
                     break;
                 } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
+                    LOG.log(Level.INFO, null, ex);
                 }
             }
             return arr[0];
@@ -161,7 +163,7 @@ public class FXBrwsr extends Application {
                 FINISHED.await();
                 break;
             } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.INFO, null, ex);
             }
         }
     }
