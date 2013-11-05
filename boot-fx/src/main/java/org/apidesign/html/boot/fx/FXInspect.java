@@ -20,7 +20,6 @@
  */
 package org.apidesign.html.boot.fx;
 
-import com.sun.javafx.scene.web.Debugger;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,7 +31,6 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.web.WebEngine;
 import javafx.util.Callback;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -44,6 +42,7 @@ final class FXInspect implements Runnable {
     
     private final WebEngine engine;
     private final ObjectInputStream input;
+    private Dbgr dbg;
     
     private FXInspect(WebEngine engine, int port) throws IOException {
         this.engine = engine;
@@ -73,9 +72,7 @@ final class FXInspect implements Runnable {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                Debugger debugger = engine.impl_getDebugger();
-                debugger.setEnabled(true);
-                debugger.setMessageCallback(new Callback<String,Void>() {
+                dbg = new Dbgr(engine, new Callback<String,Void>() {
                     @Override
                     public Void call(String message) {
                         try {
@@ -104,12 +101,12 @@ final class FXInspect implements Runnable {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        engine.impl_getDebugger().sendMessage(message);
+                        dbg.sendMessage(message);
                     }
                 });
             }
         } catch (IOException ioex) {
-            ioex.printStackTrace();
+            LOG.log(Level.WARNING, null, ex);
         }
     }
 }
