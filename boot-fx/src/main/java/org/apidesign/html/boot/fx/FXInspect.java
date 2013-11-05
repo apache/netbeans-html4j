@@ -105,7 +105,7 @@ final class FXInspect implements Runnable {
                     }
                 });
             }
-        } catch (IOException ioex) {
+        } catch (IOException ex) {
             LOG.log(Level.WARNING, null, ex);
         }
     }
