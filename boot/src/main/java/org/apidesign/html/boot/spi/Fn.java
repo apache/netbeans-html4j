@@ -23,7 +23,6 @@ package org.apidesign.html.boot.spi;
 import java.io.Reader;
 import java.net.URL;
 import org.apidesign.html.boot.impl.FnContext;
-import org.apidesign.html.boot.impl.FnUtils;
 
 /** Represents single JavaScript function that can be invoked. 
  * Created via {@link Presenter#defineFn(java.lang.String, java.lang.String...)}.
@@ -73,6 +72,9 @@ public abstract class Fn {
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
 
     /** The representation of a <em>presenter</em> - usually a browser window.
+     * Should be provided by a library included in the application and registered
+     * in <code>META-INF/services</code>, for example with
+     * <code>@ServiceProvider(service = Fn.Presenter.class)</code> annotation.
      */
     public interface Presenter {
         /** Creates new function with given parameter names and provided body.
