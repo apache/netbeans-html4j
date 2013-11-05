@@ -14,7 +14,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <publicPackages>net.java.html</publicPackages>
+    <publicPackages>net.java.html,org.apidesign.html.context.spi</publicPackages>
   </properties>
   <build>
       <plugins>
