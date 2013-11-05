@@ -20,10 +20,10 @@
  */
 package org.apidesign.html.kofx;
 
+import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
-import org.apidesign.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.annotations.Test;
@@ -66,8 +66,7 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try {
-            FnContext.currentPresenter(p);
+        try (Closeable a = Fn.activate(p)) {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -91,7 +90,6 @@ public final class KOFx implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
         }
     }
     

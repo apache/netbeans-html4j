@@ -20,15 +20,42 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.logging.Logger;
 import org.apidesign.html.boot.spi.Fn;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FnContext {
-    private FnContext() {
+public final class FnContext implements Closeable {
+    private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
+
+    private Fn.Presenter prev;
+    private FnContext(Fn.Presenter p) {
+        this.prev = p;
     }
+
+    @Override
+    public void close() throws IOException {
+        if (prev != null) {
+            currentPresenter(prev);
+            prev = null;
+        }
+    }
+/*
+    @Override
+    protected void finalize() throws Throwable {
+        if (prev != null) {
+            LOG.warning("Unclosed context!");
+        }
+    }
+*/
+    public static Closeable activate(Fn.Presenter newP) {
+        return new FnContext(currentPresenter(newP));
+    }
+    
     
     private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
 

@@ -14,7 +14,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <publicPackages>net.java.html.json</publicPackages>
+    <publicPackages>net.java.html.json,org.apidesign.html.json.spi</publicPackages>
   </properties>
   <build>
       <plugins>
@@ -35,6 +35,15 @@
                       <phase>package</phase>
                   </execution>
               </executions>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9</version>
+              <configuration>
+                  <subpackages>net.java.html.json</subpackages>
+                  <skip>false</skip>
+              </configuration>
           </plugin>
       </plugins>
   </build>
