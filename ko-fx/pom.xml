@@ -50,7 +50,6 @@
     <dependency>
         <groupId>de.twentyeleven.skysail</groupId>
         <artifactId>org.json-osgi</artifactId>
-        <version>20080701</version>
     </dependency>
     <dependency>
       <groupId>org.apidesign.html</groupId>

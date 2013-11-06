@@ -62,10 +62,8 @@
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20090211</version>
-      <type>jar</type>
+        <groupId>de.twentyeleven.skysail</groupId>
+        <artifactId>org.json-osgi</artifactId>
     </dependency>
     <dependency>
       <artifactId>javax.websocket-api</artifactId>
