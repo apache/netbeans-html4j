@@ -21,6 +21,7 @@
 
 package org.apidesign.html.boot.impl;
 
+import java.io.Closeable;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -115,7 +116,9 @@ public class FnTest extends JsClassLoaderBase {
         ClassLoader loader = FnUtils.newLoader(impl, impl, parent);
         presenter = impl;
         
+        Closeable close = FnContext.activate(impl);
         methodClass = loader.loadClass(JsMethods.class.getName());
+        close.close();
     }
 
     @BeforeMethod public void initPresenter() {

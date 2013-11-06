@@ -32,16 +32,16 @@ import org.apidesign.html.boot.spi.Fn;
 public final class FnContext implements Closeable {
     private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
 
-    private Fn.Presenter prev;
+    private Object prev;
     private FnContext(Fn.Presenter p) {
         this.prev = p;
     }
 
     @Override
     public void close() throws IOException {
-        if (prev != null) {
-            currentPresenter(prev);
-            prev = null;
+        if (prev != this) {
+            currentPresenter((Fn.Presenter)prev);
+            prev = this;
         }
     }
 /*

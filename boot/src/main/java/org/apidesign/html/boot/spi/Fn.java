@@ -62,6 +62,31 @@ public abstract class Fn {
         return FnContext.currentPresenter() == presenter;
     }
     
+    /** Helper method to check if the provided instance is valid function.
+     * Checks if the parameter is non-null and if so, does {@link #isValid()}
+     * check.
+     * 
+     * @param fnOrNull function or <code>null</code>
+     * @return true if the parameter is non-null and valid
+     * @since 0.7
+     */
+    public static boolean isValid(Fn fnOrNull) {
+        return fnOrNull != null && fnOrNull.isValid();
+    }
+
+    /** Helper method to find current presenter and ask it to define new
+     * function by calling {@link Presenter#defineFn(java.lang.String, java.lang.String...)}.
+     * 
+     * @param caller the class who wishes to define the function
+     * @param code the body of the function (can reference <code>this</code> and <code>names</code> variables)
+     * @param names names of individual parameters
+     * @return the function object that can be {@link Fn#invoke(java.lang.Object, java.lang.Object...) invoked}
+     * @since 0.7
+     */
+    public static Fn define(Class<?> caller, String code, String... names) {
+        return FnContext.currentPresenter().defineFn(code, names);
+    }
+    
     /** The currently active presenter.
      * 
      * @return the currently active presenter or <code>null</code>

@@ -20,6 +20,7 @@
  */
 package org.apidesign.html.boot.impl;
 
+import java.io.Closeable;
 import java.io.Reader;
 import org.apidesign.html.boot.spi.Fn;
 import java.net.URL;
@@ -115,7 +116,9 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
         };
         
         MyCL l = new MyCL(parent);
+        Closeable close = FnContext.activate(l);
         methodClass = l.loadClass(JsMethods.class.getName());
+        close.close();
         loader = l;
     }
     
