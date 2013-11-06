@@ -21,6 +21,11 @@
           <plugin>
               <groupId>org.apache.felix</groupId>
               <artifactId>maven-bundle-plugin</artifactId>
+              <configuration>
+                  <instructions>
+                      <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
+                  </instructions>
+              </configuration>
           </plugin>
       </plugins>
   </build>
