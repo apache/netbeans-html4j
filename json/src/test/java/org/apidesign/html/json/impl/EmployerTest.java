@@ -22,6 +22,7 @@ package org.apidesign.html.json.impl;
 
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import org.testng.annotations.Test;
 })
 public class EmployerTest {
     @Test public void preLoadsTheClass() {
-        Employer em = JSON.read(BrwsrCtx.EMPTY, Employer.class, this);
+        Employer em = Models.fromRaw(BrwsrCtx.EMPTY, Employer.class, this);
         Assert.assertNotNull(em, "Class loaded");
         em.applyBindings();
     }

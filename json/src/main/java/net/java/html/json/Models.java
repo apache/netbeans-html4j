@@ -23,7 +23,6 @@ package net.java.html.json;
 import net.java.html.BrwsrCtx;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import org.apidesign.html.json.impl.JSON;
 
 /** Information about and 
@@ -71,4 +70,29 @@ public final class Models {
     public static <M> M parse(BrwsrCtx c, Class<M> model, InputStream is) throws IOException {
         return JSON.readStream(c, model, is);
     }
+    
+    /** Converts an existing, raw, JSON object into a {@link Model model class}.
+     * 
+     * @param <M> the type of the model class
+     * @param ctx context of the technology to use for converting
+     * @param model the model class
+     * @param jsonObject original instance of the JSON object
+     * @return new instance of the model class
+     * @since 0.7
+     */
+    public static <M> M fromRaw(BrwsrCtx ctx, Class<M> model, Object jsonObject) {
+        return JSON.read(ctx, model, jsonObject);
+    }
+    
+//    /** Converts an existing {@link Model model} into its associated, raw 
+//     * JSON object. The object may, but does not have to, be the same instance
+//     * as the model object.
+//     * 
+//     * @param model the model object
+//     * @return the raw JSON object associated with the model
+//     * @since 0.7
+//     */
+//    public static Object toRaw(Object model) {
+//        return JSON.toJSON(model);
+//    }
 }
