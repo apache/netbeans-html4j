@@ -35,6 +35,7 @@ import javax.annotation.processing.Completions;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -255,7 +256,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     sep = ", ";
                 }
                 source.append(") throws Throwable {\n");
-                source.append("    try (java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p)) { \n");
+                if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
+                    source.append("    try (java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p)) { \n");
+                } else {
+                    source.append("    java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p); try {\n");
+                }
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
                     source.append("return ");
@@ -279,7 +284,14 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 if (m.getReturnType().getKind() == TypeKind.VOID) {
                     source.append("    return null;\n");
                 }
-                source.append("    }\n");
+                if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
+                    source.append("    }\n");
+                } else {
+                    
+                    source.append("    } finally {\n");
+                    source.append("      a.close();\n");
+                    source.append("    }\n");
+                }
                 source.append("  }\n");
             }
             source.append("}\n");
