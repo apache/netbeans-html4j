@@ -198,7 +198,7 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     static final Object koData(Collection<?> c, Bindings m) {
-        Object[] arr = c.toArray();
+        Object[] arr = c.toArray(new Object[c.size()]);
         for (int i = 0; i < arr.length; i++) {
             Object r = WrapperObject.find(arr[i], m);
             if (r != null) {
