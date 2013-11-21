@@ -68,6 +68,46 @@ public final class JSONTest {
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
     }
     
+    @KOTest public void toJSONWithEscapeCharactersInABrowser() throws Throwable {
+        Person p = Models.bind(new Person(), newContext());
+        p.setSex(Sex.MALE);
+        p.setFirstName("/*\n * Copyright (c) 2013");
+
+        
+        final String txt = p.toString();
+        Object json;
+        try {
+            json = parseJSON(txt);
+        } catch (Throwable ex) {
+            throw new IllegalStateException("Can't parse " + txt).initCause(ex);
+        }
+        
+        Person p2 = JSON.read(newContext(), Person.class, json);
+        
+        assert p2.getFirstName().equals(p.getFirstName()) : 
+            "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
+    }
+    
+    @KOTest public void toJSONWithDoubleSlashInABrowser() throws Throwable {
+        Person p = Models.bind(new Person(), newContext());
+        p.setSex(Sex.MALE);
+        p.setFirstName("/*\\n * Copyright (c) 2013");
+
+        
+        final String txt = p.toString();
+        Object json;
+        try {
+            json = parseJSON(txt);
+        } catch (Throwable ex) {
+            throw new IllegalStateException("Can't parse " + txt).initCause(ex);
+        }
+        
+        Person p2 = JSON.read(newContext(), Person.class, json);
+        
+        assert p2.getFirstName().equals(p.getFirstName()) : 
+            "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
+    }
+    
     @OnReceive(url="{url}")
     static void fetch(Person p, JSONik model) {
         model.setFetched(p);

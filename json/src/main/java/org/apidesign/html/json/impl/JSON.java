@@ -82,13 +82,24 @@ public final class JSON {
             value = value.toString();
         }
         if (value instanceof String) {
-            return '"' + 
-                ((String)value).
-                    replace("\"", "\\\"").
-                    replace("\n", "\\n").
-                    replace("\r", "\\r").
-                    replace("\t", "\\t")
-                + '"';
+            String s = (String)value;
+            int len = s.length();
+            StringBuilder sb = new StringBuilder(len + 10);
+            sb.append('"');
+            for (int i = 0; i < len; i++) {
+                char ch = s.charAt(i);
+                switch (ch) {
+                    case '\'': sb.append("\\\'"); break;
+                    case '\"': sb.append("\\\""); break;
+                    case '\n': sb.append("\\n"); break;
+                    case '\r': sb.append("\\r"); break;
+                    case '\t': sb.append("\\t"); break;
+                    case '\\': sb.append("\\\\"); break;
+                    default: sb.append(ch);
+                }
+            }
+            sb.append('"');
+            return sb.toString();
         }
         return value.toString();
     }
