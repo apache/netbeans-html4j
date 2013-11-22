@@ -53,6 +53,14 @@
                   <target>1.6</target>
               </configuration>
           </plugin>
+          <plugin>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9</version>
+              <configuration>
+                  <subpackages></subpackages>
+                  <skip>true</skip>
+              </configuration>
+          </plugin>          
       </plugins>
   </build>
 </project>
