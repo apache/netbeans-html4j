@@ -29,6 +29,7 @@
     <module>boot-fx</module>
     <module>geo</module>
     <module>ko-ws-tyrus</module>
+    <module>html4j-maven-plugin</module>
   </modules>
   <licenses>
       <license>

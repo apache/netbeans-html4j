@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apidesign.html.boot.spi.Fn;
 import org.objectweb.asm.AnnotationVisitor;
@@ -50,6 +51,19 @@ import org.objectweb.asm.signature.SignatureWriter;
 public final class FnUtils implements Fn.Presenter {
     
     private FnUtils() {
+    }
+    
+    /** Seeks for {@link JavaScriptBody} and {@link JavaScriptResource} annotations
+     * in the bytecode and converts them into real code. Used by Maven plugin
+     * postprocessing classes.
+     * 
+     * @param bytecode the original bytecode with javascript specific annotations
+     * @param resources the resources to load
+     * @return the transformed bytecode
+     * @since 0.7
+     */
+    public static byte[] transform(byte[] bytecode, Map<String,InputStream> resources) {
+        return transform(null, bytecode);
     }
     
     public static boolean isJavaScriptCapable(ClassLoader l) {
