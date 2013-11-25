@@ -150,7 +150,7 @@ public final class FnUtils implements Fn.Presenter {
             Reader isr = null;
             try {
                 isr = new InputStreamReader(script, "UTF-8");
-                FnContext.currentPresenter().loadScript(isr);
+                FnContext.currentPresenter(false).loadScript(isr);
             } finally {
                 if (isr != null) {
                     isr.close();

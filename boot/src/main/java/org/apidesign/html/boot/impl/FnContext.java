@@ -65,9 +65,9 @@ public final class FnContext implements Closeable {
         return prev;
     }
 
-    public static Fn.Presenter currentPresenter() {
+    public static Fn.Presenter currentPresenter(boolean canReturnNull) {
         Fn.Presenter p = CURRENT.get();
-        if (p == null) {
+        if (p == null && !canReturnNull) {
             throw new IllegalStateException("No current WebView context around!");
         }
         return p;
