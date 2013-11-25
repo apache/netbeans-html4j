@@ -21,6 +21,7 @@
 package org.apidesign.html.boot.impl;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -71,12 +72,19 @@ public final class FnUtils implements Fn.Presenter {
             return true;
         }
         Class<?> clazz;
-        try (Closeable c = Fn.activate(new FnUtils())) {
+        Closeable c = Fn.activate(new FnUtils());
+        try {
             clazz = Class.forName(Test.class.getName(), true, l);
             final Object is = ((Callable<?>)clazz.newInstance()).call();
             return Boolean.TRUE.equals(is);
         } catch (Exception ex) {
             return false;
+        } finally {
+            try {
+                c.close();
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
     }
     
