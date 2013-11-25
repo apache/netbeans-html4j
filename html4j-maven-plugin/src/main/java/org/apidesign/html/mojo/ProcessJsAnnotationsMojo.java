@@ -22,8 +22,16 @@ package org.apidesign.html.mojo;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -36,7 +44,7 @@ import org.apidesign.html.boot.impl.FnUtils;
 
 @Mojo(
     name="process-js-annotations",
-    requiresDependencyResolution = ResolutionScope.RUNTIME,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
     defaultPhase= LifecyclePhase.PROCESS_CLASSES
 )
 public final class ProcessJsAnnotationsMojo extends AbstractMojo {
@@ -45,6 +53,13 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
     
     @Parameter(defaultValue = "${project.build.directory}/classes")
     private File classes;
+    
+    /** Checks all "provided" dependency JAR files and if they contain
+     * usage of JavaScriptXXX annotation, their classes are expanded into the
+     * <code>classes</code> directory.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean processProvided;
 
     public ProcessJsAnnotationsMojo() {
     }
@@ -52,18 +67,34 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            processClasess(classes);
+            processClasses(classes);
         } catch (IOException ex) {
             throw new MojoExecutionException("Problem converting JavaScriptXXX annotations", ex);
         }
+        
+        if (processProvided) {
+            for (Artifact a : prj.getArtifacts()) {
+                if (!"provided".equals(a.getScope())) {
+                    continue;
+                }
+                final File f = a.getFile();
+                if (f != null) {
+                    try {
+                        processClasses(f, classes);
+                    } catch (IOException ex) {
+                        throw new MojoExecutionException("Problem converting JavaScriptXXX annotations in " + f, ex);
+                    }
+                }
+            }
+        }
     }
     
-    private void processClasess(File f) throws IOException, MojoExecutionException {
+    private void processClasses(File f) throws IOException, MojoExecutionException {
         if (f.isDirectory()) {
             File[] arr = f.listFiles();
             if (arr != null) {
                 for (File file : arr) {
-                    processClasess(file);
+                    processClasses(file);
                 }
             }
             return;
@@ -79,14 +110,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         byte[] arr = new byte[(int)f.length()];
         FileInputStream is = new FileInputStream(f);
         try {
-            int off = 0;
-            while (off< arr.length) {
-                int read = is.read(arr, off, arr.length - off);
-                if (read == -1) {
-                    break;
-                }
-                off += read;
-            }
+            readArr(arr, is);
         } finally {
             is.close();
         }
@@ -95,9 +119,71 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         if (newArr == null || newArr == arr) {
             return;
         }
-        
+        getLog().info("Processing " + f);
+        writeArr(f, newArr);        
+    }
+
+    private void writeArr(File f, byte[] newArr) throws IOException, FileNotFoundException {
         FileOutputStream os = new FileOutputStream(f);
-        os.write(newArr);
-        os.close();
+        try {
+            os.write(newArr);
+        } finally {
+            os.close();
+        }
+    }
+
+    private static void readArr(byte[] arr, InputStream is) throws IOException {
+        int off = 0;
+        while (off< arr.length) {
+            int read = is.read(arr, off, arr.length - off);
+            if (read == -1) {
+                break;
+            }
+            off += read;
+        }
+    }
+    
+    private void processClasses(File jar, File target) throws IOException {
+        ZipFile zf = new ZipFile(jar);
+        Enumeration<? extends ZipEntry> en = zf.entries();
+        Map<String,byte[]> waiting = new HashMap<String, byte[]>();
+        boolean found = false;
+        while (en.hasMoreElements()) {
+            ZipEntry ze = en.nextElement();
+            if (ze.getName().endsWith("/")) {
+                continue;
+            }
+            byte[] arr = new byte[(int)ze.getSize()];
+            InputStream is = zf.getInputStream(ze);
+            try {
+                readArr(arr, is);
+            } finally {
+                is.close();
+            }
+            if (ze.getName().endsWith(".class")) {
+                byte[] newArr = FnUtils.transform(arr, null);
+                if (newArr == null || newArr == arr) {
+                    waiting.put(ze.getName(), arr);
+                    continue;
+                }
+                File t = new File(target, ze.getName().replace('/', File.separatorChar));
+                t.getParentFile().mkdirs();
+                writeArr(t, newArr);
+                found = true;
+                getLog().info("Found " + ze.getName() + " in " + jar + " - will copy all classes");
+            } else {
+                waiting.put(ze.getName(), arr);
+            }
+        }
+        
+        if (found) {
+            for (Map.Entry<String, byte[]> entry : waiting.entrySet()) {
+                String name = entry.getKey();
+                byte[] arr = entry.getValue();
+                File t = new File(target, name.replace('/', File.separatorChar));
+                t.getParentFile().mkdirs();
+                writeArr(t, arr);
+            }
+        }
     }
 }
