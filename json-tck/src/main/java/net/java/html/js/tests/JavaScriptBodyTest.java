@@ -18,25 +18,25 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
  */
-package org.apidesign.html.boot.fx;
+package net.java.html.js.tests;
 
-import net.java.html.js.JavaScriptBody;
-import static org.testng.Assert.*;
-import org.testng.annotations.Test;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class FXPresenterTst {
-    @Test public void showClassLoader() {
-        R run = new R();
-        callback(run);
-        assertEquals(run.cnt, 1, "Can call even private implementation classes");
+public class JavaScriptBodyTest {
+    @KOTest public void sumTwoNumbers() {
+        int res = Bodies.sum(5, 3);
+        assert res == 8 : "Expecting 8: " + res;
     }
     
-    @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
-    private static native void callback(Runnable r);
+    @KOTest public void callbackToRunnable() {
+        R run = new R();
+        Bodies.callback(run);
+        assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
+    }
 
     private static class R implements Runnable {
         int cnt;
@@ -46,4 +46,5 @@ public class FXPresenterTst {
             cnt++;
         }
     }
+    
 }

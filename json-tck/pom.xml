@@ -10,7 +10,7 @@
   <artifactId>net.java.html.json.tck</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <name>TCK for JSON Model</name>
+  <name>HTML for Java TCK</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,6 +56,11 @@
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>net.java.html.boot</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
     <description>Test Compatibility Kit for anyone who wants to consume the net.java.html.json APIs and

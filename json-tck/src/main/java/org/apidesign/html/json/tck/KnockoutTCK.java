@@ -85,7 +85,7 @@ public abstract class KnockoutTCK {
      * are annotated by {@link KOTest} annotation. The methods are public
      * instance methods that take no arguments.
      * 
-     * @return classes with methods annotated by {@link BrwsrTest} annotation
+     * @return classes with methods annotated by {@link KOTest} annotation
      */
     protected static Class<?>[] testClasses() {
         return new Class[] { 
