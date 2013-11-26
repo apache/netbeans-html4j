@@ -112,7 +112,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserContext = FnContext.currentPresenter();
+        browserContext = Fn.activePresenter();
         TyrusKnockoutTest.class.notifyAll();
     }
     
@@ -120,7 +120,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
         m.invoke(null, TyrusKnockoutTest.class);
-        browserContext = FnContext.currentPresenter();
+        browserContext = Fn.activePresenter();
     }
     
     @Override
