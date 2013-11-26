@@ -116,7 +116,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserContext = FnContext.currentPresenter();
+        browserContext = Fn.activePresenter();
         KnockoutFXTest.class.notifyAll();
     }
     
@@ -124,7 +124,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
         m.invoke(null, KnockoutFXTest.class);
-        browserContext = FnContext.currentPresenter();
+        browserContext = Fn.activePresenter();
     }
     
     @Override
