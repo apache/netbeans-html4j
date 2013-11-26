@@ -81,7 +81,7 @@ public class BootstrapTest {
     
     public static synchronized void ready(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserPresenter = FnContext.currentPresenter();
+        browserPresenter = Fn.activePresenter();
         BootstrapTest.class.notifyAll();
     }
     
