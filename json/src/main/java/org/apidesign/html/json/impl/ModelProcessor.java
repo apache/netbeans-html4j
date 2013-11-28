@@ -374,9 +374,13 @@ public final class ModelProcessor extends AbstractProcessor {
                         w.append("    }\n");
                     } else {
                         if (isEnum[0]) {
+                            w.append("    try {\n");
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? null : ");
                             w.append(type).append(".valueOf(org.apidesign.html.json.impl.JSON.stringValue(ret[" + cnt + "]));\n");
+                            w.append("    } catch (IllegalArgumentException ex) {\n");
+                            w.append("      ex.printStackTrace();\n");
+                            w.append("    }\n");
                         } else if (isPrimitive(type)) {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? ");

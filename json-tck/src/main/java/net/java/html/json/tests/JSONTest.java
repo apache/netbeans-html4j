@@ -451,6 +451,14 @@ public final class JSONTest {
         assert 0 == v.getValue() : "Value is empty: " + v.getValue();
         assert 0 == v.getSmall() : "Small value is empty: " + v.getSmall();
     }
+
+    @KOTest public void deserializeWrongEnum() throws Exception {
+        String str = "{ \"sex\" : \"unknown\" }";
+        ByteArrayInputStream is = new ByteArrayInputStream(str.getBytes("UTF-8"));
+        Person p = Models.parse(newContext(), Person.class, is);
+        assert p.getSex() == null : "Wrong sex means null, but was: " + p.getSex();
+    }
+
     
     private static BrwsrCtx newContext() {
         return Utils.newContext(JSONTest.class);
