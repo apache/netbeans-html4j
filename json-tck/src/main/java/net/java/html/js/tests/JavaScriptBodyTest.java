@@ -32,6 +32,12 @@ public class JavaScriptBodyTest {
         assert res == 8 : "Expecting 8: " + res;
     }
     
+    @KOTest public void accessJsObject() {
+        Object o = Bodies.instance(10);
+        int ten = Bodies.readX(o);
+        assert ten == 10 : "Expecting ten: " + ten;
+    }
+    
     @KOTest public void callbackToRunnable() {
         R run = new R();
         Bodies.callback(run);
