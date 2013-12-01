@@ -34,6 +34,9 @@ final class Bodies {
     @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void callback(Runnable r);
     
+    @JavaScriptBody(args = { "v" }, body = "return v;")
+    public static native Object id(Object v);
+    
     @JavaScriptBody(args = { "v" }, body = "return { 'x' : v };")
     public static native Object instance(int v);
 

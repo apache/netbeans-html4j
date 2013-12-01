@@ -43,6 +43,18 @@ public class JavaScriptBodyTest {
         Bodies.callback(run);
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
     }
+    
+    @KOTest public void identity() {
+        Object p = new Object();
+        Object r = Bodies.id(p);
+        assert r == p : "The object is the same";
+    }
+
+    @KOTest public void nullIsNull() {
+        Object p = null;
+        Object r = Bodies.id(p);
+        assert r == p : "The null is the same";
+    }
 
     private static class R implements Runnable {
         int cnt;
