@@ -21,6 +21,7 @@
 
 package net.java.html.js.tests;
 
+import java.util.concurrent.Callable;
 import net.java.html.js.JavaScriptBody;
 
 /**
@@ -33,6 +34,9 @@ final class Bodies {
     
     @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void callback(Runnable r);
+
+    @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
+    static native Object callback(Callable<Boolean> c);
     
     @JavaScriptBody(args = { "v" }, body = "return v;")
     public static native Object id(Object v);

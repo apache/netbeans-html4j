@@ -20,6 +20,7 @@
  */
 package net.java.html.js.tests;
 
+import java.util.concurrent.Callable;
 import org.apidesign.html.json.tck.KOTest;
 
 /**
@@ -55,6 +56,12 @@ public class JavaScriptBodyTest {
         Object r = Bodies.id(p);
         assert r == p : "The null is the same";
     }
+    
+    @KOTest public void callbackWithResult() {
+        Callable<Boolean> c = new C();
+        Object b = Bodies.callback(c);
+        assert b == Boolean.TRUE : "Should return true";
+    }
 
     private static class R implements Runnable {
         int cnt;
@@ -71,4 +78,10 @@ public class JavaScriptBodyTest {
         }
     }
     
+    private static class C implements Callable<Boolean> {
+        @Override
+        public Boolean call() throws Exception {
+            return Boolean.TRUE;
+        }
+    }
 }
