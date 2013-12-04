@@ -58,9 +58,15 @@ public class JavaScriptBodyTest {
 
     private static class R implements Runnable {
         int cnt;
+        private final Thread initThread;
+        
+        public R() {
+            initThread = Thread.currentThread();
+        }
 
         @Override
         public void run() {
+            assert initThread == Thread.currentThread() : "Expecting to run in " + initThread + " but running in " + Thread.currentThread();
             cnt++;
         }
     }
