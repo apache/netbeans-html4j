@@ -21,34 +21,12 @@
 
 package net.java.html.js.tests;
 
-import java.util.concurrent.Callable;
-import net.java.html.js.JavaScriptBody;
-
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class Bodies {
-    @JavaScriptBody(args = { "a", "b" }, body = "return a + b;")
-    public static native int sum(int a, int b);
-    
-    @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
-    static native void callback(Runnable r);
-
-    @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
-    static native Object callback(Callable<Boolean> c);
-    
-    @JavaScriptBody(args = { "v" }, body = "return v;")
-    public static native Object id(Object v);
-    
-    @JavaScriptBody(args = { "v" }, body = "return { 'x' : v };")
-    public static native Object instance(int v);
-
-    @JavaScriptBody(args = "o", body = "return o.x;")
-    public static native int readX(Object o);
-
-    @JavaScriptBody(args = { "c" }, javacall = true, body = 
-        "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"
-    )
-    public static native int sumIndirect(Sum c);
+public final class Sum {
+    public int sum(int a, int b) {
+        return a + b;
+    }
 }

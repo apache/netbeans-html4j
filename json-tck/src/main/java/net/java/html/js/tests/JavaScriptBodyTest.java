@@ -62,6 +62,11 @@ public class JavaScriptBodyTest {
         Object b = Bodies.callback(c);
         assert b == Boolean.TRUE : "Should return true";
     }
+    
+    @KOTest public void callbackWithParameters() {
+        int res = Bodies.sumIndirect(new Sum());
+        assert res == 42 : "Expecting 42";
+    }
 
     private static class R implements Runnable {
         int cnt;
