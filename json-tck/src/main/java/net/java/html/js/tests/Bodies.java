@@ -51,4 +51,13 @@ final class Bodies {
         "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"
     )
     public static native int sumIndirect(Sum c);
+    
+    @JavaScriptBody(args = { "arr", "index" }, body = "return arr[index];")
+    public static native Object select(Object[] arr, int index);
+
+    @JavaScriptBody(args = { "arr" }, body = "return arr.length;")
+    public static native int length(Object[] arr);
+
+    @JavaScriptBody(args = { "arr", "i", "value" }, body = "arr[i] = value;")
+    public static native void modify(String[] arr, int i, String value);
 }

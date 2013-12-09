@@ -67,6 +67,32 @@ public class JavaScriptBodyTest {
         int res = Bodies.sumIndirect(new Sum());
         assert res == 42 : "Expecting 42";
     }
+    
+    @KOTest public void selectFromJavaArray() {
+        String[] arr = { "Ahoj", "World" };
+        Object res = Bodies.select(arr, 1);
+        assert "World".equals(res) : "Expecting World, but was: " + res;
+    }
+
+    @KOTest public void lengthOfJavaArray() {
+        String[] arr = { "Ahoj", "World" };
+        int res = Bodies.length(arr);
+        assert res == 2 : "Expecting 2, but was: " + res;
+    }
+
+    @KOTest public void javaArrayInOut() {
+        String[] arr = { "Ahoj", "World" };
+        Object res = Bodies.id(arr);
+        assert res == arr : "Expecting same array, but was: " + res;
+    }
+
+//  Modifying an array is a complex operation in the bridge:    
+//    
+//    @KOTest public void modifyJavaArray() {
+//        String[] arr = { "Ahoj", "World" };
+//        Bodies.modify(arr, 0, "Hello");
+//        assert "Hello".equals(arr[0]) : "Expecting World, but was: " + arr[0];
+//    }
 
     private static class R implements Runnable {
         int cnt;
