@@ -89,7 +89,6 @@ public final class JSON {
             for (int i = 0; i < len; i++) {
                 char ch = s.charAt(i);
                 switch (ch) {
-                    case '\'': sb.append("\\\'"); break;
                     case '\"': sb.append("\\\""); break;
                     case '\n': sb.append("\\n"); break;
                     case '\r': sb.append("\\r"); break;
