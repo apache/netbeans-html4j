@@ -21,8 +21,15 @@
 package org.apidesign.html.boot.spi;
 
 import java.io.Closeable;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.impl.FnContext;
 
@@ -85,6 +92,31 @@ public abstract class Fn {
      */
     public static Fn define(Class<?> caller, String code, String... names) {
         return FnContext.currentPresenter().defineFn(code, names);
+    }
+    
+    private static final Map<String,Set<Presenter>> LOADED = new HashMap<String, Set<Presenter>>();
+    public static Fn preload(final Fn fn, final Class<?> caller, final String resource) {
+        return new Fn() {
+            @Override
+            public Object invoke(Object thiz, Object... args) throws Exception {
+                final Presenter p = FnContext.currentPresenter();
+                Set<Presenter> there = LOADED.get(resource);
+                if (there == null) {
+                    there = new HashSet<Presenter>();
+                    LOADED.put(resource, there);
+                }
+                if (there.add(p)) {
+                    InputStream is = caller.getClassLoader().getResourceAsStream(resource);
+                    try {
+                        InputStreamReader r = new InputStreamReader(is, "UTF-8");
+                        p.loadScript(r);
+                    } finally {
+                        is.close();
+                    }
+                }
+                return fn.invoke(thiz, args);
+            }
+        };
     }
     
     /** The currently active presenter.

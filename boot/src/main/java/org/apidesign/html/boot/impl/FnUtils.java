@@ -156,6 +156,7 @@ public final class FnUtils implements Fn.Presenter {
         private String name;
         private int found;
         private ClassLoader loader;
+        private String resource;
 
         public FindInClass(ClassLoader l, ClassVisitor cv) {
             super(Opcodes.ASM4, cv);
@@ -263,6 +264,14 @@ public final class FnUtils implements Fn.Presenter {
                         "org/apidesign/html/boot/spi/Fn", "define",
                         "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
                 );
+                if (resource != null) {
+                    super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
+                    super.visitLdcInsn(resource);
+                    super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                            "org/apidesign/html/boot/spi/Fn", "preload",
+                            "(Lorg/apidesign/html/boot/spi/Fn;Ljava/lang/Class;Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
+                    );
+                }
                 super.visitInsn(Opcodes.DUP);
                 super.visitFieldInsn(
                         Opcodes.PUTSTATIC, FindInClass.this.name,
@@ -487,11 +496,11 @@ public final class FnUtils implements Fn.Presenter {
             public void visit(String attrName, Object value) {
                 String relPath = (String) value;
                 if (relPath.startsWith("/")) {
-                    loadScript(loader, relPath);
+                    resource = relPath;
                 } else {
                     int last = name.lastIndexOf('/');
                     String fullPath = name.substring(0, last + 1) + relPath;
-                    loadScript(loader, fullPath);
+                    resource = fullPath;
                 }
             }
         }
