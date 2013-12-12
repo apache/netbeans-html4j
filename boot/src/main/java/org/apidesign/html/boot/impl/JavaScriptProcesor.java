@@ -49,6 +49,8 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import org.openide.util.lookup.ServiceProvider;
@@ -100,6 +102,31 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 }
             }
         }
+        for (Element e : roundEnv.getElementsAnnotatedWith(JavaScriptResource.class)) {
+            JavaScriptResource r = e.getAnnotation(JavaScriptResource.class);
+            if (r == null) {
+                continue;
+            }
+            final String res;
+            if (r.value().startsWith("/")) {
+                res = r.value();
+            } else {
+                res = findPkg(e).replace('.', '/') + "/" + r.value();
+            }
+            
+            try {
+                FileObject os = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", res);
+                os.openInputStream().close();
+            } catch (IOException ex1) {
+                try {
+                    FileObject os2 = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", res);
+                    os2.openInputStream().close();
+                } catch (IOException ex2) {
+                    msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find " + res + " in " + res + " package", e);
+                }
+            }
+        }
+
         if (roundEnv.processingOver()) {
             generateCallbackClass(javacalls);
             javacalls.clear();
