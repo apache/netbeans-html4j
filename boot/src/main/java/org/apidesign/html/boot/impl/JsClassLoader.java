@@ -89,7 +89,7 @@ abstract class JsClassLoader extends ClassLoader {
                 }
                 is.close();
                 is = null;
-                arr = FnUtils.transform(JsClassLoader.this, arr);
+                arr = FnUtils.transform(arr, JsClassLoader.this);
                 if (arr != null) {
                     return defineClass(name, arr, 0, arr.length);
                 }

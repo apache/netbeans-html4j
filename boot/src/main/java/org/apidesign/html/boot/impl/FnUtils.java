@@ -59,12 +59,33 @@ public final class FnUtils implements Fn.Presenter {
      * postprocessing classes.
      * 
      * @param bytecode the original bytecode with javascript specific annotations
-     * @param resources the resources to load
+     * @param loader the loader to load resources (scripts and classes) when needed
      * @return the transformed bytecode
      * @since 0.7
      */
-    public static byte[] transform(byte[] bytecode, ClassLoader resources) {
-        return transform(resources, bytecode);
+    public static byte[] transform(byte[] bytecode, ClassLoader loader) {
+        ClassReader cr = new ClassReader(bytecode) {
+            // to allow us to compile with -profile compact1 on 
+            // JDK8 while processing the class as JDK7, the highest
+            // class format asm 4.1 understands to
+            @Override
+            public short readShort(int index) {
+                short s = super.readShort(index);
+                if (index == 6 && s > Opcodes.V1_7) {
+                    return Opcodes.V1_7;
+                }
+                return s;
+            }
+        };
+        FindInClass tst = new FindInClass(loader, null);
+        cr.accept(tst, 0);
+        if (tst.found > 0) {
+            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            FindInClass fic = new FindInClass(loader, w);
+            cr.accept(fic, 0);
+            bytecode = w.toByteArray();
+        }
+        return bytecode;
     }
     
     public static boolean isJavaScriptCapable(ClassLoader l) {
@@ -561,31 +582,6 @@ public final class FnUtils implements Fn.Presenter {
                 return c.getName().replace('.', '/');
             }
         }
-    }
-
-    static byte[] transform(ClassLoader loader, byte[] arr) {
-        ClassReader cr = new ClassReader(arr) {
-            // to allow us to compile with -profile compact1 on 
-            // JDK8 while processing the class as JDK7, the highest
-            // class format asm 4.1 understands to
-            @Override
-            public short readShort(int index) {
-                short s = super.readShort(index);
-                if (index == 6 && s > Opcodes.V1_7) {
-                    return Opcodes.V1_7;
-                }
-                return s;
-            }
-        };
-        FindInClass tst = new FindInClass(loader, null);
-        cr.accept(tst, 0);
-        if (tst.found > 0) {
-            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-            FindInClass fic = new FindInClass(loader, w);
-            cr.accept(fic, 0);
-            arr = w.toByteArray();
-        }
-        return arr;
     }
 
     private static final class TrueFn extends Fn {
