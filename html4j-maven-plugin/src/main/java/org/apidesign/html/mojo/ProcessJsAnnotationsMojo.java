@@ -26,9 +26,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.maven.artifact.Artifact;
@@ -73,6 +80,18 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         }
         
         if (processProvided) {
+            List<URL> arr = new ArrayList<URL>();
+            for (Artifact a : prj.getArtifacts()) {
+                final File f = a.getFile();
+                if (f != null) {
+                    try {
+                        arr.add(f.toURI().toURL());
+                    } catch (MalformedURLException ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                }
+            }
+            URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
             for (Artifact a : prj.getArtifacts()) {
                 if (!"provided".equals(a.getScope())) {
                     continue;
@@ -80,7 +99,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
                 final File f = a.getFile();
                 if (f != null) {
                     try {
-                        processClasses(f, classes);
+                        processClasses(f, classes, l);
                     } catch (IOException ex) {
                         throw new MojoExecutionException("Problem converting JavaScriptXXX annotations in " + f, ex);
                     }
@@ -143,7 +162,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         }
     }
     
-    private void processClasses(File jar, File target) throws IOException {
+    private void processClasses(File jar, File target, ClassLoader l) throws IOException {
         ZipFile zf = new ZipFile(jar);
         Enumeration<? extends ZipEntry> en = zf.entries();
         Map<String,byte[]> waiting = new HashMap<String, byte[]>();
@@ -161,7 +180,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
                 is.close();
             }
             if (ze.getName().endsWith(".class")) {
-                byte[] newArr = FnUtils.transform(arr, null);
+                byte[] newArr = FnUtils.transform(arr, l);
                 if (newArr == null || newArr == arr) {
                     waiting.put(ze.getName(), arr);
                     continue;

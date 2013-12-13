@@ -63,8 +63,8 @@ public final class FnUtils implements Fn.Presenter {
      * @return the transformed bytecode
      * @since 0.7
      */
-    public static byte[] transform(byte[] bytecode, Map<String,InputStream> resources) {
-        return transform(null, bytecode);
+    public static byte[] transform(byte[] bytecode, ClassLoader resources) {
+        return transform(resources, bytecode);
     }
     
     public static boolean isJavaScriptCapable(ClassLoader l) {
