@@ -51,6 +51,12 @@ public class JavaScriptBodyTest {
         assert r == p : "The object is the same";
     }
 
+    @KOTest public void encodingString() {
+        Object p = "Ji\n\"Hi\"\nHon";
+        Object r = Bodies.id(p);
+        assert p.equals(r) : "The object is the same: " + p + " != " + r;
+    }
+
     @KOTest public void nullIsNull() {
         Object p = null;
         Object r = Bodies.id(p);
@@ -94,6 +100,9 @@ public class JavaScriptBodyTest {
 //        assert "Hello".equals(arr[0]) : "Expecting World, but was: " + arr[0];
 //    }
 
+    @KOTest public void truth() {
+        assert Bodies.truth() : "True is true";
+    }
     private static class R implements Runnable {
         int cnt;
         private final Thread initThread;

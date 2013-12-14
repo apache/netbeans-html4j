@@ -60,4 +60,7 @@ final class Bodies {
 
     @JavaScriptBody(args = { "arr", "i", "value" }, body = "arr[i] = value;")
     public static native void modify(String[] arr, int i, String value);
+    
+    @JavaScriptBody(args = {}, body = "return true;")
+    public static native boolean truth();
 }
