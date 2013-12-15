@@ -43,6 +43,9 @@ final class Bodies {
     
     @JavaScriptBody(args = { "v" }, body = "return { 'x' : v };")
     public static native Object instance(int v);
+    
+    @JavaScriptBody(args = "o", body = "o.x++;")
+    public static native void incrementX(Object o);
 
     @JavaScriptBody(args = "o", body = "return o.x;")
     public static native int readX(Object o);

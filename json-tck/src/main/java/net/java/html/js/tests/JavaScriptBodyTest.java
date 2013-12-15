@@ -38,6 +38,13 @@ public class JavaScriptBodyTest {
         int ten = Bodies.readX(o);
         assert ten == 10 : "Expecting ten: " + ten;
     }
+
+    @KOTest public void callWithNoReturnType() {
+        Object o = Bodies.instance(10);
+        Bodies.incrementX(o);
+        int ten = Bodies.readX(o);
+        assert ten == 11 : "Expecting eleven: " + ten;
+    }
     
     @KOTest public void callbackToRunnable() {
         R run = new R();
