@@ -51,6 +51,17 @@ public class JavaScriptBodyTest {
         Bodies.callback(run);
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
     }
+
+    @KOTest public void doubleCallbackToRunnable() {
+        final R run = new R();
+        class First implements Runnable {
+            @Override public void run() {
+                Bodies.callback(run);
+            }
+        }
+        Bodies.callback(new First());
+        assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
+    }
     
     @KOTest public void identity() {
         Object p = new Object();
