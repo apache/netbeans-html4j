@@ -49,7 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
-import org.apidesign.html.json.impl.JSON;
+import org.netbeans.html.json.impl.JSON;
 import org.apidesign.html.json.tck.KOTest;
 
 /**

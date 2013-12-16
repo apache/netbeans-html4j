@@ -46,7 +46,7 @@ import net.java.html.BrwsrCtx;
 import java.util.Map;
 import net.java.html.json.MapModelTest.One;
 import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.impl.WrapperObject;
+import org.netbeans.html.json.impl.WrapperObject;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.testng.annotations.BeforeMethod;

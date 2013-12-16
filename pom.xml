@@ -92,7 +92,7 @@
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>ko-archetype/src/main/resources/**</exclude>
-                       <exclude>ko-fx/src/main/resources/org/apidesign/html/kofx/knockout*.js</exclude>
+                       <exclude>ko-fx/src/main/resources/org/netbeans/html/kofx/knockout*.js</exclude>
                   </excludes>
               </configuration>
           </plugin>

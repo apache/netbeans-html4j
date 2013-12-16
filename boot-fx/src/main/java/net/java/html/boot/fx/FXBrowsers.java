@@ -49,7 +49,7 @@ import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.boot.fx.AbstractFXPresenter;
+import org.netbeans.html.boot.fx.AbstractFXPresenter;
 
 /** Utility methods for working with <em>JavaFX</em> <code>WebView</code>s.
  *

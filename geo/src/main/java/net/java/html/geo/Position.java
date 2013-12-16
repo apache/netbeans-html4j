@@ -44,7 +44,7 @@ package net.java.html.geo;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apidesign.html.geo.impl.JsG;
+import org.netbeans.html.geo.impl.JsG;
 
 /** Class that represents a geolocation position provided as a callback
  * to {@link Handle#onLocation(net.java.html.geo.Position)} method. The

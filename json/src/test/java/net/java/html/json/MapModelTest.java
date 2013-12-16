@@ -49,7 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.impl.WrapperObject;
+import org.netbeans.html.json.impl.WrapperObject;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;

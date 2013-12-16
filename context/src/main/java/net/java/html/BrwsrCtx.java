@@ -44,8 +44,8 @@ package net.java.html;
 
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import org.apidesign.html.context.impl.CtxAccssr;
-import org.apidesign.html.context.impl.CtxImpl;
+import org.netbeans.html.context.impl.CtxAccssr;
+import org.netbeans.html.context.impl.CtxImpl;
 import org.apidesign.html.context.spi.Contexts;
 
 /** Represents context where the <code>net.java.html.json.Model</code>

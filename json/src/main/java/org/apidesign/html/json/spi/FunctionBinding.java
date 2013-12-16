@@ -44,7 +44,7 @@ package org.apidesign.html.json.spi;
 
 import net.java.html.json.Function;
 import net.java.html.json.Model;
-import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
+import org.netbeans.html.json.impl.PropertyBindingAccessor.FBData;
 
 /** Describes a function provided by the {@link Model} and 
  * annotated by {@link Function} annotation.

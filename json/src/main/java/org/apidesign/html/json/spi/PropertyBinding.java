@@ -43,10 +43,10 @@
 package org.apidesign.html.json.spi;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.json.impl.PropertyBindingAccessor;
-import org.apidesign.html.json.impl.PropertyBindingAccessor.PBData;
-import org.apidesign.html.json.impl.RcvrJSON;
-import org.apidesign.html.json.impl.WrapperObject;
+import org.netbeans.html.json.impl.PropertyBindingAccessor;
+import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
+import org.netbeans.html.json.impl.RcvrJSON;
+import org.netbeans.html.json.impl.WrapperObject;
 
 /** Describes a property when one is asked to 
  * bind it 

@@ -45,8 +45,8 @@ package org.apidesign.html.json.spi;
 import java.io.IOException;
 import java.io.OutputStream;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.json.impl.JSON;
-import org.apidesign.html.json.impl.RcvrJSON;
+import org.netbeans.html.json.impl.JSON;
+import org.netbeans.html.json.impl.RcvrJSON;
 
 /** Description of a JSON call request that is supposed to be processed
  * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.

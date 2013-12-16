@@ -51,9 +51,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.boot.impl.FnContext;
+import org.netbeans.html.boot.impl.FnContext;
 
 /** Represents single JavaScript function that can be invoked. 
  * Created via {@link Presenter#defineFn(java.lang.String, java.lang.String...)}.

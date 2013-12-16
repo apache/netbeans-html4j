@@ -95,7 +95,7 @@ public class FXBrowsersOnResourceTest {
             }
             
             private void doTest() throws Throwable {
-                URL u = FXBrowsersOnResourceTest.class.getResource("/org/apidesign/html/boot/fx/empty.html");
+                URL u = FXBrowsersOnResourceTest.class.getResource("/org/netbeans/html/boot/fx/empty.html");
                 assertNotNull(u, "URL found");
                 FXBrowsers.load(App.getV1(), u, OnPages.class, "first");
                 
@@ -131,7 +131,7 @@ public class FXBrowsersOnResourceTest {
             
             assertEquals(increment(), 1, "Now it is one");
             
-            URL u = FXBrowsersOnResourceTest.class.getResource("/org/apidesign/html/boot/fx/empty.html");
+            URL u = FXBrowsersOnResourceTest.class.getResource("/org/netbeans/html/boot/fx/empty.html");
             assertNotNull(u, "URL found");
             FXBrowsers.load(App.getV2(), u, OnPages.class, "second", "Hello");
             

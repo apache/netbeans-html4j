@@ -43,7 +43,7 @@
 package org.apidesign.html.context.spi;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.impl.CtxImpl;
+import org.netbeans.html.context.impl.CtxImpl;
 
 /**
  *
