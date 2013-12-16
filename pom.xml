@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apidesign</groupId>
-  <artifactId>html</artifactId>
+  <groupId>org.netbeans.html</groupId>
+  <artifactId>pom</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
@@ -38,8 +38,8 @@
       </license>
   </licenses>
   <organization>
-      <name>API Design</name>
-      <url>http://apidesign.org</url>
+      <name>NetBeans</name>
+      <url>http://netbeans.org</url>
   </organization>
   <scm>
       <connection>scm:hg:https://hg.apidesign.org/hg/html~html4j</connection>
