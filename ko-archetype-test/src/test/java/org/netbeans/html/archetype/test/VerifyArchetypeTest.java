@@ -82,10 +82,10 @@ public class VerifyArchetypeTest {
         v.deleteDirectory("");
         dir.mkdirs();
         Properties sysProp = v.getSystemProperties();
-        sysProp.put("groupId", "org.apidesign.test");
+        sysProp.put("groupId", "org.someuser.test");
         sysProp.put("artifactId", "o-a-test");
-        sysProp.put("package", "org.apidesign.test.oat");
-        sysProp.put("archetypeGroupId", "org.apidesign.html");
+        sysProp.put("package", "org.someuser.test.oat");
+        sysProp.put("archetypeGroupId", "org.netbeans.html");
         sysProp.put("archetypeArtifactId", "knockout4j-archetype");
         sysProp.put("archetypeVersion", ArchetypeVersionTest.findCurrentVersion());
         

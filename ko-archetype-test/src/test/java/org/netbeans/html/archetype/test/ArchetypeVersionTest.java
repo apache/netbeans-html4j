@@ -106,8 +106,8 @@ public class ArchetypeVersionTest {
         
         for (int i = 0; i < goals.getLength(); i++) {
             String s = goals.item(i).getTextContent();
-            if (s.contains("apidesign")) {
-                assertFalse(s.matches(".*apidesign.*[0-9].*"), "No numbers: " + s);
+            if (s.contains("netbeans")) {
+                assertFalse(s.matches(".*netbeans.*[0-9].*"), "No numbers: " + s);
             }
         }
     }
