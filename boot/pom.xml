@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apidesign</groupId>
-    <artifactId>html</artifactId>
+    <groupId>org.netbeans.html</groupId>
+    <artifactId>pom</artifactId>
     <version>0.7-SNAPSHOT</version>
   </parent>
-  <groupId>org.apidesign.html</groupId>
+  <groupId>org.netbeans.html</groupId>
   <artifactId>net.java.html.boot</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -23,7 +23,7 @@
               <artifactId>maven-bundle-plugin</artifactId>
               <configuration>
                   <instructions>
-                      <Agent-Class>org.apidesign.html.boot.impl.JsAgent</Agent-Class>
+                      <Agent-Class>org.netbeans.html.boot.impl.JsAgent</Agent-Class>
                   </instructions>
               </configuration>
           </plugin>

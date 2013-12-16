@@ -101,24 +101,24 @@
   </build>
   <dependencies>
     <dependency>
-        <groupId>org.apidesign.html</groupId>
+        <groupId>org.netbeans.html</groupId>
         <artifactId>net.java.html.json</artifactId>
         <version>\${net.java.html.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.apidesign.html</groupId>
+        <groupId>org.netbeans.html</groupId>
         <artifactId>net.java.html.boot</artifactId>
         <version>\${net.java.html.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.apidesign.html</groupId>
+        <groupId>org.netbeans.html</groupId>
         <artifactId>ko-fx</artifactId>
         <version>\${net.java.html.version}</version>
         <scope>runtime</scope>
     </dependency>
     <dependency>
-        <groupId>org.apidesign.html</groupId>
-        <artifactId>boot-fx</artifactId>
+        <groupId>org.netbeans.html</groupId>
+        <artifactId>net.java.html.boot.fx</artifactId>
         <version>\${net.java.html.version}</version>
         <scope>runtime</scope>
     </dependency>
