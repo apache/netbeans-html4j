@@ -32,8 +32,8 @@
   </modules>
   <licenses>
       <license>
-          <name>GPL-2.0wCPexc</name>
-          <url>http://opensource.org/licenses/GPL-2.0</url>
+          <name>GPL-2.0wCPexc+CDDL</name>
+          <url>http://www.netbeans.org/cddl-gplv2.html</url>
           <distribution>repo</distribution>
       </license>
   </licenses>
