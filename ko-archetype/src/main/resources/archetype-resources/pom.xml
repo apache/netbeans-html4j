@@ -118,7 +118,7 @@
     </dependency>
     <dependency>
         <groupId>org.netbeans.html</groupId>
-        <artifactId>boot-fx</artifactId>
+        <artifactId>net.java.html.boot.fx</artifactId>
         <version>\${net.java.html.version}</version>
         <scope>runtime</scope>
     </dependency>

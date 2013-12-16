@@ -7,7 +7,7 @@
     <version>0.7-SNAPSHOT</version>
   </parent>
   <groupId>org.netbeans.html</groupId>
-  <artifactId>boot-fx</artifactId>
+  <artifactId>net.java.html.boot.fx</artifactId>
   <version>0.7-SNAPSHOT</version>
   <name>FX WebView Bootstrap</name>
   <packaging>bundle</packaging>

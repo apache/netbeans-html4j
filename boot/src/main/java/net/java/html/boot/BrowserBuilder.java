@@ -82,8 +82,8 @@ import org.apidesign.html.boot.impl.FnContext;
  * also needs an implementation on the classpath of one's application. For example
  * use: <pre>
  * &lt;dependency&gt;
- *   &lt;groupId&gt;org.apidesign.html&lt;/groupId&gt;
- *   &lt;artifactId&gt;boot-fx&lt;/artifactId&gt;
+ *   &lt;groupId&gt;org.netbeans.html&lt;/groupId&gt;
+ *   &lt;artifactId&gt;net.java.html.boot.fx&lt;/artifactId&gt;
  *   &lt;scope&gt;runtime&lt;/scope&gt;
  * &lt;/dependency&gt;
  * </pre>

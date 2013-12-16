@@ -14,6 +14,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <bundleSymbolicName>org.netbeans.html.ko-fx</bundleSymbolicName>
   </properties>
   <build>
       <plugins>
@@ -80,7 +81,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>boot-fx</artifactId>
+      <artifactId>net.java.html.boot.fx</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

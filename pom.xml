@@ -16,6 +16,7 @@
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
       <publicPackages></publicPackages>
+      <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
   </properties>
   <modules>
     <module>json</module>
@@ -139,7 +140,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>${publicPackages},META-INF.services.*</Export-Package>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
             </plugin>
