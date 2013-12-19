@@ -52,15 +52,31 @@ public class JavaScriptBodyTest {
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
     }
 
+    @KOTest public void computeInARunnable() {
+        final int[] sum = new int[2];
+        class First implements Runnable {
+            @Override public void run() {
+                sum[0] = Bodies.sum(22, 20);
+                sum[1] = Bodies.sum(32, 10);
+            }
+        }
+        Bodies.callback(new First());
+        assert sum[0] == 42 : "Computed OK " + sum[0];
+        assert sum[1] == 42 : "Computed OK too: " + sum[1];
+    }
+    
     @KOTest public void doubleCallbackToRunnable() {
         final R run = new R();
+        final R r2 = new R();
         class First implements Runnable {
             @Override public void run() {
                 Bodies.callback(run);
+                Bodies.callback(r2);
             }
         }
         Bodies.callback(new First());
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
+        assert r2.cnt == 1 : "Can call even private implementation classes: " + r2.cnt;
     }
     
     @KOTest public void identity() {
