@@ -137,6 +137,27 @@ public class JavaScriptBodyTest {
     @KOTest public void truth() {
         assert Bodies.truth() : "True is true";
     }
+    
+    @KOTest public void factorial2() {
+        assert new Factorial().factorial(2) == 2;
+    }
+    
+    @KOTest public void factorial3() {
+        assert new Factorial().factorial(3) == 6;
+    }
+    
+    @KOTest public void factorial4() {
+        assert new Factorial().factorial(4) == 24;
+    }
+    
+    @KOTest public void factorial5() {
+        assert new Factorial().factorial(5) == 120;
+    }
+    
+    @KOTest public void factorial6() {
+        assert new Factorial().factorial(6) == 720;
+    }
+    
     private static class R implements Runnable {
         int cnt;
         private final Thread initThread;
