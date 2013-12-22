@@ -9,6 +9,19 @@
     <artifactId>ko-osgi-test</artifactId>
     <packaging>jar</packaging>
     <description>Runs the TCK for Knockout in an OSGi Container</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>com.oracle</groupId>
