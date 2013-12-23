@@ -107,8 +107,8 @@ public final class Proto {
                     type.functions[i], i, obj, type
                 );
             }
-            b.finish(obj, pb, fb);
             ko = b;
+            b.finish(obj, pb, fb);
         }
         return ko;
     }
