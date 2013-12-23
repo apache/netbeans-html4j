@@ -42,7 +42,6 @@
  */
 package org.netbeans.html.json.impl;
 
-import org.netbeans.html.json.impl.JSON;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 

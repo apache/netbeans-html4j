@@ -396,10 +396,10 @@ public final class ModelProcessor extends AbstractProcessor {
                         } else if (isEnum[0]) {
                             w.append("        this.prop_").append(pn);
                             w.append(".add(e == null ? null : ");
-                            w.append(type).append(".valueOf(org.netbeans.html.json.impl.JSON.stringValue(e)));\n");
+                            w.append(type).append(".valueOf(TYPE.stringValue(e)));\n");
                         } else {
                             if (isPrimitive(type)) {
-                                w.append("        this.prop_").append(pn).append(".add(org.netbeans.html.json.impl.JSON.numberValue(e).");
+                                w.append("        this.prop_").append(pn).append(".add(TYPE.numberValue(e).");
                                 w.append(type).append("Value());\n");
                             } else {
                                 w.append("        this.prop_").append(pn).append(".add((");
@@ -413,7 +413,7 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.append("    try {\n");
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? null : ");
-                            w.append(type).append(".valueOf(org.netbeans.html.json.impl.JSON.stringValue(ret[" + cnt + "]));\n");
+                            w.append(type).append(".valueOf(TYPE.stringValue(ret[" + cnt + "]));\n");
                             w.append("    } catch (IllegalArgumentException ex) {\n");
                             w.append("      ex.printStackTrace();\n");
                             w.append("    }\n");
@@ -421,11 +421,11 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.append("    this.prop_").append(pn);
                             w.append(" = ret[" + cnt + "] == null ? ");
                             if ("char".equals(type)) {
-                                w.append("0 : (org.netbeans.html.json.impl.JSON.charValue(");
+                                w.append("0 : (TYPE.charValue(");
                             } else if ("boolean".equals(type)) {
-                                w.append("false : (org.netbeans.html.json.impl.JSON.boolValue(");
+                                w.append("false : (TYPE.boolValue(");
                             } else {
-                                w.append("0 : (org.netbeans.html.json.impl.JSON.numberValue(");
+                                w.append("0 : (TYPE.numberValue(");
                             }
                             w.append("ret[" + cnt + "])).");
                             w.append(type).append("Value();\n");
@@ -464,14 +464,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    if (!(o instanceof " + className + ")) return false;\n");
                 w.write("    " + className + " p = (" + className + ")o;\n");
                 for (Prprt p : props) {
-                    w.write("    if (!org.netbeans.html.json.impl.JSON.isSame(prop_" + p.name() + ", p.prop_" + p.name() + ")) return false;\n");
+                    w.write("    if (!TYPE.isSame(prop_" + p.name() + ", p.prop_" + p.name() + ")) return false;\n");
                 }
                 w.write("    return true;\n");
                 w.write("  }\n");
                 w.write("  public int hashCode() {\n");
                 w.write("    int h = " + className + ".class.getName().hashCode();\n");
                 for (Prprt p : props) {
-                    w.write("    h = org.netbeans.html.json.impl.JSON.hashPlus(prop_" + p.name() + ", h);\n");
+                    w.write("    h = TYPE.hashPlus(prop_" + p.name() + ", h);\n");
                 }
                 w.write("    return h;\n");
                 w.write("  }\n");
@@ -517,7 +517,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
                 w.write("    proto.checkLock();\n");
-                w.write("    if (org.netbeans.html.json.impl.JSON.isSame(prop_" + p.name() + ", v)) return;\n");
+                w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
                 w.write("    prop_" + p.name() + " = v;\n");
                 w.write("    proto.valueHasMutated(\"" + p.name() + "\");\n");
                 Collection<String> dependants = deps.get(p.name());
@@ -1221,18 +1221,18 @@ public final class ModelProcessor extends AbstractProcessor {
                     params.append('"').append(id).append('"');
                     continue;
                 }
-                toCall = "org.netbeans.html.json.impl.JSON.toString(proto.getContext(), ";
+                toCall = "proto.toString(";
             }
             if (ve.asType().getKind() == TypeKind.DOUBLE) {
-                toCall = "org.netbeans.html.json.impl.JSON.toNumber(proto.getContext(), ";
+                toCall = "proto.toNumber(";
                 toFinish = ".doubleValue()";
             }
             if (ve.asType().getKind() == TypeKind.INT) {
-                toCall = "org.netbeans.html.json.impl.JSON.toNumber(proto.getContext(), ";
+                toCall = "proto.toNumber(";
                 toFinish = ".intValue()";
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
-                toCall = "org.netbeans.html.json.impl.JSON.toModel(proto.getContext(), " + ve.asType() + ".class, ";
+                toCall = "proto.toModel(" + ve.asType() + ".class, ";
             }
 
             if (toCall != null) {
@@ -1341,7 +1341,7 @@ public final class ModelProcessor extends AbstractProcessor {
             w.write(sep);
             w.append("    sb.append('\"').append(\"" + p.name() + "\")");
                 w.append(".append('\"').append(\":\");\n");
-            w.append("    sb.append(org.netbeans.html.json.impl.JSON.toJSON(prop_");
+            w.append("    sb.append(TYPE.toJSON(prop_");
             w.append(p.name()).append("));\n");
             sep =    "    sb.append(',');\n";
         }

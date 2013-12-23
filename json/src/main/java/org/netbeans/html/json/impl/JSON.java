@@ -97,7 +97,7 @@ public final class JSON {
         return val[0];
     }
 
-    public static Object toJSON(Object value) {
+    public static String toJSON(Object value) {
         if (value == null) {
             return "null";
         }
@@ -199,7 +199,7 @@ public final class JSON {
         return type.cast(val);
     }
     
-    protected static boolean isNumeric(Object val) {
+    static boolean isNumeric(Object val) {
         return ((val instanceof Integer) || (val instanceof Long) || (val instanceof Short) || (val instanceof Byte));
     }
     
@@ -218,7 +218,7 @@ public final class JSON {
         }
         return (String)val;
     }
-
+    
     public static Number numberValue(Object val) {
         if (val instanceof String) {
             try {
