@@ -455,7 +455,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  public boolean equals(Object o) {\n");
                 w.write("    if (o == this) return true;\n");
                 w.write("    if (o instanceof org.netbeans.html.json.impl.WrapperObject) {\n");
-//                w.write("      ((org.netbeans.html.json.impl.WrapperObject)o).setRealObject(intKnckt().koData());\n");
+                w.write("      ((org.netbeans.html.json.impl.WrapperObject)o).setRealObject(proto.initBindings().koData());\n");
                 w.write("      return false;\n");
                 w.write("    }\n");
                 w.write("    if (!(o instanceof " + className + ")) return false;\n");
