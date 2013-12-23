@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import net.java.html.BrwsrCtx;
+import org.apidesign.html.json.spi.Proto;
 
 /**
  *
@@ -57,12 +58,11 @@ import net.java.html.BrwsrCtx;
 public final class JSONList<T> extends ArrayList<T> {
     private final String name;
     private final String[] deps;
-    private Bindings[] model;
+    private Proto proto;
     private Runnable onchange;
 
-    public JSONList(Bindings[] model, String name, String... deps) {
-        assert model.length == 1;
-        this.model = model;
+    public JSONList(Proto proto, String name, String... deps) {
+        this.proto = proto;
         this.name = name;
         this.deps = deps;
     }
@@ -71,9 +71,9 @@ public final class JSONList<T> extends ArrayList<T> {
         if (values == null || values.length == 0) {
             return;
         }
-        if (this.model[0] != null || !isEmpty()) {
-            throw new IllegalStateException();
-        }
+//        if (this.model[0] != null || !isEmpty()) {
+//            throw new IllegalStateException();
+//        }
         super.addAll(Arrays.asList(values));
     }
     
@@ -82,9 +82,9 @@ public final class JSONList<T> extends ArrayList<T> {
         if (values == null || (len = Array.getLength(values)) == 0) {
             return;
         }
-        if (this.model[0] != null || !isEmpty()) {
-            throw new IllegalStateException();
-        }
+//        if (this.model[0] != null || !isEmpty()) {
+//            throw new IllegalStateException();
+//        }
         for (int i = 0; i < len; i++) {
             Object data = Array.get(values, i);
             super.add((T)data);
@@ -187,7 +187,7 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     private void notifyChange() {
-        Bindings m = model[0];
+        Bindings m = proto.getBindings();
         if (m != null) {
             m.valueHasMutated(name);
             for (String dependant : deps) {
@@ -231,6 +231,6 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     final Object koData() {
-        return koData(this, model[0]);
+        return koData(this, proto.getBindings());
     }
 }

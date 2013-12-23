@@ -83,6 +83,8 @@
 package org.apidesign.html.json.spi;
 
 import net.java.html.BrwsrCtx;
+import org.netbeans.html.json.impl.Bindings;
+import org.netbeans.html.json.impl.JSON;
 
 /**
  *
@@ -90,12 +92,14 @@ import net.java.html.BrwsrCtx;
  * @since 0.7
  */
 public final class Proto {
+    private final Object obj;
     private final Type type;
     private final net.java.html.BrwsrCtx context;
     private boolean locked;
-    private org.netbeans.html.json.impl.Bindings[] ko = { null };
+    private org.netbeans.html.json.impl.Bindings ko;
 
-    Proto(Type type, BrwsrCtx context) {
+    Proto(Object obj, Type type, BrwsrCtx context) {
+        this.obj = obj;
         this.type = type;
         this.context = context;
     }
@@ -118,10 +122,38 @@ public final class Proto {
     }
     
     public void valueHasMutated(String propName) {
-        
+        if (ko != null) {
+            ko.valueHasMutated(propName);
+        }
     }
     
     public void applyBindings() {
+        initBindings().applyBindings();
+    }
+    
+    private Bindings initBindings() {
+        if (ko == null) {
+            Bindings b = Bindings.apply(context, obj);
+            PropertyBinding[] pb = new PropertyBinding[type.propertyNames.length];
+            for (int i = 0; i < pb.length; i++) {
+                pb[i] = b.registerProperty(
+                    type.propertyNames[i], i, obj, type, type.propertyReadOnly[i]
+                );
+            }
+            FunctionBinding[] fb = new FunctionBinding[type.functions.length];
+            for (int i = 0; i < fb.length; i++) {
+                fb[i] = b.registerFunction(
+                    type.functions[i], i, obj, type
+                );
+            }
+            b.finish(obj, pb, fb);
+            ko = b;
+        }
+        return ko;
+    }
+
+    public Bindings getBindings() {
+        return ko;
     }
     
     
@@ -140,12 +172,13 @@ public final class Proto {
         protected Type(
             Class<Model> clazz, Class<?> modelFor, int properties, int functions
         ) {
-            assert clazz.getName().endsWith("$Html4JavaType");
-            assert clazz.getDeclaringClass() == clazz;
+            assert getClass().getName().endsWith("$Html4JavaType");
+            assert getClass().getDeclaringClass() == clazz;
             this.clazz = clazz;
             this.propertyNames = new String[properties];
             this.propertyReadOnly = new boolean[properties];
             this.functions = new String[functions];
+            JSON.register(clazz, this);
         }
         
         protected final void registerProperty(String name, int index, boolean readOnly) {
@@ -159,12 +192,15 @@ public final class Proto {
             functions[index] = name;
         }
         
-        public Proto protoFor(BrwsrCtx context) {
-            return new Proto(this, context);
+        public Proto protoFor(Object obj, BrwsrCtx context) {
+            return new Proto(obj, this, context);
         }
         
-        protected abstract void setValue(Model model, int index, Object value);
-        protected abstract Object getValue(Model model, int index);
-        protected abstract void call(Model model, int index, Object data, Object event);
+        // XXX: should be protected
+        public abstract void setValue(Model model, int index, Object value);
+        public abstract Object getValue(Model model, int index);
+        public abstract void call(Model model, int index, Object data, Object event);
+        public abstract Model cloneTo(Object model, BrwsrCtx ctx);
+        public abstract Model read(BrwsrCtx c, Object json);
     }
 }

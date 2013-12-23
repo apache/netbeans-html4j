@@ -218,22 +218,46 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
-                w.append("    this.proto = TYPE.protoFor(context);\n");
+                w.append("    this.proto = TYPE.protoFor(this, context);\n");
+                for (Prprt p : props) {
+                    if (p.array()) {
+                        final String tn = typeName(e, p);
+                        String[] gs = toGetSet(p.name(), tn, p.array());
+                        w.write("    this.prop_" + p.name() + " = new org.netbeans.html.json.impl.JSONList<" + tn + ">(proto, \""
+                            + p.name() + "\"");
+                        Collection<String> dependants = propsDeps.get(p.name());
+                        if (dependants != null) {
+                            for (String depProp : dependants) {
+                                w.write(", ");
+                                w.write('\"');
+                                w.write(depProp);
+                                w.write('\"');
+                            }
+                        }
+                        w.write(")");
+
+                        dependants = functionDeps.get(p.name());
+                        if (dependants != null) {
+                            w.write(".onChange(new Runnable() { public void run() {\n");
+                            for (String call : dependants) {
+                                w.append("  ").append(call);
+                            }
+                            w.write("  }})");
+                        }
+                        w.write(";\n");
+                    } else {
+                        boolean[] isModel = {false};
+                        boolean[] isEnum = {false};
+                        boolean isPrimitive[] = {false};
+                        String tn = checkType(p, isModel, isEnum, isPrimitive);
+                        if (isModel[0]) {
+                            w.write("    prop_" + p.name() + " = new " + tn + "();\n");
+                        }
+                    }
+                }
                 w.append("  };\n");
                 w.append("  public ").append(className).append("() {\n");
                 w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
-                for (Prprt p : props) {
-                    if (p.array()) {
-                        continue;
-                    }
-                    boolean[] isModel = {false};
-                    boolean[] isEnum = {false};
-                    boolean isPrimitive[] = {false};
-                    String tn = checkType(p, isModel, isEnum, isPrimitive);
-                    if (isModel[0]) {
-                        w.write("    prop_" + p.name() + " = new " + tn + "();\n");
-                    }
-                }
                 w.append("  };\n");
                 if (props.length > 0) {
                     w.append("  public ").append(className).append("(");
@@ -292,7 +316,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.append("    }\n");
-                w.append("    @Override protected void setValue(" + className + " data, int type, Object value) {\n");
+                w.append("    @Override public void setValue(" + className + " data, int type, Object value) {\n");
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String set = propsGetSet.get(i + 2);
@@ -307,7 +331,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("      }\n");
                 w.append("    }\n");
-                w.append("    @Override protected Object getValue(" + className + " data, int type) {\n");
+                w.append("    @Override public Object getValue(" + className + " data, int type) {\n");
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < propsGetSet.size(); i += 5) {
                     final String get = propsGetSet.get(i + 1);
@@ -318,7 +342,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
-                w.append("    @Override protected void call(" + className + " model, int type, Object data, Object ev) {\n");
+                w.append("    @Override public void call(" + className + " model, int type, Object data, Object ev) {\n");
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < functions.size(); i += 2) {
                     final String name = functions.get(i);
@@ -327,8 +351,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
-                w.append("    protected " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
-                w.append("    protected " + className + " cloneTo(Object o, net.java.html.BrwsrCtx c) { return ((" + className + ")o).clone(c); }\n");
+                w.append("    @Override public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
+                w.append("    @Override public " + className + " cloneTo(Object o, net.java.html.BrwsrCtx c) { return ((" + className + ")o).clone(c); }\n");
                 w.append("  }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx c, Object json) {\n");
                 w.append("    this(c);\n");
@@ -431,7 +455,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  public boolean equals(Object o) {\n");
                 w.write("    if (o == this) return true;\n");
                 w.write("    if (o instanceof org.netbeans.html.json.impl.WrapperObject) {\n");
-                w.write("      ((org.netbeans.html.json.impl.WrapperObject)o).setRealObject(intKnckt().koData());\n");
+//                w.write("      ((org.netbeans.html.json.impl.WrapperObject)o).setRealObject(intKnckt().koData());\n");
                 w.write("      return false;\n");
                 w.write("    }\n");
                 w.write("    if (!(o instanceof " + className + ")) return false;\n");
@@ -474,28 +498,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String castTo;
             
             if (p.array()) {
-                w.write("  private org.netbeans.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + " = new org.netbeans.html.json.impl.JSONList<" + tn + ">(ko, \""
-                    + p.name() + "\"");
-                Collection<String> dependants = deps.get(p.name());
-                if (dependants != null) {
-                    for (String depProp : dependants) {
-                        w.write(", ");
-                        w.write('\"');
-                        w.write(depProp);
-                        w.write('\"');
-                    }
-                }
-                w.write(")");
-                
-                dependants = functionDeps.get(p.name());
-                if (dependants != null) {
-                    w.write(".onChange(new Runnable() { public void run() {\n");
-                    for (String call : dependants) {
-                        w.append("  ").append(call);
-                    }
-                    w.write("  }})");
-                }
-                w.write(";\n");
+                w.write("  private final org.netbeans.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + ";\n");
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");

@@ -46,6 +46,7 @@ import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
+import org.apidesign.html.json.spi.Proto;
 
 /**
  *
@@ -88,23 +89,25 @@ public abstract class PropertyBindingAccessor {
         public final String name;
         public final boolean readOnly;
         private final M model;
-        private final SetAndGet<M> access;
+        private final Proto.Type<M> access;
         private final Bindings<?> bindings;
+        private final int index;
 
-        public PBData(Bindings<?> bindings, String name, M model, SetAndGet<M> access, boolean readOnly) {
+        public PBData(Bindings<?> bindings, String name, int index, M model, Proto.Type<M> access, boolean readOnly) {
             this.bindings = bindings;
             this.name = name;
+            this.index = index;
             this.model = model;
             this.access = access;
             this.readOnly = readOnly;
         }
 
         public void setValue(Object v) {
-            access.setValue(model, v);
+            access.setValue(model, index, v);
         }
 
         public Object getValue() {
-            return access.getValue(model);
+            return access.getValue(model, index);
         }
 
         public boolean isReadOnly() {
@@ -119,17 +122,19 @@ public abstract class PropertyBindingAccessor {
     public static final class FBData<M> {
         public final String name;
         private final M model;
-        private final Callback<M> access;
+        private final Proto.Type<M> access;
+        private final int index;
 
-        public FBData(String name, M model, Callback<M> access) {
+        public FBData(String name, int index, M model, Proto.Type<M> access) {
             this.name = name;
+            this.index = index;
             this.model = model;
             this.access = access;
         }
 
 
         public void call(Object data, Object ev) {
-            access.call(model, data, ev);
+            access.call(model, index, data, ev);
         }
     } // end of FBData
 }

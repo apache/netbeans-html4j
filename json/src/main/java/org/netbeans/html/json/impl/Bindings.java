@@ -42,12 +42,13 @@
  */
 package org.netbeans.html.json.impl;
 
-import org.apidesign.html.json.spi.PropertyBinding;
 import net.java.html.BrwsrCtx;
+import org.apidesign.html.json.spi.FunctionBinding;
+import org.apidesign.html.json.spi.PropertyBinding;
+import org.apidesign.html.json.spi.Proto;
+import org.apidesign.html.json.spi.Technology;
 import org.netbeans.html.json.impl.PropertyBindingAccessor.FBData;
 import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
-import org.apidesign.html.json.spi.FunctionBinding;
-import org.apidesign.html.json.spi.Technology;
 
 /**
  *
@@ -61,12 +62,12 @@ public final class Bindings<Data> {
         this.bp = bp;
     }
     
-    public <M> PropertyBinding registerProperty(String propName, M model, SetAndGet<M> access, boolean readOnly) {
-        return PropertyBindingAccessor.create(new PBData<M>(this, propName, model, access, readOnly));
+    public <M> PropertyBinding registerProperty(String propName, int index, M model, Proto.Type<M> access, boolean readOnly) {
+        return PropertyBindingAccessor.create(new PBData<M>(this, propName, index, model, access, readOnly));
     }
 
-    public <M> FunctionBinding registerFunction(String name, M model, Callback<M> access) {
-        return PropertyBindingAccessor.createFunction(new FBData<M>(name, model, access));
+    public <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
+        return PropertyBindingAccessor.createFunction(new FBData<M>(name, index, model, access));
     }
     
     public static Bindings<?> apply(BrwsrCtx c, Object model) {
