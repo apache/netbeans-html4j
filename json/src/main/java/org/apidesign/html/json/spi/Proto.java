@@ -91,6 +91,10 @@ public final class Proto {
         initBindings().applyBindings();
     }
     
+    public void runInBrowser(Runnable run) {
+        JSON.runInBrowser(context, run);
+    }
+    
     // XXX: Don't expose internal type
     public Bindings initBindings() {
         if (ko == null) {

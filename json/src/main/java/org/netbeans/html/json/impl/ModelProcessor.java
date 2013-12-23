@@ -329,7 +329,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         tn = btn;
                     }
                     if (set != null) {
-                        w.append("        case " + (i / 5) + ": data." + strip(set) + "(org.netbeans.html.json.impl.JSON.extractValue(" + tn + ".class, value)); return;\n");
+                        w.append("        case " + (i / 5) + ": data." + strip(set) + "(TYPE.extractValue(" + tn + ".class, value)); return;\n");
                     }
                 }
                 w.append("      }\n");
@@ -897,7 +897,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 body.append(") {\n");
-                body.append("    org.netbeans.html.json.impl.JSON.runInBrowser(proto.getContext(), new Runnable() { public void run() {\n");
+                body.append("    proto.runInBrowser(new Runnable() { public void run() {\n");
                 body.append("      ").append(clazz.getSimpleName()).append(".").append(m.getSimpleName()).append("(");
                 body.append(className).append(".this");
                 for (String s : args) {
