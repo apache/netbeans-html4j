@@ -245,7 +245,13 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.write("  }})");
                         }
                         w.write(";\n");
-                    } else {
+                    }
+                }
+                w.append("  };\n");
+                w.append("  public ").append(className).append("() {\n");
+                w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
+                for (Prprt p : props) {
+                    if (!p.array()) {
                         boolean[] isModel = {false};
                         boolean[] isEnum = {false};
                         boolean isPrimitive[] = {false};
@@ -255,9 +261,6 @@ public final class ModelProcessor extends AbstractProcessor {
                         }
                     }
                 }
-                w.append("  };\n");
-                w.append("  public ").append(className).append("() {\n");
-                w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
                 w.append("  };\n");
                 if (props.length > 0) {
                     w.append("  public ").append(className).append("(");
