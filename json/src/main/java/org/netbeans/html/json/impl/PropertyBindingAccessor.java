@@ -65,7 +65,6 @@ public abstract class PropertyBindingAccessor {
     }
 
     protected abstract <M> PropertyBinding newBinding(PBData<M> d);
-    protected abstract <M> FunctionBinding newFunction(FBData<M> d);
     protected abstract JSONCall newCall(
         BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter,
         String method, Object data
@@ -74,9 +73,6 @@ public abstract class PropertyBindingAccessor {
     
     static <M> PropertyBinding create(PBData<M> d) {
         return DEFAULT.newBinding(d);
-    }
-    static <M> FunctionBinding createFunction(FBData<M> d) {
-        return DEFAULT.newFunction(d);
     }
     static JSONCall createCall(
         BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, 
@@ -118,23 +114,4 @@ public abstract class PropertyBindingAccessor {
             return bindings;
         }
     } // end of PBData
-    
-    public static final class FBData<M> {
-        public final String name;
-        private final M model;
-        private final Proto.Type<M> access;
-        private final int index;
-
-        public FBData(String name, int index, M model, Proto.Type<M> access) {
-            this.name = name;
-            this.index = index;
-            this.model = model;
-            this.access = access;
-        }
-
-
-        public void call(Object data, Object ev) {
-            access.call(model, index, data, ev);
-        }
-    } // end of FBData
 }

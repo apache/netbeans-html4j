@@ -142,7 +142,7 @@ public final class Proto {
             }
             FunctionBinding[] fb = new FunctionBinding[type.functions.length];
             for (int i = 0; i < fb.length; i++) {
-                fb[i] = b.registerFunction(
+                fb[i] = FunctionBinding.registerFunction(
                     type.functions[i], i, obj, type
                 );
             }

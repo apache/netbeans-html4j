@@ -68,11 +68,6 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected <M> FunctionBinding newFunction(FBData<M> d) {
-                return new FunctionBinding(d);
-            }
-
-            @Override
             protected JSONCall newCall(BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
                 return new JSONCall(ctx, callback, urlBefore, urlAfter, method, data);
             }

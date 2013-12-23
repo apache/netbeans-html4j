@@ -47,7 +47,6 @@ import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Proto;
 import org.apidesign.html.json.spi.Technology;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.FBData;
 import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
 
 /**
@@ -66,10 +65,6 @@ public final class Bindings<Data> {
         return PropertyBindingAccessor.create(new PBData<M>(this, propName, index, model, access, readOnly));
     }
 
-    public <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
-        return PropertyBindingAccessor.createFunction(new FBData<M>(name, index, model, access));
-    }
-    
     public static Bindings<?> apply(BrwsrCtx c, Object model) {
         Technology<?> bp = JSON.findTechnology(c);
         return apply(bp);
