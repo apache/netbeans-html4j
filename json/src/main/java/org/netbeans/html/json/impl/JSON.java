@@ -339,7 +339,7 @@ public final class JSON {
         return findType(clazz) != null; 
     }
     
-    private static Proto.Type<?> findType(Class<?> clazz) {
+    static Proto.Type<?> findType(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
             Proto.Type<?> from = modelTypes.get(clazz);
             if (from == null) {

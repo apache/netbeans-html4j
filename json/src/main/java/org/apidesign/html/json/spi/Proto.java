@@ -217,6 +217,7 @@ public final class Proto {
         public abstract Model cloneTo(Object model, BrwsrCtx ctx);
         public abstract Model read(BrwsrCtx c, Object json);
         public abstract void onChange(Model model, int index);
+        public abstract Proto protoFor(Object object);
         
         //
         // Various support methods the generated classes use
@@ -346,6 +347,6 @@ public final class Proto {
             }
             return type.cast(val);
         }
-        
+
     }
 }

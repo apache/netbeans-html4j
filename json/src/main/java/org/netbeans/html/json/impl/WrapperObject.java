@@ -43,20 +43,14 @@
 package org.netbeans.html.json.impl;
 
 import java.util.Collection;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
+import org.apidesign.html.json.spi.Proto;
 
 /** A way to extract real object from a model classes.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class WrapperObject {
-    private Object ko;
-    
     private WrapperObject() {
-    }
-    
-    public void setRealObject(Object ko) {
-        this.ko = ko;
     }
     
     public static Object find(Object object) {
@@ -74,9 +68,16 @@ public final class WrapperObject {
         if (object instanceof Collection) {
             return JSONList.koData((Collection<?>)object, model);
         }
-        
-        WrapperObject ro = new WrapperObject();
-        object.equals(ro);
-        return ro.ko;
+
+        Proto.Type<?> type = JSON.findType(object.getClass());
+        if (type == null) {
+            return null;
+        }
+        final Proto proto = type.protoFor(object);
+        if (proto == null) {
+            return null;
+        }
+        final Bindings b = proto.initBindings();
+        return b == null ? null : b.koData();
     }
 }
