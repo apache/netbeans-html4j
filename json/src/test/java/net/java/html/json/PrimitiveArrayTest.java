@@ -42,6 +42,7 @@
  */
 package net.java.html.json;
 
+import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -53,11 +54,16 @@ import org.testng.annotations.Test;
     @Property(name = "array", type = byte.class, array = true)
 })
 public class PrimitiveArrayTest {
+    @ComputedProperty static int length(List<Byte> array) {
+        return array.size();
+    }
+    
     @Test public void generatedConstructorWithPrimitiveType() {
         byte[] arr = new byte[10];
         arr[3] = 10;
         ByteArray a = new ByteArray(arr);
         Assert.assertEquals(a.getArray().size(), 10, "Ten elements");
         Assert.assertEquals(a.getArray().get(3).byteValue(), 10, "Value ten");
+        Assert.assertEquals(a.getLength(), 10, "Derived property is OK too");
     }
 }
