@@ -195,7 +195,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateOnChange(e, propsDeps, props, className, functionDeps)) {
                 ok = false;
             }
-            if (!generateProperties(e, body, props, propsGetSet, propsDeps, functionDeps)) {
+            if (!generateProperties(e, body, className, props, propsGetSet, propsDeps, functionDeps)) {
                 ok = false;
             }
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
@@ -223,8 +223,14 @@ public final class ModelProcessor extends AbstractProcessor {
                     if (p.array()) {
                         final String tn = typeName(e, p);
                         String[] gs = toGetSet(p.name(), tn, p.array());
-                        w.write("    this.prop_" + p.name() + " = new org.netbeans.html.json.impl.JSONList<" + tn + ">(proto, \""
+                        w.write("    this.prop_" + p.name() + " = proto.createList(\""
                             + p.name() + "\"");
+                        if (functionDeps.containsKey(p.name())) {
+                            int index = Arrays.asList(functionDeps.keySet().toArray()).indexOf(p.name());
+                            w.write(", " + index);
+                        } else {
+                            w.write(", -1");
+                        }
                         Collection<String> dependants = propsDeps.get(p.name());
                         if (dependants != null) {
                             for (String depProp : dependants) {
@@ -235,15 +241,6 @@ public final class ModelProcessor extends AbstractProcessor {
                             }
                         }
                         w.write(")");
-
-                        dependants = functionDeps.get(p.name());
-                        if (dependants != null) {
-                            w.write(".onChange(new Runnable() { public void run() {\n");
-                            for (String call : dependants) {
-                                w.append("  ").append(call);
-                            }
-                            w.write("  }})");
-                        }
                         w.write(";\n");
                     }
                 }
@@ -298,7 +295,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
                     }
                     if (firstArray != null) {
-                        w.write("    this.prop_" + firstArray.name() + ".init(" + firstArray.name() + ");\n");
+                        w.write("    proto.initTo(this.prop_" + firstArray.name() + ", " + firstArray.name() + ");\n");
                     }
                     w.append("  };\n");
                 }
@@ -352,6 +349,24 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.append("        case " + (i / 2) + ": model." + name + "(data, ev); return;\n");
                 }
                 w.append("      }\n");
+                w.append("      throw new UnsupportedOperationException();\n");
+                w.append("    }\n");
+                w.append("    @Override public void onChange(" + className + " model, int type) {\n");
+                w.append("      switch (type) {\n");
+                {
+                    String[] arr = functionDeps.keySet().toArray(new String[0]);
+                    for (int i = 0; i < arr.length; i++) {
+                        Collection<String> onChange = functionDeps.get(arr[i]);
+                        if (onChange != null) {
+                            w.append("      case " + i + ":\n");
+                            for (String call : onChange) {
+                                w.append("      ").append(call).append("\n");
+                            }
+                            w.write("      return;\n");
+                        }
+                    }
+                }
+                w.append("    }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
                 w.append("    @Override public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
@@ -488,7 +503,7 @@ public final class ModelProcessor extends AbstractProcessor {
     
     private boolean generateProperties(
         Element where,
-        Writer w, Prprt[] properties,
+        Writer w, String className, Prprt[] properties,
         Collection<String> props, 
         Map<String,Collection<String>> deps,
         Map<String,Collection<String>> functionDeps
@@ -501,7 +516,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String castTo;
             
             if (p.array()) {
-                w.write("  private final org.netbeans.html.json.impl.JSONList<" + tn + "> prop_" + p.name() + ";\n");
+                w.write("  private final java.util.List<" + tn + "> prop_" + p.name() + ";\n");
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
@@ -528,6 +543,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 dependants = functionDeps.get(p.name());
                 if (dependants != null) {
+                    w.append(className).append(" model = ").append(className).append(".this;\n");
                     for (String call : dependants) {
                         w.append("  ").append(call);
                     }
@@ -1303,7 +1319,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 rn = rn.substring(last + 1);
             }
             if (rn.equals(className)) {
-                params.append(className).append(".this");
+                params.append("model");
                 continue;
             }
             error(
@@ -1367,7 +1383,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + "  == null ? null : prop_" + p.name() + ".clone();\n");
             } else {
-                w.write("    ret.prop_" + p.name() + ".cloneAll(ctx, prop_" + p.name() + ");\n");
+                w.write("    proto.cloneList(ret.prop_" + p.name() + ", ctx, prop_" + p.name() + ");\n");
             }
         }
         
