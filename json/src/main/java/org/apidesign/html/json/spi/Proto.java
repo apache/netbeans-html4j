@@ -109,6 +109,13 @@ public final class Proto {
         }
     }
     
+    public void extract(Object json, String[] props, Object[] values) {
+        JSON.extract(context, json, props, values);
+    }
+    
+    public <T> T read(Class<T> modelClass, Object data) {
+        return JSON.read(context, modelClass, data);
+    }
     
     // XXX: Don't expose internal type
     public Bindings initBindings() {
