@@ -183,6 +183,7 @@ public final class ModelProcessor extends AbstractProcessor {
         models.put(e, className);
         try {
             StringWriter body = new StringWriter();
+            StringBuilder onReceiveType = new StringBuilder();
             List<String> propsGetSet = new ArrayList<String>();
             List<String> functions = new ArrayList<String>();
             Map<String, Collection<String>> propsDeps = new HashMap<String, Collection<String>>();
@@ -201,7 +202,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
                 ok = false;
             }
-            if (!generateReceive(e, body, className, e.getEnclosedElements(), functions)) {
+            if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType)) {
                 ok = false;
             }
             if (!generateOperation(e, body, className, e.getEnclosedElements())) {
@@ -372,6 +373,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
+                w.append(onReceiveType);
                 w.append("    @Override public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
                 w.append("    @Override public " + className + " cloneTo(Object o, net.java.html.BrwsrCtx c) { return ((" + className + ")o).clone(c); }\n");
                 w.append("  }\n");
@@ -930,8 +932,11 @@ public final class ModelProcessor extends AbstractProcessor {
     
     private boolean generateReceive(
         Element clazz, StringWriter body, String className, 
-        List<? extends Element> enclosedElements, List<String> functions
+        List<? extends Element> enclosedElements, StringBuilder inType
     ) {
+        inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data) {\n");
+        inType.append("    switch (index) {\n");
+        int index = 0;
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -979,7 +984,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         simpleName = type.toString();
                     }
                     if (simpleName.toString().equals(className)) {
-                        args.add(className + ".this");
+                        args.add("model");
                     } else if (isModel(ve.asType())) {
                         modelType = ve.asType();
                     } else if (ve.asType().getKind() == TypeKind.ARRAY) {
@@ -1042,47 +1047,49 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(") {\n");
             boolean webSocket = onR.method().equals("WebSocket");
             if (webSocket) {
-                if (generateWSReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
-                    return false;
-                }
+//                if (generateWSReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+//                    return false;
+//                }
                 body.append("  }\n");
                 body.append("  private org.netbeans.html.json.impl.JSON.WS ws_" + e.getSimpleName() + ";\n");
             } else {
-                if (generateJSONReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
                 body.append("  }\n");
             }
         }
+        inType.append("    }\n");
+        inType.append("    throw new UnsupportedOperationException(\"index: \" + index + \" type: \" + type);\n");
+        inType.append("  }\n");
         return true;
     }
 
-    private boolean generateJSONReceiveBody(StringWriter body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
         body.append(
-            "    class ProcessResult extends org.netbeans.html.json.impl.RcvrJSON {\n" +
-            "      @Override\n" +
-            "      public void onError(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
-            "        Exception value = ev.getException();\n"
+            "    case " + index + ": {\n" +
+            "      if (type == 2) { /* on error */\n" +
+            "        Exception ex = (Exception)data;\n"
             );
         if (onR.onError().isEmpty()) {
             body.append(
-                "        value.printStackTrace();\n"
+                "        ex.printStackTrace();\n"
                 );
         } else {
             if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
                 return true;
             }
             body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-            body.append(className).append(".this, value);\n");
+            body.append("model, ex);\n");
         }
         body.append(
-            "      }\n" +
-            "      @Override\n" +
-            "      public void onMessage(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+            "        return;\n" +
+            "      } else if (type == 1) {\n" +
+            "        Object[] ev = (Object[])data;\n"
             );
         if (expectsList) {
             body.append(
-                "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
+                "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
                 );
         } else {
             body.append(
@@ -1090,8 +1097,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 );
         }
         body.append(
-            "        ev.dataRead(proto.getContext(), " + modelClass + ".class, arr);\n"
-            );
+            "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
+        );
         {
             body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
             String sep = "";
@@ -1103,28 +1110,28 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(");\n");
         }
         body.append(
+            "        return;\n" +
             "      }\n" +
             "    }\n"
             );
-        body.append("    ProcessResult pr = new ProcessResult();\n");
-        body.append("    org.netbeans.html.json.impl.JSON.loadJSON(proto.getContext(), pr,\n        ");
-        body.append(urlBefore).append(", ");
+        method.append("    proto.loadJSON(" + index + ",\n        ");
+        method.append(urlBefore).append(", ");
         if (jsonpVarName != null) {
-            body.append(urlAfter);
+            method.append(urlAfter);
         } else {
-            body.append("null");
+            method.append("null");
         }
         if (!"GET".equals(onR.method()) || dataMirror != null) {
-            body.append(", \"").append(onR.method()).append('"');
+            method.append(", \"").append(onR.method()).append('"');
             if (dataMirror != null) {
-                body.append(", data");
+                method.append(", data");
             } else {
-                body.append(", null");
+                method.append(", null");
             }
         } else {
-            body.append(", null, null");
+            method.append(", null, null");
         }
-        body.append(");\n");
+        method.append(");\n");
         return false;
     }
     
