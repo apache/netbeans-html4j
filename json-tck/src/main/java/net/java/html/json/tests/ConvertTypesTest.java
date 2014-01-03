@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
-import org.netbeans.html.json.impl.JSON;
 import org.apidesign.html.json.tck.KOTest;
 
 /**
@@ -86,7 +85,7 @@ public final class ConvertTypesTest {
     public void testConvertToPeople() throws Exception {
         final Object o = createJSON(true);
         
-        Person p = JSON.read(newContext(), Person.class, o);
+        Person p = Models.fromRaw(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
@@ -123,7 +122,7 @@ public final class ConvertTypesTest {
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
         
-        Person p = JSON.read(newContext(), Person.class, o);
+        Person p = Models.fromRaw(newContext(), Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
