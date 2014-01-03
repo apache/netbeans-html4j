@@ -1047,11 +1047,11 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(") {\n");
             boolean webSocket = onR.method().equals("WebSocket");
             if (webSocket) {
-//                if (generateWSReceiveBody(body, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
-//                    return false;
-//                }
+                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                    return false;
+                }
                 body.append("  }\n");
-                body.append("  private org.netbeans.html.json.impl.JSON.WS ws_" + e.getSimpleName() + ";\n");
+                body.append("  private Object ws_" + e.getSimpleName() + ";\n");
             } else {
                 if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
@@ -1135,13 +1135,11 @@ public final class ModelProcessor extends AbstractProcessor {
         return false;
     }
     
-    private boolean generateWSReceiveBody(StringWriter body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
         body.append(
-            "    class ProcessResult extends org.netbeans.html.json.impl.RcvrJSON {\n" +
-            "      @Override\n" +
-            "      public void onOpen(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
-        );
-        body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            "    case " + index + ": {\n" +
+            "      if (type == 0) { /* on open */\n" +
+            "        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
         {
             String sep = "";
             for (String arg : args) {
@@ -1156,10 +1154,9 @@ public final class ModelProcessor extends AbstractProcessor {
         }
         body.append(");\n");
         body.append(
-            "      }\n" +
-            "      @Override\n" +
-            "      public void onError(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n" +
-            "        Exception value = ev.getException();\n"
+            "        return;\n" +
+            "      } else if (type == 2) { /* on error */\n" +
+            "        Exception value = (Exception)data;\n"
             );
         if (onR.onError().isEmpty()) {
             body.append(
@@ -1170,16 +1167,16 @@ public final class ModelProcessor extends AbstractProcessor {
                 return true;
             }
             body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-            body.append(className).append(".this, value);\n");
+            body.append("model, value);\n");
         }
         body.append(
-            "      }\n" +
-            "      @Override\n" +
-            "      public void onMessage(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
+            "        return;\n" +
+            "      } else if (type == 1) {\n" +
+            "        Object[] ev = (Object[])data;\n"
         );
         if (expectsList) {
             body.append(
-                "        " + modelClass + "[] arr = new " + modelClass + "[ev.dataSize()];\n"
+                "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
                 );
         } else {
             body.append(
@@ -1187,8 +1184,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 );
         }
         body.append(
-            "        ev.dataRead(proto.getContext(), " + modelClass + ".class, arr);\n"
-            );
+            "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
+        );
         {
             body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
             String sep = "";
@@ -1200,28 +1197,26 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(");\n");
         }
         body.append(
-            "      }\n"
+            "        return;\n" +
+            "      }"
         );
         if (!onR.onError().isEmpty()) {
-            body.append(
-                "      @Override\n"
-              + "      public void onClose(org.netbeans.html.json.impl.RcvrJSON.MsgEvnt ev) {\n"
-            );
+            body.append(" else if (type == 3) { /* on close */\n");
             body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
-            body.append(className).append(".this, null);\n");
+            body.append("model, null);\n");
             body.append(
-                "      }\n"
+                "      }"
             );
         }
+        body.append("\n");
         body.append("    }\n");
-        body.append("    if (this.ws_").append(e.getSimpleName()).append(" == null) {\n");
-        body.append("      ProcessResult pr = new ProcessResult();\n");
-        body.append("      this.ws_").append(e.getSimpleName());
-        body.append("= org.netbeans.html.json.impl.JSON.openWS(proto.getContext(), pr,\n        ");
-        body.append(urlBefore).append(", data);\n");
-        body.append("    } else {\n");
-        body.append("      this.ws_").append(e.getSimpleName()).append(".send(proto.getContext(), ").append(urlBefore).append(", data);\n");
-        body.append("    }\n");
+        method.append("    if (this.ws_").append(e.getSimpleName()).append(" == null) {\n");
+        method.append("      this.ws_").append(e.getSimpleName());
+        method.append("= proto.wsOpen(" + index + ", ");
+        method.append(urlBefore).append(", data);\n");
+        method.append("    } else {\n");
+        method.append("      proto.wsSend(this.ws_").append(e.getSimpleName()).append(", ").append(urlBefore).append(", data);\n");
+        method.append("    }\n");
         return false;
     }
 

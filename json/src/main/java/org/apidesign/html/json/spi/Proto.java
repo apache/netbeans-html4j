@@ -169,6 +169,35 @@ public final class Proto {
         JSON.loadJSON(context, new Rcvr(), urlBefore, urlAfter, method, data);
     }
     
+    public Object wsOpen(final int index, String url, Object data) {
+        class WSrcvr extends RcvrJSON {
+            @Override
+            protected void onError(MsgEvnt msg) {
+                type.onMessage(obj, index, 2, msg.getException());
+            }
+            
+            @Override
+            protected void onMessage(MsgEvnt msg) {
+                type.onMessage(obj, index, 1, msg.getValues());
+            }
+            
+            @Override
+            protected void onClose(MsgEvnt msg) {
+                type.onMessage(obj, index, 3, null);
+            }
+
+            @Override
+            protected void onOpen(MsgEvnt msg) {
+                type.onMessage(obj, index, 0, null);
+            }
+        }
+        return JSON.openWS(context, new WSrcvr(), url, data);
+    }
+    
+    public void wsSend(Object webSocket, String url, Object data) {
+        ((JSON.WS)webSocket).send(context, url, data);
+    }
+    
     public String toString(Object data, String propName) {
         return JSON.toString(context, data, propName);
     }
