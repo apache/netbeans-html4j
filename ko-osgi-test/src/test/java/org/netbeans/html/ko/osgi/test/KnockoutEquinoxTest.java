@@ -105,7 +105,23 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
             dir.mkdirs();
             config.put(Constants.FRAMEWORK_STORAGE, dir.getPath());
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
-            config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc");
+            config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc,"
+                + "javafx.application,"
+                + "javafx.beans.property,"
+                + "javafx.beans.value,"
+                + "javafx.collections,"
+                + "javafx.concurrent,"
+                + "javafx.event,"
+                + "javafx.geometry,"
+                + "javafx.scene,"
+                + "javafx.scene.control,"
+                + "javafx.scene.layout,"
+                + "javafx.scene.text,"
+                + "javafx.scene.web,"
+                + "javafx.stage,"
+                + "javafx.util,"
+                + "netscape.javascript"
+            );
             framework = ff.newFramework(config);
             framework.init();
             loadClassPathBundles(framework);
@@ -143,6 +159,7 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
         for (String jar : System.getProperty("java.class.path").split(File.pathSeparator)) {
             File file = new File(jar);
             if (!file.isFile()) {
+                LOG.info("Not loading " + file);
                 continue;
             }
             JarFile jf = new JarFile(file);

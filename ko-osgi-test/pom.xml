@@ -9,6 +9,9 @@
     <artifactId>ko-osgi-test</artifactId>
     <packaging>jar</packaging>
     <description>Runs the TCK for Knockout in an OSGi Container</description>
+    <properties>
+        <netbeans.compile.on.save>none</netbeans.compile.on.save>
+    </properties>
     <build>
         <plugins>
             <plugin>
