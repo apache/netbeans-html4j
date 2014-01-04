@@ -60,6 +60,8 @@ import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -89,6 +91,7 @@ import org.testng.annotations.Factory;
  */
 @ServiceProvider(service = KnockoutTCK.class)
 public class KnockoutEquinoxTest extends KnockoutTCK {
+    private static final Logger LOG = Logger.getLogger(KnockoutEquinoxTest.class.getName());
     private static Framework framework;
     private static File dir;
     static Framework framework() throws Exception {
@@ -102,12 +105,18 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
             dir.mkdirs();
             config.put(Constants.FRAMEWORK_STORAGE, dir.getPath());
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
+            config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc");
             framework = ff.newFramework(config);
             framework.init();
             loadClassPathBundles(framework);
             framework.start();
             for (Bundle b : framework.getBundleContext().getBundles()) {
-                b.start();
+                try {
+                    b.start();
+                    LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
+                } catch (BundleException ex) {
+                    LOG.log(Level.WARNING, "Cannot start bundle " + b.getSymbolicName(), ex);
+                }
             }
             return framework;
         }
