@@ -52,8 +52,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
@@ -72,7 +70,6 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service = KnockoutTCK.class)
 public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Class[]> {
     
-    private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
 
     @Override
