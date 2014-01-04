@@ -127,6 +127,7 @@ public class KnockoutEquinoxIT {
                 + "javafx.util,"
                 + "netscape.javascript"
             );
+            config.put("osgi.hook.configurators.include", "org.netbeans.html.equinox.agentclass.AgentHook");
             framework = ff.newFramework(config);
             framework.init();
             loadClassPathBundles(framework);
@@ -234,8 +235,7 @@ public class KnockoutEquinoxIT {
         ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
-            Class<?> c = Class.forName(arr[i].getName(), true, l);
-            seekKOTests(c, res);
+            seekKOTests(arr[i], res);
         }
         return res.toArray();
     }

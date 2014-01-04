@@ -31,6 +31,7 @@
     <module>geo</module>
     <module>ko-ws-tyrus</module>
     <module>ko-osgi-test</module>
+    <module>equinox-agentclass-hook</module>
   </modules>
   <licenses>
       <license>

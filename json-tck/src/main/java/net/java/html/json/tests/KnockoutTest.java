@@ -50,6 +50,7 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.apidesign.html.json.tck.KOTest;
+import org.apidesign.html.json.tck.KnockoutTCK;
 
 /**
  *
