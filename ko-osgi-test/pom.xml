@@ -6,14 +6,19 @@
         <artifactId>pom</artifactId>
         <version>0.7-SNAPSHOT</version>
     </parent>
+    <name>KO Tests in an OSGi Container</name>
     <artifactId>ko-osgi-test</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <description>Runs the TCK for Knockout in an OSGi Container</description>
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -22,6 +27,23 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>${project.build.directory}/${project.build.finalName}.jar</additionalClasspathElement>
+                    </additionalClasspathElements>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -51,7 +73,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>net.java.html.json.tck</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -63,6 +84,11 @@
             <artifactId>net.java.html.boot</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ko-fx</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -99,13 +125,6 @@
             <groupId>org.eclipse</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
             <version>3.8.0.v20120529-1548</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ko-fx</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

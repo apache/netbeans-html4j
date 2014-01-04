@@ -81,6 +81,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Factory;
@@ -89,9 +91,8 @@ import org.testng.annotations.Factory;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@ServiceProvider(service = KnockoutTCK.class)
-public class KnockoutEquinoxTest extends KnockoutTCK {
-    private static final Logger LOG = Logger.getLogger(KnockoutEquinoxTest.class.getName());
+public class KnockoutEquinoxIT {
+    private static final Logger LOG = Logger.getLogger(KnockoutEquinoxIT.class.getName());
     private static Framework framework;
     private static File dir;
     static Framework framework() throws Exception {
@@ -99,10 +100,14 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
             return framework;
         }
         for (FrameworkFactory ff : ServiceLoader.load(FrameworkFactory.class)) {
-            Map<String,String> config = new HashMap<>();
-            dir = File.createTempFile("osgi", "tmp");
-            dir.delete();
+            
+            String basedir = System.getProperty("basedir");
+            assertNotNull("basedir preperty provided", basedir);
+            File target = new File(basedir, "target");
+            dir = new File(target, "osgi");
             dir.mkdirs();
+            
+            Map<String,String> config = new HashMap<>();
             config.put(Constants.FRAMEWORK_STORAGE, dir.getPath());
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
             config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc,"
@@ -201,7 +206,7 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
     
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class<?> tck = loadAClass(KnockoutTCK.class);
-        Class<?> peer = loadAClass(KnockoutEquinoxTest.class);
+        Class<?> peer = loadAClass(KnockoutEquinoxTCKImpl.class);
         // initialize the TCK
         Callable<Class[]> inst = (Callable<Class[]>) peer.newInstance();
         
@@ -248,7 +253,7 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
         while (browserClass == null) {
-            KnockoutEquinoxTest.class.wait();
+            KnockoutEquinoxIT.class.wait();
         }
         return browserClass.getClassLoader();
     }
@@ -256,92 +261,6 @@ public class KnockoutEquinoxTest extends KnockoutTCK {
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = FnContext.currentPresenter();
-        KnockoutEquinoxTest.class.notifyAll();
+        KnockoutEquinoxIT.class.notifyAll();
     }
-    
-    public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutEquinoxTest.class.getName());
-        Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, KnockoutEquinoxTest.class);
-        browserContext = FnContext.currentPresenter();
-    }
-
-    @Override
-    public BrwsrCtx createContext() {
-        FXContext fx = new FXContext(browserContext);
-        Contexts.Builder cb = Contexts.newBuilder().
-            register(Technology.class, fx, 10).
-            register(Transfer.class, fx, 10);
-//        if (fx.areWebSocketsSupported()) {
-//            cb.register(WSTransfer.class, fx, 10);
-//        }
-        return cb.build();
-    }
-
-    @Override
-    public Object createJSON(Map<String, Object> values) {
-        JSONObject json = new JSONObject();
-        for (Map.Entry<String, Object> entry : values.entrySet()) {
-            try {
-                json.put(entry.getKey(), entry.getValue());
-            } catch (JSONException ex) {
-                throw new IllegalStateException(ex);
-            }
-        }
-        return json;
-    }
-
-    @Override
-    @JavaScriptBody(args = { "s", "args" }, body = ""
-        + "var f = new Function(s); "
-        + "return f.apply(null, args);"
-    )
-    public native Object executeScript(String script, Object[] arguments);
-
-    @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
-    )
-    private static native String findBaseURL();
-    
-    @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
-        try {
-            final URL baseURL = new URL(findBaseURL());
-            StringBuilder sb = new StringBuilder();
-            sb.append("/dynamic?mimeType=").append(mimeType);
-            for (int i = 0; i < parameters.length; i++) {
-                sb.append("&param" + i).append("=").append(parameters[i]);
-            }
-            String mangle = content.replace("\n", "%0a")
-                .replace("\"", "\\\"").replace(" ", "%20");
-            sb.append("&content=").append(mangle);
-
-            URL query = new URL(baseURL, sb.toString());
-            URLConnection c = query.openConnection();
-            BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
-            URI connectTo = new URI(br.readLine());
-            return connectTo;
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        } catch (URISyntaxException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
-
-    @Override
-    public boolean canFailWebSocketTest() {
-        try {
-            Class.forName("java.util.function.Function");
-            return false;
-        } catch (ClassNotFoundException ex) {
-            // running on JDK7, FX WebView WebSocket impl does not work
-            return true;
-        }
-    }
-    
 }
