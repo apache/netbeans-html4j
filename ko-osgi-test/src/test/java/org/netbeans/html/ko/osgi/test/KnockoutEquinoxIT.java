@@ -117,6 +117,12 @@ public class KnockoutEquinoxIT {
             framework.start();
             for (Bundle b : framework.getBundleContext().getBundles()) {
                 try {
+                    if (b.getSymbolicName().contains("equinox-agentclass-hook")) {
+                        continue;
+                    }
+                    if (b.getSymbolicName().contains("grizzly.websockets-server")) {
+                        continue;
+                    }
                     b.start();
                     LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
                 } catch (BundleException ex) {
