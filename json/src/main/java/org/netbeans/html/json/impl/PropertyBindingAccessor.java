@@ -71,9 +71,14 @@ public abstract class PropertyBindingAccessor {
     );
     
     protected abstract Bindings bindings(Proto proto, boolean initialize);
+    protected abstract void notifyChange(Proto proto, int propIndex);
     
     static Bindings getBindings(Proto proto, boolean initialize) {
         return DEFAULT.bindings(proto, initialize);
+    }
+    
+    static void notifyProtoChange(Proto proto, int propIndex) {
+        DEFAULT.notifyChange(proto, propIndex);
     }
     
     static <M> PropertyBinding create(PBData<M> d) {

@@ -77,6 +77,11 @@ public final class PropertyBinding {
             protected Bindings bindings(Proto proto, boolean initialize) {
                 return initialize ? proto.initBindings() : proto.getBindings();
             }
+
+            @Override
+            protected void notifyChange(Proto proto, int propIndex) {
+                proto.onChange(propIndex);
+            }
         };
     }
 

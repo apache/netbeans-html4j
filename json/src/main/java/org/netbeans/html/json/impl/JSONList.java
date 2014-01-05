@@ -181,7 +181,7 @@ public final class JSONList<T> extends ArrayList<T> {
                 m.valueHasMutated(dependant);
             }
             if (index >= 0) {
-                proto.onChange(index);
+                PropertyBindingAccessor.notifyProtoChange(proto, index);
             }
         }
     }
