@@ -1234,6 +1234,7 @@ public final class ModelProcessor extends AbstractProcessor {
             first = false;
             String toCall = null;
             String toFinish = null;
+            boolean addNull = true;
             if (ve.asType() == stringType) {
                 if (ve.getSimpleName().contentEquals("id")) {
                     params.append('"').append(id).append('"');
@@ -1251,13 +1252,16 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
                 toCall = "proto.toModel(" + ve.asType() + ".class, ";
+                addNull = false;
             }
 
             if (toCall != null) {
                 params.append(toCall);
                 if (dataName != null && ve.getSimpleName().contentEquals(dataName)) {
                     params.append(dataName);
-                    params.append(", null");
+                    if (addNull) {
+                        params.append(", null");
+                    }
                 } else {
                     if (evName == null) {
                         final StringBuilder sb = new StringBuilder();

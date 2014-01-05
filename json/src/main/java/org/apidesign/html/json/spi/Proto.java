@@ -45,6 +45,7 @@ package org.apidesign.html.json.spi;
 import java.util.Collection;
 import java.util.List;
 import net.java.html.BrwsrCtx;
+import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
@@ -281,14 +282,40 @@ public final class Proto {
         return JSON.toNumber(context, data, propName);
     }
 
-    public <T> T toModel(Class<T> type, Object data, String propName) {
-        return JSON.toModel(context, type, data, propName);
+    /** Converts raw JSON data into a {@link Model} class representation.
+     * 
+     * @param <T> type of the model to create
+     * @param type class of the model to create
+     * @param data raw JSON data (depends on associated {@link Technology})
+     * @return new instances of the model class filled with values from the
+     *   <code>data</code> object
+     */
+    public <T> T toModel(Class<T> type, Object data) {
+        return JSON.toModel(context, type, data, null);
     }
 
+    /** Creates new JSON like observable list.
+     * 
+     * @param <T> the type of the list elements
+     * @param propName name of a property this list is associated with
+     * @param onChange index of the property to use when the list is modified
+     *   during callback to {@link Type#onChange(java.lang.Object, int)}
+     * @param dependingProps the array of {@link ComputedProperty derived properties}
+     *   that depend on the value of the list
+     * @return new, empty list associated with this proto-object and its model
+     */
     public <T> List<T> createList(String propName, int onChange, String... dependingProps) {
         return new JSONList<T>(this, propName, onChange, dependingProps);
     }
-    
+
+    /** Copies content of one collection to another, re-assigning all its
+     * elements from their current context to the new <code>ctx</code>.
+     * 
+     * @param <T> type of the collections
+     * @param to the target collection to be filled with cloned values
+     * @param ctx context for the new collection
+     * @param from original collection with its data
+     */
     public <T> void cloneList(Collection<T> to, BrwsrCtx ctx, Collection<T> from) {
         Boolean isModel = null;
         for (T t : from) {
