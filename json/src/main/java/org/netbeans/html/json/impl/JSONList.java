@@ -174,7 +174,7 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     private void notifyChange() {
-        Bindings m = proto.getBindings();
+        Bindings m = PropertyBindingAccessor.getBindings(proto, false);
         if (m != null) {
             m.valueHasMutated(name);
             for (String dependant : deps) {

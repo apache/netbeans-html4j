@@ -203,8 +203,7 @@ public final class Proto {
         return ko;
     }
 
-    // XXX: Don't expose internal type
-    public Bindings getBindings() {
+    final Bindings getBindings() {
         return ko;
     }
     
