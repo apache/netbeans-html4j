@@ -108,20 +108,45 @@ public final class Proto {
         locked = false;
     }
     
+    /** Whenever model changes a property. It should notify the
+     * associated technology by calling this method.
+     * 
+     *@param propName name of the changed property
+     */
     public void valueHasMutated(String propName) {
         if (ko != null) {
             ko.valueHasMutated(propName);
         }
     }
     
+    /** Initializes the associated model in the current {@link #getContext() context}.
+     * In case of <em>knockout.js</em> technology, applies given bindings 
+     * of the current model to the <em>body</em> element of the page.
+     */
     public void applyBindings() {
         initBindings().applyBindings();
     }
     
+    /** Invokes the provided runnable in the {@link #getContext() context}
+     * of the browser. If the caller is already on the right thread, the
+     * <code>run.run()</code> is invoked immediately and synchronously. 
+     * Otherwise the method returns immediately and the <code>run()</code>
+     * method is performed later
+     * 
+     * @param run the action to execute
+     */
     public void runInBrowser(Runnable run) {
         JSON.runInBrowser(context, run);
     }
 
+    /** Initializes the provided collection with a content of the <code>array</code>.
+     * The initialization can only be done soon after the the collection 
+     * is created, otherwise an exception is throw
+     * 
+     * @param to the collection to initialize (assumed to be empty)
+     * @param array the array to add to the collection
+     * @throws IllegalStateException if the system has already been initialized
+     */
     public void initTo(Collection<?> to, Object array) {
         if (ko != null) {
             throw new IllegalStateException();
@@ -132,11 +157,27 @@ public final class Proto {
             JSONList.init(to, array);
         }
     }
-    
+
+    /** Takes an object representing JSON result and extract some of its
+     * properties. It is assumed that the <code>props</code> and
+     * <code>values</code> arrays have the same length.
+     * 
+     * @param json the JSON object (actual type depends on the associated
+     *   {@link Technology})
+     * @param props list of properties to extract
+     * @param values array that will be filled with extracted values
+     */
     public void extract(Object json, String[] props, Object[] values) {
         JSON.extract(context, json, props, values);
     }
-    
+
+    /** Converts raw JSON <code>data</code> into a Java {@link Model} class.
+     * 
+     * @param <T> type of the model class
+     * @param modelClass the type of the class to create
+     * @param data the raw JSON data
+     * @return newly created instance of the model class
+     */
     public <T> T read(Class<T> modelClass, Object data) {
         return JSON.read(context, modelClass, data);
     }
@@ -219,10 +260,25 @@ public final class Proto {
     public void wsSend(Object webSocket, String url, Object data) {
         ((JSON.WS)webSocket).send(context, url, data);
     }
-    
+
+    /** Converts raw data (one of its properties) to string representation.
+     * 
+     * @param data the object
+     * @param propName the name of object property or <code>null</code>
+     *   if the whole object should be converted
+     * @return the string representation of the object or its property
+     */
     public String toString(Object data, String propName) {
         return JSON.toString(context, data, propName);
     }
+    
+    /** Converts raw data (one of its properties) to a number representation.
+     * 
+     * @param data the object
+     * @param propName the name of object property or <code>null</code>
+     *   if the whole object should be converted
+     * @return the number representation of the object or its property
+     */
     public Number toNumber(Object data, String propName) {
         return JSON.toNumber(context, data, propName);
     }
