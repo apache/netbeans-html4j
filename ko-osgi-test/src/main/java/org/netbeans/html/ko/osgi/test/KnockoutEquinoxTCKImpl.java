@@ -116,6 +116,12 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     }
 
     public static void initialized() throws Exception {
+        Bundle bundle = FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class);
+        if (bundle == null) {
+            throw new IllegalStateException(
+                "Should be loaded from a bundle. But was: " + KnockoutEquinoxTCKImpl.class.getClassLoader()
+            );
+        }
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(
             "org.netbeans.html.ko.osgi.test.KnockoutEquinoxIT"
         );

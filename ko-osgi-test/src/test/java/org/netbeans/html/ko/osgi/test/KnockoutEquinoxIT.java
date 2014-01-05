@@ -162,7 +162,11 @@ public class KnockoutEquinoxIT {
                     continue;
                 }
                 final String path = "reference:" + file.toURI().toString();
-                Bundle b = f.getBundleContext().installBundle(path);
+                try {
+                    Bundle b = f.getBundleContext().installBundle(path);
+                } catch (BundleException ex) {
+                    LOG.log(Level.WARNING, "Cannot install " + file, ex);
+                }
             }
         }
     }
