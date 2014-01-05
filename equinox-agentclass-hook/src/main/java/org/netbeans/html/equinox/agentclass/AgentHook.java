@@ -45,6 +45,7 @@ package org.netbeans.html.equinox.agentclass;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.HookConfigurator;
@@ -62,11 +63,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class AgentHook implements HookConfigurator, BundleWatcher, ClassLoadingHook {
+    private static final Logger LOG = Logger.getLogger(AgentHook.class.getName());
 	private boolean all;
 	
 	@Override
 	public void addHooks(HookRegistry hookRegistry) {
-		Thread.dumpStack();
+		LOG.info("Agent hook for Equinox initialized!");
 		hookRegistry.addWatcher(this);
 		hookRegistry.addClassLoadingHook(this);
 	}
