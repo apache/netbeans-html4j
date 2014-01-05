@@ -521,18 +521,18 @@ public final class ModelProcessor extends AbstractProcessor {
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
-                w.write("    proto.checkLock();\n");
+                w.write("    proto.verifyUnlocked();\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
             } else {
                 castTo = tn;
                 w.write("  private " + tn + " prop_" + p.name() + ";\n");
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
-                w.write("    proto.checkLock();\n");
+                w.write("    proto.verifyUnlocked();\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
-                w.write("    proto.checkLock();\n");
+                w.write("    proto.verifyUnlocked();\n");
                 w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
                 w.write("    prop_" + p.name() + " = v;\n");
                 w.write("    proto.valueHasMutated(\"" + p.name() + "\");\n");
