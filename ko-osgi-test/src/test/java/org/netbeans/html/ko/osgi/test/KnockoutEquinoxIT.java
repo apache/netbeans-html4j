@@ -42,47 +42,30 @@
  */
 package org.netbeans.html.ko.osgi.test;
 
-import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.java.html.BrwsrCtx;
-import net.java.html.boot.BrowserBuilder;
-import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.spi.Technology;
-import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.netbeans.html.boot.impl.FnContext;
-import org.netbeans.html.kofx.FXContext;
-import org.openide.util.lookup.ServiceProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Factory;
@@ -184,30 +167,16 @@ public class KnockoutEquinoxIT {
         }
     }
     
-    private static Class<?> loadAClass(Class<?> c) throws Exception {
-        for (Bundle b : framework().getBundleContext().getBundles()) {
-            try {
-                Class<?> osgiClass = b.loadClass(c.getName());
-                if (
-                    osgiClass != null && 
-                    osgiClass.getClassLoader() != ClassLoader.getSystemClassLoader()
-                ) {
-                    return osgiClass;
-                }
-            } catch (ClassNotFoundException cnfe) {
-                // go on
-            }
-        }
-        fail("Cannot load " + c + " from the OSGi container!");
-        return null;
+    private static Class<?> loadOSGiClass(Class<?> c) throws Exception {
+        return KnockoutEquinoxTCKImpl.loadOSGiClass(c.getName(), KnockoutEquinoxIT.framework().getBundleContext());
     }
     
     private static Class<?> browserClass;
-    private static Fn.Presenter browserContext;
+    private static Object browserContext;
     
     @Factory public static Object[] compatibilityTests() throws Exception {
-        Class<?> tck = loadAClass(KnockoutTCK.class);
-        Class<?> peer = loadAClass(KnockoutEquinoxTCKImpl.class);
+        Class<?> tck = loadOSGiClass(KnockoutTCK.class);
+        Class<?> peer = loadOSGiClass(KnockoutEquinoxTCKImpl.class);
         // initialize the TCK
         Callable<Class[]> inst = (Callable<Class[]>) peer.newInstance();
         
@@ -220,17 +189,8 @@ public class KnockoutEquinoxIT {
         
         URI uri = DynamicHTTP.initServer();
 
-        
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(peer).
-            loadPage(uri.toString()).
-            invoke("initialized");
-        
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                bb.showAndWait();
-            }
-        });
+        Method start = peer.getMethod("start", URI.class);
+        start.invoke(null, uri);
         
         ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
@@ -258,9 +218,16 @@ public class KnockoutEquinoxIT {
         return browserClass.getClassLoader();
     }
     
-    public static synchronized void initialized(Class<?> browserCls) throws Exception {
+    public static synchronized void initialized(Class<?> browserCls, Object presenter) throws Exception {
         browserClass = browserCls;
-        browserContext = FnContext.currentPresenter();
+        browserContext = presenter;
         KnockoutEquinoxIT.class.notifyAll();
+    }
+
+    static Closeable activateInOSGi(Object presenter) throws Exception {
+        Class<?> presenterClass = loadOSGiClass(Fn.Presenter.class);
+        Class<?> fnClass = loadOSGiClass(Fn.class);
+        Method m = fnClass.getMethod("activate", presenterClass);
+        return (Closeable) m.invoke(null, presenter);
     }
 }

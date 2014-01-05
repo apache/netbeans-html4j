@@ -52,7 +52,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
+import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
@@ -62,6 +64,9 @@ import org.apidesign.html.json.tck.KnockoutTCK;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  *
@@ -72,24 +77,61 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     
     private static Fn.Presenter browserContext;
 
+    public static Class loadOSGiClass(String name, BundleContext ctx) throws Exception {
+        for (Bundle b : ctx.getBundles()) {
+            try {
+                Class<?> osgiClass = b.loadClass(name);
+                if (osgiClass != null && osgiClass.getClassLoader() != ClassLoader.getSystemClassLoader()) {
+                    return osgiClass;
+                }
+            } catch (ClassNotFoundException cnfe) {
+                // go on
+            }
+        }
+        throw new IllegalStateException("Cannot load " + name + " from the OSGi container!");
+    }
+
     @Override
     public Class[] call() throws Exception {
         return testClasses();
+    }
+    
+    public static void start(URI server) throws Exception {
+        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutEquinoxTCKImpl.class).
+            loadPage(server.toString()).
+            invoke("initialized");
+
+        Executors.newSingleThreadExecutor().submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final ClassLoader osgiClassLoader = BrowserBuilder.class.getClassLoader();
+                    Thread.currentThread().setContextClassLoader(osgiClassLoader);
+                    bb.showAndWait();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
     }
 
     public static void initialized() throws Exception {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(
             "org.netbeans.html.ko.osgi.test.KnockoutEquinoxIT"
         );
-        Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, KnockoutEquinoxTCKImpl.class);
+        Method m = classpathClass.getMethod("initialized", Class.class, Object.class);
         browserContext = Fn.activePresenter();
+        m.invoke(null, KnockoutEquinoxTCKImpl.class, browserContext);
     }
     
     @Override
     public BrwsrCtx createContext() {
         try {
-            Object fx = Class.forName("org.netbeans.html.kofx.FXContext").getConstructor(Fn.Presenter.class).newInstance(browserContext);
+            Class<?> fxCls = loadOSGiClass(
+                "org.netbeans.html.kofx.FXContext",
+                FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class).getBundleContext()
+            );
+            Object fx = fxCls.getConstructor(Fn.Presenter.class).newInstance(browserContext);
             Contexts.Builder cb = Contexts.newBuilder().
                 register(Technology.class, (Technology)fx, 10).
                 register(Transfer.class, (Transfer)fx, 10);

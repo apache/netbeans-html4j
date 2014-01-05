@@ -55,13 +55,13 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class KOFx implements ITest, Runnable {
-    private final Fn.Presenter p;
+    private final Object p;
     private final Method m;
     private Object result;
     private Object inst;
     private int count;
 
-    KOFx(Fn.Presenter p, Method m) {
+    KOFx(Object p, Method m) {
         this.p = p;
         this.m = m;
     }
@@ -88,7 +88,7 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try (Closeable a = Fn.activate(p)) {
+        try (Closeable a = KnockoutEquinoxIT.activateInOSGi(p)) {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
