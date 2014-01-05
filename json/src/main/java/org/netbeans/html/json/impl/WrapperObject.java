@@ -77,7 +77,7 @@ public final class WrapperObject {
         if (proto == null) {
             return null;
         }
-        final Bindings b = proto.initBindings();
+        final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
         return b == null ? null : b.koData();
     }
 }

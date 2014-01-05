@@ -182,8 +182,7 @@ public final class Proto {
         return JSON.read(context, modelClass, data);
     }
     
-    // XXX: Don't expose internal type
-    public Bindings initBindings() {
+    final Bindings initBindings() {
         if (ko == null) {
             Bindings b = Bindings.apply(context, obj);
             PropertyBinding[] pb = new PropertyBinding[type.propertyNames.length];

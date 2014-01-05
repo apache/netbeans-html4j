@@ -69,7 +69,12 @@ public abstract class PropertyBindingAccessor {
         BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter,
         String method, Object data
     );
-
+    
+    protected abstract Bindings bindings(Proto proto, boolean initialize);
+    
+    static Bindings getBindings(Proto proto, boolean initialize) {
+        return DEFAULT.bindings(proto, initialize);
+    }
     
     static <M> PropertyBinding create(PBData<M> d) {
         return DEFAULT.newBinding(d);

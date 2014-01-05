@@ -203,6 +203,6 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     final Object koData() {
-        return koData(this, proto.initBindings());
+        return koData(this, PropertyBindingAccessor.getBindings(proto, true));
     }
 }
