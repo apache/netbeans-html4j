@@ -1205,6 +1205,7 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
             body.append("model, null);\n");
             body.append(
+                "        return;" +
                 "      }"
             );
         }
