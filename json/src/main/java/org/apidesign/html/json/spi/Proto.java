@@ -449,15 +449,24 @@ public final class Proto {
          */
         public abstract void onMessage(Model model, int index, int type, Object data);
 
+        //
+        // Various support methods the generated classes use
+        //
+
+        /** Converts and array of raw JSON objects into an array of typed
+         * Java {@lin Model} classes.
+         * 
+         * @param <T> the type of the destination array
+         * @param context browser context to use
+         * @param src array of raw JSON objects
+         * @param destType type of the individual array elements
+         * @param dest array to be filled with read type instances
+         */
         public <T> void copyJSON(BrwsrCtx context, Object[] src, Class<T> destType, T[] dest) {
             for (int i = 0; i < src.length && i < dest.length; i++) {
                 dest[i] = org.netbeans.html.json.impl.JSON.read(context, destType, src[i]);
             }
         }
-        
-        //
-        // Various support methods the generated classes use
-        //
         
         /** Compares two objects that can be converted to integers.
          * @return true if they are the same
