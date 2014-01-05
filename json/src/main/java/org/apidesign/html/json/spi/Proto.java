@@ -182,6 +182,18 @@ public final class Proto {
         return JSON.read(context, modelClass, data);
     }
 
+    /** Initializes asynchronous JSON connection to specified URL. The 
+     * method returns immediately and later does callback later.
+     * 
+     * @param index the callback index to be used when a reply is received
+     *   to call {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}.
+     * 
+     * @param urlBefore the part of the URL before JSON-P callback parameter
+     * @param urlAfter the rest of the URL or <code>null</code> if no JSON-P is used
+     * @param method method to use for connection to the server
+     * @param data string, number or a {@link Model} generated class to send to
+     *    the server when doing a query
+     */
     public void loadJSON(final int index, 
         String urlBefore, String urlAfter, String method,
         final Object data
@@ -200,6 +212,15 @@ public final class Proto {
         JSON.loadJSON(context, new Rcvr(), urlBefore, urlAfter, method, data);
     }
     
+    /** Opens new WebSocket connection to the specified URL. 
+     * 
+     * @param index the index to use later during callbacks to 
+     *   {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}
+     * @param url the <code>ws://</code> or <code>wss://</code> URL to connect to
+     * @param data data to send to server (usually <code>null</code>)
+     * @return returns a non-null object representing the socket
+     *   which can be used when calling {@link #wsSend(java.lang.Object, java.lang.String, java.lang.Object) }
+     */
     public Object wsOpen(final int index, String url, Object data) {
         class WSrcvr extends RcvrJSON {
             @Override
@@ -225,6 +246,15 @@ public final class Proto {
         return JSON.openWS(context, new WSrcvr(), url, data);
     }
     
+    /** Sends a message to existing socket.
+     * 
+     * @param webSocket the socket to send message to
+     * @param url the <code>ws://</code> or <code>wss://</code> URL to connect to,
+     *    preferably the same as the one used when the socket was 
+     *    {@link #wsOpen(int, java.lang.String, java.lang.Object) opened}
+     * @param data the data to send or <code>null</code> if the socket is
+     *    supposed to be closed
+     */
     public void wsSend(Object webSocket, String url, Object data) {
         ((JSON.WS)webSocket).send(context, url, data);
     }
@@ -250,7 +280,7 @@ public final class Proto {
     public Number toNumber(Object data, String propName) {
         return JSON.toNumber(context, data, propName);
     }
-    
+
     public <T> T toModel(Class<T> type, Object data, String propName) {
         return JSON.toModel(context, type, data, propName);
     }
