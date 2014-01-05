@@ -419,7 +419,15 @@ public final class Proto {
             functions[index] = name;
         }
         
-        public Proto protoFor(Object obj, BrwsrCtx context) {
+        /** Creates new proto-object for given {@link Model} class bound to
+         * provided context.
+         * 
+         * @param obj instance of appropriate {@link Model} class
+         * @param context the browser context
+         * @return new proto-object that the generated class can use for
+         *   communication with the infrastructure
+         */
+        public Proto createProto(Object obj, BrwsrCtx context) {
             return new Proto(obj, this, context);
         }
         

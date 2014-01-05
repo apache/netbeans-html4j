@@ -219,7 +219,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
-                w.append("    this.proto = TYPE.protoFor(this, context);\n");
+                w.append("    this.proto = TYPE.createProto(this, context);\n");
                 for (Prprt p : props) {
                     if (p.array()) {
                         final String tn = typeName(e, p);
