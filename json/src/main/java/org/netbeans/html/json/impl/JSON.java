@@ -44,6 +44,7 @@ package org.netbeans.html.json.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
@@ -256,6 +257,32 @@ public final class JSON {
         }
     
         return Boolean.TRUE.equals(val);
+    }
+    
+    public static Object find(Object object, Bindings model) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof JSONList) {
+            return ((JSONList<?>) object).koData();
+        }
+        if (object instanceof Collection) {
+            return JSONList.koData((Collection<?>) object, model);
+        }
+        Proto.Type<?> type = JSON.findType(object.getClass());
+        if (type == null) {
+            return null;
+        }
+        final Proto proto = PropertyBindingAccessor.protoFor(type, object);
+        if (proto == null) {
+            return null;
+        }
+        final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
+        return b == null ? null : b.koData();
+    }
+
+    public static Object find(Object object) {
+        return find(object, null);
     }
     
     public static void loadJSON(

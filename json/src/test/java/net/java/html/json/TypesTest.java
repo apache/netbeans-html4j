@@ -46,9 +46,9 @@ import net.java.html.BrwsrCtx;
 import java.util.Map;
 import net.java.html.json.MapModelTest.One;
 import org.apidesign.html.context.spi.Contexts;
-import org.netbeans.html.json.impl.WrapperObject;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.netbeans.html.json.impl.JSON;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -111,10 +111,10 @@ public class TypesTest {
         t.setFloatX(99f);
         */
         
-        Object json = WrapperObject.find(t);
+        Object json = JSON.find(t);
         
         Types copy = Models.bind(new Types(), c);
-        Map copyMap = (Map) WrapperObject.find(copy);
+        Map copyMap = (Map) JSON.find(copy);
         One o = (One) copyMap.get("readFromEvent");
         o.fb.call(null, json);
         

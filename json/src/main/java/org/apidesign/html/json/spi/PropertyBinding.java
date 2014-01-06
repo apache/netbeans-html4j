@@ -44,10 +44,10 @@ package org.apidesign.html.json.spi;
 
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.impl.Bindings;
+import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.PropertyBindingAccessor;
 import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
 import org.netbeans.html.json.impl.RcvrJSON;
-import org.netbeans.html.json.impl.WrapperObject;
 
 /** Describes a property when one is asked to 
  * bind it 
@@ -120,7 +120,7 @@ public final class PropertyBinding {
     
     public Object getValue() {
         Object v = data.getValue();
-        Object r = WrapperObject.find(v, data.getBindings());
+        Object r = JSON.find(v, data.getBindings());
         return r == null ? v : r;
     }
     
