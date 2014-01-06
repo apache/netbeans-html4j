@@ -352,11 +352,11 @@ public final class JSON {
     }
     
     public static <Model> Model bindTo(Model model, BrwsrCtx c) {
-        Proto.Type<?> from = findType(model.getClass());
+        Proto.Type<Model> from = (Proto.Type<Model>) findType(model.getClass());
         if (from == null) {
             throw new IllegalArgumentException();
         }
-        return (Model) from.cloneTo(model, c);
+        return PropertyBindingAccessor.clone(from, model, c);
     }
     
     public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 
@@ -376,7 +376,7 @@ public final class JSON {
             if (from == null) {
                 initClass(modelClazz);
             } else {
-                return modelClazz.cast(from.read(c, data));
+                return modelClazz.cast(PropertyBindingAccessor.readFrom(from, c, data));
             }
         }
         throw new NullPointerException();

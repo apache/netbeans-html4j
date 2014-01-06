@@ -431,14 +431,69 @@ public final class Proto {
             return new Proto(obj, this, context);
         }
         
-        // XXX: should be protected
-        public abstract void setValue(Model model, int index, Object value);
-        public abstract Object getValue(Model model, int index);
-        public abstract void call(Model model, int index, Object data, Object event);
-        public abstract Model cloneTo(Object model, BrwsrCtx ctx);
-        public abstract Model read(BrwsrCtx c, Object json);
-        public abstract void onChange(Model model, int index);
-        public abstract Proto protoFor(Object object);
+        //
+        // Implemented by subclasses
+        //
+        
+        /** Sets value of a {@link #registerProperty(java.lang.String, int, boolean) registered property}
+         * to new value.
+         * 
+         * @param model the instance of {@link Model model class}
+         * @param index index of the property used during registration
+         * @param value the value to set the property to
+         */
+        protected abstract void setValue(Model model, int index, Object value);
+        
+        /** Obtains and returns value of a 
+         * {@link #registerProperty(java.lang.String, int, boolean) registered property}.
+         * 
+         * @param model the instance of {@link Model model class}
+         * @param index index of the property used during registration
+         * @return current value of the property
+         */
+        protected abstract Object getValue(Model model, int index);
+        
+        /** Invokes a {@link #registerFunction(java.lang.String, int) registered function
+         * on given object.
+         * 
+         * @param model the instance of {@link Model model class}
+         * @param index index of the property used during registration
+         * @param data the currently selected object the function is about to operate on
+         * @param event the event that triggered the event
+         */
+        protected abstract void call(Model model, int index, Object data, Object event);
+        
+        /** Re-binds the model object to new browser context.
+         * 
+         * @param model the instance of {@link Model model class}
+         * @param ctx browser context to clone the object to
+         * @return new instance of the model suitable for new context
+         */
+        protected abstract Model cloneTo(Model model, BrwsrCtx ctx);
+        
+        /** Reads raw JSON data and converts them to our model class.
+         * 
+         * @param c the browser context to work in
+         * @param json raw JSON data to get values from
+         * @return new instance of model class filled by the data
+         */
+        protected abstract Model read(BrwsrCtx c, Object json);
+        
+        /** Called when a {@link #registerProperty(java.lang.String, int, boolean) registered property}
+         * changes its value.
+         * 
+         * @param model the object that has the property
+         * @param index the index of the property during registration
+         */
+        protected abstract void onChange(Model model, int index);
+        
+        /** Finds out if there is an associated proto-object for given
+         * object.
+         * 
+         * @param object an object, presumably (but not necessarily) instance of Model class
+         * @return associated proto-object or <code>null</code>
+         */
+        protected abstract Proto protoFor(Object object);
 
         /**
          * 

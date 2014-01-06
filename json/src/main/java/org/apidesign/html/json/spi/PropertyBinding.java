@@ -82,6 +82,31 @@ public final class PropertyBinding {
             protected void notifyChange(Proto proto, int propIndex) {
                 proto.onChange(propIndex);
             }
+
+            @Override
+            protected <Model> void setValue(Proto.Type<Model> type, Model model, int index, Object value) {
+                type.setValue(model, index, value);
+            }
+
+            @Override
+            protected <Model> Object getValue(Proto.Type<Model> type, Model model, int index) {
+                return type.getValue(model, index);
+            }
+
+            @Override
+            protected Proto findProto(Proto.Type<?> type, Object object) {
+                return type.protoFor(object);
+            }
+
+            @Override
+            protected <Model> Model cloneTo(Proto.Type<Model> type, Model model, BrwsrCtx c) {
+                return type.cloneTo(model, c);
+            }
+
+            @Override
+            protected Object read(Proto.Type<?> from, BrwsrCtx c, Object data) {
+                return from.read(c, data);
+            }
         };
     }
 

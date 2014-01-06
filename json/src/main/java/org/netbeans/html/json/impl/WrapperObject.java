@@ -73,7 +73,7 @@ public final class WrapperObject {
         if (type == null) {
             return null;
         }
-        final Proto proto = type.protoFor(object);
+        final Proto proto = PropertyBindingAccessor.protoFor(type, object);
         if (proto == null) {
             return null;
         }

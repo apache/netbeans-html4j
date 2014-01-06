@@ -72,6 +72,11 @@ public abstract class PropertyBindingAccessor {
     
     protected abstract Bindings bindings(Proto proto, boolean initialize);
     protected abstract void notifyChange(Proto proto, int propIndex);
+    protected abstract <Model> void setValue(Proto.Type<Model> type, Model model, int index, Object value);
+    protected abstract <Model> Object getValue(Proto.Type<Model> type, Model model, int index);
+    protected abstract Proto findProto(Proto.Type<?> type, Object object);
+    protected abstract <Model> Model cloneTo(Proto.Type<Model> type, Model model, BrwsrCtx c);
+    protected abstract Object read(Proto.Type<?> from, BrwsrCtx c, Object data);
     
     static Bindings getBindings(Proto proto, boolean initialize) {
         return DEFAULT.bindings(proto, initialize);
@@ -89,6 +94,15 @@ public abstract class PropertyBindingAccessor {
         String method, Object data
     ) {
         return DEFAULT.newCall(ctx, callback, urlBefore, urlAfter, method, data);
+    }
+    static Proto protoFor(Proto.Type<?> type, Object object) {
+        return DEFAULT.findProto(type, object);
+    }
+    static <Model> Model clone(Proto.Type<Model> type, Model model, BrwsrCtx c) {
+        return DEFAULT.cloneTo(type, model, c);
+    }
+    static Object readFrom(Proto.Type<?> from, BrwsrCtx c, Object data) {
+        return DEFAULT.read(from, c, data);
     }
 
     public static final class PBData<M> {
@@ -109,11 +123,11 @@ public abstract class PropertyBindingAccessor {
         }
 
         public void setValue(Object v) {
-            access.setValue(model, index, v);
+            DEFAULT.setValue(access, model, index, v);
         }
 
         public Object getValue() {
-            return access.getValue(model, index);
+            return DEFAULT.getValue(access, model, index);
         }
 
         public boolean isReadOnly() {

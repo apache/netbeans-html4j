@@ -375,7 +375,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    }\n");
                 w.append(onReceiveType);
                 w.append("    @Override public " + className + " read(net.java.html.BrwsrCtx c, Object json) { return new " + className + "(c, json); }\n");
-                w.append("    @Override public " + className + " cloneTo(Object o, net.java.html.BrwsrCtx c) { return ((" + className + ")o).clone(c); }\n");
+                w.append("    @Override public " + className + " cloneTo(" + className + " o, net.java.html.BrwsrCtx c) { return o.clone(c); }\n");
                 w.append("  }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx c, Object json) {\n");
                 w.append("    this(c);\n");
