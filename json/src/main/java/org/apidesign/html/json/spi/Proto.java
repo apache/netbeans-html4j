@@ -453,7 +453,7 @@ public final class Proto {
          */
         protected abstract Object getValue(Model model, int index);
         
-        /** Invokes a {@link #registerFunction(java.lang.String, int) registered function
+        /** Invokes a {@link #registerFunction(java.lang.String, int)} registered function
          * on given object.
          * 
          * @param model the instance of {@link Model model class}
