@@ -388,7 +388,11 @@ public final class Proto {
             Class<Model> clazz, Class<?> modelFor, int properties, int functions
         ) {
             assert getClass().getName().endsWith("$Html4JavaType");
-            assert getClass().getDeclaringClass() == clazz;
+            try {
+                assert getClass().getDeclaringClass() == clazz;
+            } catch (SecurityException ex) {
+                // OK, no check
+            }
             this.clazz = clazz;
             this.propertyNames = new String[properties];
             this.propertyReadOnly = new boolean[properties];
