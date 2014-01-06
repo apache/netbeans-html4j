@@ -47,7 +47,6 @@ import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Proto;
 import org.apidesign.html.json.spi.Technology;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
 
 /**
  *
@@ -62,7 +61,7 @@ public final class Bindings<Data> {
     }
     
     public <M> PropertyBinding registerProperty(String propName, int index, M model, Proto.Type<M> access, boolean readOnly) {
-        return PropertyBindingAccessor.create(new PBData<M>(this, propName, index, model, access, readOnly));
+        return PropertyBindingAccessor.create(access, this, propName, index, model, readOnly);
     }
 
     public static Bindings<?> apply(BrwsrCtx c, Object model) {

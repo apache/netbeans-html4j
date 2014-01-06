@@ -46,7 +46,6 @@ import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.PropertyBindingAccessor;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
 import org.netbeans.html.json.impl.RcvrJSON;
 
 /** Describes a property when one is asked to 
@@ -54,20 +53,12 @@ import org.netbeans.html.json.impl.RcvrJSON;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class PropertyBinding {
-    private final PBData<?> data;
-    
-    private PropertyBinding(PBData<?> p) {
-        this.data = p;
+public abstract class PropertyBinding {
+    PropertyBinding() {
     }
 
     static {
         new PropertyBindingAccessor() {
-            @Override
-            protected <M> PropertyBinding newBinding(PBData<M> d) {
-                return new PropertyBinding(d);
-            }
-
             @Override
             protected JSONCall newCall(BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
                 return new JSONCall(ctx, callback, urlBefore, urlAfter, method, data);
@@ -84,16 +75,6 @@ public final class PropertyBinding {
             }
 
             @Override
-            protected <Model> void setValue(Proto.Type<Model> type, Model model, int index, Object value) {
-                type.setValue(model, index, value);
-            }
-
-            @Override
-            protected <Model> Object getValue(Proto.Type<Model> type, Model model, int index) {
-                return type.getValue(model, index);
-            }
-
-            @Override
             protected Proto findProto(Proto.Type<?> type, Object object) {
                 return type.protoFor(object);
             }
@@ -107,24 +88,81 @@ public final class PropertyBinding {
             protected Object read(Proto.Type<?> from, BrwsrCtx c, Object data) {
                 return from.read(c, data);
             }
+
+            @Override
+            protected <M> PropertyBinding newBinding(
+                Proto.Type<M> access, Bindings<?> bindings, String name,
+                int index, M model, boolean readOnly
+            ) {
+                return new Impl(bindings, name, index, model, access, readOnly);
+            }
         };
     }
 
-    public String getPropertyName() {
-        return data.name;
-    }
+    /** Name of the property this binding represents.
+     * @return name of the property
+     */
+    public abstract String getPropertyName();
 
-    public void setValue(Object v) {
-        data.setValue(v);
-    }
+    /** Changes value of the property. Can be called only on dedicated
+     * thread. See {@link Technology#runSafe(java.lang.Runnable)}.
+     * 
+     * @param v new value of the property
+     */
+    public abstract void setValue(Object v);
     
-    public Object getValue() {
-        Object v = data.getValue();
-        Object r = JSON.find(v, data.getBindings());
-        return r == null ? v : r;
-    }
+    /** Obtains current value of the property this binding represents.
+     * Can be called only on dedicated
+     * thread. See {@link Technology#runSafe(java.lang.Runnable)}.
+     * 
+     * @return the value or <code>null</code>
+     */
+    public abstract Object getValue();
     
-    public boolean isReadOnly() {
-        return data.isReadOnly();
-    }
+    /** Is this property read only? Or can one call {@link #setValue(java.lang.Object)}?
+     * 
+     * @return true, if this property is read only
+     */
+    public abstract boolean isReadOnly();
+    
+    private static final class Impl<M> extends PropertyBinding {
+        public final String name;
+        public final boolean readOnly;
+        private final M model;
+        private final Proto.Type<M> access;
+        private final Bindings<?> bindings;
+        private final int index;
+
+        public Impl(Bindings<?> bindings, String name, int index, M model, Proto.Type<M> access, boolean readOnly) {
+            this.bindings = bindings;
+            this.name = name;
+            this.index = index;
+            this.model = model;
+            this.access = access;
+            this.readOnly = readOnly;
+        }
+
+        @Override
+        public void setValue(Object v) {
+            access.setValue(model, index, v);
+        }
+
+        @Override
+        public Object getValue() {
+            Object v = access.getValue(model, index);
+            Object r = JSON.find(v, bindings);
+            return r == null ? v : r;
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return readOnly;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return name;
+        }
+    } // end of PBData
+    
 }
