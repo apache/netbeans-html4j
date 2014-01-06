@@ -495,14 +495,18 @@ public final class Proto {
          */
         protected abstract Proto protoFor(Object object);
 
-        /**
+        /** Called to report results of asynchronous over-the-wire 
+         * communication. Result of calling {@link Proto#wsOpen(int, java.lang.String, java.lang.Object)}
+         * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)}.
          * 
-         * @param model
-         * @param index
-         * @param type 0 - onOpen, 1 - onMessage, 2 - onError, 3 - onClose
-         * @param data 
+         * @param model the instance of the model class
+         * @param index index used during initiating the communication (via <code>loadJSON</code> or <code>wsOpen</code> calls)
+         * @param type type of the message: 0 - onOpen, 1 - onMessage, 2 - onError, 3 - onClose -
+         *   not all messages are applicable to all communication protocols (JSON has only 1 and 2).
+         * @param data <code>null</code> or string, number or a {@link Model} class
+         *   obtained to the server as a response
          */
-        public abstract void onMessage(Model model, int index, int type, Object data);
+        protected abstract void onMessage(Model model, int index, int type, Object data);
 
         //
         // Various support methods the generated classes use
