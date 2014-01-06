@@ -46,9 +46,10 @@ import java.net.URI;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
-import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.JSONTest;
+import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.OperationsTest;
+import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -72,6 +73,7 @@ public final class MyKnockoutBindingTest extends KnockoutTCK {
  */
 public abstract class KnockoutTCK {
     protected KnockoutTCK() {
+        Utils.registerTCK(this);
     }
     
     /** Implement to create new context for the test. 

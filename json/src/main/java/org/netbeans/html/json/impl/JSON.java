@@ -44,6 +44,7 @@ package org.netbeans.html.json.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
@@ -51,6 +52,7 @@ import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
+import org.apidesign.html.json.spi.Proto;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
@@ -96,7 +98,7 @@ public final class JSON {
         return val[0];
     }
 
-    public static Object toJSON(Object value) {
+    public static String toJSON(Object value) {
         if (value == null) {
             return "null";
         }
@@ -198,7 +200,7 @@ public final class JSON {
         return type.cast(val);
     }
     
-    protected static boolean isNumeric(Object val) {
+    static boolean isNumeric(Object val) {
         return ((val instanceof Integer) || (val instanceof Long) || (val instanceof Short) || (val instanceof Byte));
     }
     
@@ -217,7 +219,7 @@ public final class JSON {
         }
         return (String)val;
     }
-
+    
     public static Number numberValue(Object val) {
         if (val instanceof String) {
             try {
@@ -255,6 +257,32 @@ public final class JSON {
         }
     
         return Boolean.TRUE.equals(val);
+    }
+    
+    public static Object find(Object object, Bindings model) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof JSONList) {
+            return ((JSONList<?>) object).koData();
+        }
+        if (object instanceof Collection) {
+            return JSONList.koData((Collection<?>) object, model);
+        }
+        Proto.Type<?> type = JSON.findType(object.getClass());
+        if (type == null) {
+            return null;
+        }
+        final Proto proto = PropertyBindingAccessor.protoFor(type, object);
+        if (proto == null) {
+            return null;
+        }
+        final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
+        return b == null ? null : b.koData();
+    }
+
+    public static Object find(Object object) {
+        return find(object, null);
     }
     
     public static void loadJSON(
@@ -326,22 +354,21 @@ public final class JSON {
         
     }
     
-    private static final Map<Class,FromJSON<?>> froms;
+    private static final Map<Class,Proto.Type<?>> modelTypes;
     static {
-        Map<Class,FromJSON<?>> m = new HashMap<Class,FromJSON<?>>();
-        froms = m;
+        modelTypes = new HashMap<Class, Proto.Type<?>>();
     }
-    public static void register(FromJSON<?> from) {
-        froms.put(from.factoryFor(), from);
+    public static void register(Class c, Proto.Type<?> type) {
+        modelTypes.put(c, type);
     }
     
     public static boolean isModel(Class<?> clazz) {
-        return findFrom(clazz) != null; 
+        return findType(clazz) != null; 
     }
     
-    private static FromJSON<?> findFrom(Class<?> clazz) {
+    static Proto.Type<?> findType(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
-            FromJSON<?> from = froms.get(clazz);
+            Proto.Type<?> from = modelTypes.get(clazz);
             if (from == null) {
                 initClass(clazz);
             } else {
@@ -352,11 +379,11 @@ public final class JSON {
     }
     
     public static <Model> Model bindTo(Model model, BrwsrCtx c) {
-        FromJSON<?> from = findFrom(model.getClass());
+        Proto.Type<Model> from = (Proto.Type<Model>) findType(model.getClass());
         if (from == null) {
             throw new IllegalArgumentException();
         }
-        return (Model) from.cloneTo(model, c);
+        return PropertyBindingAccessor.clone(from, model, c);
     }
     
     public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 
@@ -372,11 +399,11 @@ public final class JSON {
             return modelClazz.cast(data.toString());
         }
         for (int i = 0; i < 2; i++) {
-            FromJSON<?> from = froms.get(modelClazz);
+            Proto.Type<?> from = modelTypes.get(modelClazz);
             if (from == null) {
                 initClass(modelClazz);
             } else {
-                return modelClazz.cast(from.read(c, data));
+                return modelClazz.cast(PropertyBindingAccessor.readFrom(from, c, data));
             }
         }
         throw new NullPointerException();

@@ -80,7 +80,7 @@ public class JSONListTest implements Technology<Object> {
         p.setLastName("2");
         p.setSex(Sex.MALE);
 
-        Object real = WrapperObject.find(p);
+        Object real = JSON.find(p);
         assertEquals(this, real, "I am the right model");
     }
     
@@ -135,7 +135,7 @@ public class JSONListTest implements Technology<Object> {
         People people = Models.bind(new People(), c).applyBindings();
         people.getInfo().add(p);
         
-        Object real = WrapperObject.find(people.getInfo());
+        Object real = JSON.find(people.getInfo());
         assertEquals(real, this, "I am the model of the array");
     }
 

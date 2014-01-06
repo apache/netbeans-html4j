@@ -44,37 +44,25 @@ package org.netbeans.html.json.impl;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import net.java.html.BrwsrCtx;
+import org.apidesign.html.json.spi.Proto;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JSONList<T> extends ArrayList<T> {
+    private final Proto proto;
     private final String name;
     private final String[] deps;
-    private Bindings[] model;
-    private Runnable onchange;
+    private final int index;
 
-    public JSONList(Bindings[] model, String name, String... deps) {
-        assert model.length == 1;
-        this.model = model;
+    public JSONList(Proto proto, String name, int changeIndex, String... deps) {
+        this.proto = proto;
         this.name = name;
         this.deps = deps;
-    }
-    
-    public void init(T... values) {
-        if (values == null || values.length == 0) {
-            return;
-        }
-        if (this.model[0] != null || !isEmpty()) {
-            throw new IllegalStateException();
-        }
-        super.addAll(Arrays.asList(values));
+        this.index = changeIndex;
     }
     
     public void init(Object values) {
@@ -82,23 +70,22 @@ public final class JSONList<T> extends ArrayList<T> {
         if (values == null || (len = Array.getLength(values)) == 0) {
             return;
         }
-        if (this.model[0] != null || !isEmpty()) {
-            throw new IllegalStateException();
-        }
         for (int i = 0; i < len; i++) {
             Object data = Array.get(values, i);
             super.add((T)data);
         }
     }
-    
-    public JSONList<T> onChange(Runnable r) {
-        if (this.onchange != null) {
-            throw new IllegalStateException();
+    public static <T> void init(Collection<T> to, Object values) {
+        int len;
+        if (values == null || (len = Array.getLength(values)) == 0) {
+            return;
         }
-        this.onchange = r;
-        return this;
+        for (int i = 0; i < len; i++) {
+            Object data = Array.get(values, i);
+            to.add((T)data);
+        }
     }
-
+    
     @Override
     public boolean add(T e) {
         boolean ret = super.add(e);
@@ -187,29 +174,14 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     private void notifyChange() {
-        Bindings m = model[0];
+        Bindings m = PropertyBindingAccessor.getBindings(proto, false);
         if (m != null) {
             m.valueHasMutated(name);
             for (String dependant : deps) {
                 m.valueHasMutated(dependant);
             }
-            Runnable r = onchange;
-            if (r != null) {
-                r.run();
-            }
-        }
-    }
-    
-    public void cloneAll(BrwsrCtx c, Collection<T> other) {
-        Boolean isModel = null;
-        for (T t : other) {
-            if (isModel == null) {
-                isModel = JSON.isModel(t.getClass());
-            }
-            if (isModel) {
-                add(JSON.bindTo(t, c));
-            } else {
-                add(t);
+            if (index >= 0) {
+                PropertyBindingAccessor.notifyProtoChange(proto, index);
             }
         }
     }
@@ -222,7 +194,7 @@ public final class JSONList<T> extends ArrayList<T> {
     static final Object koData(Collection<?> c, Bindings m) {
         Object[] arr = c.toArray(new Object[c.size()]);
         for (int i = 0; i < arr.length; i++) {
-            Object r = WrapperObject.find(arr[i], m);
+            Object r = JSON.find(arr[i], m);
             if (r != null) {
                 arr[i] = r;
             }
@@ -231,6 +203,6 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     final Object koData() {
-        return koData(this, model[0]);
+        return koData(this, PropertyBindingAccessor.getBindings(proto, true));
     }
 }

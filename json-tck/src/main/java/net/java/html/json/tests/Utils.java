@@ -43,6 +43,7 @@
 package net.java.html.json.tests;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
@@ -52,12 +53,18 @@ import org.apidesign.html.json.tck.KnockoutTCK;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class Utils {
+public final class Utils {
+    private static KnockoutTCK instantiatedTCK;
+    
     private Utils() {
+    }
+    
+    public static void registerTCK(KnockoutTCK tck) {
+        instantiatedTCK = tck;
     }
 
     static  BrwsrCtx newContext(Class<?> clazz) {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+        for (KnockoutTCK tck : tcks(clazz)) {
             BrwsrCtx c = tck.createContext();
             if (c != null) {
                 return c;
@@ -66,7 +73,7 @@ final class Utils {
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
     static Object createObject(Map<String,Object> values, Class<?> clazz) {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+        for (KnockoutTCK tck : tcks(clazz)) {
             Object o = tck.createJSON(values);
             if (o != null) {
                 return o;
@@ -77,10 +84,17 @@ final class Utils {
     static Object executeScript(Class<?> clazz, 
         String script, Object... arguments
     ) throws Exception {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+        for (KnockoutTCK tck : tcks(clazz)) {
             return tck.executeScript(script, arguments);
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
+    }
+
+    private static Iterable<KnockoutTCK> tcks(Class<?> clazz) {
+        if (instantiatedTCK != null) {
+            return Collections.singleton(instantiatedTCK);
+        }
+        return ServiceLoader.load(KnockoutTCK.class, cl(clazz));
     }
     
     static Object exposeHTML(Class<?> clazz, String html) throws Exception {
@@ -98,7 +112,7 @@ final class Utils {
 
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+        for (KnockoutTCK tck : tcks(clazz)) {
             URI o = tck.prepareURL(content, mimeType, parameters);
             if (o != null) {
                 return o.toString();
@@ -109,7 +123,7 @@ final class Utils {
 
     static boolean canFailWebSockets(
         Class<?> clazz) {
-        for (KnockoutTCK tck : ServiceLoader.load(KnockoutTCK.class, cl(clazz))) {
+        for (KnockoutTCK tck : tcks(clazz)) {
             if (tck.canFailWebSocketTest()) {
                 return true;
             }

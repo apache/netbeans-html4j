@@ -44,35 +44,59 @@ package org.apidesign.html.json.spi;
 
 import net.java.html.json.Function;
 import net.java.html.json.Model;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.FBData;
 
 /** Describes a function provided by the {@link Model} and 
  * annotated by {@link Function} annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FunctionBinding {
-    private final FBData<?> fb;
-    
-    FunctionBinding(FBData<?> fb) {
-        this.fb = fb;
-    }
-
-    public String getFunctionName() {
-        return fb.name;
+public abstract class FunctionBinding {
+    FunctionBinding() {
     }
     
-    /** Calls the function provided data associated with current element,
-     * as well as information about the event that triggered the event.
-     * 
+    /** Returns name of the function.
+     * @return function name
+     */
+    public abstract String getFunctionName();
+    
+    /**
+     * Calls the function provided data associated with current element, as well
+     * as information about the event that triggered the event.
+     *
      * @param data data associated with selected element
      * @param ev event (with additional properties) that triggered the event
      */
-    public void call(Object data, Object ev) {
-        try {
-            fb.call(data, ev);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+    public abstract void call(Object data, Object ev);
+
+    static <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
+        return new Impl<M>(name, index, model, access);
+    }
+    
+    private static final class Impl<M> extends FunctionBinding {
+        final String name;
+        private final M model;
+        private final Proto.Type<M> access;
+        private final int index;
+
+        public Impl(String name, int index, M model, Proto.Type<M> access) {
+            this.name = name;
+            this.index = index;
+            this.model = model;
+            this.access = access;
+        }
+
+        @Override
+        public String getFunctionName() {
+            return name;
+        }
+
+        @Override
+        public void call(Object data, Object ev) {
+            try {
+                access.call(model, index, data, ev);
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }

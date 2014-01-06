@@ -49,7 +49,6 @@ import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.netbeans.html.json.impl.JSON;
 import org.apidesign.html.json.tck.KOTest;
 
 /** Need to verify that models produce reasonable JSON objects.
@@ -84,7 +83,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + p).initCause(ex);
         }
         
-        Person p2 = JSON.read(newContext(), Person.class, json);
+        Person p2 = Models.fromRaw(newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
@@ -104,7 +103,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
         
-        Person p2 = JSON.read(newContext(), Person.class, json);
+        Person p2 = Models.fromRaw(newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
@@ -124,7 +123,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
         
-        Person p2 = JSON.read(newContext(), Person.class, json);
+        Person p2 = Models.fromRaw(newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
@@ -144,7 +143,7 @@ public final class JSONTest {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
         
-        Person p2 = JSON.read(newContext(), Person.class, json);
+        Person p2 = Models.fromRaw(newContext(), Person.class, json);
         
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();

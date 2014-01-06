@@ -40,43 +40,79 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.json.impl;
+package org.netbeans.html.ko.osgi.test;
 
-import java.util.Collection;
-import org.netbeans.html.json.impl.PropertyBindingAccessor.PBData;
+import java.io.Closeable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javafx.application.Platform;
+import org.apidesign.html.boot.spi.Fn;
+import org.testng.ITest;
+import org.testng.annotations.Test;
 
-/** A way to extract real object from a model classes.
+/**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class WrapperObject {
-    private Object ko;
-    
-    private WrapperObject() {
+public final class KOFx implements ITest, Runnable {
+    private final Object p;
+    private final Method m;
+    private Object result;
+    private Object inst;
+    private int count;
+
+    KOFx(Object p, Method m) {
+        this.p = p;
+        this.m = m;
     }
-    
-    public void setRealObject(Object ko) {
-        this.ko = ko;
+
+    @Override
+    public String getTestName() {
+        return m.getName();
     }
-    
-    public static Object find(Object object) {
-        return find(object, null);
-    }
-    
-    public static Object find(Object object, Bindings model) {
-        if (object == null) {
-            return null;
+
+    @Test
+    public synchronized void executeTest() throws Exception {
+        if (result == null) {
+            Platform.runLater(this);
+            wait();
         }
-        
-        if (object instanceof JSONList) {
-            return ((JSONList<?>)object).koData();
+        if (result instanceof Exception) {
+            throw (Exception)result;
         }
-        if (object instanceof Collection) {
-            return JSONList.koData((Collection<?>)object, model);
+        if (result instanceof Error) {
+            throw (Error)result;
         }
-        
-        WrapperObject ro = new WrapperObject();
-        object.equals(ro);
-        return ro.ko;
     }
+
+    @Override
+    public synchronized void run() {
+        boolean notify = true;
+        try (Closeable a = KnockoutEquinoxIT.activateInOSGi(p)) {
+            if (inst == null) {
+                inst = m.getDeclaringClass().newInstance();
+            }
+            result = m.invoke(inst);
+            if (result == null) {
+                result = this;
+            }
+        } catch (InvocationTargetException ex) {
+            Throwable r = ex.getTargetException();
+            if (r instanceof InterruptedException) {
+                if (count++ < 10000) {
+                    notify = false;
+                    Platform.runLater(this);
+                    return;
+                }
+            }
+            result = r;
+        } catch (Exception ex) {
+            result = ex;
+        } finally {
+            if (notify) {
+                notifyAll();
+            }
+        }
+    }
+    
 }

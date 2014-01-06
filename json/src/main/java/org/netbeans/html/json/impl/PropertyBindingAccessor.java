@@ -46,6 +46,7 @@ import net.java.html.BrwsrCtx;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
+import org.apidesign.html.json.spi.Proto;
 
 /**
  *
@@ -63,19 +64,32 @@ public abstract class PropertyBindingAccessor {
         JSON.initClass(PropertyBinding.class);
     }
 
-    protected abstract <M> PropertyBinding newBinding(PBData<M> d);
-    protected abstract <M> FunctionBinding newFunction(FBData<M> d);
+    protected abstract <M> PropertyBinding newBinding(
+        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model, boolean readOnly
+    );
     protected abstract JSONCall newCall(
         BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter,
         String method, Object data
     );
-
     
-    static <M> PropertyBinding create(PBData<M> d) {
-        return DEFAULT.newBinding(d);
+    protected abstract Bindings bindings(Proto proto, boolean initialize);
+    protected abstract void notifyChange(Proto proto, int propIndex);
+    protected abstract Proto findProto(Proto.Type<?> type, Object object);
+    protected abstract <Model> Model cloneTo(Proto.Type<Model> type, Model model, BrwsrCtx c);
+    protected abstract Object read(Proto.Type<?> from, BrwsrCtx c, Object data);
+    
+    static Bindings getBindings(Proto proto, boolean initialize) {
+        return DEFAULT.bindings(proto, initialize);
     }
-    static <M> FunctionBinding createFunction(FBData<M> d) {
-        return DEFAULT.newFunction(d);
+    
+    static void notifyProtoChange(Proto proto, int propIndex) {
+        DEFAULT.notifyChange(proto, propIndex);
+    }
+    
+    static <M> PropertyBinding create(
+        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model , boolean readOnly
+    ) {
+        return DEFAULT.newBinding(access, bindings, name, index, model, readOnly);
     }
     static JSONCall createCall(
         BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, 
@@ -83,53 +97,13 @@ public abstract class PropertyBindingAccessor {
     ) {
         return DEFAULT.newCall(ctx, callback, urlBefore, urlAfter, method, data);
     }
-
-    public static final class PBData<M> {
-        public final String name;
-        public final boolean readOnly;
-        private final M model;
-        private final SetAndGet<M> access;
-        private final Bindings<?> bindings;
-
-        public PBData(Bindings<?> bindings, String name, M model, SetAndGet<M> access, boolean readOnly) {
-            this.bindings = bindings;
-            this.name = name;
-            this.model = model;
-            this.access = access;
-            this.readOnly = readOnly;
-        }
-
-        public void setValue(Object v) {
-            access.setValue(model, v);
-        }
-
-        public Object getValue() {
-            return access.getValue(model);
-        }
-
-        public boolean isReadOnly() {
-            return readOnly;
-        }
-
-        public Bindings getBindings() {
-            return bindings;
-        }
-    } // end of PBData
-    
-    public static final class FBData<M> {
-        public final String name;
-        private final M model;
-        private final Callback<M> access;
-
-        public FBData(String name, M model, Callback<M> access) {
-            this.name = name;
-            this.model = model;
-            this.access = access;
-        }
-
-
-        public void call(Object data, Object ev) {
-            access.call(model, data, ev);
-        }
-    } // end of FBData
+    static Proto protoFor(Proto.Type<?> type, Object object) {
+        return DEFAULT.findProto(type, object);
+    }
+    static <Model> Model clone(Proto.Type<Model> type, Model model, BrwsrCtx c) {
+        return DEFAULT.cloneTo(type, model, c);
+    }
+    static Object readFrom(Proto.Type<?> from, BrwsrCtx c, Object data) {
+        return DEFAULT.read(from, c, data);
+    }
 }

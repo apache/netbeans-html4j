@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.json.impl;
 
+import java.util.ArrayList;
 import net.java.html.BrwsrCtx;
 
 /** Super type for those who wish to receive JSON messages.
@@ -73,13 +74,10 @@ public abstract class RcvrJSON {
             return new Exception(t);
         }
         
-        public int dataSize() {
-            return -1;
+        public Object[] getValues() {
+            return null;
         }
         
-        public <Data> void dataRead(BrwsrCtx ctx, Class<? extends Data> type, Data[] fillTheArray) {
-        }
-
         public abstract void dispatch(RcvrJSON r);
         
         public static MsgEvnt createError(final Throwable t) {
@@ -99,26 +97,8 @@ public abstract class RcvrJSON {
         public static MsgEvnt createMessage(final Object value) {
             return new MsgEvnt() {
                 @Override
-                public int dataSize() {
-                    if (value instanceof Object[]) {
-                        return ((Object[])value).length;
-                    } else {
-                        return 1;
-                    }
-                }
-                
-                @Override
-                public <Data> void dataRead(BrwsrCtx context, Class<? extends Data> type, Data[] arr) {
-                    if (value instanceof Object[]) {
-                        Object[] data = ((Object[]) value);
-                        for (int i = 0; i < data.length && i < arr.length; i++) {
-                            arr[i] = org.netbeans.html.json.impl.JSON.read(context, type, data[i]);
-                        }
-                    } else {
-                        if (arr.length > 0) {
-                            arr[0] = org.netbeans.html.json.impl.JSON.read(context, type, value);
-                        }
-                    }
+                public Object[] getValues() {
+                    return value instanceof Object[] ? (Object[])value : new Object[] { value };
                 }
                 
                 @Override
@@ -145,5 +125,4 @@ public abstract class RcvrJSON {
                 }
             };
         }
-    } // end MsgEvnt
-}
+    } }

@@ -80,7 +80,11 @@ public final class FnUtils implements Fn.Presenter {
         }
         Class<?> clazz;
         try (Closeable c = Fn.activate(new FnUtils())) {
-            clazz = Class.forName(Test.class.getName(), true, l);
+            try {
+                clazz = Class.forName(Test.class.getName(), true, l);
+            } catch (ClassNotFoundException ex) {
+                clazz = Test.class;
+            }
             final Object is = ((Callable<?>)clazz.newInstance()).call();
             return Boolean.TRUE.equals(is);
         } catch (Exception ex) {
