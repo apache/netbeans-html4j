@@ -17,9 +17,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.apidesign.html</groupId>
             <artifactId>knockout4j-archetype</artifactId>
-            <version>0.7-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

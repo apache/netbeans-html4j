@@ -85,7 +85,7 @@ public class VerifyArchetypeTest {
         sysProp.put("groupId", "org.someuser.test");
         sysProp.put("artifactId", "o-a-test");
         sysProp.put("package", "org.someuser.test.oat");
-        sysProp.put("archetypeGroupId", "org.netbeans.html");
+        sysProp.put("archetypeGroupId", "org.apidesign.html");
         sysProp.put("archetypeArtifactId", "knockout4j-archetype");
         sysProp.put("archetypeVersion", ArchetypeVersionTest.findCurrentVersion());
         
