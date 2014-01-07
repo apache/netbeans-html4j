@@ -116,6 +116,20 @@ public abstract class Fn {
     }
     
     private static final Map<String,Set<Presenter>> LOADED = new HashMap<String, Set<Presenter>>();
+    
+    /** Wraps function to ensure that the script represented by <code>resource</code>
+     * gets loaded into the browser environment before the function <code>fn</code>
+     * is executed.
+     * 
+     * @param fn original function to call
+     * @param caller the class who wishes to define/call the function
+     * @param resource resources (accessible via {@link ClassLoader#getResource(java.lang.String)}) 
+     *   with a <em>JavaScript</em> that is supposed to loaded into the browser
+     *   environment
+     * @return function that ensures the script is loaded and then delegates
+     *   to <code>fn</code>
+     * @since 0.7
+     */
     public static Fn preload(final Fn fn, final Class<?> caller, final String resource) {
         return new Fn() {
             @Override
