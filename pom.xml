@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apidesign</groupId>
-  <artifactId>html</artifactId>
+  <groupId>org.netbeans.html</groupId>
+  <artifactId>pom</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
@@ -16,6 +16,7 @@
       <netbeans.version>RELEASE73</netbeans.version>
       <license>COPYING</license>
       <publicPackages></publicPackages>
+      <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
   </properties>
   <modules>
     <module>json</module>
@@ -30,17 +31,19 @@
     <module>geo</module>
     <module>ko-ws-tyrus</module>
     <module>html4j-maven-plugin</module>
+    <module>ko-osgi-test</module>
+    <module>equinox-agentclass-hook</module>
   </modules>
   <licenses>
       <license>
-          <name>GPL-2.0wCPexc</name>
-          <url>http://opensource.org/licenses/GPL-2.0</url>
+          <name>GPL-2.0wCPexc+CDDL</name>
+          <url>http://www.netbeans.org/cddl-gplv2.html</url>
           <distribution>repo</distribution>
       </license>
   </licenses>
   <organization>
-      <name>API Design</name>
-      <url>http://apidesign.org</url>
+      <name>NetBeans</name>
+      <url>http://netbeans.org</url>
   </organization>
   <scm>
       <connection>scm:hg:https://hg.apidesign.org/hg/html~html4j</connection>
@@ -92,7 +95,7 @@
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>ko-archetype/src/main/resources/**</exclude>
-                       <exclude>ko-fx/src/main/resources/org/apidesign/html/kofx/knockout*.js</exclude>
+                       <exclude>ko-fx/src/main/resources/org/netbeans/html/kofx/knockout*.js</exclude>
                   </excludes>
               </configuration>
           </plugin>
@@ -140,7 +143,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>${publicPackages},META-INF.services.*</Export-Package>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
             </plugin>

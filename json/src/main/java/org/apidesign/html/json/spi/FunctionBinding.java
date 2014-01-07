@@ -1,56 +1,102 @@
 /**
- * HTML via Java(tm) Language Bindings
- * Copyright (C) 2013 Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * Copyright 2013-2013 Oracle and/or its affiliates. All rights reserved.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details. apidesign.org
- * designates this particular file as subject to the
- * "Classpath" exception as provided by apidesign.org
- * in the License file that accompanied this code.
+ * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. Look for COPYING file in the top folder.
- * If not, see http://wiki.apidesign.org/wiki/GPLwithClassPathException
+ * The contents of this file are subject to the terms of either the GNU
+ * General Public License Version 2 only ("GPL") or the Common
+ * Development and Distribution License("CDDL") (collectively, the
+ * "License"). You may not use this file except in compliance with the
+ * License. You can obtain a copy of the License at
+ * http://www.netbeans.org/cddl-gplv2.html
+ * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
+ * specific language governing permissions and limitations under the
+ * License.  When distributing the software, include this License Header
+ * Notice in each file and include the License file at
+ * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the GPL Version 2 section of the License file that
+ * accompanied this code. If applicable, add the following below the
+ * License Header, with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Contributor(s):
+ *
+ * The Original Software is NetBeans. The Initial Developer of the Original
+ * Software is Oracle. Portions Copyright 2013-2013 Oracle. All Rights Reserved.
+ *
+ * If you wish your version of this file to be governed by only the CDDL
+ * or only the GPL Version 2, indicate your decision by adding
+ * "[Contributor] elects to include this software in this distribution
+ * under the [CDDL or GPL Version 2] license." If you do not indicate a
+ * single choice of license, a recipient has the option to distribute
+ * your version of this file under either the CDDL, the GPL Version 2 or
+ * to extend the choice of license to its licensees as provided above.
+ * However, if you add GPL Version 2 code and therefore, elected the GPL
+ * Version 2 license, then the option applies only if the new code is
+ * made subject to such option by the copyright holder.
  */
 package org.apidesign.html.json.spi;
 
 import net.java.html.json.Function;
 import net.java.html.json.Model;
-import org.apidesign.html.json.impl.PropertyBindingAccessor.FBData;
 
 /** Describes a function provided by the {@link Model} and 
  * annotated by {@link Function} annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FunctionBinding {
-    private final FBData<?> fb;
-    
-    FunctionBinding(FBData<?> fb) {
-        this.fb = fb;
-    }
-
-    public String getFunctionName() {
-        return fb.name;
+public abstract class FunctionBinding {
+    FunctionBinding() {
     }
     
-    /** Calls the function provided data associated with current element,
-     * as well as information about the event that triggered the event.
-     * 
+    /** Returns name of the function.
+     * @return function name
+     */
+    public abstract String getFunctionName();
+    
+    /**
+     * Calls the function provided data associated with current element, as well
+     * as information about the event that triggered the event.
+     *
      * @param data data associated with selected element
      * @param ev event (with additional properties) that triggered the event
      */
-    public void call(Object data, Object ev) {
-        try {
-            fb.call(data, ev);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
+    public abstract void call(Object data, Object ev);
+
+    static <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
+        return new Impl<M>(name, index, model, access);
+    }
+    
+    private static final class Impl<M> extends FunctionBinding {
+        final String name;
+        private final M model;
+        private final Proto.Type<M> access;
+        private final int index;
+
+        public Impl(String name, int index, M model, Proto.Type<M> access) {
+            this.name = name;
+            this.index = index;
+            this.model = model;
+            this.access = access;
+        }
+
+        @Override
+        public String getFunctionName() {
+            return name;
+        }
+
+        @Override
+        public void call(Object data, Object ev) {
+            try {
+                access.call(model, index, data, ev);
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
