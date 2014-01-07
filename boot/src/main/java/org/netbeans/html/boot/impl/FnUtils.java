@@ -79,7 +79,8 @@ public final class FnUtils implements Fn.Presenter {
             return true;
         }
         Class<?> clazz;
-        try (Closeable c = Fn.activate(new FnUtils())) {
+        Closeable c = Fn.activate(new FnUtils());
+        try {
             try {
                 clazz = Class.forName(Test.class.getName(), true, l);
             } catch (ClassNotFoundException ex) {
@@ -89,6 +90,12 @@ public final class FnUtils implements Fn.Presenter {
             return Boolean.TRUE.equals(is);
         } catch (Exception ex) {
             return false;
+        } finally {
+            try {
+                c.close();
+            } catch (Exception ex) {
+                return false;
+            }
         }
     }
     

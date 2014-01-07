@@ -40,63 +40,14 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.impl;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.logging.Logger;
-import org.apidesign.html.boot.spi.Fn;
+package net.java.html.js.tests;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FnContext implements Closeable {
-    private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
-
-    private Object prev;
-    private FnContext(Fn.Presenter p) {
-        this.prev = p;
+public final class Sum {
+    public int sum(int a, int b) {
+        return a + b;
     }
-
-    @Override
-    public void close() throws IOException {
-        if (prev != this) {
-            currentPresenter((Fn.Presenter)prev);
-            prev = this;
-        }
-    }
-/*
-    @Override
-    protected void finalize() throws Throwable {
-        if (prev != null) {
-            LOG.warning("Unclosed context!");
-        }
-    }
-*/
-    public static Closeable activate(Fn.Presenter newP) {
-        return new FnContext(currentPresenter(newP));
-    }
-    
-    
-    private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
-
-    public static Fn.Presenter currentPresenter(Fn.Presenter p) {
-        Fn.Presenter prev = CURRENT.get();
-        CURRENT.set(p);
-        return prev;
-    }
-
-    public static Fn.Presenter currentPresenter() {
-        return currentPresenter(true);
-    }
-
-    public static Fn.Presenter currentPresenter(boolean fail) {
-        Fn.Presenter p = CURRENT.get();
-        if (p == null && fail) {
-            throw new IllegalStateException("No current WebView context around!");
-        }
-        return p;
-    }
-    
 }

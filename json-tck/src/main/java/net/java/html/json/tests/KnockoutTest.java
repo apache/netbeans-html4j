@@ -302,9 +302,10 @@ public final class KnockoutTest {
             + "</ul>\n"
         );
         try {
-            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            final BrwsrCtx c = newContext();
+            KnockoutModel m = Models.bind(new KnockoutModel(), c);
 
-            final Person first = Models.bind(new Person(), newContext());
+            final Person first = Models.bind(new Person(), c);
             first.setFirstName("first");
             m.getPeople().add(first);
 
@@ -313,7 +314,7 @@ public final class KnockoutTest {
             int cnt = countChildren("ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
-            final Person second = Models.bind(new Person(), newContext());
+            final Person second = Models.bind(new Person(), c);
             second.setFirstName("second");
             m.getPeople().add(second);
 

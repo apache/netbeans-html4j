@@ -40,63 +40,28 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.impl;
+package org.apidesign.html.json.tck;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.logging.Logger;
+import net.java.html.js.tests.JavaScriptBodyTest;
 import org.apidesign.html.boot.spi.Fn;
 
-/**
+/** Subclass this class, implements is abstract methods (if any).
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @sine 0.7
  */
-public final class FnContext implements Closeable {
-    private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
-
-    private Object prev;
-    private FnContext(Fn.Presenter p) {
-        this.prev = p;
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (prev != this) {
-            currentPresenter((Fn.Presenter)prev);
-            prev = this;
-        }
-    }
-/*
-    @Override
-    protected void finalize() throws Throwable {
-        if (prev != null) {
-            LOG.warning("Unclosed context!");
-        }
-    }
-*/
-    public static Closeable activate(Fn.Presenter newP) {
-        return new FnContext(currentPresenter(newP));
-    }
-    
-    
-    private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
-
-    public static Fn.Presenter currentPresenter(Fn.Presenter p) {
-        Fn.Presenter prev = CURRENT.get();
-        CURRENT.set(p);
-        return prev;
-    }
-
-    public static Fn.Presenter currentPresenter() {
-        return currentPresenter(true);
-    }
-
-    public static Fn.Presenter currentPresenter(boolean fail) {
-        Fn.Presenter p = CURRENT.get();
-        if (p == null && fail) {
-            throw new IllegalStateException("No current WebView context around!");
-        }
-        return p;
+public abstract class JavaScriptTCK {
+    /** Gives you list of classes included in the TCK. Their test methods
+     * are annotated by {@link KOTest} annotation. The methods are public
+     * instance methods that take no arguments. The method should be 
+     * invoke in a presenter context {@link Fn#activate(org.apidesign.html.boot.spi.Fn.Presenter)}.
+     * 
+     * @return classes with methods annotated by {@link KOTest} annotation
+     */
+    protected static Class<?>[] testClasses() {
+        return new Class[] { 
+            JavaScriptBodyTest.class
+        };
     }
     
 }

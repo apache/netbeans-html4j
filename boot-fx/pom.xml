@@ -65,6 +65,12 @@
       <scope>test</scope>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>net.java.html.json.tck</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <description>A presentation provider to show JavaFX WebView 
 when a Java/HTML based application is about to boot.</description>

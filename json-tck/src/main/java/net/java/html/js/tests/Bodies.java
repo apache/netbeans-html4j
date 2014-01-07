@@ -40,63 +40,51 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.impl;
+package net.java.html.js.tests;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.logging.Logger;
-import org.apidesign.html.boot.spi.Fn;
+import java.util.concurrent.Callable;
+import net.java.html.js.JavaScriptBody;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FnContext implements Closeable {
-    private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
-
-    private Object prev;
-    private FnContext(Fn.Presenter p) {
-        this.prev = p;
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (prev != this) {
-            currentPresenter((Fn.Presenter)prev);
-            prev = this;
-        }
-    }
-/*
-    @Override
-    protected void finalize() throws Throwable {
-        if (prev != null) {
-            LOG.warning("Unclosed context!");
-        }
-    }
-*/
-    public static Closeable activate(Fn.Presenter newP) {
-        return new FnContext(currentPresenter(newP));
-    }
+final class Bodies {
+    @JavaScriptBody(args = { "a", "b" }, body = "return a + b;")
+    public static native int sum(int a, int b);
     
+    @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
+    static native void callback(Runnable r);
+
+    @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
+    static native Object callback(Callable<Boolean> c);
     
-    private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
-
-    public static Fn.Presenter currentPresenter(Fn.Presenter p) {
-        Fn.Presenter prev = CURRENT.get();
-        CURRENT.set(p);
-        return prev;
-    }
-
-    public static Fn.Presenter currentPresenter() {
-        return currentPresenter(true);
-    }
-
-    public static Fn.Presenter currentPresenter(boolean fail) {
-        Fn.Presenter p = CURRENT.get();
-        if (p == null && fail) {
-            throw new IllegalStateException("No current WebView context around!");
-        }
-        return p;
-    }
+    @JavaScriptBody(args = { "v" }, body = "return v;")
+    public static native Object id(Object v);
     
+    @JavaScriptBody(args = { "v" }, body = "return { 'x' : v };")
+    public static native Object instance(int v);
+    
+    @JavaScriptBody(args = "o", body = "o.x++;")
+    public static native void incrementX(Object o);
+
+    @JavaScriptBody(args = "o", body = "return o.x;")
+    public static native int readX(Object o);
+
+    @JavaScriptBody(args = { "c" }, javacall = true, body = 
+        "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"
+    )
+    public static native int sumIndirect(Sum c);
+    
+    @JavaScriptBody(args = { "arr", "index" }, body = "return arr[index];")
+    public static native Object select(Object[] arr, int index);
+
+    @JavaScriptBody(args = { "arr" }, body = "return arr.length;")
+    public static native int length(Object[] arr);
+
+    @JavaScriptBody(args = { "arr", "i", "value" }, body = "arr[i] = value;")
+    public static native void modify(String[] arr, int i, String value);
+    
+    @JavaScriptBody(args = {}, body = "return true;")
+    public static native boolean truth();
 }
