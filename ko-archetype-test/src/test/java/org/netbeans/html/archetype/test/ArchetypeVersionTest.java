@@ -114,7 +114,7 @@ public class ArchetypeVersionTest {
 
     static String findCurrentVersion() throws XPathExpressionException, IOException, ParserConfigurationException, SAXException, XPathFactoryConfigurationException {
         final ClassLoader l = ArchetypeVersionTest.class.getClassLoader();
-        URL u = l.getResource("META-INF/maven/org.netbeans.html/knockout4j-archetype/pom.xml");
+        URL u = l.getResource("META-INF/maven/org.apidesign.html/knockout4j-archetype/pom.xml");
         assertNotNull(u, "Own pom found: " + System.getProperty("java.class.path"));
 
         final XPathFactory fact = XPathFactory.newInstance();

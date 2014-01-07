@@ -6,7 +6,7 @@
     <artifactId>pom</artifactId>
     <version>0.7-SNAPSHOT</version>
   </parent>
-  <groupId>org.netbeans.html</groupId>
+  <groupId>org.apidesign.html</groupId>
   <artifactId>knockout4j-archetype</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>jar</packaging>
