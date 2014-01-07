@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.boot.fx;
+package org.netbeans.html.boot.fx;
 
 import org.apidesign.html.json.tck.JavaScriptTCK;
 
