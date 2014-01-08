@@ -74,6 +74,55 @@ public class JavaScriptBodyTest {
         Bodies.callback(run);
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
     }
+    
+    @KOTest public void typeOfCharacter() {
+        String charType = Bodies.typeof('a', false);
+        assert "number".equals(charType) : "Expecting number type: " + charType;
+    }
+    @KOTest public void typeOfBoolean() {
+        String booleanType = Bodies.typeof(true, false);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfPrimitiveBoolean() {
+        String booleanType = Bodies.typeof(true);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfInteger() {
+        String intType = Bodies.typeof(1, false);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfString() {
+        String strType = Bodies.typeof("Ahoj", false);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDouble() {
+        String doubleType = Bodies.typeof(0.33, false);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
+    }
+    
+    @KOTest public void typeOfBooleanValueOf() {
+        String booleanType = Bodies.typeof(true, true);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfIntegerValueOf() {
+        String intType = Bodies.typeof(1, true);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfStringValueOf() {
+        String strType = Bodies.typeof("Ahoj", true);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDoubleValueOf() {
+        String doubleType = Bodies.typeof(0.33, true);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
+    }
 
     @KOTest public void computeInARunnable() {
         final int[] sum = new int[2];
