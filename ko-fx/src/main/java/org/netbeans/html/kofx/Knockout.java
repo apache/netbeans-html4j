@@ -60,7 +60,6 @@ import org.apidesign.html.json.spi.PropertyBinding;
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
     static {
-        Console.register();
         loadKnockout();
     }
     

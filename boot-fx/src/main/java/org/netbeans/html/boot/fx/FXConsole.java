@@ -40,11 +40,12 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.kofx;
+package org.netbeans.html.boot.fx;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.java.html.js.JavaScriptBody;
+import javafx.scene.web.WebEngine;
+import netscape.javascript.JSObject;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -54,28 +55,30 @@ import net.java.html.js.JavaScriptBody;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class Console {
-    private static final Logger LOG = Logger.getLogger(Console.class.getName());
+public final class FXConsole {
+    static final Logger LOG = Logger.getLogger(FXConsole.class.getName());
     
-    private Console() {
+    private FXConsole() {
     }
 
-    static void register() {
-        registerImpl("log", Level.INFO);
-        registerImpl("info", Level.INFO);
-        registerImpl("warn", Level.WARNING);
-        registerImpl("error", Level.SEVERE);
+    static void register(WebEngine eng) {
+        JSObject fn = (JSObject) eng.executeScript(""
+            + "(function(attr, l, c) {"
+            + "  window.console[attr] = function(msg) { c.log(l, msg); };"
+            + "})"
+        );
+        FXConsole c = new FXConsole();
+        c.registerImpl(fn, "log", Level.INFO);
+        c.registerImpl(fn, "info", Level.INFO);
+        c.registerImpl(fn, "warn", Level.WARNING);
+        c.registerImpl(fn, "error", Level.SEVERE);
     }
     
-    @JavaScriptBody(args = { "attr", "l" }, 
-        javacall = true, body = 
-        "  window.console[attr] = function(m) {\n"
-      + "    @org.netbeans.html.kofx.Console::log(Ljava/util/logging/Level;Ljava/lang/String;)(l, m);\n"
-      + "  };\n"
-    )
-    private static native void registerImpl(String attr, Level l);
+    private void registerImpl(JSObject eng, String attr, Level l) {
+        eng.call("call", null, attr, l, this);
+    }
     
-    static void log(Level l, String msg) {
+    public void log(Level l, String msg) {
         LOG.log(l, msg);
     }
 }
