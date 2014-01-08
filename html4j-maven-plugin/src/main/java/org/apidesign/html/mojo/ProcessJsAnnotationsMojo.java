@@ -69,7 +69,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.apidesign.html.boot.impl.FnUtils;
+import org.netbeans.html.boot.impl.FnUtils;
 
 @Mojo(
     name="process-js-annotations",
