@@ -189,6 +189,16 @@ public abstract class Fn {
      * @throws Exception if something goes wrong, as exception may be thrown
      */
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
+    
+    /** Provides the function implementation access to the presenter provided
+     * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor).
+     * 
+     * @return presenter passed in in the constructor (may be, but should not be <code>null</code>)
+     * @since 0.7
+     */
+    protected final Presenter presenter() {
+        return presenter;
+    }
 
     /** The representation of a <em>presenter</em> - usually a browser window.
      * Should be provided by a library included in the application and registered

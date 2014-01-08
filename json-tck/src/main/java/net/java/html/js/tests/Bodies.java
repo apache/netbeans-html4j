@@ -81,9 +81,15 @@ final class Bodies {
 
     @JavaScriptBody(args = { "arr" }, body = "return arr.length;")
     public static native int length(Object[] arr);
+    
+    @JavaScriptBody(args = { "o" }, body = "return typeof o;")
+    public static native String typeof(Object o);
 
-    @JavaScriptBody(args = { "arr", "i", "value" }, body = "arr[i] = value;")
-    public static native void modify(String[] arr, int i, String value);
+    @JavaScriptBody(args = { "o" }, body = "return Array.isArray(o);")
+    public static native boolean isArray(Object o);
+
+    @JavaScriptBody(args = { "arr", "i", "value" }, body = "arr[i] = value; return arr[i];")
+    public static native String modify(String[] arr, int i, String value);
     
     @JavaScriptBody(args = {}, body = "return true;")
     public static native boolean truth();

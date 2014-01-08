@@ -130,10 +130,16 @@ public class JavaScriptBodyTest {
         assert res == 42 : "Expecting 42";
     }
     
-    @KOTest public void selectFromJavaArray() {
+    @KOTest public void selectFromStringJavaArray() {
         String[] arr = { "Ahoj", "World" };
         Object res = Bodies.select(arr, 1);
         assert "World".equals(res) : "Expecting World, but was: " + res;
+    }
+
+    @KOTest public void selectFromObjectJavaArray() {
+        Object[] arr = { new Object(), new Object() };
+        Object res = Bodies.select(arr, 1);
+        assert arr[1].equals(res) : "Expecting " + arr[1] + ", but was: " + res;
     }
 
     @KOTest public void lengthOfJavaArray() {
@@ -142,19 +148,31 @@ public class JavaScriptBodyTest {
         assert res == 2 : "Expecting 2, but was: " + res;
     }
 
-    @KOTest public void javaArrayInOut() {
+    @KOTest public void isJavaArray() {
         String[] arr = { "Ahoj", "World" };
-        Object res = Bodies.id(arr);
-        assert res == arr : "Expecting same array, but was: " + res;
+        boolean is = Bodies.isArray(arr);
+        assert is: "Expecting it to be an array: " + is;
     }
 
-//  Modifying an array is a complex operation in the bridge:    
-//    
-//    @KOTest public void modifyJavaArray() {
-//        String[] arr = { "Ahoj", "World" };
-//        Bodies.modify(arr, 0, "Hello");
-//        assert "Hello".equals(arr[0]) : "Expecting World, but was: " + arr[0];
-//    }
+    @KOTest public void javaArrayInOutIsCopied() {
+        String[] arr = { "Ahoj", "World" };
+        Object res = Bodies.id(arr);
+        assert res != null : "Non-null is returned";
+        assert res instanceof Object[] : "Returned an array: " + res;
+        assert !(res instanceof String[]) : "Not returned a string array: " + res;
+        
+        Object[] ret = (Object[]) res;
+        assert arr.length == ret.length : "Same length: " + ret.length;
+        assert arr[0].equals(ret[0]) : "Same first elem";
+        assert arr[1].equals(ret[1]) : "Same 2nd elem";
+    }
+
+    @KOTest public void modifyJavaArrayHasNoEffect() {
+        String[] arr = { "Ahoj", "World" };
+        String value = Bodies.modify(arr, 0, "Hello");
+        assert "Hello".equals(value) : "Inside JS the value is changed: " + value;
+        assert "Ahoj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
+    }
 
     @KOTest public void truth() {
         assert Bodies.truth() : "True is true";
