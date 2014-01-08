@@ -95,12 +95,4 @@ public final class FXPresenter extends AbstractFXPresenter {
     protected WebView findView(final URL resource) {
         return FXBrwsr.findWebView(resource, this);
     }
-    
-    public void runSafe(Runnable r) {
-        if (Platform.isFxApplicationThread()) {
-            r.run();
-        } else {
-            Platform.runLater(r);
-        }
-    }
 }

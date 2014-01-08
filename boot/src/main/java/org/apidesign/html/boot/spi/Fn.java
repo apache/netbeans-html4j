@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
@@ -204,6 +205,13 @@ public abstract class Fn {
      * Should be provided by a library included in the application and registered
      * in <code>META-INF/services</code>, for example with
      * <code>@ServiceProvider(service = Fn.Presenter.class)</code> annotation.
+     * <p>
+     * Since 0.7 a presenter may implement {@link Executor} interface, in case
+     * it supports single threaded execution environment. The executor's
+     * {@link Executor#execute(java.lang.Runnable)} method is then supposed
+     * to invoke the runnable immediately (in case we are on the right thread
+     * already) or return and asynchronously invoke the runnable later on the
+     * right thread (if we are on wrong thread).
      */
     public interface Presenter {
         /** Creates new function with given parameter names and provided body.

@@ -47,6 +47,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -59,7 +60,8 @@ import org.apidesign.html.boot.spi.Fn;
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
-public abstract class AbstractFXPresenter implements Fn.Presenter, Fn.ToJavaScript {
+public abstract class AbstractFXPresenter 
+implements Fn.Presenter, Fn.ToJavaScript, Executor {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected List<String> scripts;
@@ -223,6 +225,14 @@ public abstract class AbstractFXPresenter implements Fn.Presenter, Fn.ToJavaScri
             return convertArrays((Object[])toReturn);
         } else {
             return toReturn;
+        }
+    }
+    
+    @Override public void execute(Runnable r) {
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        } else {
+            Platform.runLater(r);
         }
     }
 

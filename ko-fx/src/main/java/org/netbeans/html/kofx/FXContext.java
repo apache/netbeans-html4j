@@ -45,8 +45,8 @@ package org.netbeans.html.kofx;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ServiceLoader;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
@@ -182,11 +182,10 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
             }
         }
         Wrap w = new Wrap();
-        try {
-            Method m = browserContext.getClass().getMethod("runSafe", Runnable.class);
-            m.invoke(browserContext, w);
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
+        if (browserContext instanceof Executor) {
+            ((Executor)browserContext).execute(w);
+        } else {
+            w.run();
         }
     }
 
