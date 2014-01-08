@@ -99,7 +99,7 @@ final class Knockout {
         + "    read: function() {\n"
         + "      var r = activeGetter();\n"
         + "      activeGetter = realGetter;\n"
-        + "      return r;\n"
+        + "      return r == null ? null : r.valueOf();\n"
         + "    },\n"
         + "    owner: ret\n"
         + "  };\n"
