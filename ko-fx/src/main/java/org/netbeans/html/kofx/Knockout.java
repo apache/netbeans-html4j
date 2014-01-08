@@ -76,7 +76,7 @@ final class Knockout {
     )
     public native static void valueHasMutated(Object model, String prop);
 
-    @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);")
+    @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);\n")
     native static void applyBindings(Object bindings);
     
     @JavaScriptBody(
@@ -87,28 +87,28 @@ final class Knockout {
         + "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
         + "  function realGetter() {\n"
-        + "    try {"
-        + "      var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();"
-        + "      return v;"
-        + "    } catch (e) {"
-        + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);"
-        + "    }"
+        + "    try {\n"
+        + "      var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();\n"
+        + "      return v;\n"
+        + "    } catch (e) {\n"
+        + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);\n"
+        + "    }\n"
         + "  }\n"
         + "  var activeGetter = function() { return value; };\n"
-        + "  var bnd = {"
-        + "    read: function() {"
-        + "      var r = activeGetter();"
-        + "      activeGetter = realGetter;"
-        + "      return r;"
-        + "    },"
+        + "  var bnd = {\n"
+        + "    read: function() {\n"
+        + "      var r = activeGetter();\n"
+        + "      activeGetter = realGetter;\n"
+        + "      return r;\n"
+        + "    },\n"
         + "    owner: ret\n"
         + "  };\n"
         + "  if (!readOnly) {\n"
         + "    bnd.write = function(val) {\n"
         + "      prop.@org.apidesign.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(val);\n"
-        + "    };"
-        + "  };"
-        + "  ret[name] = ko.computed(bnd);"
+        + "    };\n"
+        + "  };\n"
+        + "  ret[name] = ko.computed(bnd);\n"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
         + "  koComputed(propNames[i], propReadOnly[i], propValues[i], propArr[i]);\n"
