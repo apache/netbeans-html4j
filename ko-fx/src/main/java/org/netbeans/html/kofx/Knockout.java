@@ -45,7 +45,6 @@ package org.netbeans.html.kofx;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
-import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
@@ -60,16 +59,14 @@ import org.apidesign.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
-    static final JSObject KObject;
     static {
         Console.register();
-        KObject = (JSObject) kObj();
-    }
-
-    static Object toArray(Object[] arr) {
-        return KObject.call("array", arr);
+        loadKnockout();
     }
     
+    @JavaScriptBody(args = {  }, body = "")
+    private static native void loadKnockout();
+
     @JavaScriptBody(args = { "model", "prop" }, body =
           "if (model) {\n"
         + "  var koProp = model[prop];\n"
@@ -78,21 +75,11 @@ final class Knockout {
         + "  }\n"
         + "}\n"
     )
-    public native static void valueHasMutated(JSObject model, String prop);
+    public native static void valueHasMutated(Object model, String prop);
 
     @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);")
     native static void applyBindings(Object bindings);
     
-    @JavaScriptBody(args = {}, body =
-              "  var k = {};"
-            + "  k.array= function() {"
-            + "    return Array.prototype.slice.call(arguments);"
-            + "  };"
-            + "  return k;"
-    )
-    private static native Object kObj();
-        
-        
     @JavaScriptBody(
         javacall = true,
         args = {"model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
@@ -137,9 +124,12 @@ final class Knockout {
         + "}\n"
         + "return ret;\n"
         )
-    static native JSObject wrapModel(
+    static native Object wrapModel(
         Object model,
         String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
         String[] funcNames, FunctionBinding[] funcArr
     );
+    
+    @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
+    static native Object toModel(Object wrapper);
 }

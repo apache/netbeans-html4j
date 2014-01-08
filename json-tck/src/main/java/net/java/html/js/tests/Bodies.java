@@ -57,7 +57,10 @@ final class Bodies {
     static native void callback(Runnable r);
 
     @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
-    static native Object callback(Callable<Boolean> c);
+    static native Object callback(Callable<? extends Object> c);
+
+    @JavaScriptBody(args = {"c", "v"}, javacall = true, body = "var arr = c.@java.util.concurrent.Callable::call()(); arr.push(v); return arr;")
+    static native Object callbackAndPush(Callable<String[]> c, String v);
     
     @JavaScriptBody(args = { "v" }, body = "return v;")
     public static native Object id(Object v);

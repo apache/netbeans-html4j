@@ -312,7 +312,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 }
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
-                    source.append("return ");
+                    source.append("Object $ret = ");
                 }
                 if (isStatic) {
                     source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
@@ -332,6 +332,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 source.append(");\n");
                 if (m.getReturnType().getKind() == TypeKind.VOID) {
                     source.append("    return null;\n");
+                } else {
+                    source.append("    if (p instanceof org.apidesign.html.boot.spi.Fn.ToJavaScript) {\n");
+                    source.append("      $ret = ((org.apidesign.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
+                    source.append("    }\n");
+                    source.append("    return $ret;\n");
                 }
                 if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
                     source.append("    }\n");

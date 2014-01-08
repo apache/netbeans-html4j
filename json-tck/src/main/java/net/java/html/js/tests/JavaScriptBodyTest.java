@@ -42,6 +42,7 @@
  */
 package net.java.html.js.tests;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.apidesign.html.json.tck.KOTest;
 
@@ -172,6 +173,24 @@ public class JavaScriptBodyTest {
         String value = Bodies.modify(arr, 0, "Hello");
         assert "Hello".equals(value) : "Inside JS the value is changed: " + value;
         assert "Ahoj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
+    }
+
+    @KOTest
+    public void callbackWithArray() {
+        class A implements Callable<String[]> {
+            @Override
+            public String[] call() throws Exception {
+                return new String[] { "Hello" };
+            }
+        }
+        Callable<String[]> a = new A();
+        Object b = Bodies.callbackAndPush(a, "World!");
+        assert b instanceof Object[] : "Returns an array: " + b;
+        Object[] arr = (Object[]) b;
+        String str = Arrays.toString(arr);
+        assert arr.length == 2 : "Size is two " + str;
+        assert "Hello".equals(arr[0]) : "Hello expected: " + arr[0];
+        assert "World!".equals(arr[1]) : "World! expected: " + arr[1];
     }
 
     @KOTest public void truth() {

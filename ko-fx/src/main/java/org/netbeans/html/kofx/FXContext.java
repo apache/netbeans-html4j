@@ -45,11 +45,10 @@ package org.netbeans.html.kofx;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import javafx.application.Platform;
 import net.java.html.js.JavaScriptBody;
-import netscape.javascript.JSObject;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -69,7 +68,7 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class FXContext
-implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
+implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
     private final Fn.Presenter browserContext;
@@ -96,7 +95,7 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
 
 
     @Override
-    public JSObject wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+    public Object wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
         String[] propNames = new String[propArr.length];
         boolean[] propReadOnly = new boolean[propArr.length];
         Object[] propValues = new Object[propArr.length];
@@ -109,41 +108,41 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
         for (int i = 0; i < funcNames.length; i++) {
             funcNames[i] = funcArr[i].getFunctionName();
         }
-        
-        return Knockout.wrapModel(model, 
-            propNames, propReadOnly, Knockout.toArray(propValues), propArr, 
+        Object ret = Knockout.wrapModel(model, 
+            propNames, propReadOnly, propValues, propArr,
             funcNames, funcArr
         );
+        return ret;
     }
     
     @Override
-    public JSObject wrapModel(Object model) {
+    public Object wrapModel(Object model) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void bind(PropertyBinding b, Object model, JSObject data) {
+    public void bind(PropertyBinding b, Object model, Object data) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void valueHasMutated(JSObject data, String propertyName) {
+    public void valueHasMutated(Object data, String propertyName) {
         Knockout.valueHasMutated(data, propertyName);
     }
 
     @Override
-    public void expose(FunctionBinding fb, Object model, JSObject d) {
+    public void expose(FunctionBinding fb, Object model, Object d) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void applyBindings(JSObject data) {
+    public void applyBindings(Object data) {
         Knockout.applyBindings(data);
     }
 
     @Override
     public Object wrapArray(Object[] arr) {
-        return Knockout.toArray(arr);
+        return arr;
     }
 
     @Override
@@ -158,10 +157,7 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
 
     @Override
     public <M> M toModel(Class<M> modelClass, Object data) {
-        if (data instanceof JSObject) {
-            data = ((JSObject)data).getMember("ko-fx.model"); // NOI18N
-        }
-        return modelClass.cast(data);
+        return modelClass.cast(Knockout.toModel(data));
     }
 
     @Override
@@ -173,19 +169,24 @@ implements Technology.BatchInit<JSObject>, Transfer, WSTransfer<LoadWS> {
     public void runSafe(final Runnable r) {
         class Wrap implements Runnable {
             @Override public void run() {
-                try (Closeable c = Fn.activate(browserContext)) {
+                Closeable c = Fn.activate(browserContext);
+                try {
                     r.run();
-                } catch (IOException ex) {
-                    // cannot be thrown
+                } finally {
+                    try {
+                        c.close();
+                    } catch (IOException ex) {
+                        // cannot be thrown
+                    }
                 }
             }
         }
         Wrap w = new Wrap();
-        
-        if (Platform.isFxApplicationThread()) {
-            w.run();
-        } else {
-            Platform.runLater(w);
+        try {
+            Method m = browserContext.getClass().getMethod("runSafe", Runnable.class);
+            m.invoke(browserContext, w);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
         }
     }
 

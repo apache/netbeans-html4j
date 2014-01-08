@@ -232,4 +232,29 @@ public abstract class Fn {
          */
         public void loadScript(Reader code) throws Exception;
     }
+    
+    /** Additional interface to be implemented by {@link Presenter}s that
+     * wish to control what objects are passed into the JavaScript virtual 
+     * machine.
+     * <p>
+     * If a JavaScript engine makes callback to Java method that returns 
+     * a value, the {@link #toJavaScript(java.lang.Object)} method is
+     * consulted to convert the Java value to something reasonable inside
+     * JavaScript VM.
+     * <p>
+     * <em>Note:</em> The implementation based on <em>JavaFX</em> <code>WebView</code>
+     * uses this interface to convert Java arrays to JavaScript ones.
+     * 
+     * @see Presenter
+     * @since 0.7
+     */
+    public interface ToJavaScript {
+        /** Convert a Java return value into some object suitable for
+         * JavaScript virtual machine.
+         * 
+         * @param toReturn the Java object to be returned
+         * @return the replacement value to return instead
+         */
+        public Object toJavaScript(Object toReturn);
+    }
 }
