@@ -55,18 +55,74 @@ import org.openide.util.lookup.ServiceProvider;
  * Registers {@link ContextProvider}, so {@link ServiceLoader} can find it.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @since 0.7
  */
 @ServiceProvider(service = Contexts.Provider.class)
 public final class KO4J implements Contexts.Provider {
+    private final Fn.Presenter presenter;
+    private FXContext c;
+    
+    public KO4J() {
+        this(null);
+    }
+    
+    public KO4J(Fn.Presenter presenter) {
+        this.presenter = presenter;
+    }
+    
+    private FXContext getKO() {
+        if (c == null) {
+            c = new FXContext(presenter == null ? Fn.activePresenter() : presenter);
+        }
+        return c;
+    }
+    
+    /** Return instance of the knockout.js for Java technology.
+     * @return non-null instance
+     */
+    public Technology knockout() {
+        return getKO();
+    }
+    
+    /** Java based implementation of transfer interface. Requires
+     * org.json libraries on classpath. Use: <pre>
+&lt;dependency&gt;
+    &lt;groupId>de.twentyeleven.skysail&lt;/groupId&gt;
+    &lt;artifactId>org.json-osgi&lt;/artifactId&gt;
+&lt;/dependency&gt;
+     * </pre>
+     * @return instance of the technology or <code>null</code>, 
+     *   if <code>org.json</code> interfaces are not around
+     */
+    public Transfer transferViaOrgJSON() {
+        return getKO();
+    }
+    
+    /** Returns browser based implementation of websocket transfer.
+     * 
+     * @return an instance or <code>null</code>, if there is no
+     *   <code>WebSocket</code> object in the browser
+     */
+    public WSTransfer<?> websocketsViaBrowser() {
+        return getKO().areWebSocketsSupported() ? getKO() : null;
+    }
 
+    /** Registers technologies at position 100:
+     * <ul>
+     *   <li>{@link #knockout()}</li>
+     *   <li>{@link #transferViaOrgJSON()} - if <code>org.json</code> libraries are around</li>
+     *   <li>{@link #websocketsViaBrowser()()} - if browser supports web sockets</li>
+     * </ul>
+     * @param context the context to register to
+     * @param requestor the class requesting the registration
+     */
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
         if (FXContext.isJavaScriptEnabled()) {
-            FXContext c = new FXContext(Fn.activePresenter());
-            context.register(Technology.class, c, 100);
-            context.register(Transfer.class, c, 100);
+            context.register(Technology.class, knockout(), 100);
+            context.register(Transfer.class, transferViaOrgJSON(), 100);
             if (c.areWebSocketsSupported()) {
-                context.register(WSTransfer.class, c, 100);
+                context.register(WSTransfer.class, websocketsViaBrowser(), 100);
             }
         }
     }

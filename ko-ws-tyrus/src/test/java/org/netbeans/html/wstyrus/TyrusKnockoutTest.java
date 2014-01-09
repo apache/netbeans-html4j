@@ -58,7 +58,6 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -68,10 +67,11 @@ import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.netbeans.html.kofx.FXContext;
+import org.netbeans.html.boot.impl.FnContext;
+import org.netbeans.html.ko4j.KO4J;
 import org.openide.util.lookup.ServiceProvider;
-import org.testng.annotations.Factory;
 import static org.testng.Assert.*;
+import org.testng.annotations.Factory;
 
 /**
  *
@@ -146,11 +146,11 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     @Override
     public BrwsrCtx createContext() {
-        FXContext fx = new FXContext(browserContext);
+        KO4J ko = new KO4J(browserContext);
         TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
-            register(Technology.class, fx, 10).
-            register(Transfer.class, fx, 10).
+            register(Technology.class, ko.knockout(), 10).
+            register(Transfer.class, ko.transferViaOrgJSON(), 10).
             register(WSTransfer.class, tc, 10);
         return cb.build();
     }
