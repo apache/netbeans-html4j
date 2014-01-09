@@ -40,34 +40,30 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.kofx;
+package org.netbeans.html.ko4j;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
-import org.openide.util.lookup.ServiceProvider;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
  * to access the functionality.
  * <p>
- * Registers {@link ContextProvider}, so {@link ServiceLoader} can find it.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FXContext
+final class FXContext
 implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
@@ -204,19 +200,4 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
         socket.close();
     }
     
-    @ServiceProvider(service = Contexts.Provider.class)
-    public static final class Prvdr implements Contexts.Provider {
-        @Override
-        public void fillContext(Contexts.Builder context, Class<?> requestor) {
-            if (isJavaScriptEnabled()) {
-                FXContext c = new FXContext(Fn.activePresenter());
-                
-                context.register(Technology.class, c, 100);
-                context.register(Transfer.class, c, 100);
-                if (c.areWebSocketsSupported()) {
-                    context.register(WSTransfer.class, c, 100);
-                }
-            }
-        }
-    }
 }

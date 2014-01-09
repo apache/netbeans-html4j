@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.kofx;
+package org.netbeans.html.ko4j;
 
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;
@@ -116,10 +116,10 @@ final class LoadWS {
         + "if (window.WebSocket) {"
         + "  try {"
         + "    var ws = new window.WebSocket(url);"
-        + "    ws.onopen = function(ev) { back.@org.netbeans.html.kofx.LoadWS::onOpen(Ljava/lang/Object;)(ev); };"
-        + "    ws.onmessage = function(ev) { back.@org.netbeans.html.kofx.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data); };"
-        + "    ws.onerror = function(ev) { back.@org.netbeans.html.kofx.LoadWS::onError(Ljava/lang/Object;)(ev); };"
-        + "    ws.onclose = function(ev) { back.@org.netbeans.html.kofx.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason); };"
+        + "    ws.onopen = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onOpen(Ljava/lang/Object;)(ev); };"
+        + "    ws.onmessage = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data); };"
+        + "    ws.onerror = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onError(Ljava/lang/Object;)(ev); };"
+        + "    ws.onclose = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason); };"
         + "    return ws;"
         + "  } catch (ex) {"
         + "    return null;"

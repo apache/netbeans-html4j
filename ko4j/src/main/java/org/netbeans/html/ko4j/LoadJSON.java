@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.kofx;
+package org.netbeans.html.ko4j;
 
 import java.io.IOException;
 import java.io.InputStream;

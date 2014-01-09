@@ -7,14 +7,14 @@
     <version>0.7-SNAPSHOT</version>
   </parent>
   <groupId>org.netbeans.html</groupId>
-  <artifactId>ko-fx</artifactId>
+  <artifactId>ko4j</artifactId>
   <version>0.7-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <name>Knockout.fx</name>
+  <name>Knockout.js for Java</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bundleSymbolicName>org.netbeans.html.ko-fx</bundleSymbolicName>
+    <bundleSymbolicName>org.netbeans.html.ko4j</bundleSymbolicName>
   </properties>
   <build>
       <plugins>
@@ -111,5 +111,5 @@
         <version>3.1.0</version>
     </dependency>
   </dependencies>
-    <description>Binds net.java.html.json APIs together with JavaFX WebView.</description>
+    <description>Binds net.java.html.json APIs together with knockout.js</description>
 </project>

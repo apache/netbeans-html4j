@@ -40,79 +40,43 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.kofx;
+package org.netbeans.html.ko4j;
 
-import java.io.Closeable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import javafx.application.Platform;
-import org.apidesign.html.boot.spi.Fn;
-import org.testng.ITest;
-import org.testng.annotations.Test;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import net.java.html.json.ComputedProperty;
+import net.java.html.json.Model;
+import net.java.html.json.Property;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class KOFx implements ITest, Runnable {
-    private final Fn.Presenter p;
-    private final Method m;
-    private Object result;
-    private Object inst;
-    private int count;
-
-    KOFx(Fn.Presenter p, Method m) {
-        this.p = p;
-        this.m = m;
-    }
-
-    @Override
-    public String getTestName() {
-        return m.getName();
-    }
-
-    @Test
-    public synchronized void executeTest() throws Exception {
-        if (result == null) {
-            Platform.runLater(this);
-            wait();
+@Model(className = "LessCalls", properties = {
+    @Property(name = "value", type = int.class)
+})
+public class LessCallbacksCheck {
+    private static StringWriter sw;
+    
+    @ComputedProperty static int plusOne(int value) {
+        if (sw == null) {
+            sw = new StringWriter();
         }
-        if (result instanceof Exception) {
-            throw (Exception)result;
-        }
-        if (result instanceof Error) {
-            throw (Error)result;
-        }
-    }
-
-    @Override
-    public synchronized void run() {
-        boolean notify = true;
-        try (Closeable a = Fn.activate(p)) {
-            if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
-            }
-            result = m.invoke(inst);
-            if (result == null) {
-                result = this;
-            }
-        } catch (InvocationTargetException ex) {
-            Throwable r = ex.getTargetException();
-            if (r instanceof InterruptedException) {
-                if (count++ < 10000) {
-                    notify = false;
-                    Platform.runLater(this);
-                    return;
-                }
-            }
-            result = r;
-        } catch (Exception ex) {
-            result = ex;
-        } finally {
-            if (notify) {
-                notifyAll();
-            }
-        }
+        new Exception("Who calls me?").printStackTrace(
+            new PrintWriter(sw)
+        );
+        return value + 1;
     }
     
+    @KOTest public void dontCallForInitialValueBackToJavaVM() {
+        LessCalls m = new LessCalls(10).applyBindings();
+        assert m.getPlusOne() == 11 : "Expecting 11: " + m.getPlusOne();
+        
+        assert sw != null : "StringWriter should be initialized: " + sw;
+        
+        if (sw.toString().contains("$JsCallbacks$")) {
+            assert false : "Don't call for initial value via JsCallbacks:\n" + sw;
+        }
+    }
 }
