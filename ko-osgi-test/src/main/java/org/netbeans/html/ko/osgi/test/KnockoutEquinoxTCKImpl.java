@@ -45,6 +45,7 @@ package org.netbeans.html.ko.osgi.test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -134,10 +135,12 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     public BrwsrCtx createContext() {
         try {
             Class<?> fxCls = loadOSGiClass(
-                "org.netbeans.html.kofx.FXContext",
+                "org.netbeans.html.ko4j.FXContext",
                 FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class).getBundleContext()
             );
-            Object fx = fxCls.getConstructor(Fn.Presenter.class).newInstance(browserContext);
+            final Constructor<?> cnstr = fxCls.getConstructor(Fn.Presenter.class);
+            cnstr.setAccessible(true);
+            Object fx = cnstr.newInstance(browserContext);
             Contexts.Builder cb = Contexts.newBuilder().
                 register(Technology.class, (Technology)fx, 10).
                 register(Transfer.class, (Transfer)fx, 10);

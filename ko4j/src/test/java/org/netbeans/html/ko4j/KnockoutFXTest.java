@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.wstyrus;
+package org.netbeans.html.ko4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,6 +58,7 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -65,24 +66,20 @@ import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.netbeans.html.boot.impl.FnContext;
-import org.netbeans.html.ko4j.KO4J;
 import org.openide.util.lookup.ServiceProvider;
-import static org.testng.Assert.*;
 import org.testng.annotations.Factory;
+import static org.testng.Assert.*;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service = KnockoutTCK.class)
-public final class TyrusKnockoutTest extends KnockoutTCK {
+public final class KnockoutFXTest extends KnockoutTCK {
     private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
     
-    public TyrusKnockoutTest() {
+    public KnockoutFXTest() {
     }
     
     @Factory public static Object[] compatibilityTests() throws Exception {
@@ -90,14 +87,14 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         for (int i = 0; i < arr.length; i++) {
             assertEquals(
                 arr[i].getClassLoader(),
-                TyrusKnockoutTest.class.getClassLoader(),
+                KnockoutFXTest.class.getClassLoader(),
                 "All classes loaded by the same classloader"
             );
         }
         
-        URI uri = TyrusDynamicHTTP.initServer();
+        URI uri = DynamicHTTP.initServer();
     
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(TyrusKnockoutTest.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
         
@@ -112,21 +109,27 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
             Class<?> c = Class.forName(arr[i].getName(), true, l);
-            Class<? extends Annotation> koTest = 
-                c.getClassLoader().loadClass(KOTest.class.getName()).
-                asSubclass(Annotation.class);
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(koTest) != null) {
-                    res.add(new TyrusFX(browserContext, m));
-                }
+            seekKOTests(c, res);
+        }
+        Class<?> c = Class.forName(LessCallbacksCheck.class.getName(), true, l);
+        seekKOTests(c, res);
+        return res.toArray();
+    }
+
+    private static void seekKOTests(Class<?> c, List<Object> res) throws SecurityException, ClassNotFoundException {
+        Class<? extends Annotation> koTest =
+            c.getClassLoader().loadClass(KOTest.class.getName()).
+            asSubclass(Annotation.class);
+        for (Method m : c.getMethods()) {
+            if (m.getAnnotation(koTest) != null) {
+                res.add(new KOFx(browserContext, m));
             }
         }
-        return res.toArray();
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
         while (browserClass == null) {
-            TyrusKnockoutTest.class.wait();
+            KnockoutFXTest.class.wait();
         }
         return browserClass.getClassLoader();
     }
@@ -134,39 +137,41 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = FnContext.currentPresenter();
-        TyrusKnockoutTest.class.notifyAll();
+        KnockoutFXTest.class.notifyAll();
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
+        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
         Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, TyrusKnockoutTest.class);
+        m.invoke(null, KnockoutFXTest.class);
         browserContext = FnContext.currentPresenter();
     }
     
     @Override
     public BrwsrCtx createContext() {
-        KO4J ko = new KO4J(browserContext);
-        TyrusContext tc = new TyrusContext();
+        FXContext fx = new FXContext(browserContext);
         Contexts.Builder cb = Contexts.newBuilder().
-            register(Technology.class, ko.knockout(), 10).
-            register(Transfer.class, tc, 10).
-            register(WSTransfer.class, tc, 10);
+            register(Technology.class, fx, 10).
+            register(Transfer.class, fx, 10);
+        if (fx.areWebSocketsSupported()) {
+            cb.register(WSTransfer.class, fx, 10);
+        }
         return cb.build();
     }
 
     @Override
     public Object createJSON(Map<String, Object> values) {
-        JSONObject json = new JSONObject();
+        Object json = createJSON();
         for (Map.Entry<String, Object> entry : values.entrySet()) {
-            try {
-                json.put(entry.getKey(), entry.getValue());
-            } catch (JSONException ex) {
-                throw new IllegalStateException(ex);
-            }
+            setProperty(json, entry.getKey(), entry.getValue());
         }
         return json;
     }
+    
+    @JavaScriptBody(args = {}, body = "return new Object();")
+    private static native Object createJSON();
+    @JavaScriptBody(args = { "json", "key", "value" }, body = "json[key] = value;")
+    private static native void setProperty(Object json, String key, Object value);
 
     @Override
     @JavaScriptBody(args = { "s", "args" }, body = ""
@@ -207,6 +212,17 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {
             throw new IllegalStateException(ex);
+        }
+    }
+
+    @Override
+    public boolean canFailWebSocketTest() {
+        try {
+            Class.forName("java.util.function.Function");
+            return false;
+        } catch (ClassNotFoundException ex) {
+            // running on JDK7, FX WebView WebSocket impl does not work
+            return true;
         }
     }
 }

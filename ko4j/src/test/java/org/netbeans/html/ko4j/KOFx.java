@@ -40,64 +40,79 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.fx;
+package org.netbeans.html.ko4j;
 
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import net.java.html.js.JavaScriptBody;
-import static org.testng.Assert.*;
+import java.io.Closeable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javafx.application.Platform;
+import org.apidesign.html.boot.spi.Fn;
+import org.testng.ITest;
 import org.testng.annotations.Test;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class FXPresenterTst {
-    @Test public void showClassLoader() {
-        R run = new R();
-        callback(run);
-        assertEquals(run.cnt, 1, "Can call even private implementation classes");
+public final class KOFx implements ITest, Runnable {
+    private final Fn.Presenter p;
+    private final Method m;
+    private Object result;
+    private Object inst;
+    private int count;
+
+    KOFx(Fn.Presenter p, Method m) {
+        this.p = p;
+        this.m = m;
     }
-    
-    @Test public void checkConsoleLogging() {
-        class H extends Handler {
-            LogRecord record;
-            
-            @Override
-            public void publish(LogRecord record) {
-                assert this.record == null;
-                this.record = record;
-            }
 
-            @Override
-            public void flush() {
-            }
+    @Override
+    public String getTestName() {
+        return m.getName();
+    }
 
-            @Override
-            public void close() throws SecurityException {
-            }
+    @Test
+    public synchronized void executeTest() throws Exception {
+        if (result == null) {
+            Platform.runLater(this);
+            wait();
         }
-        H h = new H();
-        FXConsole.LOG.addHandler(h);
-
-        log("Ahoj");
-        
-        assert h.record != null : "Some log record obtained";
-        assert "Ahoj".equals(h.record.getMessage()) : "It is our Ahoj: " + h.record.getMessage();
-    }
-    
-    @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
-    private static native void callback(Runnable r);
-
-    @JavaScriptBody(args = { "msg" }, body = "console.log(msg);")
-    private static native void log(String msg);
-
-    private static class R implements Runnable {
-        int cnt;
-
-        @Override
-        public void run() {
-            cnt++;
+        if (result instanceof Exception) {
+            throw (Exception)result;
+        }
+        if (result instanceof Error) {
+            throw (Error)result;
         }
     }
+
+    @Override
+    public synchronized void run() {
+        boolean notify = true;
+        try (Closeable a = Fn.activate(p)) {
+            if (inst == null) {
+                inst = m.getDeclaringClass().newInstance();
+            }
+            result = m.invoke(inst);
+            if (result == null) {
+                result = this;
+            }
+        } catch (InvocationTargetException ex) {
+            Throwable r = ex.getTargetException();
+            if (r instanceof InterruptedException) {
+                if (count++ < 10000) {
+                    notify = false;
+                    Platform.runLater(this);
+                    return;
+                }
+            }
+            result = r;
+        } catch (Exception ex) {
+            result = ex;
+        } finally {
+            if (notify) {
+                notifyAll();
+            }
+        }
+    }
+    
 }

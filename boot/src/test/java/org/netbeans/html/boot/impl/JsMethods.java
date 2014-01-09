@@ -106,6 +106,9 @@ public class JsMethods {
     @JavaScriptBody(args = { "v" }, javacall = true, body = "return @java.lang.Integer::parseInt(Ljava/lang/String;)(v);")
     public static native int parseInt(String v);
     
+    @JavaScriptBody(args = "arr", body = "return arr;")
+    public static native Object[] arr(Object[] arr);
+    
     @JavaScriptBody(args = { "useA", "useB", "a", "b" }, body = "var l = 0;"
         + "if (useA) l += a;\n"
         + "if (useB) l += b;\n"

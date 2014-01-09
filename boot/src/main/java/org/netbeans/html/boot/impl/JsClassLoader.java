@@ -85,6 +85,12 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.equals(Fn.Presenter.class.getName())) {
             return Fn.Presenter.class;
         }
+        if (name.equals(Fn.ToJavaScript.class.getName())) {
+            return Fn.ToJavaScript.class;
+        }
+        if (name.equals(Fn.FromJavaScript.class.getName())) {
+            return Fn.FromJavaScript.class;
+        }
         if (name.equals(FnUtils.class.getName())) {
             return FnUtils.class;
         }

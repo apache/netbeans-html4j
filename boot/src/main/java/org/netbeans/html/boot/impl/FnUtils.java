@@ -235,9 +235,7 @@ public final class FnUtils implements Fn.Presenter {
 
             @Override
             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                if ("Lnet/java/html/js/JavaScriptBody;".equals(desc) // NOI18N
-                        || "Lorg/apidesign/bck2brwsr/core/JavaScriptBody;".equals(desc) // NOI18N
-                        ) {
+                if ("Lnet/java/html/js/JavaScriptBody;".equals(desc)) { // NOI18N
                     found++;
                     return new FindInAnno();
                 }
@@ -388,7 +386,12 @@ public final class FnUtils implements Fn.Presenter {
                     @Override
                     public SignatureVisitor visitArrayType() {
                         if (nowReturn) {
-                            throw new IllegalStateException("Not supported yet");
+                            return new SignatureVisitor(Opcodes.ASM4) {
+                                @Override
+                                public void visitClassType(String name) {
+                                    returnType = Type.getType("[" + Type.getObjectType(name).getDescriptor());
+                                }
+                            };
                         }
                         loadObject();
                         return new SignatureWriter();

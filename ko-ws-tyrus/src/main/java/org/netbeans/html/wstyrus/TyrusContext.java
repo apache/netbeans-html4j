@@ -43,6 +43,7 @@
 package org.netbeans.html.wstyrus;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -58,6 +59,8 @@ import javax.websocket.WebSocketContainer;
 import net.java.html.json.OnReceive;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.JSONCall;
+import org.apidesign.html.json.spi.Technology;
+import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.netbeans.html.wstyrus.TyrusContext.Comm;
 import org.json.JSONArray;
@@ -82,12 +85,14 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service = Contexts.Provider.class)
-public final class TyrusContext implements Contexts.Provider, WSTransfer<Comm> {
+public final class TyrusContext 
+implements Contexts.Provider, WSTransfer<Comm>, Transfer {
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
         // default WebSocket transfer implementation is registered
         // in ko-fx module with 100, provide this one as a fallback only
         context.register(WSTransfer.class, this, 1000);
+        context.register(Transfer.class, this, 1000);
     }
 
     @Override
@@ -114,6 +119,21 @@ public final class TyrusContext implements Contexts.Provider, WSTransfer<Comm> {
         } catch (IOException ex) {
             socket.callback.notifyError(ex);
         }
+    }
+
+    @Override
+    public void extract(Object obj, String[] props, Object[] values) {
+        LoadJSON.extractJSON(obj, props, values);
+    }
+
+    @Override
+    public Object toJSON(InputStream is) throws IOException {
+        return LoadJSON.parse(is);
+    }
+
+    @Override
+    public void loadJSON(JSONCall call) {
+        LoadJSON.loadJSON(call);
     }
     
     /** Implementation class in an implementation. Represents a {@link ClientEndpoint} of the

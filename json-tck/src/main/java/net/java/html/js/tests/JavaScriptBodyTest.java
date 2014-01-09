@@ -42,6 +42,7 @@
  */
 package net.java.html.js.tests;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.apidesign.html.json.tck.KOTest;
 
@@ -72,6 +73,56 @@ public class JavaScriptBodyTest {
         R run = new R();
         Bodies.callback(run);
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
+    }
+    
+    @KOTest public void typeOfCharacter() {
+        String charType = Bodies.typeof('a', false);
+        assert "number".equals(charType) : "Expecting number type: " + charType;
+    }
+    @KOTest public void typeOfBoolean() {
+        String booleanType = Bodies.typeof(true, false);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfPrimitiveBoolean() {
+        String booleanType = Bodies.typeof(true);
+        assert "boolean".equals(booleanType) || "number".equals(booleanType): 
+            "Expecting boolean or at least number type: " + booleanType;
+    }
+
+    @KOTest public void typeOfInteger() {
+        String intType = Bodies.typeof(1, false);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfString() {
+        String strType = Bodies.typeof("Ahoj", false);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDouble() {
+        String doubleType = Bodies.typeof(0.33, false);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
+    }
+    
+    @KOTest public void typeOfBooleanValueOf() {
+        String booleanType = Bodies.typeof(true, true);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfIntegerValueOf() {
+        String intType = Bodies.typeof(1, true);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfStringValueOf() {
+        String strType = Bodies.typeof("Ahoj", true);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDoubleValueOf() {
+        String doubleType = Bodies.typeof(0.33, true);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
     }
 
     @KOTest public void computeInARunnable() {
@@ -174,6 +225,24 @@ public class JavaScriptBodyTest {
         assert "Ahoj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
     }
 
+    @KOTest
+    public void callbackWithArray() {
+        class A implements Callable<String[]> {
+            @Override
+            public String[] call() throws Exception {
+                return new String[] { "Hello" };
+            }
+        }
+        Callable<String[]> a = new A();
+        Object b = Bodies.callbackAndPush(a, "World!");
+        assert b instanceof Object[] : "Returns an array: " + b;
+        Object[] arr = (Object[]) b;
+        String str = Arrays.toString(arr);
+        assert arr.length == 2 : "Size is two " + str;
+        assert "Hello".equals(arr[0]) : "Hello expected: " + arr[0];
+        assert "World!".equals(arr[1]) : "World! expected: " + arr[1];
+    }
+
     @KOTest public void truth() {
         assert Bodies.truth() : "True is true";
     }
@@ -196,6 +265,11 @@ public class JavaScriptBodyTest {
     
     @KOTest public void factorial6() {
         assert new Factorial().factorial(6) == 720;
+    }
+    
+    @KOTest public void sumArray() {
+        int r = Bodies.sumArr(new Sum());
+        assert r == 6 : "Sum is six: " + r;
     }
     
     private static class R implements Runnable {

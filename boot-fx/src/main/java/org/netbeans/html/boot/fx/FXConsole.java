@@ -42,62 +42,43 @@
  */
 package org.netbeans.html.boot.fx;
 
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import net.java.html.js.JavaScriptBody;
-import static org.testng.Assert.*;
-import org.testng.annotations.Test;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.scene.web.WebEngine;
+import netscape.javascript.JSObject;
 
-/**
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
+ * <p>
+ * Redirects JavaScript's messages to Java's {@link Logger}.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class FXPresenterTst {
-    @Test public void showClassLoader() {
-        R run = new R();
-        callback(run);
-        assertEquals(run.cnt, 1, "Can call even private implementation classes");
+public final class FXConsole {
+    static final Logger LOG = Logger.getLogger(FXConsole.class.getName());
+    
+    private FXConsole() {
+    }
+
+    static void register(WebEngine eng) {
+        JSObject fn = (JSObject) eng.executeScript(""
+            + "(function(attr, l, c) {"
+            + "  window.console[attr] = function(msg) { c.log(l, msg); };"
+            + "})"
+        );
+        FXConsole c = new FXConsole();
+        c.registerImpl(fn, "log", Level.INFO);
+        c.registerImpl(fn, "info", Level.INFO);
+        c.registerImpl(fn, "warn", Level.WARNING);
+        c.registerImpl(fn, "error", Level.SEVERE);
     }
     
-    @Test public void checkConsoleLogging() {
-        class H extends Handler {
-            LogRecord record;
-            
-            @Override
-            public void publish(LogRecord record) {
-                assert this.record == null;
-                this.record = record;
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() throws SecurityException {
-            }
-        }
-        H h = new H();
-        FXConsole.LOG.addHandler(h);
-
-        log("Ahoj");
-        
-        assert h.record != null : "Some log record obtained";
-        assert "Ahoj".equals(h.record.getMessage()) : "It is our Ahoj: " + h.record.getMessage();
+    private void registerImpl(JSObject eng, String attr, Level l) {
+        eng.call("call", null, attr, l, this);
     }
     
-    @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
-    private static native void callback(Runnable r);
-
-    @JavaScriptBody(args = { "msg" }, body = "console.log(msg);")
-    private static native void log(String msg);
-
-    private static class R implements Runnable {
-        int cnt;
-
-        @Override
-        public void run() {
-            cnt++;
-        }
+    public void log(Level l, String msg) {
+        LOG.log(l, msg);
     }
 }

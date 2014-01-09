@@ -169,6 +169,7 @@ public class FXBrwsr extends Application {
             @Override
             public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                 if (newState.equals(Worker.State.SUCCEEDED)) {
+                    FXConsole.register(view.getEngine());
                     onLoad.onPageLoad();
                 }
                 if (newState.equals(Worker.State.FAILED)) {

@@ -40,64 +40,43 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.fx;
+package org.netbeans.html.ko4j;
 
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import net.java.html.js.JavaScriptBody;
-import static org.testng.Assert.*;
-import org.testng.annotations.Test;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import net.java.html.json.ComputedProperty;
+import net.java.html.json.Model;
+import net.java.html.json.Property;
+import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class FXPresenterTst {
-    @Test public void showClassLoader() {
-        R run = new R();
-        callback(run);
-        assertEquals(run.cnt, 1, "Can call even private implementation classes");
-    }
+@Model(className = "LessCalls", properties = {
+    @Property(name = "value", type = int.class)
+})
+public class LessCallbacksCheck {
+    private static StringWriter sw;
     
-    @Test public void checkConsoleLogging() {
-        class H extends Handler {
-            LogRecord record;
-            
-            @Override
-            public void publish(LogRecord record) {
-                assert this.record == null;
-                this.record = record;
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() throws SecurityException {
-            }
+    @ComputedProperty static int plusOne(int value) {
+        if (sw == null) {
+            sw = new StringWriter();
         }
-        H h = new H();
-        FXConsole.LOG.addHandler(h);
-
-        log("Ahoj");
-        
-        assert h.record != null : "Some log record obtained";
-        assert "Ahoj".equals(h.record.getMessage()) : "It is our Ahoj: " + h.record.getMessage();
+        new Exception("Who calls me?").printStackTrace(
+            new PrintWriter(sw)
+        );
+        return value + 1;
     }
     
-    @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
-    private static native void callback(Runnable r);
-
-    @JavaScriptBody(args = { "msg" }, body = "console.log(msg);")
-    private static native void log(String msg);
-
-    private static class R implements Runnable {
-        int cnt;
-
-        @Override
-        public void run() {
-            cnt++;
+    @KOTest public void dontCallForInitialValueBackToJavaVM() {
+        LessCalls m = new LessCalls(10).applyBindings();
+        assert m.getPlusOne() == 11 : "Expecting 11: " + m.getPlusOne();
+        
+        assert sw != null : "StringWriter should be initialized: " + sw;
+        
+        if (sw.toString().contains("$JsCallbacks$")) {
+            assert false : "Don't call for initial value via JsCallbacks:\n" + sw;
         }
     }
 }
