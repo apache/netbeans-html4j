@@ -150,7 +150,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, ko.knockout(), 10).
-            register(Transfer.class, ko.transferViaOrgJSON(), 10).
+            register(Transfer.class, tc, 10).
             register(WSTransfer.class, tc, 10);
         return cb.build();
     }

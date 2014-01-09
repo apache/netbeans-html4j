@@ -42,9 +42,11 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
@@ -73,7 +75,7 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
         this.browserContext = browserContext;
     }
     
-    @JavaScriptBody(args = {}, body = "return true;")
+    @JavaScriptBody(args = {}, body = "if (window) return true; else return false;")
     private static boolean isJavaScriptEnabledJs() {
         return false;
     }
@@ -148,7 +150,22 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
 
     @Override
     public void loadJSON(final JSONCall call) {
-        LoadJSON.loadJSON(call);
+        if (call.isJSONP()) {
+            String me = LoadJSON.createJSONP(call);
+            LoadJSON.loadJSONP(call.composeURL(me), me);
+        } else {
+            String data = null;
+            if (call.isDoOutput()) {
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    call.writeData(bos);
+                    data = new String(bos.toByteArray(), "UTF-8");
+                } catch (IOException ex) {
+                    call.notifyError(ex);
+                }
+            }
+            LoadJSON.loadJSON(call.composeURL(null), call, call.getMethod(), data);
+        }
     }
 
     @Override
@@ -158,7 +175,16 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
 
     @Override
     public Object toJSON(InputStream is) throws IOException {
-        return LoadJSON.parse(is);
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader r = new InputStreamReader(is);
+        for (;;) {
+            int ch = r.read();
+            if (ch == -1) {
+                break;
+            }
+            sb.append((char)ch);
+        }
+        return LoadJSON.parse(sb.toString());
     }
 
     @Override

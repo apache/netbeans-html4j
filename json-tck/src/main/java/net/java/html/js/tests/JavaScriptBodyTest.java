@@ -267,6 +267,11 @@ public class JavaScriptBodyTest {
         assert new Factorial().factorial(6) == 720;
     }
     
+    @KOTest public void sumArray() {
+        int r = Bodies.sumArr(new Sum());
+        assert r == 6 : "Sum is six: " + r;
+    }
+    
     private static class R implements Runnable {
         int cnt;
         private final Thread initThread;

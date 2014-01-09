@@ -42,226 +42,167 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PushbackInputStream;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Iterator;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
 import net.java.html.js.JavaScriptBody;
-import netscape.javascript.JSObject;
 import org.apidesign.html.json.spi.JSONCall;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.apidesign.html.json.spi.Transfer;
+import org.apidesign.html.json.spi.WSTransfer;
 
-/** This is an implementation package - just
- * include its JAR on classpath and use official {@link Context} API
- * to access the functionality.
+/**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-final class LoadJSON implements Runnable {
-    private static final Logger LOG = FXContext.LOG;
-    private static final Executor REQ = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable runnable) {
-            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
-
-    private final JSONCall call;
-    private final URL base;
-    private Throwable error;
-    private Object json;
-
-
-    private LoadJSON(JSONCall call) {
-        this.call = call;
-        URL b;
-        try {
-            b = new URL(findBaseURL());
-        } catch (MalformedURLException ex) {
-            LOG.log(Level.SEVERE, "Can't find base url for " + call.composeURL("dummy"), ex);
-            b = null;
-        }
-        this.base = b;
-    }
-
-    public static void loadJSON(JSONCall call) {
-        assert !"WebSocket".equals(call.getMethod());
-        REQ.execute(new LoadJSON((call)));
+final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
+    private LoadJSON() {}
+    
+    @Override
+    public void extract(Object obj, String[] props, Object[] values) {
+        extractJSON(obj, props, values);
     }
 
     @Override
-    public void run() {
-        if (Platform.isFxApplicationThread()) {
-            if (error != null) {
-                call.notifyError(error);
-            } else {
-                call.notifySuccess(json);
-            }
-            return;
-        }
-        final String url;
+    public void loadJSON(final JSONCall call) {
         if (call.isJSONP()) {
-            url = call.composeURL("dummy");
+            String me = createJSONP(call);
+            loadJSONP(call.composeURL(me), me);
         } else {
-            url = call.composeURL(null);
-        }
-        try {
-            final URL u = new URL(base, url.replace(" ", "%20"));
-            URLConnection conn = u.openConnection();
-            if (conn instanceof HttpURLConnection) {
-                HttpURLConnection huc = (HttpURLConnection) conn;
-                if (call.getMethod() != null) {
-                    huc.setRequestMethod(call.getMethod());
-                }
-                if (call.isDoOutput()) {
-                    huc.setDoOutput(true);
-                    final OutputStream os = huc.getOutputStream();
-                    call.writeData(os);
-                    os.flush();
-                }
-            }
-            final PushbackInputStream is = new PushbackInputStream(
-                conn.getInputStream(), 1
-            );
-            boolean array = false;
-            boolean string = false;
-            if (call.isJSONP()) {
-                for (;;) {
-                    int ch = is.read();
-                    if (ch == -1) {
-                        break;
-                    }
-                    if (ch == '[') {
-                        is.unread(ch);
-                        array = true;
-                        break;
-                    }
-                    if (ch == '{') {
-                        is.unread(ch);
-                        break;
-                    }
-                }
-            } else {
-                int ch = is.read();
-                if (ch == -1) {
-                    string = true;
-                } else {
-                    array = ch == '[';
-                    is.unread(ch);
-                    if (!array && ch != '{') {
-                        string = true;
-                    }
-                }
-            }
-            try {
-                if (string) {
-                    throw new JSONException("");
-                }
-                Reader r = new InputStreamReader(is, "UTF-8");
-
-                JSONTokener tok = new JSONTokener(r);
-                Object obj;
-                obj = array ? new JSONArray(tok) : new JSONObject(tok);
-                json = convertToArray(obj);
-            } catch (JSONException ex) {
-                Reader r = new InputStreamReader(is, "UTF-8");
-                StringBuilder sb = new StringBuilder();
-                for (;;) {
-                    int ch = r.read();
-                    if (ch == -1) {
-                        break;
-                    }
-                    sb.append((char)ch);
-                }
-                json = sb.toString();
-            }
-        } catch (IOException ex) {
-            error = ex;
-        } finally {
-            Platform.runLater(this);
-        }
-    }
-
-    static Object convertToArray(Object o) throws JSONException {
-        if (o instanceof JSONArray) {
-            JSONArray ja = (JSONArray)o;
-            Object[] arr = new Object[ja.length()];
-            for (int i = 0; i < arr.length; i++) {
-                arr[i] = convertToArray(ja.get(i));
-            }
-            return arr;
-        } else if (o instanceof JSONObject) {
-            JSONObject obj = (JSONObject)o;
-            Iterator it = obj.keys();
-            while (it.hasNext()) {
-                String key = (String)it.next();
-                obj.put(key, convertToArray(obj.get(key)));
-            }
-            return obj;
-        } else {
-            return o;
-        }
-    }
-    
-    public static void extractJSON(Object jsonObject, String[] props, Object[] values) {
-        if (jsonObject instanceof JSONObject) {
-            JSONObject obj = (JSONObject)jsonObject;
-            for (int i = 0; i < props.length; i++) {
+            String data = null;
+            if (call.isDoOutput()) {
                 try {
-                    values[i] = obj.has(props[i]) ? obj.get(props[i]) : null;
-                } catch (JSONException ex) {
-                    LoadJSON.LOG.log(Level.SEVERE, "Can't read " + props[i] + " from " + jsonObject, ex);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    call.writeData(bos);
+                    data = new String(bos.toByteArray(), "UTF-8");
+                } catch (IOException ex) {
+                    call.notifyError(ex);
                 }
             }
-        }
-        if (jsonObject instanceof JSObject) {
-            JSObject obj = (JSObject)jsonObject;
-            for (int i = 0; i < props.length; i++) {
-                Object val = obj.getMember(props[i]);
-                values[i] = isDefined(val) ? val : null;
-            }
-        }
-    }
-    
-    public static Object parse(InputStream is) throws IOException {
-        try {
-            InputStreamReader r = new InputStreamReader(is, "UTF-8");
-            JSONTokener t = new JSONTokener(r);
-            return new JSONObject(t);
-        } catch (JSONException ex) {
-            throw new IOException(ex);
+            loadJSON(call.composeURL(null), call, call.getMethod(), data);
         }
     }
 
-    @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
-    )
-    private static native String findBaseURL();
-    
-    private static boolean isDefined(Object val) {
-        return !"undefined".equals(val);
+    @Override
+    public Object toJSON(InputStream is) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader r = new InputStreamReader(is);
+        for (;;) {
+            int ch = r.read();
+            if (ch == -1) {
+                break;
+            }
+            sb.append((char)ch);
+        }
+        return parse(sb.toString());
     }
+
+    @Override
+    public LoadWS open(String url, JSONCall callback) {
+        return new LoadWS(callback, url);
+    }
+
+    @Override
+    public void send(LoadWS socket, JSONCall data) {
+        socket.send(data);
+    }
+
+    @Override
+    public void close(LoadWS socket) {
+        socket.close();
+    }
+    
+    //
+    // implementations
+    //
+    
+    @JavaScriptBody(args = {"object", "property"},
+        body
+        = "if (property === null) return object;\n"
+        + "if (object === null) return null;\n"
+        + "var p = object[property]; return p ? p : null;"
+    )
+    private static Object getProperty(Object object, String property) {
+        return null;
+    }
+
+    static String createJSONP(JSONCall whenDone) {
+        int h = whenDone.hashCode();
+        String name;
+        for (;;) {
+            name = "jsonp" + Integer.toHexString(h);
+            if (defineIfUnused(name, whenDone)) {
+                return name;
+            }
+            h++;
+        }
+    }
+
+    @JavaScriptBody(args = {"name", "done"}, javacall = true, body
+        = "if (window[name]) return false;\n "
+        + "window[name] = function(data) {\n "
+        + "  delete window[name];\n"
+        + "  var el = window.document.getElementById(name);\n"
+        + "  el.parentNode.removeChild(el);\n"
+        + "  done.@org.apidesign.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);\n"
+        + "};\n"
+        + "return true;\n"
+    )
+    private static boolean defineIfUnused(String name, JSONCall done) {
+        return true;
+    }
+
+    @JavaScriptBody(args = {"s"}, body = "return eval('(' + s + ')');")
+    static Object parse(String s) {
+        return s;
+    }
+
+    @JavaScriptBody(args = {"url", "done", "method", "data"}, javacall = true, body = ""
+        + "var request = new XMLHttpRequest();\n"
+        + "if (!method) method = 'GET';\n"
+        + "request.open(method, url, true);\n"
+        + "request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');\n"
+        + "request.onreadystatechange = function() {\n"
+        + "  if (this.readyState!==4) return;\n"
+        + "  try {\n"
+        + "    var r = this.response;\n"
+        + "    try { r = eval('(' + this.response + ')'); } catch (ignore) { }"
+        + "    done.@org.apidesign.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(r);\n"
+        + "  } catch (error) {;\n"
+        + "    @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, this.response);\n"
+        + "  }\n"
+        + "};\n"
+        + "request.onerror = function (e) {console.log('eeeor:' + Object.getOwnPropertyNames(e));\n"
+        + "  @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e);\n"
+        + "}\n"
+        + "if (data) request.send(data);"
+        + "else request.send();"
+    )
+    static void loadJSON(
+        String url, JSONCall done, String method, String data
+    ) {
+    }
+    
+    static void notifyError(Object done, Object msg) {
+        ((JSONCall)done).notifyError(new Exception(msg.toString()));
+    }
+
+    @JavaScriptBody(args = {"url", "jsonp"}, body
+        = "var scrpt = window.document.createElement('script');\n "
+        + "scrpt.setAttribute('src', url);\n "
+        + "scrpt.setAttribute('id', jsonp);\n "
+        + "scrpt.setAttribute('type', 'text/javascript');\n "
+        + "var body = document.getElementsByTagName('body')[0];\n "
+        + "body.appendChild(scrpt);\n"
+    )
+    static void loadJSONP(String url, String jsonp) {
+
+    }
+
+    static void extractJSON(Object jsonObject, String[] props, Object[] values) {
+        for (int i = 0; i < props.length; i++) {
+            values[i] = getProperty(jsonObject, props[i]);
+        }
+    }
+    
 }

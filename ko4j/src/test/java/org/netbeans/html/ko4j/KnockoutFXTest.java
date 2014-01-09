@@ -66,8 +66,6 @@ import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.annotations.Factory;
 import static org.testng.Assert.*;
@@ -163,16 +161,17 @@ public final class KnockoutFXTest extends KnockoutTCK {
 
     @Override
     public Object createJSON(Map<String, Object> values) {
-        JSONObject json = new JSONObject();
+        Object json = createJSON();
         for (Map.Entry<String, Object> entry : values.entrySet()) {
-            try {
-                json.put(entry.getKey(), entry.getValue());
-            } catch (JSONException ex) {
-                throw new IllegalStateException(ex);
-            }
+            setProperty(json, entry.getKey(), entry.getValue());
         }
         return json;
     }
+    
+    @JavaScriptBody(args = {}, body = "return new Object();")
+    private static native Object createJSON();
+    @JavaScriptBody(args = { "json", "key", "value" }, body = "json[key] = value;")
+    private static native void setProperty(Object json, String key, Object value);
 
     @Override
     @JavaScriptBody(args = { "s", "args" }, body = ""

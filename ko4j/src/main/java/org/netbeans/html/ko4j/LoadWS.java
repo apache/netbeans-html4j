@@ -44,12 +44,8 @@ package org.netbeans.html.ko4j;
 
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
-/** Communication with WebSockets for WebView 1.8.
+/** Communication with WebSockets via browser's WebSocket object.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
@@ -57,7 +53,6 @@ final class LoadWS {
     private static final boolean SUPPORTED = isWebSocket();
     private final Object ws;
     private final JSONCall call;
-
     LoadWS(JSONCall first, String url) {
         call = first;
         ws = initWebSocket(this, url);
@@ -84,18 +79,17 @@ final class LoadWS {
         }
     }
     
+    
+    @JavaScriptBody(args = { "data" }, body = "try {\n"
+        + "    return eval('(' + data + ')');\n"
+        + "  } catch (error) {;\n"
+        + "    return data;\n"
+        + "  }\n"
+    )
+    private static native Object toJSON(String data);
+    
     void onMessage(Object ev, String data) {
-        Object json;
-        try {
-            data = data.trim();
-            
-            JSONTokener tok = new JSONTokener(data);
-            Object obj;
-            obj = data.startsWith("[") ? new JSONArray(tok) : new JSONObject(tok);
-            json = LoadJSON.convertToArray(obj);
-        } catch (JSONException ex) {
-            json = data;
-        }
+        Object json = toJSON(data);
         call.notifySuccess(json);
     }
     
@@ -113,20 +107,28 @@ final class LoadWS {
     }
 
     @JavaScriptBody(args = { "back", "url" }, javacall = true, body = ""
-        + "if (window.WebSocket) {"
-        + "  try {"
-        + "    var ws = new window.WebSocket(url);"
-        + "    ws.onopen = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onOpen(Ljava/lang/Object;)(ev); };"
-        + "    ws.onmessage = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data); };"
-        + "    ws.onerror = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onError(Ljava/lang/Object;)(ev); };"
-        + "    ws.onclose = function(ev) { back.@org.netbeans.html.ko4j.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason); };"
-        + "    return ws;"
-        + "  } catch (ex) {"
-        + "    return null;"
-        + "  }"
-        + "} else {"
-        + "  return null;"
-        + "}"
+        + "if (window.WebSocket) {\n"
+        + "  try {\n"
+        + "    var ws = new window.WebSocket(url);\n"
+        + "    ws.onopen = function(ev) {\n"
+        + "      back.@org.netbeans.html.ko4j.LoadWS::onOpen(Ljava/lang/Object;)(ev);\n"
+        + "    };\n"
+        + "    ws.onmessage = function(ev) {\n"
+        + "      back.@org.netbeans.html.ko4j.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data);\n"
+        + "    };\n"
+        + "    ws.onerror = function(ev) {\n"
+        + "      back.@org.netbeans.html.ko4j.LoadWS::onError(Ljava/lang/Object;)(ev);\n"
+        + "    };\n"
+        + "    ws.onclose = function(ev) {\n"
+        + "      back.@org.netbeans.html.ko4j.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason);\n"
+        + "    };\n"
+        + "    return ws;\n"
+        + "  } catch (ex) {\n"
+        + "    return null;\n"
+        + "  }\n"
+        + "} else {\n"
+        + "  return null;\n"
+        + "}\n"
     )
     private static Object initWebSocket(Object back, String url) {
         return null;

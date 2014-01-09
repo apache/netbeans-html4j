@@ -265,4 +265,24 @@ public abstract class Fn {
          */
         public Object toJavaScript(Object toReturn);
     }
+    
+    /** Additional interface to be implemented by {@link Presenter}s that
+     * need to convert JavaScript object (usually array) to Java object 
+     * when calling back from JavaScript to Java.
+     * <p>
+     * <em>Note:</em> The implementation based on <em>JavaFX</em>
+     * <code>WebView</code> uses this interface to convert JavaScript arrays to
+     * Java ones.
+      * 
+     * @since 0.7
+     */
+    public interface FromJavaScript {
+        /** Convert a JavaScript object into suitable Java representation
+         * before a Java method is called with this object as an argument.
+         * 
+         * @param js the JavaScript object
+         * @return replacement object for 
+         */
+        public Object toJava(Object js);
+    }
 }

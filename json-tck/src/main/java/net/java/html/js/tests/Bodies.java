@@ -99,4 +99,9 @@ final class Bodies {
     
     @JavaScriptBody(args = {}, body = "return true;")
     public static native boolean truth();
+    
+    @JavaScriptBody(args = { "s" }, javacall = true, body = 
+        "return s.@net.java.html.js.tests.Sum::sum([Ljava/lang/Object;)([1, 2, 3]);"
+    )
+    public static native int sumArr(Sum s);
 }

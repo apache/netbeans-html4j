@@ -298,13 +298,26 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 }
                 
                 int cnt = 0;
+                StringBuilder convert = new StringBuilder();
                 for (VariableElement ve : m.getParameters()) {
                     source.append(sep);
-                    source.append(ve.asType());
-                    source.append(" arg").append(++cnt);
+                    ++cnt;
+                    final TypeMirror t = ve.asType();
+                    if (!t.getKind().isPrimitive()) {
+                        source.append("Object");
+                        convert.append("    if (p instanceof org.apidesign.html.boot.spi.Fn.FromJavaScript) {\n");
+                        convert.append("      arg").append(cnt).
+                            append(" = ((org.apidesign.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
+                            append(");\n");
+                        convert.append("    }\n");
+                    } else {
+                        source.append(t);
+                    }
+                    source.append(" arg").append(cnt);
                     sep = ", ";
                 }
                 source.append(") throws Throwable {\n");
+                source.append(convert);
                 if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
                     source.append("    try (java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p)) { \n");
                 } else {
@@ -326,7 +339,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 sep = "";
                 for (VariableElement ve : m.getParameters()) {
                     source.append(sep);
-                    source.append("arg").append(++cnt);
+                    source.append("(").append(ve.asType());
+                    source.append(")arg").append(++cnt);
                     sep = ", ";
                 }
                 source.append(");\n");

@@ -61,7 +61,7 @@ import org.apidesign.html.boot.spi.Fn;
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
 public abstract class AbstractFXPresenter 
-implements Fn.Presenter, Fn.ToJavaScript, Executor {
+implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected List<String> scripts;
@@ -219,6 +219,11 @@ implements Fn.Presenter, Fn.ToJavaScript, Executor {
         return arraySize;
     }
 
+    @Override
+    public Object toJava(Object jsArray) {
+        return checkArray(jsArray);
+    }
+    
     @Override
     public Object toJavaScript(Object toReturn) {
         if (toReturn instanceof Object[]) {

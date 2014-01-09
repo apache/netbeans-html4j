@@ -94,7 +94,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>net.java.html.boot</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
       <type>jar</type>
     </dependency>
     <dependency>
