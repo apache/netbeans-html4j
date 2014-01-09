@@ -198,4 +198,14 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("recordError", Object.class);
         assertEquals(st.invoke(methodClass.newInstance(), "Hello"), "Hello", "The same parameter returned");
     }
+    
+    @Test public void arrayInOut() throws Throwable {
+        String[] arr = { "Ahoj" };
+        Method st = methodClass.getMethod("arr", Object[].class);
+        Object ret = st.invoke(null, (Object) arr);
+        assertTrue(ret instanceof Object[], "Expecting array: " + ret);
+        Object[] res = (Object[]) ret;
+        assertEquals(res.length, 1, "One element");
+        assertEquals(res[0], "Ahoj", "The right string");
+    }
 }

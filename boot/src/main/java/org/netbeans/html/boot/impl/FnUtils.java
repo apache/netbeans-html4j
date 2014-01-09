@@ -388,7 +388,12 @@ public final class FnUtils implements Fn.Presenter {
                     @Override
                     public SignatureVisitor visitArrayType() {
                         if (nowReturn) {
-                            throw new IllegalStateException("Not supported yet");
+                            return new SignatureVisitor(Opcodes.ASM4) {
+                                @Override
+                                public void visitClassType(String name) {
+                                    returnType = Type.getType("[" + Type.getObjectType(name).getDescriptor());
+                                }
+                            };
                         }
                         loadObject();
                         return new SignatureWriter();
