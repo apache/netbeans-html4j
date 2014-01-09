@@ -42,22 +42,12 @@
  */
 package org.netbeans.html.boot.fx;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import net.java.html.boot.BrowserBuilder;
-import netscape.javascript.JSObject;
 import org.apidesign.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
