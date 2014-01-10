@@ -45,9 +45,9 @@
       <url>http://netbeans.org</url>
   </organization>
   <scm>
-      <connection>scm:hg:https://hg.apidesign.org/hg/html~html4j</connection>
-      <developerConnection>scm:hg:https://hg.apidesign.org/hg/html~html4j</developerConnection>
-      <url>https://hg.apidesign.org/hg/html~html4j</url>
+      <connection>scm:hg:https://hg.netbeans.org/html4j</connection>
+      <developerConnection>scm:hg:https://hg.netbeans.org/html4j</developerConnection>
+      <url>https://hg.netbeans.org/html4j</url>
       <tag>default</tag>
   </scm>
   <repositories>
