@@ -77,7 +77,7 @@ public class MapModelTest {
         Person p = Models.bind(new Person(), c).applyBindings();
         p.setFirstName("Jarda");
         
-        Map m = (Map)JSON.find(p);
+        Map m = (Map)Models.toRaw(p);
         Object v = m.get("firstName");
         assertNotNull(v, "Value should be in the map");
         assertEquals(v.getClass(), One.class, "It is instance of One");
@@ -98,7 +98,7 @@ public class MapModelTest {
         Person p = Models.bind(new Person(), c);
         p.setFirstName("Jirka");
         
-        Map m = (Map)JSON.find(p);
+        Map m = (Map)Models.toRaw(p);
         Object v = m.get("firstName");
         assertNotNull(v, "Value should be in the map");
         assertEquals(v.getClass(), One.class, "It is instance of One");
@@ -122,7 +122,7 @@ public class MapModelTest {
     @Test public void derivedProperty() throws Exception {
         Person p = Models.bind(new Person(), c);
         
-        Map m = (Map)JSON.find(p);
+        Map m = (Map)Models.toRaw(p);
         Object v = m.get("fullName");
         assertNotNull(v, "Value should be in the map");
         assertEquals(v.getClass(), One.class, "It is instance of One");
@@ -135,7 +135,7 @@ public class MapModelTest {
         p.setFirstName("Trans");
         p.setSex(Sex.MALE);
         
-        Map m = (Map)JSON.find(p);
+        Map m = (Map)Models.toRaw(p);
         Object o = m.get("changeSex");
         assertNotNull(o, "Function registered in the model");
         assertEquals(o.getClass(), One.class);
@@ -152,7 +152,7 @@ public class MapModelTest {
         Person p = Models.bind(new Person(), c);
         p.setFirstName("Trans");
         
-        Map m = (Map)JSON.find(p);
+        Map m = (Map)Models.toRaw(p);
         Object o = m.get("changeSex");
         assertNotNull(o, "Function registered in the model");
         assertEquals(o.getClass(), One.class);
