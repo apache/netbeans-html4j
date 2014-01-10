@@ -129,4 +129,9 @@ public class JsMethods {
       + "return this.@org.netbeans.html.boot.impl.JsMethods::getError()();"
     )
     public native Object recordError(Object err);
+    
+    @JavaScriptBody(args = { "x", "y" }, body = "return x + y;")
+    public static int plusOrMul(int x, int y) {
+        return x * y;
+    }
 }

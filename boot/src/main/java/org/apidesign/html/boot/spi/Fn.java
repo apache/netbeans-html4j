@@ -88,7 +88,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return FnContext.currentPresenter(false) == presenter;
+        return presenter != null && FnContext.currentPresenter(false) == presenter;
     }
     
     /** Helper method to check if the provided instance is valid function.
@@ -110,10 +110,12 @@ public abstract class Fn {
      * @param code the body of the function (can reference <code>this</code> and <code>names</code> variables)
      * @param names names of individual parameters
      * @return the function object that can be {@link Fn#invoke(java.lang.Object, java.lang.Object...) invoked}
+     *    - can return <code>null</code> if there is {@link #activePresenter() no presenter}
      * @since 0.7
      */
     public static Fn define(Class<?> caller, String code, String... names) {
-        return FnContext.currentPresenter(false).defineFn(code, names);
+        final Presenter p = FnContext.currentPresenter(false);
+        return p == null ? null : p.defineFn(code, names);
     }
     
     private static final Map<String,Set<Presenter>> LOADED = new HashMap<String, Set<Presenter>>();

@@ -252,10 +252,10 @@ public final class FnUtils implements Fn.Presenter {
                 if (body == null) {
                     return;
                 }
-                generateBody();
+                generateBody(true);
             }
 
-            private boolean generateBody() {
+            private boolean generateBody(boolean hasCode) {
                 if (bodyGenerated) {
                     return false;
                 }
@@ -295,6 +295,11 @@ public final class FnUtils implements Fn.Presenter {
                         "org/apidesign/html/boot/spi/Fn", "define",
                         "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
                 );
+                Label noPresenter = new Label();
+                if (hasCode) {
+                    super.visitInsn(Opcodes.DUP);
+                    super.visitJumpInsn(Opcodes.IFNULL, noPresenter);
+                }
                 if (resource != null) {
                     super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
                     super.visitLdcInsn(resource);
@@ -460,6 +465,10 @@ public final class FnUtils implements Fn.Presenter {
                         );
                         super.visitInsn(sv.returnType.getOpcode(Opcodes.IRETURN));
                 }
+                if (hasCode) {
+                    super.visitLabel(noPresenter);
+                    super.visitCode();
+                }
                 return true;
             }
 
@@ -467,7 +476,7 @@ public final class FnUtils implements Fn.Presenter {
             public void visitEnd() {
                 super.visitEnd();
                 if (body != null) {
-                    if (generateBody()) {
+                    if (generateBody(false)) {
                         // native method
                         super.visitMaxs(1, 0);
                     }
