@@ -47,6 +47,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
@@ -84,7 +86,19 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
         if (javaScriptEnabled != null) {
             return javaScriptEnabled;
         }
-        return javaScriptEnabled = isJavaScriptEnabledJs();
+        if (!(javaScriptEnabled = isJavaScriptEnabledJs())) {
+            Closeable c = Fn.activate(new TrueFn());
+            try {
+                javaScriptEnabled = isJavaScriptEnabledJs();
+            } finally {
+                try {
+                    c.close();
+                } catch (IOException ex) {
+                    // cannot happen
+                }
+            }
+        }
+        return javaScriptEnabled;
     }
 
     final boolean areWebSocketsSupported() {
@@ -225,5 +239,24 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
     public void close(LoadWS socket) {
         socket.close();
     }
-    
+
+    private static final class TrueFn extends Fn implements Fn.Presenter {
+        @Override
+        public Object invoke(Object thiz, Object... args) throws Exception {
+            return true;
+        }
+
+        @Override
+        public Fn defineFn(String code, String... names) {
+            return this;
+        }
+
+        @Override
+        public void displayPage(URL page, Runnable onPageLoad) {
+        }
+
+        @Override
+        public void loadScript(Reader code) throws Exception {
+        }
+    } // end of TrueFn
 }
