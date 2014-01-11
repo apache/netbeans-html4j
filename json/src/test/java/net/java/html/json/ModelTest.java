@@ -119,7 +119,7 @@ public class ModelTest {
     }
     
     @Test public void arrayChangesNotified() {
-        model.applyBindings();
+        Models.applyBindings(model);
         model.getNames().add("Hello");
         
         assertFalse(my.mutated.isEmpty(), "There was a change" + my.mutated);
