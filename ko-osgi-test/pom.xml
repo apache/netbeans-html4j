@@ -99,20 +99,20 @@
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-server</artifactId>
-            <version>2.3.3</version>
+            <version>${grizzly.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-websockets-server</artifactId>
-            <version>2.3.3</version>
+            <version>${grizzly.version}</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-servlet</artifactId>
-            <version>2.3.3</version>
+            <version>${grizzly.version}</version>
             <scope>test</scope>
         </dependency>    
         <dependency>
