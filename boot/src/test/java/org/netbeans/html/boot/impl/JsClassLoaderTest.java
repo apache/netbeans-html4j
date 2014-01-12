@@ -49,6 +49,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import javax.script.Invocable;
@@ -123,7 +124,12 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
 
             @Override
             protected Enumeration<URL> findResources(String name) {
-                throw new UnsupportedOperationException();
+                URL u = findResource(name);
+                List<URL> arr = new ArrayList<URL>();
+                if (u != null) {
+                    arr.add(u);
+                }
+                return Collections.enumeration(arr);
             }
 
             @Override

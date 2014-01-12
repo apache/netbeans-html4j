@@ -43,6 +43,9 @@
 package org.netbeans.html.boot.impl;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +88,8 @@ import org.openide.util.lookup.ServiceProvider;
 public final class JavaScriptProcesor extends AbstractProcessor {
     private final Map<String,Map<String,ExecutableElement>> javacalls = 
         new HashMap<String,Map<String,ExecutableElement>>();
+    private final Map<String,Set<TypeElement>> bodies = 
+        new HashMap<String, Set<TypeElement>>();
     
     @Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -107,6 +112,17 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             JavaScriptBody jsb = e.getAnnotation(JavaScriptBody.class);
             if (jsb == null) {
                 continue;
+            } else {
+                Set<TypeElement> classes = this.bodies.get(findPkg(e));
+                if (classes == null) {
+                    classes = new HashSet<TypeElement>();
+                    bodies.put(findPkg(e), classes);
+                }
+                Element t = e.getEnclosingElement();
+                while (!t.getKind().isClass() && !t.getKind().isInterface()) {
+                    t = t.getEnclosingElement();
+                }
+                classes.add((TypeElement)t);
             }
             String[] arr = jsb.args();
             if (params.size() != arr.length) {
@@ -151,6 +167,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
         if (roundEnv.processingOver()) {
             generateCallbackClass(javacalls);
+            generateJavaScriptBodyList(bodies);
             javacalls.clear();
         }
         return true;
@@ -259,6 +276,33 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             sb.append(')');
             return sb.toString();
+        }
+    }
+    
+    private void generateJavaScriptBodyList(Map<String,Set<TypeElement>> bodies) {
+        for (Map.Entry<String, Set<TypeElement>> entry : bodies.entrySet()) {
+            String pkg = entry.getKey();
+            Set<TypeElement> classes = entry.getValue();
+            
+            try {
+                FileObject out = processingEnv.getFiler().createResource(
+                    StandardLocation.CLASS_OUTPUT, pkg, "net.java.html.js.classes",
+                    classes.iterator().next()
+                );
+                OutputStream os = out.openOutputStream();
+                try {
+                    PrintWriter w = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
+                    for (TypeElement type : classes) {
+                        w.println(processingEnv.getElementUtils().getBinaryName(type));
+                    }
+                    w.flush();
+                    w.close();
+                } finally {
+                    os.close();
+                }
+            } catch (IOException x) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + entry.getKey() + ": " + x.toString());
+            }
         }
     }
     

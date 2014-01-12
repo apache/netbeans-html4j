@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.tools.Diagnostic;
@@ -152,6 +154,16 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
         }
         
         JavaFileManager jfm = new ForwardingJavaFileManager<JavaFileManager>(sjfm) {
+            @Override
+            public FileObject getFileForOutput(JavaFileManager.Location location, String packageName, String relativeName, FileObject sibling) throws IOException {
+                try {
+                    return new VirtFO(new URI("mem://resource/" + relativeName), Kind.OTHER, relativeName);
+                } catch (URISyntaxException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+            
+            
             @Override
             public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind, FileObject sibling) throws IOException {
                 if (kind  == Kind.CLASS) {

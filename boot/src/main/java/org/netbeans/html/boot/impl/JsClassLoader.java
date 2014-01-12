@@ -117,10 +117,10 @@ abstract class JsClassLoader extends ClassLoader {
                 }
                 is.close();
                 is = null;
-                arr = FnUtils.transform(arr, JsClassLoader.this);
-                if (arr != null) {
-                    return defineClass(name, arr, 0, arr.length);
+                if (JsPkgCache.process(this, name)) {
+                    arr = FnUtils.transform(arr, JsClassLoader.this);
                 }
+                return defineClass(name, arr, 0, arr.length);
             } catch (IOException ex) {
                 throw new ClassNotFoundException("Can't load " + name, ex);
             } finally {
