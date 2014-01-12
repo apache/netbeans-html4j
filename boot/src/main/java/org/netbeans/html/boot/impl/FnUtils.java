@@ -69,7 +69,7 @@ import org.objectweb.asm.signature.SignatureWriter;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FnUtils implements Fn.Presenter {
+public final class FnUtils {
     
     private FnUtils() {
     }
@@ -79,7 +79,7 @@ public final class FnUtils implements Fn.Presenter {
             return true;
         }
         Class<?> clazz;
-        Closeable c = Fn.activate(new FnUtils());
+        Closeable c = Fn.activate(new TrueFn());
         try {
             try {
                 clazz = Class.forName(Test.class.getName(), true, l);
@@ -170,19 +170,6 @@ public final class FnUtils implements Fn.Presenter {
         } catch (Exception ex) {
             throw new IllegalStateException("Can't execute " + resource, ex);
         } 
-    }
-
-    @Override
-    public Fn defineFn(String code, String... names) {
-        return new TrueFn();
-    }
-
-    @Override
-    public void displayPage(URL page, Runnable onPageLoad) {
-    }
-
-    @Override
-    public void loadScript(Reader code) throws Exception {
     }
     
     private static final class FindInClass extends ClassVisitor {
@@ -611,10 +598,23 @@ public final class FnUtils implements Fn.Presenter {
         return arr;
     }
 
-    private static final class TrueFn extends Fn {
+    private static final class TrueFn extends Fn implements Fn.Presenter {
         @Override
         public Object invoke(Object thiz, Object... args) throws Exception {
             return Boolean.TRUE;
+        }
+
+        @Override
+        public Fn defineFn(String code, String... names) {
+            return this;
+        }
+
+        @Override
+        public void displayPage(URL page, Runnable onPageLoad) {
+        }
+
+        @Override
+        public void loadScript(Reader code) throws Exception {
         }
     } // end of TrueFn
 }
