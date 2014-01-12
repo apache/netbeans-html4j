@@ -172,6 +172,40 @@ public final class FnUtils {
         } 
     }
     
+    /** Checks bytecode for usage of {@link JavaScriptBody} annotation
+     * and rewrites it to invoke {@link Fn.Presenter} directly. 
+     * 
+     * @param arr the byte code to check
+     * @param loader loader to load additional resources and classes
+     * @return the same <code>arr</code> (if no change needed) or new
+     *    array with rewritten bytecode
+     * @since 0.7
+     */
+    public static byte[] transform(byte[] arr, ClassLoader loader) {
+        ClassReader cr = new ClassReader(arr) {
+            // to allow us to compile with -profile compact1 on 
+            // JDK8 while processing the class as JDK7, the highest
+            // class format asm 4.1 understands to
+            @Override
+            public short readShort(int index) {
+                short s = super.readShort(index);
+                if (index == 6 && s > Opcodes.V1_7) {
+                    return Opcodes.V1_7;
+                }
+                return s;
+            }
+        };
+        FindInClass tst = new FindInClass(loader, null);
+        cr.accept(tst, 0);
+        if (tst.found > 0) {
+            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            FindInClass fic = new FindInClass(loader, w);
+            cr.accept(fic, 0);
+            arr = w.toByteArray();
+        }
+        return arr;
+    }
+    
     private static final class FindInClass extends ClassVisitor {
         private String name;
         private int found;
@@ -571,31 +605,6 @@ public final class FnUtils {
                 return c.getName().replace('.', '/');
             }
         }
-    }
-
-    static byte[] transform(ClassLoader loader, byte[] arr) {
-        ClassReader cr = new ClassReader(arr) {
-            // to allow us to compile with -profile compact1 on 
-            // JDK8 while processing the class as JDK7, the highest
-            // class format asm 4.1 understands to
-            @Override
-            public short readShort(int index) {
-                short s = super.readShort(index);
-                if (index == 6 && s > Opcodes.V1_7) {
-                    return Opcodes.V1_7;
-                }
-                return s;
-            }
-        };
-        FindInClass tst = new FindInClass(loader, null);
-        cr.accept(tst, 0);
-        if (tst.found > 0) {
-            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-            FindInClass fic = new FindInClass(loader, w);
-            cr.accept(fic, 0);
-            arr = w.toByteArray();
-        }
-        return arr;
     }
 
     private static final class TrueFn extends Fn implements Fn.Presenter {
