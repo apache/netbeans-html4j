@@ -42,13 +42,6 @@
   </build>
   <dependencies>
     <dependency>
-        <groupId>com.oracle</groupId>
-        <artifactId>javafx</artifactId>
-        <version>2.2</version>
-        <scope>system</scope>
-        <systemPath>${jfxrt.jar}</systemPath>
-    </dependency>
-    <dependency>
       <groupId>org.netbeans.html</groupId>
       <artifactId>net.java.html.json</artifactId>
       <version>${project.version}</version>
