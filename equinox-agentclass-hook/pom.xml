@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.netbeans.html</groupId>
         <artifactId>pom</artifactId>
-        <version>0.7-SNAPSHOT</version>
+        <version>0.7</version>
     </parent>
     <name>AgentClass Hook for Equinox</name>
     <artifactId>equinox-agentclass-hook</artifactId>
@@ -17,7 +17,7 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.eclipse.osgi;bundle-version="[3.8.0,4.0)"</Fragment-Host>
-                        <Import-Package></Import-Package>
+                        <Import-Package />
                     </instructions>
                 </configuration>
             </plugin>
