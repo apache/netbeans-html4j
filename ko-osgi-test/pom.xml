@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.netbeans.html</groupId>
         <artifactId>pom</artifactId>
-        <version>0.7</version>
+        <version>0.8-SNAPSHOT</version>
     </parent>
     <name>KO Tests in an OSGi Container</name>
     <artifactId>ko-osgi-test</artifactId>
