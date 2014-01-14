@@ -90,7 +90,7 @@ public class KnockoutEquinoxIT {
             dir = new File(target, "osgi");
             dir.mkdirs();
             
-            Map<String,String> config = new HashMap<>();
+            Map<String,String> config = new HashMap<String,String>();
             config.put(Constants.FRAMEWORK_STORAGE, dir.getPath());
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
             config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc,"

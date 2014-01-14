@@ -88,7 +88,8 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try (Closeable a = Fn.activate(p)) {
+        Closeable a = Fn.activate(p);
+        try {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -111,6 +112,11 @@ public final class KOFx implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
+            }
+            try {
+                a.close();
+            } catch (java.io.IOException ex) {
+                throw new IllegalStateException(ex);
             }
         }
     }

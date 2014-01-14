@@ -149,7 +149,7 @@ implements Contexts.Provider, WSTransfer<Comm>, Transfer {
             try {
                 final WebSocketContainer c = ContainerProvider.getWebSocketContainer();
                 c.connectToServer(Comm.this, url);
-            } catch (DeploymentException | IOException ex) {
+            } catch (Exception ex) {
                 wasAnError(ex);
             }
         }

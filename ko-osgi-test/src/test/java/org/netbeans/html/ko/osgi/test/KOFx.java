@@ -88,7 +88,9 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try (Closeable a = KnockoutEquinoxIT.activateInOSGi(p)) {
+        Closeable a = null;
+        try {
+            a = KnockoutEquinoxIT.activateInOSGi(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -111,6 +113,11 @@ public final class KOFx implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
+            }
+            if (a != null) try {
+                a.close();
+            } catch (java.io.IOException ex) {
+                throw new IllegalStateException(ex);
             }
         }
     }
