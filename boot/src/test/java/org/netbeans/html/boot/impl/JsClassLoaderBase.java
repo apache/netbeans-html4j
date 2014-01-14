@@ -42,9 +42,11 @@
  */
 package org.netbeans.html.boot.impl;
 
+import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import org.apidesign.html.boot.spi.Fn;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -197,5 +199,38 @@ public class JsClassLoaderBase {
     @Test public void recordError() throws Throwable {
         Method st = methodClass.getMethod("recordError", Object.class);
         assertEquals(st.invoke(methodClass.newInstance(), "Hello"), "Hello", "The same parameter returned");
+    }
+    
+    @Test public void plusOrMul() throws Throwable {
+        Method st = methodClass.getMethod("plusOrMul", int.class, int.class);
+        assertNotNull(Fn.activePresenter(), "Is there a presenter?");
+        Closeable c = Fn.activate(null);
+        try {
+            assertNull(Fn.activePresenter(), "No presenter now");
+            assertEquals(st.invoke(null, 6, 7), 42, "Mul in Java");
+        } finally {
+            c.close();
+        }
+        assertNotNull(Fn.activePresenter(), "Is there a presenter again");
+        assertEquals(st.invoke(null, 6, 7), 13, "Plus in JavaScript");
+        c = Fn.activate(null);
+        try {
+            assertNull(Fn.activePresenter(), "No presenter again");
+            assertEquals(st.invoke(null, 6, 7), 42, "Mul in Java");
+        } finally {
+            c.close();
+        }
+        assertNotNull(Fn.activePresenter(), "Is there a presenter again");
+        assertEquals(st.invoke(null, 6, 7), 13, "Plus in JavaScript again");
+    }
+    
+    @Test public void arrayInOut() throws Throwable {
+        String[] arr = { "Ahoj" };
+        Method st = methodClass.getMethod("arr", Object[].class);
+        Object ret = st.invoke(null, (Object) arr);
+        assertTrue(ret instanceof Object[], "Expecting array: " + ret);
+        Object[] res = (Object[]) ret;
+        assertEquals(res.length, 1, "One element");
+        assertEquals(res[0], "Ahoj", "The right string");
     }
 }

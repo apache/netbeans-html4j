@@ -46,8 +46,8 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -60,7 +60,8 @@ import org.apidesign.html.boot.spi.Fn;
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */
-public abstract class AbstractFXPresenter implements Fn.Presenter {
+public abstract class AbstractFXPresenter 
+implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected List<String> scripts;
@@ -69,6 +70,10 @@ public abstract class AbstractFXPresenter implements Fn.Presenter {
 
     @Override
     public Fn defineFn(String code, String... names) {
+        return defineJSFn(code, names);
+    }
+    
+    final JSFn defineJSFn(String code, String... names) {
         StringBuilder sb = new StringBuilder();
         sb.append("(function() {");
         sb.append("  return function(");
@@ -153,6 +158,88 @@ public abstract class AbstractFXPresenter implements Fn.Presenter {
     protected abstract void waitFinished();
 
     protected abstract WebView findView(final URL resource);
+    
+    final JSObject convertArrays(Object[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] instanceof Object[]) {
+                arr[i] = convertArrays((Object[]) arr[i]);
+            }
+        }
+        final JSObject wrapArr = (JSObject)wrapArrFn().call("array", arr); // NOI18N
+        return wrapArr;
+    }
+
+    private JSObject wrapArrImpl;
+    private final JSObject wrapArrFn() {
+        if (wrapArrImpl == null) {
+            try {
+                wrapArrImpl = (JSObject)defineJSFn("  var k = {};"
+                    + "  k.array= function() {"
+                    + "    return Array.prototype.slice.call(arguments);"
+                    + "  };"
+                    + "  return k;"
+                ).invokeImpl(null, false);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return wrapArrImpl;
+    }
+
+    final Object checkArray(Object val) {
+        int length = ((Number) arraySizeFn().call("array", val, null)).intValue();
+        if (length == -1) {
+            return val;
+        }
+        Object[] arr = new Object[length];
+        arraySizeFn().call("array", val, arr);
+        return arr;
+    }
+    private JSObject arraySize;
+    private final JSObject arraySizeFn() {
+        if (arraySize == null) {
+            try {
+                arraySize = (JSObject)defineJSFn("  var k = {};"
+                    + "  k.array = function(arr, to) {"
+                    + "    if (to === null) {"
+                    + "      if (Object.prototype.toString.call(arr) === '[object Array]') return arr.length;"
+                    + "      else return -1;"
+                    + "    } else {"
+                    + "      var l = arr.length;"
+                    + "      for (var i = 0; i < l; i++) to[i] = arr[i];"
+                    + "      return l;"
+                    + "    }"
+                    + "  };"
+                    + "  return k;"
+                ).invokeImpl(null, false);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return arraySize;
+    }
+
+    @Override
+    public Object toJava(Object jsArray) {
+        return checkArray(jsArray);
+    }
+    
+    @Override
+    public Object toJavaScript(Object toReturn) {
+        if (toReturn instanceof Object[]) {
+            return convertArrays((Object[])toReturn);
+        } else {
+            return toReturn;
+        }
+    }
+    
+    @Override public void execute(Runnable r) {
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        } else {
+            Platform.runLater(r);
+        }
+    }
 
     private static final class JSFn extends Fn {
 
@@ -168,15 +255,32 @@ public abstract class AbstractFXPresenter implements Fn.Presenter {
 
         @Override
         public Object invoke(Object thiz, Object... args) throws Exception {
+            return invokeImpl(thiz, true, args);
+        }
+        
+        final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
             try {
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.log(Level.FINE, "calling {0} function #{1}", new Object[]{++call, id});
                 }
                 List<Object> all = new ArrayList<Object>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
-                all.addAll(Arrays.asList(args));
+                for (int i = 0; i < args.length; i++) {
+                    if (arrayChecks && args[i] instanceof Object[]) {
+                        Object[] arr = (Object[]) args[i];
+                        Object conv = ((AbstractFXPresenter)presenter()).convertArrays(arr);
+                        args[i] = conv;
+                    }
+                    all.add(args[i]);
+                }
                 Object ret = fn.call("call", all.toArray()); // NOI18N
-                return ret == fn ? null : ret;
+                if (ret == fn) {
+                    return null;
+                }
+                if (!arrayChecks) {
+                    return ret;
+                }
+                return ((AbstractFXPresenter)presenter()).checkArray(ret);
             } catch (Error t) {
                 t.printStackTrace();
                 throw t;

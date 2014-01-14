@@ -59,7 +59,11 @@ public final class JsAgent implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         try {
-            return FnUtils.transform(classfileBuffer, loader);
+            if (JsPkgCache.process(loader, className)) {
+                return FnUtils.transform(classfileBuffer, loader);
+            } else {
+                return classfileBuffer;
+            }
         } catch (Exception ex) {
             return classfileBuffer;
         }

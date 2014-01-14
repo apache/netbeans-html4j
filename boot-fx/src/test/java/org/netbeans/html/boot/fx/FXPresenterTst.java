@@ -42,6 +42,8 @@
  */
 package org.netbeans.html.boot.fx;
 
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import net.java.html.js.JavaScriptBody;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
@@ -57,8 +59,38 @@ public class FXPresenterTst {
         assertEquals(run.cnt, 1, "Can call even private implementation classes");
     }
     
+    @Test public void checkConsoleLogging() {
+        class H extends Handler {
+            LogRecord record;
+            
+            @Override
+            public void publish(LogRecord record) {
+                assert this.record == null;
+                this.record = record;
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() throws SecurityException {
+            }
+        }
+        H h = new H();
+        FXConsole.LOG.addHandler(h);
+
+        log("Ahoj");
+        
+        assert h.record != null : "Some log record obtained";
+        assert "Ahoj".equals(h.record.getMessage()) : "It is our Ahoj: " + h.record.getMessage();
+    }
+    
     @JavaScriptBody(args = { "r" }, javacall = true, body = "r.@java.lang.Runnable::run()();")
     private static native void callback(Runnable r);
+
+    @JavaScriptBody(args = { "msg" }, body = "console.log(msg);")
+    private static native void log(String msg);
 
     private static class R implements Runnable {
         int cnt;

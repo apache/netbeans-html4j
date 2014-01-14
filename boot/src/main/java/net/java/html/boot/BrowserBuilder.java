@@ -110,7 +110,7 @@ public final class BrowserBuilder {
      * {@link #loadPage(java.lang.String)}.
      * 
      * @param context any instances that should be available to the builder -
-     *   implemenation dependant
+     *   implementation dependant
      * @return new browser builder
      */
     public static BrowserBuilder newBrowser(Object... context) {

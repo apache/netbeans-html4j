@@ -111,10 +111,10 @@ public class TypesTest {
         t.setFloatX(99f);
         */
         
-        Object json = JSON.find(t);
+        Object json = Models.toRaw(t);
         
         Types copy = Models.bind(new Types(), c);
-        Map copyMap = (Map) JSON.find(copy);
+        Map copyMap = (Map) Models.toRaw(copy);
         One o = (One) copyMap.get("readFromEvent");
         o.fb.call(null, json);
         

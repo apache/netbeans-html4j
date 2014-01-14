@@ -532,6 +532,8 @@ public final class Proto {
         }
         
         /** Compares two objects that can be converted to integers.
+         * @param a first value
+         * @param b second value
          * @return true if they are the same
          */
         public final boolean isSame(int a, int b) {
@@ -540,6 +542,8 @@ public final class Proto {
 
         /** Compares two objects that can be converted to (floating point)
          * numbers.
+         * @param a first value
+         * @param b second value
          * @return  true if they are the same
          */
         public final boolean isSame(double a, double b) {
@@ -548,6 +552,8 @@ public final class Proto {
 
         /** Compares two objects for being the same - e.g. either <code>==</code>
          * or <code>equals</code>.
+         * @param a first value
+         * @param b second value
          * @return true if they are equals
          */ 
         public final boolean isSame(Object a, Object b) {

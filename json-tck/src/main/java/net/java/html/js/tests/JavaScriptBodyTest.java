@@ -42,6 +42,7 @@
  */
 package net.java.html.js.tests;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.apidesign.html.json.tck.KOTest;
 
@@ -72,6 +73,56 @@ public class JavaScriptBodyTest {
         R run = new R();
         Bodies.callback(run);
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
+    }
+    
+    @KOTest public void typeOfCharacter() {
+        String charType = Bodies.typeof('a', false);
+        assert "number".equals(charType) : "Expecting number type: " + charType;
+    }
+    @KOTest public void typeOfBoolean() {
+        String booleanType = Bodies.typeof(true, false);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfPrimitiveBoolean() {
+        String booleanType = Bodies.typeof(true);
+        assert "boolean".equals(booleanType) || "number".equals(booleanType): 
+            "Expecting boolean or at least number type: " + booleanType;
+    }
+
+    @KOTest public void typeOfInteger() {
+        String intType = Bodies.typeof(1, false);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfString() {
+        String strType = Bodies.typeof("Ahoj", false);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDouble() {
+        String doubleType = Bodies.typeof(0.33, false);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
+    }
+    
+    @KOTest public void typeOfBooleanValueOf() {
+        String booleanType = Bodies.typeof(true, true);
+        assert "boolean".equals(booleanType) : "Expecting boolean type: " + booleanType;
+    }
+
+    @KOTest public void typeOfIntegerValueOf() {
+        String intType = Bodies.typeof(1, true);
+        assert "number".equals(intType) : "Expecting number type: " + intType;
+    }
+
+    @KOTest public void typeOfStringValueOf() {
+        String strType = Bodies.typeof("Ahoj", true);
+        assert "string".equals(strType) : "Expecting string type: " + strType;
+    }
+
+    @KOTest public void typeOfDoubleValueOf() {
+        String doubleType = Bodies.typeof(0.33, true);
+        assert "number".equals(doubleType) : "Expecting number type: " + doubleType;
     }
 
     @KOTest public void computeInARunnable() {
@@ -130,10 +181,16 @@ public class JavaScriptBodyTest {
         assert res == 42 : "Expecting 42";
     }
     
-    @KOTest public void selectFromJavaArray() {
+    @KOTest public void selectFromStringJavaArray() {
         String[] arr = { "Ahoj", "World" };
         Object res = Bodies.select(arr, 1);
         assert "World".equals(res) : "Expecting World, but was: " + res;
+    }
+
+    @KOTest public void selectFromObjectJavaArray() {
+        Object[] arr = { new Object(), new Object() };
+        Object res = Bodies.select(arr, 1);
+        assert arr[1].equals(res) : "Expecting " + arr[1] + ", but was: " + res;
     }
 
     @KOTest public void lengthOfJavaArray() {
@@ -142,19 +199,49 @@ public class JavaScriptBodyTest {
         assert res == 2 : "Expecting 2, but was: " + res;
     }
 
-    @KOTest public void javaArrayInOut() {
+    @KOTest public void isJavaArray() {
         String[] arr = { "Ahoj", "World" };
-        Object res = Bodies.id(arr);
-        assert res == arr : "Expecting same array, but was: " + res;
+        boolean is = Bodies.isArray(arr);
+        assert is: "Expecting it to be an array: " + is;
     }
 
-//  Modifying an array is a complex operation in the bridge:    
-//    
-//    @KOTest public void modifyJavaArray() {
-//        String[] arr = { "Ahoj", "World" };
-//        Bodies.modify(arr, 0, "Hello");
-//        assert "Hello".equals(arr[0]) : "Expecting World, but was: " + arr[0];
-//    }
+    @KOTest public void javaArrayInOutIsCopied() {
+        String[] arr = { "Ahoj", "World" };
+        Object res = Bodies.id(arr);
+        assert res != null : "Non-null is returned";
+        assert res instanceof Object[] : "Returned an array: " + res;
+        assert !(res instanceof String[]) : "Not returned a string array: " + res;
+        
+        Object[] ret = (Object[]) res;
+        assert arr.length == ret.length : "Same length: " + ret.length;
+        assert arr[0].equals(ret[0]) : "Same first elem";
+        assert arr[1].equals(ret[1]) : "Same 2nd elem";
+    }
+
+    @KOTest public void modifyJavaArrayHasNoEffect() {
+        String[] arr = { "Ahoj", "World" };
+        String value = Bodies.modify(arr, 0, "Hello");
+        assert "Hello".equals(value) : "Inside JS the value is changed: " + value;
+        assert "Ahoj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
+    }
+
+    @KOTest
+    public void callbackWithArray() {
+        class A implements Callable<String[]> {
+            @Override
+            public String[] call() throws Exception {
+                return new String[] { "Hello" };
+            }
+        }
+        Callable<String[]> a = new A();
+        Object b = Bodies.callbackAndPush(a, "World!");
+        assert b instanceof Object[] : "Returns an array: " + b;
+        Object[] arr = (Object[]) b;
+        String str = Arrays.toString(arr);
+        assert arr.length == 2 : "Size is two " + str;
+        assert "Hello".equals(arr[0]) : "Hello expected: " + arr[0];
+        assert "World!".equals(arr[1]) : "World! expected: " + arr[1];
+    }
 
     @KOTest public void truth() {
         assert Bodies.truth() : "True is true";
@@ -178,6 +265,11 @@ public class JavaScriptBodyTest {
     
     @KOTest public void factorial6() {
         assert new Factorial().factorial(6) == 720;
+    }
+    
+    @KOTest public void sumArray() {
+        int r = Bodies.sumArr(new Sum());
+        assert r == 6 : "Sum is six: " + r;
     }
     
     private static class R implements Runnable {

@@ -80,7 +80,7 @@ public class JSONListTest implements Technology<Object> {
         p.setLastName("2");
         p.setSex(Sex.MALE);
 
-        Object real = JSON.find(p);
+        Object real = Models.toRaw(p);
         assertEquals(this, real, "I am the right model");
     }
     

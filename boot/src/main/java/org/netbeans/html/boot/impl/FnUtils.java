@@ -70,7 +70,7 @@ import org.objectweb.asm.signature.SignatureWriter;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class FnUtils implements Fn.Presenter {
+public final class FnUtils {
     
     private FnUtils() {
     }
@@ -114,7 +114,7 @@ public final class FnUtils implements Fn.Presenter {
             return true;
         }
         Class<?> clazz;
-        Closeable c = Fn.activate(new FnUtils());
+        Closeable c = Fn.activate(new TrueFn());
         try {
             try {
                 clazz = Class.forName(Test.class.getName(), true, l);
@@ -206,19 +206,7 @@ public final class FnUtils implements Fn.Presenter {
             throw new IllegalStateException("Can't execute " + resource, ex);
         } 
     }
-
-    @Override
-    public Fn defineFn(String code, String... names) {
-        return new TrueFn();
-    }
-
-    @Override
-    public void displayPage(URL page, Runnable onPageLoad) {
-    }
-
-    @Override
-    public void loadScript(Reader code) throws Exception {
-    }
+    
     
     private static final class FindInClass extends ClassVisitor {
         private String name;
@@ -270,9 +258,7 @@ public final class FnUtils implements Fn.Presenter {
 
             @Override
             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                if ("Lnet/java/html/js/JavaScriptBody;".equals(desc) // NOI18N
-                        || "Lorg/apidesign/bck2brwsr/core/JavaScriptBody;".equals(desc) // NOI18N
-                        ) {
+                if ("Lnet/java/html/js/JavaScriptBody;".equals(desc)) { // NOI18N
                     found++;
                     return new FindInAnno();
                 }
@@ -289,10 +275,10 @@ public final class FnUtils implements Fn.Presenter {
                 if (body == null) {
                     return;
                 }
-                generateBody();
+                generateBody(true);
             }
 
-            private boolean generateBody() {
+            private boolean generateBody(boolean hasCode) {
                 if (bodyGenerated) {
                     return false;
                 }
@@ -332,6 +318,11 @@ public final class FnUtils implements Fn.Presenter {
                         "org/apidesign/html/boot/spi/Fn", "define",
                         "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
                 );
+                Label noPresenter = new Label();
+                if (hasCode) {
+                    super.visitInsn(Opcodes.DUP);
+                    super.visitJumpInsn(Opcodes.IFNULL, noPresenter);
+                }
                 if (resource != null) {
                     super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
                     super.visitLdcInsn(resource);
@@ -423,7 +414,12 @@ public final class FnUtils implements Fn.Presenter {
                     @Override
                     public SignatureVisitor visitArrayType() {
                         if (nowReturn) {
-                            throw new IllegalStateException("Not supported yet");
+                            return new SignatureVisitor(Opcodes.ASM4) {
+                                @Override
+                                public void visitClassType(String name) {
+                                    returnType = Type.getType("[" + Type.getObjectType(name).getDescriptor());
+                                }
+                            };
                         }
                         loadObject();
                         return new SignatureWriter();
@@ -492,6 +488,10 @@ public final class FnUtils implements Fn.Presenter {
                         );
                         super.visitInsn(sv.returnType.getOpcode(Opcodes.IRETURN));
                 }
+                if (hasCode) {
+                    super.visitLabel(noPresenter);
+                    super.visitCode();
+                }
                 return true;
             }
 
@@ -499,7 +499,7 @@ public final class FnUtils implements Fn.Presenter {
             public void visitEnd() {
                 super.visitEnd();
                 if (body != null) {
-                    if (generateBody()) {
+                    if (generateBody(false)) {
                         // native method
                         super.visitMaxs(1, 0);
                     }
@@ -609,10 +609,23 @@ public final class FnUtils implements Fn.Presenter {
         }
     }
 
-    private static final class TrueFn extends Fn {
+    private static final class TrueFn extends Fn implements Fn.Presenter {
         @Override
         public Object invoke(Object thiz, Object... args) throws Exception {
             return Boolean.TRUE;
+        }
+
+        @Override
+        public Fn defineFn(String code, String... names) {
+            return this;
+        }
+
+        @Override
+        public void displayPage(URL page, Runnable onPageLoad) {
+        }
+
+        @Override
+        public void loadScript(Reader code) throws Exception {
         }
     } // end of TrueFn
 }

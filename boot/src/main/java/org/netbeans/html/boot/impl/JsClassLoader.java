@@ -85,6 +85,12 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.equals(Fn.Presenter.class.getName())) {
             return Fn.Presenter.class;
         }
+        if (name.equals(Fn.ToJavaScript.class.getName())) {
+            return Fn.ToJavaScript.class;
+        }
+        if (name.equals(Fn.FromJavaScript.class.getName())) {
+            return Fn.FromJavaScript.class;
+        }
         if (name.equals(FnUtils.class.getName())) {
             return FnUtils.class;
         }
@@ -111,10 +117,10 @@ abstract class JsClassLoader extends ClassLoader {
                 }
                 is.close();
                 is = null;
-                arr = FnUtils.transform(arr, JsClassLoader.this);
-                if (arr != null) {
-                    return defineClass(name, arr, 0, arr.length);
+                if (JsPkgCache.process(this, name)) {
+                    arr = FnUtils.transform(arr, JsClassLoader.this);
                 }
+                return defineClass(name, arr, 0, arr.length);
             } catch (IOException ex) {
                 throw new ClassNotFoundException("Can't load " + name, ex);
             } finally {

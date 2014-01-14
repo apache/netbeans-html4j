@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.netbeans.html</groupId>
   <artifactId>pom</artifactId>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent> 
@@ -14,8 +14,9 @@
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <netbeans.version>RELEASE73</netbeans.version>
+      <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
-      <publicPackages></publicPackages>
+      <publicPackages />
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
   </properties>
   <modules>
@@ -23,7 +24,7 @@
     <module>json-tck</module>
     <module>ko-archetype</module>
     <module>ko-archetype-test</module>
-    <module>ko-fx</module>
+    <module>ko4j</module>
     <module>sound</module>
     <module>context</module>
     <module>boot</module>
@@ -46,9 +47,9 @@
       <url>http://netbeans.org</url>
   </organization>
   <scm>
-      <connection>scm:hg:https://hg.apidesign.org/hg/html~html4j</connection>
-      <developerConnection>scm:hg:https://hg.apidesign.org/hg/html~html4j</developerConnection>
-      <url>https://hg.apidesign.org/hg/html~html4j</url>
+      <connection>scm:hg:https://hg.netbeans.org/html4j</connection>
+      <developerConnection>scm:hg:https://hg.netbeans.org/html4j</developerConnection>
+      <url>https://hg.netbeans.org/html4j</url>
       <tag>default</tag>
   </scm>
   <repositories>
@@ -95,7 +96,7 @@
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>ko-archetype/src/main/resources/**</exclude>
-                       <exclude>ko-fx/src/main/resources/org/netbeans/html/kofx/knockout*.js</exclude>
+                       <exclude>ko4j/src/main/resources/org/netbeans/html/ko4j/knockout*.js</exclude>
                   </excludes>
               </configuration>
           </plugin>

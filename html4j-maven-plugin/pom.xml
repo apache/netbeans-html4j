@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.netbeans.html</groupId>
     <artifactId>pom</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <packaging>maven-plugin</packaging>
   <groupId>org.apidesign.html</groupId>
   <artifactId>html4j-maven-plugin</artifactId>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <name>html4j-maven-plugin</name>
   <url>http://maven.apache.org</url>
   <properties>

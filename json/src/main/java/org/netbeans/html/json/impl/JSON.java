@@ -269,20 +269,33 @@ public final class JSON {
         if (object instanceof Collection) {
             return JSONList.koData((Collection<?>) object, model);
         }
-        Proto.Type<?> type = JSON.findType(object.getClass());
-        if (type == null) {
-            return null;
-        }
-        final Proto proto = PropertyBindingAccessor.protoFor(type, object);
+        Proto proto = findProto(object);
         if (proto == null) {
             return null;
         }
         final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
         return b == null ? null : b.koData();
     }
+    
+    private static Proto findProto(Object object) {
+        Proto.Type<?> type = JSON.findType(object.getClass());
+        if (type == null) {
+            return null;
+        }
+        final Proto proto = PropertyBindingAccessor.protoFor(type, object);
+        return proto;
+    }
 
     public static Object find(Object object) {
         return find(object, null);
+    }
+    
+    public static void applyBindings(Object object) {
+        final Proto proto = findProto(object);
+        if (proto == null) {
+            throw new IllegalArgumentException("Not a model: " + object.getClass());
+        }
+        proto.applyBindings();
     }
     
     public static void loadJSON(
