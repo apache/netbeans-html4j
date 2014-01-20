@@ -43,8 +43,11 @@
 package org.netbeans.html.ko.osgi.test;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
@@ -88,7 +91,9 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try (Closeable a = KnockoutEquinoxIT.activateInOSGi(p)) {
+        Closeable a = null;
+        try {
+            a = KnockoutEquinoxIT.activateInOSGi(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -111,6 +116,11 @@ public final class KOFx implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
+            }
+            try {
+                if (a != null) a.close();
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
             }
         }
     }
