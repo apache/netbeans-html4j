@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.netbeans.html</groupId>
   <artifactId>pom</artifactId>
-  <version>0.7.1</version>
+  <version>0.8-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent> 
@@ -49,7 +49,7 @@
       <connection>scm:hg:https://hg.netbeans.org/html4j</connection>
       <developerConnection>scm:hg:https://hg.netbeans.org/html4j</developerConnection>
       <url>https://hg.netbeans.org/html4j</url>
-      <tag>release-0.7.1</tag>
+      <tag>default</tag>
   </scm>
   <repositories>
       <repository>
