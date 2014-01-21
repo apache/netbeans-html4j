@@ -45,9 +45,11 @@ package org.netbeans.html.json.impl;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
+import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.People;
 import net.java.html.json.Person;
+import net.java.html.json.Property;
 import net.java.html.json.Sex;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
@@ -61,6 +63,9 @@ import org.testng.annotations.Test;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
+@Model(className = "JSNLst", properties = {
+    @Property(name = "names", type = String.class, array = true)
+})
 public class JSONListTest implements Technology<Object> {
     private boolean replaceArray;
     private final Map<String,PropertyBinding> bindings = new HashMap<String,PropertyBinding>();
@@ -150,6 +155,11 @@ public class JSONListTest implements Technology<Object> {
         assertNotNull(pb, "There is a binding for age list");
         
         assertEquals(pb.getValue(), this, "I am the model of the array");
+    }
+    
+    @Test public void toStringOnArrayOfStrings() {
+        JSNLst l = new JSNLst("Jarda", "Jirka", "Parda");
+        assertEquals(l.toString(), "{\"names\":[\"Jarda\",\"Jirka\",\"Parda\"]}", "Properly quoted");
     }
 
     @Override
