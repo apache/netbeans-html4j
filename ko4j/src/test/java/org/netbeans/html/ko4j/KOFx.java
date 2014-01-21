@@ -43,8 +43,11 @@
 package org.netbeans.html.ko4j;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
@@ -88,7 +91,8 @@ public final class KOFx implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try (Closeable a = Fn.activate(p)) {
+        Closeable a = Fn.activate(p);
+        try {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -111,6 +115,11 @@ public final class KOFx implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
+            }
+            try {
+                a.close();
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
             }
         }
     }
