@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.netbeans.html</groupId>
     <artifactId>pom</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.7.1</version>
   </parent>
   <groupId>org.apidesign.html</groupId>
   <artifactId>knockout4j-archetype</artifactId>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.7.1</version>
   <packaging>jar</packaging>
   <name>Knockout 4 Java Maven Archetype</name>
   <description>
