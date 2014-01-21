@@ -59,7 +59,6 @@ import javax.websocket.WebSocketContainer;
 import net.java.html.json.OnReceive;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.netbeans.html.wstyrus.TyrusContext.Comm;

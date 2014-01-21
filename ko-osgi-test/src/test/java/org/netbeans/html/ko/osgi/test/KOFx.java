@@ -43,8 +43,11 @@
 package org.netbeans.html.ko.osgi.test;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
@@ -114,9 +117,9 @@ public final class KOFx implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
-            if (a != null) try {
-                a.close();
-            } catch (java.io.IOException ex) {
+            try {
+                if (a != null) a.close();
+            } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }
         }
