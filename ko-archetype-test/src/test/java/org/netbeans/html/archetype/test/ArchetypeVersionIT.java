@@ -63,10 +63,10 @@ import org.xml.sax.SAXException;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class ArchetypeVersionTest {
+public class ArchetypeVersionIT {
     private String version;
     
-    public ArchetypeVersionTest() {
+    public ArchetypeVersionIT() {
     }
     
     @BeforeClass public void readCurrentVersion() throws Exception {
@@ -76,7 +76,7 @@ public class ArchetypeVersionTest {
     
 
     @Test public void testComparePomDepsVersions() throws Exception {
-        final ClassLoader l = ArchetypeVersionTest.class.getClassLoader();
+        final ClassLoader l = ArchetypeVersionIT.class.getClassLoader();
         URL r = l.getResource("archetype-resources/pom.xml");
         assertNotNull(r, "Archetype pom found");
         
@@ -92,7 +92,7 @@ public class ArchetypeVersionTest {
     }
     
     @Test public void testNbActions() throws Exception {
-        final ClassLoader l = ArchetypeVersionTest.class.getClassLoader();
+        final ClassLoader l = ArchetypeVersionIT.class.getClassLoader();
         URL r = l.getResource("archetype-resources/nbactions.xml");
         assertNotNull(r, "Archetype nb file found");
         
@@ -113,7 +113,7 @@ public class ArchetypeVersionTest {
     }
 
     static String findCurrentVersion() throws XPathExpressionException, IOException, ParserConfigurationException, SAXException, XPathFactoryConfigurationException {
-        final ClassLoader l = ArchetypeVersionTest.class.getClassLoader();
+        final ClassLoader l = ArchetypeVersionIT.class.getClassLoader();
         URL u = l.getResource("META-INF/maven/org.apidesign.html/knockout4j-archetype/pom.xml");
         assertNotNull(u, "Own pom found: " + System.getProperty("java.class.path"));
 
