@@ -58,7 +58,6 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
@@ -66,9 +65,11 @@ import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
+import org.netbeans.html.boot.impl.FnContext;
 import org.openide.util.lookup.ServiceProvider;
-import org.testng.annotations.Factory;
+import org.testng.Assert;
 import static org.testng.Assert.*;
+import org.testng.annotations.Factory;
 
 /**
  *
@@ -141,9 +142,12 @@ public final class KnockoutFXTest extends KnockoutTCK {
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(KnockoutFXTest.class.getName());
-        Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, KnockoutFXTest.class);
+        Assert.assertSame(
+            KnockoutFXTest.class.getClassLoader(),
+            ClassLoader.getSystemClassLoader(),
+            "No special classloaders"
+        );
+        KnockoutFXTest.initialized(KnockoutFXTest.class);
         browserContext = Fn.activePresenter();
     }
     

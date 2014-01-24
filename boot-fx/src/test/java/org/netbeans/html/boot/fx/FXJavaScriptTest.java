@@ -50,12 +50,8 @@ import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.json.tck.KOTest;
-import org.netbeans.html.boot.impl.FnContext;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.json.tck.JavaScriptTCK;
-import org.apidesign.html.json.tck.KOTest;
+import org.testng.Assert;
 import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -110,8 +106,11 @@ public class FXJavaScriptTest {
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(FXJavaScriptTest.class.getName());
-        Method m = classpathClass.getMethod("ready", Class.class);
-        m.invoke(null, FxJavaScriptTst.class);
+        Assert.assertSame(
+            FXJavaScriptTest.class.getClassLoader(),
+            ClassLoader.getSystemClassLoader(),
+            "No special classloaders"
+        );
+        FXJavaScriptTest.ready(FxJavaScriptTst.class);
     }
 }

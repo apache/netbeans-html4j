@@ -226,12 +226,12 @@ public final class BrowserBuilder {
         }
         
         final ClassLoader loader;
-        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
+//        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
             loader = clazz.getClassLoader();
-        } else {
-            FImpl impl = new FImpl(clazz.getClassLoader());
-            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
-        }
+//        } else {
+//            FImpl impl = new FImpl(clazz.getClassLoader());
+//            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+//        }
 
         final Fn.Presenter currentP = dfnr;
         class OnPageLoad implements Runnable {
