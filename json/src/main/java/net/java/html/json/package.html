@@ -48,8 +48,11 @@
     This API allows you to write your application logic in Java and 
     present it using modern HTML rendering technologies like 
     <a href="http://knockoutjs.com">Knockout</a>
-    <img src="doc-files/html4j.png">.
+    and communicate with
+    a server via <a href="OnReceive.html">REST</a> or 
+    <a href="doc-files/websockets.html">WebSocket</a>s.
     </p>
+    <img src="doc-files/html4j.png">
     <p>
     Use <a href="Model.html">@Model</a> annotation to define one or more
     model classes with <a href="Property.html">properties</a>. Don't waste
@@ -102,11 +105,4 @@
     <a href="Function.html">@Function</a> annotation to define handlers
     to be invoked from the HTML elements.
     </p>
-    <script type="text/javascript">
-        var arr = document.getElementsByTagName("img");
-        if (arr.length === 2) {
-            arr[0].style.visibility = 'hidden';
-            arr[0].height = 0;
-        }
-    </script>
 </body>
