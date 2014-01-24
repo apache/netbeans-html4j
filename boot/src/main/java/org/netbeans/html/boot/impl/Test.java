@@ -51,7 +51,5 @@ import net.java.html.js.JavaScriptBody;
  */
 public final class Test implements Callable<Boolean> {
     @Override @JavaScriptBody(args = {}, body = "return true;")
-    public Boolean call() {
-        return false;
-    }
+    public native Boolean call();
 }

@@ -117,12 +117,14 @@ public final class FnUtils {
         Closeable c = Fn.activate(new TrueFn());
         try {
             try {
-                clazz = Class.forName(Test.class.getName(), true, l);
+                clazz = Class.forName("org.netbeans.html.boot.impl.Test", true, l);
             } catch (ClassNotFoundException ex) {
                 clazz = Test.class;
             }
             final Object is = ((Callable<?>)clazz.newInstance()).call();
             return Boolean.TRUE.equals(is);
+        } catch (LinkageError ex) {
+            return false;
         } catch (Exception ex) {
             return false;
         } finally {
