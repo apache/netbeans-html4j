@@ -52,7 +52,7 @@ import static org.testng.Assert.*;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class VerifyArchetypeTest {
+public class VerifyArchetypeIT {
     @Test public void projectCompiles() throws Exception {
         final File dir = new File("target/tests/fxcompile/").getAbsoluteFile();
         generateFromArchetype(dir);
@@ -87,7 +87,7 @@ public class VerifyArchetypeTest {
         sysProp.put("package", "org.someuser.test.oat");
         sysProp.put("archetypeGroupId", "org.apidesign.html");
         sysProp.put("archetypeArtifactId", "knockout4j-archetype");
-        sysProp.put("archetypeVersion", ArchetypeVersionTest.findCurrentVersion());
+        sysProp.put("archetypeVersion", ArchetypeVersionIT.findCurrentVersion());
         
         for (String p : params) {
             v.addCliOption(p);
