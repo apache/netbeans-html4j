@@ -60,11 +60,16 @@
           <version>3.0.2</version>
           <type>jar</type>
       </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
-      <type>jar</type>
-    </dependency>
+      <dependency>
+          <groupId>org.ow2.asm</groupId> 
+          <artifactId>asm</artifactId>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <scope>test</scope>
+          <type>jar</type>
+      </dependency>
   </dependencies>
 </project>

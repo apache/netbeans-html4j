@@ -67,6 +67,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.objectweb.asm.ClassReader;
 
 @Mojo(
     name="process-js-annotations",
@@ -86,15 +87,23 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         List<URL> arr = new ArrayList<URL>();
+        boolean foundAsm = false;
         for (Artifact a : prj.getArtifacts()) {
             final File f = a.getFile();
             if (f != null) {
+                if (a.getArtifactId().equals("asm")) {
+                    foundAsm = true;
+                }
                 try {
                     arr.add(f.toURI().toURL());
                 } catch (MalformedURLException ex) {
                     throw new IllegalStateException(ex);
                 }
             }
+        }
+        if (!foundAsm) {
+            URL loc = ClassReader.class.getProtectionDomain().getCodeSource().getLocation();
+            arr.add(loc);
         }
         URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
         try {
