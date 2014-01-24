@@ -42,106 +42,83 @@
  */
 package org.apidesign.html.mojo;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.netbeans.html.boot.impl.FnUtils;
 
 @Mojo(
     name="process-js-annotations",
-    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+    requiresDependencyResolution = ResolutionScope.COMPILE,
     defaultPhase= LifecyclePhase.PROCESS_CLASSES
 )
 public final class ProcessJsAnnotationsMojo extends AbstractMojo {
-    @Parameter(defaultValue = "${project}")
+    @Component
     private MavenProject prj;
     
     @Parameter(defaultValue = "${project.build.directory}/classes")
     private File classes;
     
-    /** Checks all "provided" dependency JAR files and if they contain
-     * usage of JavaScriptXXX annotation, their classes are expanded into the
-     * <code>classes</code> directory.
-     */
-    @Parameter(defaultValue = "false")
-    private boolean processProvided;
-
     public ProcessJsAnnotationsMojo() {
     }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        List<URL> arr = new ArrayList<URL>();
+        for (Artifact a : prj.getArtifacts()) {
+            final File f = a.getFile();
+            if (f != null) {
+                try {
+                    arr.add(f.toURI().toURL());
+                } catch (MalformedURLException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
         try {
-            processClasses(classes);
+            processClasses(l, classes);
         } catch (IOException ex) {
             throw new MojoExecutionException("Problem converting JavaScriptXXX annotations", ex);
         }
-        
-        if (processProvided) {
-            List<URL> arr = new ArrayList<URL>();
-            for (Artifact a : prj.getArtifacts()) {
-                final File f = a.getFile();
-                if (f != null) {
-                    try {
-                        arr.add(f.toURI().toURL());
-                    } catch (MalformedURLException ex) {
-                        throw new IllegalStateException(ex);
-                    }
-                }
-            }
-            URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
-            for (Artifact a : prj.getArtifacts()) {
-                if (!"provided".equals(a.getScope())) {
-                    continue;
-                }
-                final File f = a.getFile();
-                if (f != null) {
-                    try {
-                        processClasses(f, classes, l);
-                    } catch (IOException ex) {
-                        throw new MojoExecutionException("Problem converting JavaScriptXXX annotations in " + f, ex);
-                    }
-                }
-            }
-        }
     }
     
-    private void processClasses(File f) throws IOException, MojoExecutionException {
+    private void processClasses(ClassLoader l, File f) throws IOException, MojoExecutionException {
+        if (!f.exists()) {
+            return;
+        }
         if (f.isDirectory()) {
+            boolean classes = new File(f, "net.java.html.js.classes").exists();
             File[] arr = f.listFiles();
             if (arr != null) {
                 for (File file : arr) {
-                    processClasses(file);
+                    if (classes || file.isDirectory()) {
+                        processClasses(l, file);
+                    }
                 }
             }
             return;
-        }
-        if (!f.exists()) {
-            throw new MojoExecutionException("Does not exist: " + f);
         }
         
         if (!f.getName().endsWith(".class")) {
@@ -155,10 +132,19 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         } finally {
             is.close();
         }
-        
-        byte[] newArr = FnUtils.transform(arr, null);
-        if (newArr == null || newArr == arr) {
-            return;
+
+        byte[] newArr = null;
+        try {
+            Class<?> fnUtils = l.loadClass("org.netbeans.html.boot.impl.FnUtils");
+            Method transform = fnUtils.getMethod("transform", byte[].class, ClassLoader.class);
+            
+            newArr = (byte[]) transform.invoke(null, arr, l);
+            if (newArr == null || newArr == arr) {
+                return;
+            }
+            filterClass(new File(f.getParentFile(), "net.java.html.js.classes"), f.getName());
+        } catch (Exception ex) {
+            throw new MojoExecutionException("Can't process " + f, ex);
         }
         getLog().info("Processing " + f);
         writeArr(f, newArr);        
@@ -184,46 +170,40 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         }
     }
     
-    private void processClasses(File jar, File target, ClassLoader l) throws IOException {
-        ZipFile zf = new ZipFile(jar);
-        Enumeration<? extends ZipEntry> en = zf.entries();
-        Map<String,byte[]> waiting = new HashMap<String, byte[]>();
-        boolean found = false;
-        while (en.hasMoreElements()) {
-            ZipEntry ze = en.nextElement();
-            if (ze.getName().endsWith("/")) {
-                continue;
-            }
-            byte[] arr = new byte[(int)ze.getSize()];
-            InputStream is = zf.getInputStream(ze);
-            try {
-                readArr(arr, is);
-            } finally {
-                is.close();
-            }
-            if (ze.getName().endsWith(".class")) {
-                byte[] newArr = FnUtils.transform(arr, l);
-                if (newArr == null || newArr == arr) {
-                    waiting.put(ze.getName(), arr);
-                    continue;
-                }
-                File t = new File(target, ze.getName().replace('/', File.separatorChar));
-                t.getParentFile().mkdirs();
-                writeArr(t, newArr);
-                found = true;
-                getLog().info("Found " + ze.getName() + " in " + jar + " - will copy all classes");
-            } else {
-                waiting.put(ze.getName(), arr);
-            }
+    private static void filterClass(File f, String className) throws IOException {
+        if (!f.exists()) {
+            return;
+        }
+        if (className.endsWith(".class")) {
+            className = className.substring(0, className.length() - 6);
         }
         
-        if (found) {
-            for (Map.Entry<String, byte[]> entry : waiting.entrySet()) {
-                String name = entry.getKey();
-                byte[] arr = entry.getValue();
-                File t = new File(target, name.replace('/', File.separatorChar));
-                t.getParentFile().mkdirs();
-                writeArr(t, arr);
+        BufferedReader r = new BufferedReader(new FileReader(f));
+        List<String> arr = new ArrayList<String>();
+        boolean modified = false;
+        for (;;) {
+            String line = r.readLine();
+            if (line == null) {
+                break;
+            }
+            if (line.endsWith(className)) {
+                modified = true;
+                continue;
+            }
+            arr.add(line);
+        }
+        r.close();
+        
+        if (modified) {
+            if (arr.isEmpty()) {
+                f.delete();
+            } else {
+                FileWriter w = new FileWriter(f);
+                for (String l : arr) {
+                    w.write(l);
+                    w.write("\n");
+                }
+                w.close();
             }
         }
     }

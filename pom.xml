@@ -139,6 +139,29 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.netbeans.html</groupId>
+                <artifactId>html4j-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>classes</id>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                        <configuration>
+                            <classes>${project.build.directory}/test-classes</classes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
           </plugins>
       </pluginManagement>
   </build>

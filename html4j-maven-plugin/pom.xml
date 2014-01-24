@@ -8,7 +8,7 @@
     <version>0.8-SNAPSHOT</version>
   </parent>
   <packaging>maven-plugin</packaging>
-  <groupId>org.apidesign.html</groupId>
+  <groupId>org.netbeans.html</groupId>
   <artifactId>html4j-maven-plugin</artifactId>
   <version>0.8-SNAPSHOT</version>
   <name>html4j-maven-plugin</name>
@@ -38,31 +38,6 @@
                   </execution>
               </executions>
           </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>2.3.2</version>
-              <configuration>
-                  <source>1.6</source>
-                  <target>1.6</target>
-              </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.apidesign.html</groupId>
-              <artifactId>html4j-maven-plugin</artifactId>
-              <version>${project.version}</version>
-              <executions>
-                  <execution>
-                      <goals>
-                          <goal>process-js-annotations</goal>
-                      </goals>
-                      <phase>process-test-classes</phase>
-                      <configuration>
-                          <classes>${project.build.directory}/test-classes</classes>
-                      </configuration>
-                  </execution>
-              </executions>
-          </plugin>
       </plugins>
   </build>
       
@@ -85,12 +60,6 @@
           <version>3.0.2</version>
           <type>jar</type>
       </dependency>
-    <dependency>
-      <groupId>org.netbeans.html</groupId>
-      <artifactId>net.java.html.boot</artifactId>
-      <version>${project.version}</version>
-      <type>jar</type>
-    </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
