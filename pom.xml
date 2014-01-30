@@ -31,6 +31,7 @@
     <module>boot-fx</module>
     <module>geo</module>
     <module>ko-ws-tyrus</module>
+    <module>html4j-maven-plugin</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
   </modules>
@@ -133,10 +134,33 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>${publicPackages},META-INF.services.*</Export-Package>
+                        <Export-Package>${publicPackages},META-INF.services.*;-noimport:=true;-split-package:=first</Export-Package>
                         <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.netbeans.html</groupId>
+                <artifactId>html4j-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>classes</id>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                        <configuration>
+                            <classes>${project.build.directory}/test-classes</classes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
           </plugins>
       </pluginManagement>
@@ -159,6 +183,11 @@
             <groupId>de.twentyeleven.skysail</groupId>
             <artifactId>org.json-osgi</artifactId>
             <version>20080701</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>4.1</version>
         </dependency>
         <dependency>
           <groupId>org.netbeans.api</groupId>

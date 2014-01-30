@@ -70,6 +70,7 @@ import org.json.JSONObject;
 import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.ko4j.KO4J;
 import org.openide.util.lookup.ServiceProvider;
+import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.Factory;
 
@@ -133,15 +134,17 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserContext = FnContext.currentPresenter();
+        browserContext = Fn.activePresenter();
         TyrusKnockoutTest.class.notifyAll();
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(TyrusKnockoutTest.class.getName());
-        Method m = classpathClass.getMethod("initialized", Class.class);
-        m.invoke(null, TyrusKnockoutTest.class);
-        browserContext = FnContext.currentPresenter();
+        Assert.assertSame(
+            TyrusKnockoutTest.class.getClassLoader(),
+            ClassLoader.getSystemClassLoader(),
+            "No special classloaders"
+        );
+        TyrusKnockoutTest.initialized(TyrusKnockoutTest.class);
     }
     
     @Override

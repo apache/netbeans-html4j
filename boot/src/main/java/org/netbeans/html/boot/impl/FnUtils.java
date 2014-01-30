@@ -43,6 +43,7 @@
 package org.netbeans.html.boot.impl;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -74,29 +75,48 @@ public final class FnUtils {
     private FnUtils() {
     }
     
+    /** Seeks for {@link JavaScriptBody} and {@link JavaScriptResource} annotations
+     * in the bytecode and converts them into real code. Used by Maven plugin
+     * postprocessing classes.
+     * 
+     * @param bytecode the original bytecode with javascript specific annotations
+     * @param loader the loader to load resources (scripts and classes) when needed
+     * @return the transformed bytecode
+     * @since 0.7
+     */
+    public static byte[] transform(byte[] bytecode, ClassLoader loader) {
+        ClassReader cr = new ClassReader(bytecode) {
+            // to allow us to compile with -profile compact1 on 
+            // JDK8 while processing the class as JDK7, the highest
+            // class format asm 4.1 understands to
+            @Override
+            public short readShort(int index) {
+                short s = super.readShort(index);
+                if (index == 6 && s > Opcodes.V1_7) {
+                    return Opcodes.V1_7;
+                }
+                return s;
+            }
+        };
+        FindInClass tst = new FindInClass(loader, null);
+        cr.accept(tst, 0);
+        if (tst.found > 0) {
+            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            FindInClass fic = new FindInClass(loader, w);
+            cr.accept(fic, 0);
+            bytecode = w.toByteArray();
+        }
+        return bytecode;
+    }
+    
     public static boolean isJavaScriptCapable(ClassLoader l) {
         if (l instanceof JsClassLoader) {
             return true;
         }
-        Class<?> clazz;
-        Closeable c = Fn.activate(new TrueFn());
-        try {
-            try {
-                clazz = Class.forName(Test.class.getName(), true, l);
-            } catch (ClassNotFoundException ex) {
-                clazz = Test.class;
-            }
-            final Object is = ((Callable<?>)clazz.newInstance()).call();
-            return Boolean.TRUE.equals(is);
-        } catch (Exception ex) {
+        if (l.getResource("META-INF/net.java.html.js.classes") != null) {
             return false;
-        } finally {
-            try {
-                c.close();
-            } catch (Exception ex) {
-                return false;
-            }
         }
+        return true;
     }
     
     public static boolean isValid(Fn fn) {
@@ -161,7 +181,7 @@ public final class FnUtils {
             Reader isr = null;
             try {
                 isr = new InputStreamReader(script, "UTF-8");
-                FnContext.currentPresenter().loadScript(isr);
+                FnContext.currentPresenter(false).loadScript(isr);
             } finally {
                 if (isr != null) {
                     isr.close();
@@ -172,39 +192,6 @@ public final class FnUtils {
         } 
     }
     
-    /** Checks bytecode for usage of {@link JavaScriptBody} annotation
-     * and rewrites it to invoke {@link Fn.Presenter} directly. 
-     * 
-     * @param arr the byte code to check
-     * @param loader loader to load additional resources and classes
-     * @return the same <code>arr</code> (if no change needed) or new
-     *    array with rewritten bytecode
-     * @since 0.7
-     */
-    public static byte[] transform(byte[] arr, ClassLoader loader) {
-        ClassReader cr = new ClassReader(arr) {
-            // to allow us to compile with -profile compact1 on 
-            // JDK8 while processing the class as JDK7, the highest
-            // class format asm 4.1 understands to
-            @Override
-            public short readShort(int index) {
-                short s = super.readShort(index);
-                if (index == 6 && s > Opcodes.V1_7) {
-                    return Opcodes.V1_7;
-                }
-                return s;
-            }
-        };
-        FindInClass tst = new FindInClass(loader, null);
-        cr.accept(tst, 0);
-        if (tst.found > 0) {
-            ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-            FindInClass fic = new FindInClass(loader, w);
-            cr.accept(fic, 0);
-            arr = w.toByteArray();
-        }
-        return arr;
-    }
     
     private static final class FindInClass extends ClassVisitor {
         private String name;
@@ -606,24 +593,4 @@ public final class FnUtils {
             }
         }
     }
-
-    private static final class TrueFn extends Fn implements Fn.Presenter {
-        @Override
-        public Object invoke(Object thiz, Object... args) throws Exception {
-            return Boolean.TRUE;
-        }
-
-        @Override
-        public Fn defineFn(String code, String... names) {
-            return this;
-        }
-
-        @Override
-        public void displayPage(URL page, Runnable onPageLoad) {
-        }
-
-        @Override
-        public void loadScript(Reader code) throws Exception {
-        }
-    } // end of TrueFn
 }

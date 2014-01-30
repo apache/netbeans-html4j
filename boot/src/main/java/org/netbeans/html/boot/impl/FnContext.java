@@ -87,10 +87,6 @@ public final class FnContext implements Closeable {
         return prev;
     }
 
-    public static Fn.Presenter currentPresenter() {
-        return currentPresenter(true);
-    }
-
     public static Fn.Presenter currentPresenter(boolean fail) {
         Fn.Presenter p = CURRENT.get();
         if (p == null && fail) {

@@ -42,8 +42,10 @@
  */
 package net.java.html.js.tests;
 
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.json.tck.KOTest;
 
 /**
@@ -270,6 +272,18 @@ public class JavaScriptBodyTest {
     @KOTest public void sumArray() {
         int r = Bodies.sumArr(new Sum());
         assert r == 6 : "Sum is six: " + r;
+    }
+    
+    @KOTest public void callLater() throws Exception{
+        Fn.activePresenter().loadScript(new StringReader(
+            "if (typeof window === 'undefined') window = {};"
+        ));
+        Later l = new Later();
+        l.register();
+        Fn.activePresenter().loadScript(new StringReader(
+            "window.later();"
+        ));
+        assert l.call == 42 : "Method was called: " + l.call;
     }
     
     private static class R implements Runnable {

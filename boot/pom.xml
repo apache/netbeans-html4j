@@ -34,7 +34,6 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>4.1</version>
       <type>jar</type>
     </dependency>
     <dependency>

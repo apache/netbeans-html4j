@@ -48,10 +48,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
-import org.netbeans.html.boot.impl.FnContext;
 import org.apidesign.html.boot.spi.Fn;
+import org.apidesign.html.json.tck.KOTest;
+import org.testng.Assert;
 import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -78,11 +78,15 @@ public class BootstrapTest {
 
         List<Object> res = new ArrayList<Object>();
         Class<? extends Annotation> test = 
-            loadClass().getClassLoader().loadClass(Test.class.getName()).
+            loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
-        for (Method m : loadClass().getMethods()) {
-            if (m.getAnnotation(test) != null) {
-                res.add(new KOFx(browserPresenter, m));
+
+        Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
+        for (Class c : arr) {
+            for (Method m : c.getMethods()) {
+                if (m.getAnnotation(test) != null) {
+                    res.add(new KOFx(browserPresenter, m));
+                }
             }
         }
         return res.toArray();
@@ -97,13 +101,16 @@ public class BootstrapTest {
     
     public static synchronized void ready(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserPresenter = FnContext.currentPresenter();
+        browserPresenter = Fn.activePresenter();
         BootstrapTest.class.notifyAll();
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(BootstrapTest.class.getName());
-        Method m = classpathClass.getMethod("ready", Class.class);
-        m.invoke(null, FXPresenterTst.class);
+        Assert.assertSame(
+            BootstrapTest.class.getClassLoader(),
+            ClassLoader.getSystemClassLoader(),
+            "No special classloaders"
+        );
+        BootstrapTest.ready(FxJavaScriptTst.class);
     }
 }

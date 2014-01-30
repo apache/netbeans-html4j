@@ -66,7 +66,7 @@ final class JsPkgCache {
     private static final Set<String> NONE = Collections.emptySet();
 
     public static boolean process(ClassLoader l, String className) {
-        if (className.equals("org.netbeans.html.boot.impl.Test")) {
+        if (className.equals("org.netbeans.html.boot.impl.Test")) { // NOI18N
             return true;
         }
         Set<String> p;

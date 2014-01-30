@@ -50,9 +50,8 @@ import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.json.tck.KOTest;
-import org.netbeans.html.boot.impl.FnContext;
+import org.testng.Assert;
 import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -81,7 +80,9 @@ public class FXJavaScriptTest {
         Class<? extends Annotation> test = 
             loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
-        for (Class<?> c : (Class[])loadClass().getMethod("tests").invoke(null)) {
+
+        Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
+        for (Class c : arr) {
             for (Method m : c.getMethods()) {
                 if (m.getAnnotation(test) != null) {
                     res.add(new KOFx(browserPresenter, m));
@@ -100,13 +101,16 @@ public class FXJavaScriptTest {
     
     public static synchronized void ready(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
-        browserPresenter = FnContext.currentPresenter();
+        browserPresenter = Fn.activePresenter();
         FXJavaScriptTest.class.notifyAll();
     }
     
     public static void initialized() throws Exception {
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(FXJavaScriptTest.class.getName());
-        Method m = classpathClass.getMethod("ready", Class.class);
-        m.invoke(null, FxJavaScriptTst.class);
+        Assert.assertSame(
+            FXJavaScriptTest.class.getClassLoader(),
+            ClassLoader.getSystemClassLoader(),
+            "No special classloaders"
+        );
+        FXJavaScriptTest.ready(FxJavaScriptTst.class);
     }
 }

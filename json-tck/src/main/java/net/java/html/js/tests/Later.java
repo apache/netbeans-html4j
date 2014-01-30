@@ -40,18 +40,26 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.boot.impl;
+package net.java.html.js.tests;
 
-import java.util.concurrent.Callable;
 import net.java.html.js.JavaScriptBody;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class Test implements Callable<Boolean> {
-    @Override @JavaScriptBody(args = {}, body = "return true;")
-    public Boolean call() {
-        return false;
+public final class Later {
+    int call;
+
+    @JavaScriptBody(args = {  }, javacall = true, body = 
+        "var self = this;"
+        + "window.later = function() {"
+        + "  self.@net.java.html.js.tests.Later::call(I)(42);"
+       + "};"
+    )
+    native void register();
+    
+    void call(int value) {
+        this.call = value;
     }
 }
