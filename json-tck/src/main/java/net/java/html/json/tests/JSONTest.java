@@ -43,6 +43,8 @@
 package net.java.html.json.tests;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.ModelOperation;
@@ -474,10 +476,31 @@ public final class JSONTest {
     }
 
     @KOTest public void deserializeWrongEnum() throws Exception {
+        PrintStream prev = null;
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        try {
+            prev = System.err;
+            System.setErr(new PrintStream(err));
+        } catch (LinkageError e) {
+            err = null;
+            prev = null;
+        }
+        
         String str = "{ \"sex\" : \"unknown\" }";
         ByteArrayInputStream is = new ByteArrayInputStream(str.getBytes("UTF-8"));
         Person p = Models.parse(newContext(), Person.class, is);
         assert p.getSex() == null : "Wrong sex means null, but was: " + p.getSex();
+        
+        if (err != null) {
+            assert err.toString().contains("Sex.unknown") : "Expecting error: " + err.toString();
+        }
+        if (prev != null) {
+            try {
+                System.setErr(prev);
+            } catch (LinkageError e) {
+                // ignore
+            }
+        }
     }
 
     
