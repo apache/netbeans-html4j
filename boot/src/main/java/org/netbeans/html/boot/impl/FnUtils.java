@@ -116,27 +116,7 @@ public final class FnUtils {
         if (l.getResource("META-INF/net.java.html.js.classes") != null) {
             return false;
         }
-        Class<?> clazz;
-        Closeable c = Fn.activate(new TrueFn());
-        try {
-            try {
-                clazz = Class.forName("org.netbeans.html.boot.impl.Test", true, l);
-            } catch (ClassNotFoundException ex) {
-                clazz = Test.class;
-            }
-            final Object is = ((Callable<?>)clazz.newInstance()).call();
-            return Boolean.TRUE.equals(is);
-        } catch (LinkageError ex) {
-            return false;
-        } catch (Exception ex) {
-            return false;
-        } finally {
-            try {
-                c.close();
-            } catch (IOException ex) {
-                throw new IllegalStateException(ex);
-            }
-        }
+        return true;
     }
     
     public static boolean isValid(Fn fn) {
@@ -613,24 +593,4 @@ public final class FnUtils {
             }
         }
     }
-
-    private static final class TrueFn extends Fn implements Fn.Presenter {
-        @Override
-        public Object invoke(Object thiz, Object... args) throws Exception {
-            return Boolean.TRUE;
-        }
-
-        @Override
-        public Fn defineFn(String code, String... names) {
-            return this;
-        }
-
-        @Override
-        public void displayPage(URL page, Runnable onPageLoad) {
-        }
-
-        @Override
-        public void loadScript(Reader code) throws Exception {
-        }
-    } // end of TrueFn
 }
