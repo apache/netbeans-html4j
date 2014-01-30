@@ -113,6 +113,9 @@ public final class FnUtils {
         if (l instanceof JsClassLoader) {
             return true;
         }
+        if (l.getResource("META-INF/net.java.html.js.classes") != null) {
+            return false;
+        }
         Class<?> clazz;
         Closeable c = Fn.activate(new TrueFn());
         try {

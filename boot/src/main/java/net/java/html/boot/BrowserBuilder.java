@@ -54,10 +54,10 @@ import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.boot.impl.FnUtils;
 import org.apidesign.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
+import org.netbeans.html.boot.impl.FnUtils;
 
 /** Use this builder to launch your Java/HTML based application. Typical
  * usage in a main method of your application looks like this: 
@@ -226,12 +226,12 @@ public final class BrowserBuilder {
         }
         
         final ClassLoader loader;
-//        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
+        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
             loader = clazz.getClassLoader();
-//        } else {
-//            FImpl impl = new FImpl(clazz.getClassLoader());
-//            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
-//        }
+        } else {
+            FImpl impl = new FImpl(clazz.getClassLoader());
+            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+        }
 
         final Fn.Presenter currentP = dfnr;
         class OnPageLoad implements Runnable {

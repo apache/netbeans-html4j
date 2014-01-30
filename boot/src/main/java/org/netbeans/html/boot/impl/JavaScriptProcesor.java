@@ -66,6 +66,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -280,11 +281,20 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     }
     
     private void generateJavaScriptBodyList(Map<String,Set<TypeElement>> bodies) {
-        for (Map.Entry<String, Set<TypeElement>> entry : bodies.entrySet()) {
-            String pkg = entry.getKey();
-            Set<TypeElement> classes = entry.getValue();
-            
-            try {
+        if (bodies.isEmpty()) {
+            return;
+        }
+        try {
+            FileObject all = processingEnv.getFiler().createResource(
+                StandardLocation.CLASS_OUTPUT, "", "META-INF/net.java.html.js.classes"                
+            );
+            PrintWriter wAll = new PrintWriter(new OutputStreamWriter(
+                all.openOutputStream(), "UTF-8"
+            ));
+            for (Map.Entry<String, Set<TypeElement>> entry : bodies.entrySet()) {
+                String pkg = entry.getKey();
+                Set<TypeElement> classes = entry.getValue();
+
                 FileObject out = processingEnv.getFiler().createResource(
                     StandardLocation.CLASS_OUTPUT, pkg, "net.java.html.js.classes",
                     classes.iterator().next()
@@ -293,16 +303,21 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 try {
                     PrintWriter w = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
                     for (TypeElement type : classes) {
-                        w.println(processingEnv.getElementUtils().getBinaryName(type));
+                        final Name bn = processingEnv.getElementUtils().getBinaryName(type);
+                        w.println(bn);
+                        wAll.println(bn);
                     }
                     w.flush();
                     w.close();
+                } catch (IOException x) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + entry.getKey() + ": " + x.toString());
                 } finally {
                     os.close();
                 }
-            } catch (IOException x) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + entry.getKey() + ": " + x.toString());
             }
+            wAll.close();
+        } catch (IOException x) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + "META-INF/net.java.html.js.classes: " + x.toString());
         }
     }
     

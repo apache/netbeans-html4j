@@ -107,13 +107,14 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         }
         URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
         try {
-            processClasses(l, classes);
+            File master = new File(new File(classes, "META-INF"), "net.java.html.js.classes");
+            processClasses(l, master, classes);
         } catch (IOException ex) {
             throw new MojoExecutionException("Problem converting JavaScriptXXX annotations", ex);
         }
     }
     
-    private void processClasses(ClassLoader l, File f) throws IOException, MojoExecutionException {
+    private void processClasses(ClassLoader l, File master, File f) throws IOException, MojoExecutionException {
         if (!f.exists()) {
             return;
         }
@@ -123,7 +124,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
             if (arr != null) {
                 for (File file : arr) {
                     if (classes || file.isDirectory()) {
-                        processClasses(l, file);
+                        processClasses(l, master, file);
                     }
                 }
             }
@@ -152,6 +153,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
                 return;
             }
             filterClass(new File(f.getParentFile(), "net.java.html.js.classes"), f.getName());
+            filterClass(master, f.getName());
         } catch (Exception ex) {
             throw new MojoExecutionException("Can't process " + f, ex);
         }
