@@ -49,7 +49,9 @@ import java.lang.annotation.Target;
 
 /** Put this annotation on a method to provide its special implementation
  * in JavaScript. This is a way to define <em>native</em> methods that 
- * interact with the surrounding environment.
+ * interact with the surrounding JavaScript environment. Check the list
+ * <a href="package-summary.html">use-cases</a> to see real world
+ * use of this annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

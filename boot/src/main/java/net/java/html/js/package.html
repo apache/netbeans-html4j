@@ -45,6 +45,119 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <div>Essential support for those who write <em>native</em> methods communicating directly with JavaScript</div>
+        <div>Essential support for those who write <em>native</em> methods communicating directly with JavaScript.</div>
+        Mix your Java and JavaScript code seamlessly - perform calls from Java
+        to JavaScript and back with as much freedom as JavaScript gives you
+        and as much type safety you can get from Java. Execute your code
+        in a headless testing environment or in a 
+        <a href="http://wiki.apidesign.org/wiki/FXBrwsr">JavaFX WebView</a>. 
+        When done, deploy to <a href="http://bck2brwsr.apidesign.org">real browsers</a>.
+        
+        <h3>Simple Meaning of World</h3>
+        The whole support is build around @<a href="JavaScriptBody.html">JavaScriptBody</a>
+        annotation. Use it to create parametrised JavaScript snippet easily
+        accessible from Java:
+<pre>
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"x", "y"}, body = "return x + y;")
+<b>private static native int</b> meaning(<b>int</b> x, <b>int</b> y);
+</pre>
+        The above defines method <em>meaning</em> which sums two JavaScript
+        objects together (being invoked inside of a JavaScript interpreter).
+        The <em>meaning</em> method now becomes a properly typed Java
+        surface to your JavaScript code which can be directly
+        called from the rest of your Java code:
+<pre>        
+<b>public static void</b> main(String... args) {
+  <b>assert</b> 42 == meaning(40, 2) : <em>"Meaning of World should be 42!"</em>;
+}
+</pre>
+        <em>Real code tip:</em> real classes using this technique are
+        available online:
+        <a target="top" href="http://hg.netbeans.org/html4j/file/release-0.7/boot/src/test/java/org/netbeans/html/boot/impl/JsMethods.java">JsMethods</a> and
+        <a target="top" href="http://hg.netbeans.org/html4j/file/release-0.7/json-tck/src/main/java/net/java/html/js/tests/Bodies.java">Bodies</a>.
+        <p></p>
+        <em>Editing hint:</em> one can see the list of arguments of the
+        <em>meaning</em> is now duplicated - it is once specified in Java, 
+        and once inside of the {@link net.java.html.js.JavaScriptBody} 
+        array of <code>args</code>. This is necessary to keep the names of 
+        arguments accessible during runtime. However don't despair - there
+        is a code completion for the value of <code>args</code> attribute!
+        Just type the Java signature first and then press Ctrl+Space and the
+        right parameter names will be inserted for you.
+        
+        <a name="#library"><h3>Including JavaScript Libraries</h3></a>
+
+        Large amount of JavaScript code is easier to be delivered in whole
+        files rather than {@link net.java.html.js.JavaScriptBody small code snippets} -
+        that is also possible thanks to {@link net.java.html.js.JavaScriptResource}
+        annotation. Imagine file <code>mul.js</code> with following content:
+<pre> 
+<b>function</b> <em>mul</em>(x, y) { <b>return</b> x * y; }
+</pre>
+        Place the file next to your class and reference it with 
+        {@link net.java.html.js.JavaScriptResource the annotation}:
+<pre>
+{@link net.java.html.js.JavaScriptResource}("mul.js") <b>class</b> Mul {
+
+  {@link net.java.html.js.JavaScriptBody}(args = { "x", "y" }, body = "return <b>mul</b>(x, y);")
+  <b>public static native int</b> multiply(int x, int y);
+
+  <b>public static void</b> main(String... args) {
+    <b>assert</b> 42 == multiply(6, 7) : <em>"Meaning of World should be 42!"</em>;
+  }
+}
+</pre>
+        All the Java methods annotated {@link net.java.html.js.JavaScriptBody}
+        can now reference everything that is in the <code>mul.js</code> file -
+        e.g. the body of the <code>multiply</code> method can reference the
+        function <code>mul</code> and use it.
+        <p></p>
+        <em>Real code tip:</em>
+        <a href="http://hg.netbeans.org/html4j/file/release-0.7/ko4j/src/main/java/org/netbeans/html/ko4j/Knockout.java">this</a> 
+        is the way 
+        the <a href="http://knockoutjs.com">knockout.js</a> library
+        is included in its <em>ko4j</em> library.
+        
+        <h3>Callback to Java</h3>
+        
+        Often JavaScript code needs to call back into the Java classes.
+        For example when a button in a browser is pressed and your code would
+        like to invoke a runnable to handle such situation:
+<pre> 
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"id", "r"}, {@link net.java.html.js.JavaScriptBody#javacall() javacall} = true, body = "\n" + 
+"       document.getElementById(id).onclick = function() {\n" + 
+"        r.<em>{@code @}java.lang.Runnable::run()</em>();\n" + 
+"       };\n" + 
+"    ")
+<b>public static native void</b> onClick(String id, Runnable r);
+</pre>
+        As can be seen, there is a special syntax (starting with <b>@</b>) to 
+        properly identify the right Java method to call on a Java object passed
+        into the JavaScript interpreter. The syntax starts with a fully
+        qualified name of the class, followed by <b>::</b> and name of the 
+        method including signature of its parameters. In case of runnable,
+        this is just <em>()</em> as the method has no parameters, but the
+        signature can be more complicated. For example in case of following method
+<pre><b>static int</b> compare(<b>int</b> i1, String s1, <b>int</b> i2, String s2)
+</pre>        
+        it would be <em>(ILjava/lang/String;ILjava/lang/String;)</em> (btw. the
+        return type is not included in the signature). The actual parameters 
+        then follows. The JavaScript call to such compare method would then
+        look like:
+<pre>{@code @}the.pkg.Clazz::compare(ILjava/lang/String;ILjava/lang/String;)(1, 'One', 2, 'Two');
+</pre>        
+        This syntax gives enough flexibility, helps to properly select one
+        of overloaded methods and follows the tradition of previous attempts to
+        provide JavaScript to Java calling conventions.
+        <p></p>
+        Please note that to turn the special Java callback syntax on, one
+        needs to set the {@link net.java.html.js.JavaScriptBody#javacall()}
+        attribute to <b>true</b>.
+        <p></p>
+        <em>Editing hint:</em> there is an associated annotation processor 
+        that checks the syntax and verifies the referenced class and
+        method of the right signature exist. If they do not, the
+        compilation fails. Thus don't despair seeing the syntax, you'll get early
+        warnings when there is a typo.
     </body>
 </html>

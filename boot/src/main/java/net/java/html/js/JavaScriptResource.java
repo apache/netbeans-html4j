@@ -46,11 +46,17 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import net.java.html.boot.BrowserBuilder;
 
-/** When a class annotated by this annotation is loaded into the Java virtual
- * machine by {@link BrowserBuilder} classloader, the script referenced by
- * this annotation gets loaded into associated JavaScript executor environment.
+/** Include JavaScript libraries into your application easily.
+ * Annotate a Java/JavaScript bridging class with this annotation and
+ * once one of the class {@code @}{@link JavaScriptBody} annotated methods
+ * is called, it is guaranteed the JavaScript interpreter pre-load
+ * the content of here is specified resource. All other 
+ * {@code @}{@link JavaScriptBody} methods can then access objects created
+ * by precessing this {@link JavaScriptResource#value() java script resource}.
+ * The list of
+ * <a href="package-summary.html#library">use-cases</a> includes sample use
+ * of this annotation.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
