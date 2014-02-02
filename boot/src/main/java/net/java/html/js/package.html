@@ -184,7 +184,7 @@
         values in Java, one has to return the array back as a return value:
         <pre>        
 {@code @}{@link net.java.html.js.JavaScriptBody}(args = {"arr"}, body = "arr[0] = 'Ahoy'; return arr;")
-<b>private static native Object[]</b> usefulModify(String[] arr);
+<b>private static native</b> Object[] usefulModify(String[] arr);
 <b>public static void</b> main(String... args) {
   String[] hello = { "Hello", "World!" };
   Object[] ret = usefulModify(arr);
