@@ -159,5 +159,47 @@
         method of the right signature exist. If they do not, the
         compilation fails. Thus don't despair seeing the syntax, you'll get early
         warnings when there is a typo.
+        
+        <h3>Arrays by Copy</h3>
+        
+        It is possible to exchange arrays between Java and JavaScript. Some
+        implementations can pass arrays by reference, however in some systems
+        this is hard to achieve. To choose the least common denominator, 
+        the TCK for behavior of {@link net.java.html.js.JavaScriptBody} requires
+        the arrays to be always transfered by a copy. As such following code:
+        <pre>
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"arr"}, body = "arr[0] = null;")
+<b>private static native void</b> uselessModify(String[] arr);
+<b>public static void</b> main(String... args) {
+  String[] hello = { "Hello", "World!" };
+  uselessModify(arr);
+  System.out.println(arr[0] + " " + arr[1]);
+}            
+</pre>
+        will still print <em>Hello World!</em> in spite the JavaScript code
+        sets the 0-th array element to <code>null</code>. Because the array
+        is passed as a copy, such assignment has no effect on the Java array.
+        <p></p>
+        In case one needs to modify an array in a JavaScript and use its 
+        values in Java, one has to return the array back as a return value:
+        <pre>        
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"arr"}, body = "arr[0] = 'Ahoy'; return arr;")
+<b>private static native Object[]</b> usefulModify(String[] arr);
+<b>public static void</b> main(String... args) {
+  String[] hello = { "Hello", "World!" };
+  Object[] ret = usefulModify(arr);
+  System.out.println(ret[0] + " " + ret[1]);
+}            
+</pre>
+        now the program prints <em>Ahoy World!</em> as the modified array
+        is returned back and converted (by a copy) into a Java <code>Object[]</code>
+        (but of course the <code>ret != hello</code>). Usually the copy based
+        passing of arrays works OK. It is however good to keep it in mind to 
+        avoid unwanted surprises.
+        
+        <!--
+        <h3>Post Process Classes</h3>
+        -->
+        
     </body>
 </html>
