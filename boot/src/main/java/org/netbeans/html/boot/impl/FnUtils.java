@@ -209,10 +209,11 @@ public final class FnUtils {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            final AnnotationVisitor del = super.visitAnnotation(desc, visible);
             if ("Lnet/java/html/js/JavaScriptResource;".equals(desc)) {
-                return new LoadResource();
+                return new LoadResource(del);
             }
-            return super.visitAnnotation(desc, visible);
+            return del;
         }
 
         @Override
@@ -227,8 +228,7 @@ public final class FnUtils {
             private final String name;
             private final String desc;
             private final int access;
-            private List<String> args;
-            private String body;
+            private FindInAnno fia;
             private boolean bodyGenerated;
 
             public FindInMethod(int access, String name, String desc, MethodVisitor mv) {
@@ -247,14 +247,13 @@ public final class FnUtils {
                 return super.visitAnnotation(desc, visible);
             }
 
-            private void generateJSBody(List<String> args, String body) {
-                this.args = args;
-                this.body = body;
+            private void generateJSBody(FindInAnno fia) {
+                this.fia = fia;
             }
 
             @Override
             public void visitCode() {
-                if (body == null) {
+                if (fia == null) {
                     return;
                 }
                 generateBody(true);
@@ -265,6 +264,28 @@ public final class FnUtils {
                     return false;
                 }
                 bodyGenerated = true;
+                if (mv != null) {
+                    AnnotationVisitor va = super.visitAnnotation("Lnet/java/html/js/JavaScriptBody;", false);
+                    AnnotationVisitor varr = va.visitArray("args");
+                    for (String argName : fia.args) {
+                        varr.visit(null, argName);
+                    }
+                    varr.visitEnd();
+                    va.visit("javacall", fia.javacall);
+                    va.visit("body", fia.body);
+                    va.visitEnd();
+                }
+                
+                String body;
+                List<String> args;
+                if (fia.javacall) {
+                    body = callback(fia.body);
+                    args = new ArrayList<String>(fia.args);
+                    args.add("vm");
+                } else {
+                    body = fia.body;
+                    args = fia.args;
+                }
 
                 super.visitFieldInsn(
                         Opcodes.GETSTATIC, FindInClass.this.name,
@@ -480,7 +501,7 @@ public final class FnUtils {
             @Override
             public void visitEnd() {
                 super.visitEnd();
-                if (body != null) {
+                if (fia != null) {
                     if (generateBody(false)) {
                         // native method
                         super.visitMaxs(1, 0);
@@ -496,9 +517,9 @@ public final class FnUtils {
 
             private final class FindInAnno extends AnnotationVisitor {
 
-                private List<String> args = new ArrayList<String>();
-                private String body;
-                private boolean javacall = false;
+                List<String> args = new ArrayList<String>();
+                String body;
+                boolean javacall = false;
 
                 public FindInAnno() {
                     super(Opcodes.ASM4);
@@ -526,24 +547,20 @@ public final class FnUtils {
                 @Override
                 public void visitEnd() {
                     if (body != null) {
-                        if (javacall) {
-                            body = callback(body);
-                            args.add("vm");
-                        }
-                        generateJSBody(args, body);
+                        generateJSBody(this);
                     }
                 }
             }
         }
 
         private final class LoadResource extends AnnotationVisitor {
-
-            public LoadResource() {
-                super(Opcodes.ASM4);
+            public LoadResource(AnnotationVisitor av) {
+                super(Opcodes.ASM4, av);
             }
 
             @Override
             public void visit(String attrName, Object value) {
+                super.visit(attrName, value);
                 String relPath = (String) value;
                 if (relPath.startsWith("/")) {
                     resource = relPath;
