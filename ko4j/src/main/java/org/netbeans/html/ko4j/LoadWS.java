@@ -50,7 +50,6 @@ import org.apidesign.html.json.spi.JSONCall;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class LoadWS {
-    private static final boolean SUPPORTED = isWebSocket();
     private final Object ws;
     private final JSONCall call;
     LoadWS(JSONCall first, String url) {
@@ -59,10 +58,6 @@ final class LoadWS {
         if (ws == null) {
             first.notifyError(new IllegalArgumentException("Wrong URL: " + url));
         }
-    }
-    
-    static boolean isSupported() {
-        return SUPPORTED;
     }
     
     void send(JSONCall call) {
@@ -101,11 +96,6 @@ final class LoadWS {
         call.notifyError(null);
     }
     
-    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
-    private static boolean isWebSocket() {
-        return false;
-    }
-
     @JavaScriptBody(args = { "back", "url" }, javacall = true, body = ""
         + "if (window.WebSocket) {\n"
         + "  try {\n"

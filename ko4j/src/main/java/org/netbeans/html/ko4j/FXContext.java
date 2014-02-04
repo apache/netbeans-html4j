@@ -102,9 +102,13 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
     }
 
     final boolean areWebSocketsSupported() {
-        return LoadWS.isSupported();
+        return isWebSocket();
     }
 
+    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
+    private static boolean isWebSocket() {
+        return false;
+    }
 
     @Override
     public Object wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
