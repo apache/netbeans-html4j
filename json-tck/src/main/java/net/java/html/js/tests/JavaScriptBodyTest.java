@@ -166,6 +166,12 @@ public class JavaScriptBodyTest {
         assert p.equals(r) : "The object is the same: " + p + " != " + r;
     }
 
+    @KOTest public void encodingBackslashString() {
+        Object p = "{\"firstName\":\"/*\\n * Copyright (c) 2013\",\"lastName\":null,\"sex\":\"MALE\",\"address\":{\"street\":null}}";
+        Object r = Bodies.id(p);
+        assert p.equals(r) : "The object is the same: " + p + " != " + r;
+    }
+
     @KOTest public void nullIsNull() {
         Object p = null;
         Object r = Bodies.id(p);
