@@ -39,9 +39,23 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <net.java.html.version>${project.version}</net.java.html.version>
+    <netbeans.compile.on.save>none</netbeans.compile.on.save>
   </properties>
   <build>
       <plugins>
+          <plugin>
+              <groupId>org.netbeans.html</groupId>
+              <artifactId>html4j-maven-plugin</artifactId>
+              <version>${net.java.html.version}</version>
+              <executions>
+                  <execution>
+                      <id>js-classes</id>
+                      <goals>
+                          <goal>process-js-annotations</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>          
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
