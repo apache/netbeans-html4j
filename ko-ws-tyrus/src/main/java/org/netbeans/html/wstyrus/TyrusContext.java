@@ -49,7 +49,6 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.ContainerProvider;
-import javax.websocket.DeploymentException;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
