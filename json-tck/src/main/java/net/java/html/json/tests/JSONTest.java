@@ -169,8 +169,11 @@ public final class JSONTest {
     
     @OnReceive(url="{url}")
     static void fetchPeople(People p, JSONik model) {
-        model.setFetchedCount(p.getInfo().size());
-        model.setFetched(p.getInfo().get(0));
+        final int size = p.getInfo().size();
+        if (size > 0) {
+            model.setFetched(p.getInfo().get(0));
+        }
+        model.setFetchedCount(size);
     }
 
     @OnReceive(url="{url}")
