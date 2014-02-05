@@ -293,6 +293,9 @@ public class JavaScriptBodyTest {
         p.loadScript(new StringReader(
             "window.later();"
         ));
+        for (int i = 0; i < 100 && l.call != 42; i++) {
+            Thread.sleep(50);
+        }
         assert l.call == 42 : "Method was called: " + l.call;
     }
     

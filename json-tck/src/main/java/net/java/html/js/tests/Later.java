@@ -49,7 +49,7 @@ import net.java.html.js.JavaScriptBody;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class Later {
-    int call;
+    volatile int call;
 
     @JavaScriptBody(args = {  }, javacall = true, body = 
         "var self = this;"
