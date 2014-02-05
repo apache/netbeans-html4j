@@ -49,7 +49,6 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
@@ -159,9 +158,7 @@ final class LoadJSON implements Runnable {
                 if (string) {
                     throw new JSONException("");
                 }
-                Reader r = new InputStreamReader(is, "UTF-8");
-
-                JSONTokener tok = new JSONTokener(r);
+                JSONTokener tok = createTokener(is);
                 Object obj;
                 obj = array ? new JSONArray(tok) : new JSONObject(tok);
                 json = convertToArray(obj);
@@ -185,6 +182,24 @@ final class LoadJSON implements Runnable {
             } else {
                 call.notifySuccess(json);
             }
+        }
+    }
+
+    private static JSONTokener createTokener(InputStream is) throws IOException {
+        Reader r = new InputStreamReader(is, "UTF-8");
+        try {
+            return new JSONTokener(r);
+        } catch (LinkageError ex) {
+            // phones may carry outdated version of JSONTokener
+            StringBuilder sb = new StringBuilder();
+            for (;;) {
+                int ch = r.read();
+                if (ch == -1) {
+                    break;
+                }
+                sb.append((char)ch);
+            }
+            return new JSONTokener(sb.toString());
         }
     }
 
@@ -238,8 +253,7 @@ final class LoadJSON implements Runnable {
     
     public static Object parse(InputStream is) throws IOException {
         try {
-            InputStreamReader r = new InputStreamReader(is, "UTF-8");
-            JSONTokener t = new JSONTokener(r);
+            JSONTokener t = createTokener(is);
             return new JSONObject(t);
         } catch (JSONException ex) {
             throw new IOException(ex);
