@@ -495,7 +495,7 @@ public final class JSONTest {
         assert p.getSex() == null : "Wrong sex means null, but was: " + p.getSex();
         
         if (err != null) {
-            assert err.toString().contains("Sex.unknown") : "Expecting error: " + err.toString();
+            assert err.toString().contains("unknown") && err.toString().contains("Sex"): "Expecting error: " + err.toString();
         }
         if (prev != null) {
             try {
