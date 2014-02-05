@@ -109,17 +109,16 @@ final class LoadJSON implements Runnable {
         try {
             final URL u = new URL(base, url.replace(" ", "%20"));
             URLConnection conn = u.openConnection();
-            if (conn instanceof HttpURLConnection) {
-                HttpURLConnection huc = (HttpURLConnection) conn;
-                if (call.getMethod() != null) {
-                    huc.setRequestMethod(call.getMethod());
-                }
-                if (call.isDoOutput()) {
-                    huc.setDoOutput(true);
-                    final OutputStream os = huc.getOutputStream();
-                    call.writeData(os);
-                    os.flush();
-                }
+            if (call.isDoOutput()) {
+                conn.setDoOutput(true);
+            }
+            if (call.getMethod() != null && conn instanceof HttpURLConnection) {
+                ((HttpURLConnection) conn).setRequestMethod(call.getMethod());
+            }
+            if (call.isDoOutput()) {
+                final OutputStream os = conn.getOutputStream();
+                call.writeData(os);
+                os.flush();
             }
             final PushbackInputStream is = new PushbackInputStream(
                 conn.getInputStream(), 1
