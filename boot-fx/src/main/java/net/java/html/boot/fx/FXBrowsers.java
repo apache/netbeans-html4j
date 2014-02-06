@@ -60,7 +60,7 @@ public final class FXBrowsers {
     private FXBrowsers() {
     }
     
-    /** Enables the Java/JavaScript brige (that supports {@link JavaScriptBody} and co.)
+    /** Enables the Java/JavaScript bridge (that supports {@link JavaScriptBody} and co.)
      * in the provided <code>webView</code>. This method returns 
      * immediately. Once the support is active, it calls back specified
      * method in <code>onPageLoad</code> class - the class can possibly be
