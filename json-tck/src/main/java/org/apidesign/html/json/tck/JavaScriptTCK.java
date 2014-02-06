@@ -44,8 +44,13 @@ package org.apidesign.html.json.tck;
 
 import net.java.html.js.tests.JavaScriptBodyTest;
 import org.apidesign.html.boot.spi.Fn;
+import org.apidesign.html.boot.spi.Fn.Presenter;
 
-/** Subclass this class, implements is abstract methods (if any).
+/** Entry point for those who want to verify that their implementation of
+ * {@link Presenter} is good enough to support existing Java/JavaScript 
+ * communication use-cases. Subclass this class, get list of {@link #testClasses() classes}
+ * find methods annotated by {@link KOTest} annotation and execute them.
+ * <p>
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  * @since 0.7

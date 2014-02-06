@@ -56,7 +56,8 @@ import org.apidesign.html.context.spi.Contexts.Builder;
 
 /** Entry point for providers of different HTML binding technologies (like
  * Knockout.js in JavaFX's WebView). Sample usage:
- * <pre>
+ * 
+<pre>
 {@link ServiceProvider @ServiceProvider}(service = KnockoutTCK.class)
 public final class MyKnockoutBindingTest extends KnockoutTCK {
     {@link Override @Override}
