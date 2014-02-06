@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.mojo;
+package org.netbeans.html.mojo;
 
 import java.io.BufferedReader;
 import java.io.File;
