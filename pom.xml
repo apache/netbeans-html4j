@@ -139,7 +139,10 @@
                     <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.apidesign.html.*</packages>
                   </group>
-                </groups>                  
+                </groups>   
+                <links>
+                    <link>http://bits.netbeans.org/7.4/javadoc/org-openide-util-lookup/</link>
+                </links>              
               </configuration>
             </plugin>
       </plugins>
