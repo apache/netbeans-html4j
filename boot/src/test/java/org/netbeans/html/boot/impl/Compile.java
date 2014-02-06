@@ -198,6 +198,9 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                     if (packageName.equals(pkg)) {
                         return htmlFile;
                     }
+                    if (packageName.isEmpty() && relativeName.startsWith(pkg.replace('.', '/'))) {
+                        return htmlFile;
+                    }
                 }
                 
                 return null;

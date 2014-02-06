@@ -164,6 +164,22 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find " + res + " in " + res + " package", e);
                 }
             }
+            
+            boolean found = false;
+            for (Element mthod : e.getEnclosedElements()) {
+                if (mthod.getKind() != ElementKind.METHOD) {
+                    continue;
+                }
+                if (mthod.getAnnotation(JavaScriptBody.class) != null) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                msg.printMessage(Diagnostic.Kind.ERROR, "At least one method needs @JavaScriptBody annotation. "
+                    + "Otherwise it is not guaranteed the resource will ever be loaded,", e
+                );
+            }
         }
 
         if (roundEnv.processingOver()) {

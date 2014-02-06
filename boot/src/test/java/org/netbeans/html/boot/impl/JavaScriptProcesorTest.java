@@ -113,6 +113,19 @@ public class JavaScriptProcesorTest {
         Compile c = Compile.create("", code);
         c.assertNoErrors();
     }
+
+    @Test public void needJavaScriptBodyToUseResource() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptResource;\n"
+            + "@JavaScriptResource(\"x.html\")\n"
+            + "class X {\n"
+            + "  private static native void callback(Runnable r);\n"
+            + "}\n";
+        
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("needs @JavaScriptBody");
+    }
     
     @Test public void generatesCallbacksThatReturnObject() throws Exception {
         Class<?> callbacksForTestPkg = Class.forName("org.netbeans.html.boot.impl.$JsCallbacks$");
