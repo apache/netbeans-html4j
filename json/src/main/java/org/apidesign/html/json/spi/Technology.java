@@ -121,7 +121,7 @@ public interface Technology<Data> {
      * method of this interface and it will be called instead of the 
      * previous two ones.
      * 
-     * @@since 0.6
+     * @since 0.6
      */
     public static interface BatchInit<D> extends Technology<D> {
         /** Wrap the given model into redering technology appropriate object 

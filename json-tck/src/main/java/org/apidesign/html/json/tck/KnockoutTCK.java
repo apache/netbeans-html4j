@@ -52,6 +52,7 @@ import net.java.html.json.tests.OperationsTest;
 import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
 import org.openide.util.lookup.ServiceProvider;
+import org.apidesign.html.context.spi.Contexts.Builder;
 
 /** Entry point for providers of different HTML binding technologies (like
  * Knockout.js in JavaFX's WebView). Sample usage:
@@ -60,7 +61,7 @@ import org.openide.util.lookup.ServiceProvider;
 public final class MyKnockoutBindingTest extends KnockoutTCK {
     {@link Override @Override}
     protected BrwsrCtx createContext() {
-        // use {@link ContextBuilder}.{@link ContextBuilder#build() build}();
+        // use {@link Builder}.{@link Builder#build() build}();
     }
 
     {@code @Factory} public static Object[] create() {
@@ -77,12 +78,14 @@ public abstract class KnockoutTCK {
     }
     
     /** Implement to create new context for the test. 
-     * Use {@link ContextBuilder} to implement context for your technology.
+     * Use {@link Builder} to set context for your technology up.
+     * @return the final context for the test
      */
     public abstract BrwsrCtx createContext();
     
     /** Create a JSON object as seen by the technology
      * @param values mapping from names to values of properties
+     * @return the JSON object with filled in values
      */
     public abstract Object createJSON(Map<String,Object> values);
 
@@ -98,10 +101,11 @@ public abstract class KnockoutTCK {
      * <code>mimeType</code> and <code>content</code>. The 
      * content may be processed by the provided <code>parameters</code>.
      * 
-     * @param content
-     * @param mimeType
-     * @param parameters
-     * @return 
+     * @param content what should be available on the URL. Can contain <code>$0</code>
+     *   <code>$1</code> to reference <code>parameters</code> by their position
+     * @param mimeType the type of the resource
+     * @param parameters names of parameters as reference by <code>content</code>
+     * @return URI the test can connect to to obtain the (processed) content
      */
     public abstract URI prepareURL(String content, String mimeType, String[] parameters);
     

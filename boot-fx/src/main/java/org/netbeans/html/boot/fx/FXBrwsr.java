@@ -66,8 +66,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/** This is an implementation class, use {@link BrowserBuilder} API. Just
- * include this JAR on classpath and the {@link BrowserBuilder} API will find
+/** This is an implementation class, to implement browser builder API. Just
+ * include this JAR on classpath and the browser builder API will find
  * this implementation automatically.
  */
 public class FXBrwsr extends Application {

@@ -54,7 +54,7 @@ public final class Contexts {
     }
 
     /** Creates new, empty builder for creation of {@link BrwsrCtx}. At the
-     * end call the {@link #build()} method to generate the context.
+     * end call the {@link Builder#build()} method to generate the context.
      *
      * @return new instance of the builder
      */
@@ -68,15 +68,15 @@ public final class Contexts {
      * @param context the context to seek in 
      *    (previously filled with ({@link Builder#register(java.lang.Class, java.lang.Object, int)})
      * @param technology class that identifies the technology
-     * @return 
+     * @return the technology in the context or <code>null</code>
      */
     public static <Tech> Tech find(BrwsrCtx context, Class<Tech> technology) {
         return CtxImpl.find(context, technology);
     }
 
     /** Implementors of various HTML technologies should
-     * register their implementation via {@link ServiceProvider} so
-     * {@link ServiceProvider} can find them, when their JARs are included
+     * register their implementation via {@link java.util.ServiceProvider} so
+     * {@link java.util.ServiceProvider} can find them, when their JARs are included
      * on the classpath of the running application.
      *
      * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>

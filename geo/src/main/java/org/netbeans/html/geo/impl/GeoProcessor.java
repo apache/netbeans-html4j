@@ -67,9 +67,10 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import net.java.html.geo.OnLocation;
 import net.java.html.geo.Position;
+import net.java.html.geo.Position.Handle;
 import org.openide.util.lookup.ServiceProvider;
 
-/** Annotation processor to generate callbacks from {@link GeoHandle} class.
+/** Annotation processor to generate callbacks from {@link Handle} class.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

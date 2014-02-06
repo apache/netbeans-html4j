@@ -43,10 +43,10 @@
 package org.apidesign.html.json.spi;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.context.spi.Contexts.Provider;
 
 /** Interface for providers of WebSocket protocol. Register into a 
- * {@link BrwsrCtx context} in your own {@link Contexts.Provider}
+ * {@link BrwsrCtx context} in your own {@link Provider}
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  * @param <WebSocket> internal implementation type representing the socket

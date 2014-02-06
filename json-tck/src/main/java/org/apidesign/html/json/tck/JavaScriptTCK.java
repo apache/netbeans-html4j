@@ -48,7 +48,7 @@ import org.apidesign.html.boot.spi.Fn;
 /** Subclass this class, implements is abstract methods (if any).
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
- * @sine 0.7
+ * @since 0.7
  */
 public abstract class JavaScriptTCK {
     /** Gives you list of classes included in the TCK. Their test methods

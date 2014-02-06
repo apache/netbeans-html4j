@@ -48,7 +48,7 @@ import javafx.scene.web.WebEngine;
 import netscape.javascript.JSObject;
 
 /** This is an implementation package - just
- * include its JAR on classpath and use official {@link Context} API
+ * include its JAR on classpath and use official browser builder API
  * to access the functionality.
  * <p>
  * Redirects JavaScript's messages to Java's {@link Logger}.

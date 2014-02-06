@@ -50,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import net.java.html.js.JavaScriptBody;
+import net.java.html.js.JavaScriptResource;
 import org.apidesign.html.boot.spi.Fn;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
