@@ -45,7 +45,10 @@ package org.apidesign.html.context.spi;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.impl.CtxImpl;
 
-/**
+/** Factory class to assign various technologies 
+ * to a {@link BrwsrCtx browser context}. Start with {@link #newBuilder()}
+ * and then assign technologies with {@link Builder#register(java.lang.Class, java.lang.Object, int)}
+ * method.
  *
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  */

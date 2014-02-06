@@ -110,6 +110,26 @@
               <tag>release-${releaseVersion}</tag>
             </configuration>
           </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9</version>
+              <configuration>
+                  <subpackages>${publicPackages}</subpackages>
+                  <skip>false</skip>
+                  <excludePackageNames>org.netbeans.html.*:net.java.html.js.tests:net.java.html.json.tests</excludePackageNames>
+                <groups>
+                  <group>
+                    <title>Client APIs</title>
+                    <packages>net.java.*</packages>
+                  </group>
+                  <group>
+                    <title>Service Provider Interfaces</title>
+                    <packages>org.apidesign.html.*</packages>
+                  </group>
+                </groups>                  
+              </configuration>
+            </plugin>
       </plugins>
       <pluginManagement>
           <plugins>
