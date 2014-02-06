@@ -52,6 +52,10 @@ import java.security.ProtectionDomain;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class JsAgent implements ClassFileTransformer {
+    public static void premain(String args, Instrumentation instr) {
+        instr.addTransformer(new JsAgent());
+    }
+    
     public static void agentmain(String args, Instrumentation instr) {
         instr.addTransformer(new JsAgent());
     }

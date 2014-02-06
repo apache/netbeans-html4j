@@ -24,6 +24,7 @@
               <configuration>
                   <instructions>
                       <Agent-Class>org.netbeans.html.boot.impl.JsAgent</Agent-Class>
+                      <Premain-Class>org.netbeans.html.boot.impl.JsAgent</Premain-Class>
                       <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
                   </instructions>
               </configuration>

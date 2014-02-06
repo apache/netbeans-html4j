@@ -194,9 +194,9 @@ public abstract class Fn {
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
     
     /** Provides the function implementation access to the presenter provided
-     * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor).
+     * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor}.
      * 
-     * @return presenter passed in in the constructor (may be, but should not be <code>null</code>)
+     * @return presenter passed in the constructor (may be, but should not be <code>null</code>)
      * @since 0.7
      */
     protected final Presenter presenter() {
