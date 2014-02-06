@@ -517,7 +517,7 @@ public final class Proto {
         //
 
         /** Converts and array of raw JSON objects into an array of typed
-         * Java {@lin Model} classes.
+         * Java {@link Model} classes.
          * 
          * @param <T> the type of the destination array
          * @param context browser context to use
