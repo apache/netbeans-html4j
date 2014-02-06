@@ -65,7 +65,7 @@ public final class MyKnockoutBindingTest extends KnockoutTCK {
         // use {@link Builder}.{@link Builder#build() build}();
     }
 
-    {@code @Factory} public static Object[] create() {
+    {@code @}{@link org.testng.annotations.Factory} public static Object[] create() {
         return VMTest.newTests().withClasses({@link KnockoutTCK#testClasses}()).build();
     }
 }
