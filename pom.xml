@@ -120,11 +120,23 @@
                   <excludePackageNames>org.netbeans.html.*:net.java.html.js.tests:net.java.html.json.tests</excludePackageNames>
                 <groups>
                   <group>
-                    <title>Client APIs</title>
-                    <packages>net.java.*</packages>
+                    <title>JSON for Java</title>
+                    <packages>net.java.html.json</packages>
                   </group>
                   <group>
-                    <title>Service Provider Interfaces</title>
+                    <title>Core Client APIs</title>
+                    <packages>net.java.html.boot*:net.java.html.js:net.java.html</packages>
+                  </group>
+                  <group>
+                    <title>Geolocation APIs</title>
+                    <packages>net.java.html.geo</packages>
+                  </group>
+                  <group>
+                    <title>Sound APIs</title>
+                    <packages>net.java.html.sound</packages>
+                  </group>
+                  <group>
+                    <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.apidesign.html.*</packages>
                   </group>
                 </groups>                  
