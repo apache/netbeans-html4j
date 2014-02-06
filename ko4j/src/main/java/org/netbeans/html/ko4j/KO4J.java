@@ -45,6 +45,7 @@ package org.netbeans.html.ko4j;
 import net.java.html.json.Model;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.context.spi.Contexts.Provider;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.spi.WSTransfer;
@@ -52,13 +53,13 @@ import org.openide.util.lookup.ServiceProvider;
 
 /** Support for <a href="http://knockoutjs.com">knockout.js</a>
  * and its Java binding via {@link Model model classes}.
- * Registers {@link ContextProvider}, so {@link ServiceLoader} can find it.
+ * Registers {@link Provider}, so {@link java.util.ServiceLoader} can find it.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  * @since 0.7
  */
-@ServiceProvider(service = Contexts.Provider.class)
-public final class KO4J implements Contexts.Provider {
+@ServiceProvider(service = Provider.class)
+public final class KO4J implements Provider {
     private final Fn.Presenter presenter;
     private FXContext c;
     
