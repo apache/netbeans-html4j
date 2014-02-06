@@ -11,8 +11,9 @@
   <groupId>org.netbeans.html</groupId>
   <artifactId>html4j-maven-plugin</artifactId>
   <version>0.8-SNAPSHOT</version>
-  <name>html4j-maven-plugin</name>
+  <name>Html for Java Maven Plugin</name>
   <url>http://maven.apache.org</url>
+  <description>Maven plugin to post process the classes with @JavaScriptBody annotations</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
