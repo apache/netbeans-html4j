@@ -72,12 +72,14 @@ import java.lang.annotation.Target;
  *   }
  * }
  * 
- * // associated <a href="http://knockoutjs.com/">Knockout</a> HTML page:
+ * // associated <a target="_blank" href="http://knockoutjs.com/">Knockout</a> HTML page:
  * 
- * Selected name: &lt;span data-bind="text: selectedName">&lt;/span&gt;
+ * Selected name: &lt;span data-bind="text: selectedName"&gt;&lt;/span&gt;
  * &lt;ul data-bind="foreach: names"&gt;
- *   &lt;li data-bind="text: $data, click: <b>$root.nameSelected</b>">&lt;/li&gt;
- * &lt;/ul&gt;
+ *   &lt;li&gt;
+ *     &lt;a data-bind="text: $data, click: $root.nameSelected" href="#"&gt;&lt;/a&gt;
+ *   &lt;/li&gt;
+ * &lt;/ul&gt; 
  * </pre>
  * The above example would render:
  * <hr>
@@ -91,7 +93,8 @@ import java.lang.annotation.Target;
  * </ul>
  * <hr>
  * and after clicking on one of the names the <code>---</code> would be replaced
- * by selected name.
+ * by selected name. 
+ * Try <a target="_blank" href="http://dew.apidesign.org/dew/#8848505">this sample on-line</a>!
  * 
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

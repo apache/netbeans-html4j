@@ -52,6 +52,9 @@ import java.lang.annotation.Target;
  * interact with the surrounding JavaScript environment. Check the list
  * <a href="package-summary.html">use-cases</a> to see real world
  * use of this annotation.
+ * <p>
+ * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7102188">on-line demo</a>
+ * to play with {@link JavaScriptBody} annotation for real.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */

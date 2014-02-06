@@ -124,7 +124,10 @@ import java.net.URL;
  *   Lives in &lt;span data-bind="text: town"/&gt;
  * &lt;/div&gt;
  * </pre>
- * 
+ * <p>
+ * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7510833">on-line demo</a>
+ * to see a histogram driven by the {@link Model} annotation or try 
+ * a little <a target="_blank" href="http://dew.apidesign.org/dew/#7263102">math test</a>.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
