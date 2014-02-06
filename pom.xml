@@ -128,11 +128,11 @@
                     <packages>net.java.html.boot*:net.java.html.js:net.java.html</packages>
                   </group>
                   <group>
-                    <title>Geolocation APIs</title>
+                    <title>Geolocation API</title>
                     <packages>net.java.html.geo</packages>
                   </group>
                   <group>
-                    <title>Sound APIs</title>
+                    <title>Sound API</title>
                     <packages>net.java.html.sound</packages>
                   </group>
                   <group>
