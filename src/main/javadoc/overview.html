@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!--
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright 2014 Oracle and/or its affiliates. All rights reserved.
+
+Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+The contents of this file are subject to the terms of either the GNU
+General Public License Version 2 only ("GPL") or the Common
+Development and Distribution License("CDDL") (collectively, the
+"License"). You may not use this file except in compliance with the
+License. You can obtain a copy of the License at
+http://www.netbeans.org/cddl-gplv2.html
+or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
+specific language governing permissions and limitations under the
+License.  When distributing the software, include this License Header
+Notice in each file and include the License file at
+nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the GPL Version 2 section of the License file that
+accompanied this code. If applicable, add the following below the
+License Header, with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+
+If you wish your version of this file to be governed by only the CDDL
+or only the GPL Version 2, indicate your decision by adding
+"[Contributor] elects to include this software in this distribution
+under the [CDDL or GPL Version 2] license." If you do not indicate a
+single choice of license, a recipient has the option to distribute
+your version of this file under either the CDDL, the GPL Version 2 or
+to extend the choice of license to its licensees as provided above.
+However, if you add GPL Version 2 code and therefore, elected the GPL
+Version 2 license, then the option applies only if the new code is
+made subject to such option by the copyright holder.
+
+Contributor(s):
+
+Portions Copyrighted 2014 Sun Microsystems, Inc.
+-->
+<html>
+    <head>
+        <title>HTML for Java APIs</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <p>
+         Use Java to write application logic; use HTML5 to render the UI.
+         Get the best of both worlds. 
+         The goal of these APIs is to use full featured Java runtime 
+         (e.g. real <a href="http://wiki.apidesign.org/wiki/HotSpot">HotSpot VM</a>), 
+         but still rely on a very lightweight rendering technology 
+         (so it can potentially fit 
+         <a href="http://bck2brwsr.apidesign.org">Bck2Brwsr</a> and definitely
+         to various types of phones). What can be more lightweight 
+         (from a browser perspective) than 
+         <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>!?
+         By default we use {@link net.java.html.boot.fx JavaFX's WebView} 
+         component to display the <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>. 
+         We eliminate the need to manipulate the DOM directly, 
+         there is a special {@link net.java.html.json Java to Knockout.js binding}. 
+         As a result the <a href="http://wiki.apidesign.org/wiki/Knockout4Java">HTML uses Knockout.js syntax></a>, 
+         yet the application code can be written in Java.
+        </p>
+        
+        <h3>Interesting Entry Points</h3>
+        
+        <p>Learn how to {@link net.java.html.json.Model animate an HTML page from Java}
+            without referencing single HTML element from the Java code.
+        </p>
+        <p>Use {@link net.java.html.json.OnReceive JSON} to communicate
+            with REST based server API.
+        </p>
+        <p>Use <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>
+            and JSON.
+        </p>
+        <p>Call JavaScript methods from Java and vice versa, via
+            <a href="net/java/html/js/package-summary.html">JavaScriptBody</a>.
+        </p>
+
+        <h3>Getting Started</h3>
+
+        There are many ways to start developing 
+        <a href="http://html.java.net">Html for Java</a> application. 
+        However to be sure one chooses the most recent setup, it is recommended
+        to switch to good old command line and use a 
+        <a href="http://wiki.apidesign.org/wiki/Knockout4Java">Maven archetype</a>
+        associated with every version of this project. Just type:
+        <pre>      
+$ mvn archetype:generate \
+ -DarchetypeGroupId=org.apidesign.html \
+ -DarchetypeArtifactId=knockout4j-archetype \
+ -DarchetypeVersion=x.y
+        </pre>
+        Answer few questions (for example choose myfirstbrwsrpage as artifactId) and then you can:
+        <pre>
+$ cd myfirstbrwsrpage
+$ mvn process-classes exec:java
+        </pre>
+        In a few seconds (or minutes if 
+        <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
+        decides to download the whole Internet of dependencies) you should 
+        see a sample Hello World application. It is basically composed from one 
+        Java and one HTML file:
+        <pre>
+$ ls src/main/java/**/DataModel.java
+$ ls src/main/webapp/pages/index.html
+        </pre>
+        Play with them, modify them and enjoy
+        <a href="http://html.java.net">Html for Java</a>!
+        
+        <p>
+        <img src="net/java/html/json/doc-files/DukeHTML.png" width="640" height="480" alt="Duke and HTML5. Together at last!"/>
+        </p>
+    </body>
+</html>
