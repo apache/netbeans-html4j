@@ -141,6 +141,7 @@
                   </group>
                 </groups>   
                 <links>
+                    <link>http://testng.org/javadocs/</link>
                     <link>http://bits.netbeans.org/7.4/javadoc/org-openide-util-lookup/</link>
                 </links>              
               </configuration>
