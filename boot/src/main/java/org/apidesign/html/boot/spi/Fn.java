@@ -134,7 +134,7 @@ public abstract class Fn {
      * @since 0.7
      */
     public static Fn preload(final Fn fn, final Class<?> caller, final String resource) {
-        return new Fn() {
+        return new Fn(fn.presenter()) {
             @Override
             public Object invoke(Object thiz, Object... args) throws Exception {
                 final Presenter p = FnContext.currentPresenter(false);
