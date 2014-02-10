@@ -70,9 +70,24 @@ public class LessCallbacksCheck {
     }
     
     @KOTest public void dontCallForInitialValueBackToJavaVM() {
+        sw = null;
         LessCalls m = new LessCalls(10).applyBindings();
         assert m.getPlusOne() == 11 : "Expecting 11: " + m.getPlusOne();
         
+        assert sw != null : "StringWriter should be initialized: " + sw;
+        
+        if (sw.toString().contains("$JsCallbacks$")) {
+            assert false : "Don't call for initial value via JsCallbacks:\n" + sw;
+        }
+    }
+
+    @KOTest public void dontCallForChangeValueBackToJavaVM() {
+        LessCalls m = new LessCalls(10).applyBindings();
+        assert m.getPlusOne() == 11 : "Expecting 11: " + m.getPlusOne();
+        
+        sw = null;
+        m.setValue(5);
+        assert m.getPlusOne() == 6: "Expecting 6: " + m.getPlusOne();
         assert sw != null : "StringWriter should be initialized: " + sw;
         
         if (sw.toString().contains("$JsCallbacks$")) {
