@@ -46,6 +46,7 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -262,6 +263,8 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
             try {
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.log(Level.FINE, "calling {0} function #{1}", new Object[]{++call, id});
+                    LOG.log(Level.FINER, "  thiz  : {0}", thiz);
+                    LOG.log(Level.FINER, "  params: {0}", Arrays.asList(args));
                 }
                 List<Object> all = new ArrayList<Object>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
