@@ -97,9 +97,9 @@
         Place the file next to your class and reference it with 
         {@link net.java.html.js.JavaScriptResource the annotation}:
 <pre>
-{@link net.java.html.js.JavaScriptResource}("mul.js") <b>class</b> Mul {
+{@code @}{@link net.java.html.js.JavaScriptResource}("mul.js") <b>class</b> Mul {
 
-  {@link net.java.html.js.JavaScriptBody}(args = { "x", "y" }, body = "return <b>mul</b>(x, y);")
+  {@code @}{@link net.java.html.js.JavaScriptBody}(args = { "x", "y" }, body = "return <b>mul</b>(x, y);")
   <b>public static native int</b> multiply(int x, int y);
 
   <b>public static void</b> main(String... args) {
