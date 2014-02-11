@@ -59,13 +59,6 @@ import org.apidesign.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
-    static {
-        loadKnockout();
-    }
-    
-    @JavaScriptBody(args = {  }, body = "")
-    private static native void loadKnockout();
-
     @JavaScriptBody(args = { "model", "prop" }, body =
           "if (model) {\n"
         + "  var koProp = model[prop];\n"
