@@ -295,6 +295,14 @@ public class ModelTest {
         }
     }
     
+    public @Test void computedListIsOfTypeString() {
+        Person p = new Person("1st", "2nd", Sex.MALE);
+        String first = p.getBothNames().get(0);
+        String last = p.getBothNames().get(1);
+        assertEquals(first, "1st");
+        assertEquals(last, "2nd");
+    }
+    
     private static class MockTechnology implements Technology<Object> {
         private final List<String> mutated = new ArrayList<String>();
 

@@ -42,6 +42,9 @@
  */
 package net.java.html.json;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
@@ -55,6 +58,11 @@ final class PersonImpl {
     @ComputedProperty 
     public static String fullName(String firstName, String lastName) {
         return firstName + " " + lastName;
+    }
+    
+    @ComputedProperty
+    public static List<String> bothNames(String firstName, String lastName) {
+        return Arrays.asList(firstName, lastName);
     }
     
     @ComputedProperty

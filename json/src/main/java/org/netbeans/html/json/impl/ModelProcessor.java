@@ -615,7 +615,11 @@ public final class ModelProcessor extends AbstractProcessor {
             
             String[] gs = toGetSet(sn, tn, array);
             
-            w.write("  public " + tn + " " + gs[0] + "() {\n");
+            w.write("  public " + tn);
+            if (array) {
+                w.write("<" + toCheck + ">");
+            }
+            w.write(" " + gs[0] + "() {\n");
             int arg = 0;
             for (VariableElement pe : ee.getParameters()) {
                 final String dn = pe.getSimpleName().toString();
