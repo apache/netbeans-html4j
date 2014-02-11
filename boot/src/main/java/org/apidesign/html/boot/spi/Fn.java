@@ -124,32 +124,40 @@ public abstract class Fn {
      * gets loaded into the browser environment before the function <code>fn</code>
      * is executed.
      * 
-     * @param fn original function to call
+     * @param fn original function to call (if <code>null</code> returns <code>null</code>)
      * @param caller the class who wishes to define/call the function
      * @param resource resources (accessible via {@link ClassLoader#getResource(java.lang.String)}) 
      *   with a <em>JavaScript</em> that is supposed to loaded into the browser
      *   environment
      * @return function that ensures the script is loaded and then delegates
-     *   to <code>fn</code>
+     *   to <code>fn</code>. Returns <code>null</code> if the input <code>fn</code> is null
      * @since 0.7
      */
     public static Fn preload(final Fn fn, final Class<?> caller, final String resource) {
+        if (fn == null) {
+            return null;
+        }
         return new Fn(fn.presenter()) {
             @Override
             public Object invoke(Object thiz, Object... args) throws Exception {
-                final Presenter p = FnContext.currentPresenter(false);
-                Set<Presenter> there = LOADED.get(resource);
-                if (there == null) {
-                    there = new HashSet<Presenter>();
-                    LOADED.put(resource, there);
+                Presenter p = presenter();
+                if (p == null) {
+                    p = FnContext.currentPresenter(false);
                 }
-                if (there.add(p)) {
-                    InputStream is = caller.getClassLoader().getResourceAsStream(resource);
-                    try {
-                        InputStreamReader r = new InputStreamReader(is, "UTF-8");
-                        p.loadScript(r);
-                    } finally {
-                        is.close();
+                if (p != null) {
+                    Set<Presenter> there = LOADED.get(resource);
+                    if (there == null) {
+                        there = new HashSet<Presenter>();
+                        LOADED.put(resource, there);
+                    }
+                    if (there.add(p)) {
+                        InputStream is = caller.getClassLoader().getResourceAsStream(resource);
+                        try {
+                            InputStreamReader r = new InputStreamReader(is, "UTF-8");
+                            p.loadScript(r);
+                        } finally {
+                            is.close();
+                        }
                     }
                 }
                 return fn.invoke(thiz, args);
