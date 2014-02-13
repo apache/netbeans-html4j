@@ -280,21 +280,24 @@ public class JavaScriptBodyTest {
         assert r == 6 : "Sum is six: " + r;
     }
     
+    Later l;
     @KOTest public void callLater() throws Exception{
         final Fn.Presenter p = Fn.activePresenter();
         if (p == null) {
             return;
         }
-        p.loadScript(new StringReader(
-            "if (typeof window === 'undefined') window = {};"
-        ));
-        Later l = new Later();
-        l.register();
-        p.loadScript(new StringReader(
-            "window.later();"
-        ));
-        for (int i = 0; i < 100 && l.call != 42; i++) {
-            Thread.sleep(50);
+        if (l == null) {
+            p.loadScript(new StringReader(
+                "if (typeof window === 'undefined') window = {};"
+            ));
+            l = new Later();
+            l.register();
+            p.loadScript(new StringReader(
+                "window.later();"
+            ));
+        }
+        if (l.call != 42) {
+            throw new InterruptedException();
         }
         assert l.call == 42 : "Method was called: " + l.call;
     }
