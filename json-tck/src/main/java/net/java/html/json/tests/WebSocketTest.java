@@ -124,11 +124,17 @@ public final class WebSocketTest {
     }
     
     @KOTest public void errorUsingWebSocket() throws Throwable {
-        js = Models.bind(new WebSocketik(), newContext());
-        js.applyBindings();
+        if (js == null) {
+            js = Models.bind(new WebSocketik(), newContext());
+            js.applyBindings();
 
-        js.setFetched(null);
-        js.querySex("http://wrong.protocol", null);
+            js.setFetched(null);
+            js.querySex("http://wrong.protocol", null);
+        }
+
+        if (js.getFetchedResponse() == null) {
+            throw new InterruptedException();
+        }
 
         assert js.getFetchedResponse() != null : "Error reported";
     }
