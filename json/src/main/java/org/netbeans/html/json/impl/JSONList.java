@@ -176,9 +176,9 @@ public final class JSONList<T> extends ArrayList<T> {
     private void notifyChange() {
         Bindings m = PropertyBindingAccessor.getBindings(proto, false);
         if (m != null) {
-            m.valueHasMutated(name);
+            m.valueHasMutated(name, null, null);
             for (String dependant : deps) {
-                m.valueHasMutated(dependant);
+                m.valueHasMutated(dependant, null, null);
             }
             if (index >= 0) {
                 PropertyBindingAccessor.notifyProtoChange(proto, index);

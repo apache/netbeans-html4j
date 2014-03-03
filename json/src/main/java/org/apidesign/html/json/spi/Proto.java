@@ -112,11 +112,28 @@ public final class Proto {
     /** Whenever model changes a property. It should notify the
      * associated technology by calling this method.
      * 
-     *@param propName name of the changed property
+     * @param propName name of the changed property
      */
     public void valueHasMutated(String propName) {
         if (ko != null) {
-            ko.valueHasMutated(propName);
+            ko.valueHasMutated(propName, null, null);
+        }
+    }
+
+    /** Whenever model changes a propertyit should notify the
+     * associated technology. Either by calling this method
+     * (if the new value is known and different to the old one) or
+     * via (slightly ineffective) {@link #valueHasMutated(java.lang.String)}
+     * method.
+     * 
+     * @param propName name of the changed property
+     * @param oldValue provides previous value of the property
+     * @param newValue provides new value of the property
+     * @since 0.7.6
+     */
+    public void valueHasMutated(String propName, Object oldValue, Object newValue) {
+        if (ko != null) {
+            ko.valueHasMutated(propName, oldValue, newValue);
         }
     }
     

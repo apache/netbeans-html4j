@@ -134,4 +134,32 @@ public interface Technology<Data> {
          */
         public D wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr);
     }
+
+    /** Some technologies are more effective when number of calls between
+     * Java and JavaScript is limited - to do that when a value of property
+     * is changed they should implement this additional interface.
+     * 
+     * @param <D> internal type of the technology
+     * @since 0.7.6
+     */
+    public static interface ValueMutated<D> extends Technology<D> {
+        /** Model for given data has changed its value. The technology is
+         * supposed to update its state (for example DOM nodes associated
+         * with the model). The update usually happens asynchronously.
+         * <p>
+         * If both <code>oldValue</code> and <code>newValue</code> are 
+         * <code>null</code> then the real value of the technology is
+         * not known.
+         * <p>
+         * If this method is present, then it is called instead of 
+         * old, plain {@link #valueHasMutated(java.lang.Object, java.lang.String)}
+         * which is never called by the infrastructure then.
+         * 
+         * @param data technology's own representation of the model
+         * @param propertyName name of the model property that changed
+         * @param oldValue provides previous value of the property
+         * @param newValue provides new value of the property
+         */
+        public void valueHasMutated(D data, String propertyName, Object oldValue, Object newValue);
+    }
 }

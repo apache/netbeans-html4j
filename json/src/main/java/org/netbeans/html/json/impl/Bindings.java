@@ -94,8 +94,13 @@ public final class Bindings<Data> {
         return data;
     }
 
-    public void valueHasMutated(String firstName) {
-        bp.valueHasMutated(data, firstName);
+    public void valueHasMutated(String firstName, Object oldValue, Object newValue) {
+        if (bp instanceof Technology.ValueMutated) {
+            Technology.ValueMutated<Data> vm = (Technology.ValueMutated<Data>)bp;
+            vm.valueHasMutated(data, firstName, oldValue, newValue);
+        } else {
+            bp.valueHasMutated(data, firstName);
+        }
     }
     
     public void applyBindings() {

@@ -186,7 +186,7 @@ public final class ModelProcessor extends AbstractProcessor {
             StringBuilder onReceiveType = new StringBuilder();
             List<String> propsGetSet = new ArrayList<String>();
             List<String> functions = new ArrayList<String>();
-            Map<String, Collection<String>> propsDeps = new HashMap<String, Collection<String>>();
+            Map<String, Collection<String[]>> propsDeps = new HashMap<String, Collection<String[]>>();
             Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
             Prprt[] props = createProps(e, m.properties());
             
@@ -232,12 +232,12 @@ public final class ModelProcessor extends AbstractProcessor {
                         } else {
                             w.write(", -1");
                         }
-                        Collection<String> dependants = propsDeps.get(p.name());
+                        Collection<String[]> dependants = propsDeps.get(p.name());
                         if (dependants != null) {
-                            for (String depProp : dependants) {
+                            for (String[] depProp : dependants) {
                                 w.write(", ");
                                 w.write('\"');
-                                w.write(depProp);
+                                w.write(depProp[0]);
                                 w.write('\"');
                             }
                         }
@@ -506,7 +506,7 @@ public final class ModelProcessor extends AbstractProcessor {
         Element where,
         Writer w, String className, Prprt[] properties,
         Collection<String> props, 
-        Map<String,Collection<String>> deps,
+        Map<String,Collection<String[]>> deps,
         Map<String,Collection<String>> functionDeps
     ) throws IOException {
         boolean ok = true;
@@ -534,19 +534,24 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
                 w.write("    proto.verifyUnlocked();\n");
                 w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
+                w.write("    Object o = prop_" + p.name() + ";\n");
                 w.write("    prop_" + p.name() + " = v;\n");
-                w.write("    proto.valueHasMutated(\"" + p.name() + "\");\n");
-                Collection<String> dependants = deps.get(p.name());
-                if (dependants != null) {
-                    for (String depProp : dependants) {
-                        w.write("    proto.valueHasMutated(\"" + depProp + "\");\n");
+                w.write("    proto.valueHasMutated(\"" + p.name() + "\", o, v);\n");
+                {
+                    Collection<String[]> dependants = deps.get(p.name());
+                    if (dependants != null) {
+                        for (String[] pair : dependants) {
+                            w.write("    proto.valueHasMutated(\"" + pair[0] + "\", null, " + pair[1] + "());\n"); 
+                        }
                     }
                 }
-                dependants = functionDeps.get(p.name());
-                if (dependants != null) {
-                    w.append(className).append(" model = ").append(className).append(".this;\n");
-                    for (String call : dependants) {
-                        w.append("  ").append(call);
+                {
+                    Collection<String> dependants = functionDeps.get(p.name());
+                    if (dependants != null) {
+                        w.append(className).append(" model = ").append(className).append(".this;\n");
+                        for (String call : dependants) {
+                            w.append("  ").append(call);
+                        }
                     }
                 }
                 w.write("  }\n");
@@ -564,7 +569,7 @@ public final class ModelProcessor extends AbstractProcessor {
     private boolean generateComputedProperties(
         Writer w, Prprt[] fixedProps,
         Collection<? extends Element> arr, Collection<String> props,
-        Map<String,Collection<String>> deps
+        Map<String,Collection<String[]>> deps
     ) throws IOException {
         boolean ok = true;
         for (Element e : arr) {
@@ -633,12 +638,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    " + dt + " arg" + (++arg) + " = ");
                 w.write(call[0] + "();\n");
                 
-                Collection<String> depends = deps.get(dn);
+                Collection<String[]> depends = deps.get(dn);
                 if (depends == null) {
-                    depends = new LinkedHashSet<String>();
+                    depends = new LinkedHashSet<String[]>();
                     deps.put(dn, depends);
                 }
-                depends.add(sn);
+                depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
             w.write("      proto.acquireLock();\n");
@@ -806,7 +811,7 @@ public final class ModelProcessor extends AbstractProcessor {
         return true;
     }
 
-    private boolean generateOnChange(Element clazz, Map<String,Collection<String>> propDeps,
+    private boolean generateOnChange(Element clazz, Map<String,Collection<String[]>> propDeps,
         Prprt[] properties, String className, 
         Map<String, Collection<String>> functionDeps
     ) {
@@ -1544,11 +1549,14 @@ public final class ModelProcessor extends AbstractProcessor {
             "float".equals(type);
     }
 
-    private static Collection<String> findDerivedFrom(Map<String, Collection<String>> propsDeps, String derivedProp) {
+    private static Collection<String> findDerivedFrom(Map<String, Collection<String[]>> propsDeps, String derivedProp) {
         Set<String> names = new HashSet<String>();
-        for (Map.Entry<String, Collection<String>> e : propsDeps.entrySet()) {
-            if (e.getValue().contains(derivedProp)) {
-                names.add(e.getKey());
+        for (Map.Entry<String, Collection<String[]>> e : propsDeps.entrySet()) {
+            for (String[] pair : e.getValue()) {
+                if (pair[0].equals(derivedProp)) {
+                    names.add(e.getKey());
+                    break;
+                }
             }
         }
         return names;

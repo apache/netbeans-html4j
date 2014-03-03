@@ -68,7 +68,8 @@ import org.apidesign.html.json.spi.WSTransfer;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class FXContext
-implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
+implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>,
+Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
     private static Boolean javaScriptEnabled;
     private final Fn.Presenter browserContext;
@@ -143,7 +144,12 @@ implements Technology.BatchInit<Object>, Transfer, WSTransfer<LoadWS> {
 
     @Override
     public void valueHasMutated(Object data, String propertyName) {
-        Knockout.valueHasMutated(data, propertyName);
+        Knockout.valueHasMutated(data, propertyName, null, null);
+    }
+    
+    @Override
+    public void valueHasMutated(Object data, String propertyName, Object oldValue, Object newValue) {
+        Knockout.valueHasMutated(data, propertyName, oldValue, newValue);
     }
 
     @Override

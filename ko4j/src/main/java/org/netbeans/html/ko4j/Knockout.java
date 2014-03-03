@@ -59,15 +59,21 @@ import org.apidesign.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
-    @JavaScriptBody(args = { "model", "prop" }, body =
+    @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, body =
           "if (model) {\n"
         + "  var koProp = model[prop];\n"
         + "  if (koProp && koProp['valueHasMutated']) {\n"
-        + "    koProp['valueHasMutated']();\n"
+        + "    if ((oldValue !== null || newValue !== null)) {\n"
+        + "      koProp['valueHasMutated'](newValue);\n"
+        + "    } else if (koProp['valueHasMutated']) {\n"
+        + "      koProp['valueHasMutated']();\n"
+        + "    }\n"
         + "  }\n"
         + "}\n"
     )
-    public native static void valueHasMutated(Object model, String prop);
+    public native static void valueHasMutated(
+        Object model, String prop, Object oldValue, Object newValue
+    );
 
     @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);\n")
     native static void applyBindings(Object bindings);
@@ -101,7 +107,13 @@ final class Knockout {
         + "      prop.@org.apidesign.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(val);\n"
         + "    };\n"
         + "  };\n"
-        + "  ret[name] = ko.computed(bnd);\n"
+        + "  var cmpt = ko.computed(bnd);\n"
+        + "  var vhm = cmpt.valueHasMutated;\n"
+        + "  cmpt.valueHasMutated = function(val) {\n"
+        + "    if (arguments.length === 1) activeGetter = function() { return val; };\n"
+        + "    vhm();\n"
+        + "  };\n"
+        + "  ret[name] = cmpt;\n"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
         + "  koComputed(propNames[i], propReadOnly[i], propValues[i], propArr[i]);\n"
