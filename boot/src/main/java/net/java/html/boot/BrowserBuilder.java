@@ -53,6 +53,7 @@ import java.util.Enumeration;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FindResources;
@@ -235,14 +236,21 @@ public final class BrowserBuilder {
 
         final Fn.Presenter currentP = dfnr;
         class OnPageLoad implements Runnable {
+            Class<?> newClazz;
             @Override
             public void run() {
                 try {
-                    Thread.currentThread().setContextClassLoader(loader);
-                    Class<?> newClazz = Class.forName(clazz.getName(), true, loader);
-                    if (browserClass != null) {
-                        browserClass[0] = newClazz;
+                    if (newClazz == null) {
+                        Thread.currentThread().setContextClassLoader(loader);
+                        newClazz = Class.forName(clazz.getName(), true, loader);
+                        if (browserClass != null) {
+                            browserClass[0] = newClazz;
+                        }
+                        BrwsrCtx c = BrwsrCtx.findDefault(newClazz);
+                        c.execute(this);
+                        return;
                     }
+                    
                     if (onLoad != null) {
                         onLoad.run();
                     }

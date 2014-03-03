@@ -40,31 +40,26 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package net.java.html.json;
+package org.netbeans.html.boot.fx;
 
-import net.java.html.BrwsrCtx;
 import org.apidesign.html.context.spi.Contexts;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import org.testng.annotations.Test;
+import org.openide.util.lookup.ServiceProvider;
+import static org.testng.Assert.assertTrue;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@Model(className = "OpModel", properties = {
-    @Property(name = "names", type = String.class, array = true)
-})
-public class OperationTest {
-    @ModelOperation static void add(OpModel m, String name, BrwsrCtx exp) {
-        assertSame(BrwsrCtx.findDefault(OpModel.class), exp, "Context is passed in");
-        m.getNames().add(name);
+@ServiceProvider(service = Contexts.Provider.class)
+public final class TestingProvider implements Contexts.Provider {
+    
+    static void assertCalled(String msg) {
+        assertTrue(Boolean.getBoolean(TestingProvider.class.getName()), msg);
     }
 
-    @Test public void addOneToTheModel() {
-        BrwsrCtx ctx = Contexts.newBuilder().build();
-        OpModel m = Models.bind(new OpModel("One"), ctx);
-        m.add("Second", ctx);
-        assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
+    @Override
+    public void fillContext(Contexts.Builder context, Class<?> requestor) {
+        System.setProperty(TestingProvider.class.getName(), "true");
     }
+    
 }

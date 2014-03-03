@@ -44,6 +44,7 @@ package net.java.html.json.tests;
 
 import java.util.Arrays;
 import java.util.List;
+import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
@@ -59,6 +60,8 @@ import net.java.html.json.Property;
     @Property(name = "next", type = Pair.class)
 })
 class PairModel {
+    static BrwsrCtx ctx;
+    
     @ComputedProperty 
     static List<String> bothNames(String firstName, String lastName) {
         return Arrays.asList(firstName, lastName);
@@ -71,6 +74,7 @@ class PairModel {
     
     @Function 
     static void assignFirstName(Pair m, String data) {
+        ctx = BrwsrCtx.findDefault(Pair.class);
         m.setFirstName(data);
     }
 }

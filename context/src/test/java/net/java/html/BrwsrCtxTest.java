@@ -40,31 +40,36 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package net.java.html.json;
+package net.java.html;
 
-import net.java.html.BrwsrCtx;
 import org.apidesign.html.context.spi.Contexts;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@Model(className = "OpModel", properties = {
-    @Property(name = "names", type = String.class, array = true)
-})
-public class OperationTest {
-    @ModelOperation static void add(OpModel m, String name, BrwsrCtx exp) {
-        assertSame(BrwsrCtx.findDefault(OpModel.class), exp, "Context is passed in");
-        m.getNames().add(name);
+public class BrwsrCtxTest {
+    
+    public BrwsrCtxTest() {
     }
 
-    @Test public void addOneToTheModel() {
-        BrwsrCtx ctx = Contexts.newBuilder().build();
-        OpModel m = Models.bind(new OpModel("One"), ctx);
-        m.add("Second", ctx);
-        assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
+
+    @org.testng.annotations.Test
+    public void canSetAssociateCtx() {
+        final BrwsrCtx ctx = Contexts.newBuilder().build();
+        final boolean[] arr = { false };
+        
+        assertNotSame(BrwsrCtx.findDefault(BrwsrCtxTest.class), ctx, "Not associated yet");
+        ctx.execute(new Runnable() {
+            @Override public void run() {
+                assertSame(BrwsrCtx.findDefault(BrwsrCtxTest.class), ctx, "Once same");
+                assertSame(BrwsrCtx.findDefault(BrwsrCtxTest.class), ctx, "2nd same");
+                arr[0] = true;
+            }
+        });
+        assertNotSame(BrwsrCtx.findDefault(BrwsrCtxTest.class), ctx, "Not associated again");
+        assertTrue(arr[0], "Runnable was executed");
     }
+    
 }
