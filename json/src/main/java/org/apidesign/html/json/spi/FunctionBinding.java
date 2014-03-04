@@ -42,6 +42,7 @@
  */
 package org.apidesign.html.json.spi;
 
+import net.java.html.BrwsrCtx;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
 
@@ -91,12 +92,19 @@ public abstract class FunctionBinding {
         }
 
         @Override
-        public void call(Object data, Object ev) {
-            try {
-                access.call(model, index, data, ev);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
+        public void call(final Object data, final Object ev) {
+            BrwsrCtx ctx = access.protoFor(model).getContext();
+            class Dispatch implements Runnable {
+                @Override
+                public void run() {
+                    try {
+                        access.call(model, index, data, ev);
+                    } catch (Throwable ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
+            ctx.execute(new Dispatch());
         }
     }
 }

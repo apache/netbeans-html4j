@@ -71,6 +71,7 @@ public final class JSONTest {
     @ModelOperation static void assignFetched(JSONik m, Person p) {
         m.setFetched(p);
     }
+    private BrwsrCtx ctx;
     
     @KOTest public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
@@ -150,16 +151,20 @@ public final class JSONTest {
         assert p2.getFirstName().equals(p.getFirstName()) : 
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName();
     }
+
+    private static BrwsrCtx onCallback;
     
     @OnReceive(url="{url}")
     static void fetch(Person p, JSONik model) {
         model.setFetched(p);
+        onCallback = BrwsrCtx.findDefault(model.getClass());
     }
 
     @OnReceive(url="{url}", onError = "setMessage")
     static void fetchArray(Person[] p, JSONik model) {
         model.setFetchedCount(p.length);
         model.setFetched(p[0]);
+        onCallback = BrwsrCtx.findDefault(model.getClass());
     }
     
     static void setMessage(JSONik m, Exception t) {
@@ -191,7 +196,7 @@ public final class JSONTest {
                 JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            js = Models.bind(new JSONik(), ctx = newContext());
             js.applyBindings();
 
             js.setFetched(null);
@@ -205,6 +210,8 @@ public final class JSONTest {
         
         assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar: " + p.getFirstName();
         assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
+        
+        assert ctx == onCallback;
     }
     
     @OnReceive(url="{url}?callme={me}", jsonp = "me")

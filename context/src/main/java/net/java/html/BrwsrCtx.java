@@ -83,6 +83,9 @@ public final class BrwsrCtx {
      */
     public static final BrwsrCtx EMPTY = Contexts.newBuilder().build();
     
+    /** currently {@link #execute(java.lang.Runnable) activated context} */
+    private static final ThreadLocal<BrwsrCtx> CURRENT = new ThreadLocal<BrwsrCtx>();
+    
     /** Seeks for the default context that is associated with the requesting
      * class. If no suitable context is found, a warning message is
      * printed and {@link #EMPTY} context is returned.
@@ -91,6 +94,11 @@ public final class BrwsrCtx {
      * @return appropriate context for the request
      */
     public static BrwsrCtx findDefault(Class<?> requestor) {
+        BrwsrCtx brwsr = CURRENT.get();
+        if (brwsr != null) {
+            return brwsr;
+        }
+        
         org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = false;
         
@@ -130,5 +138,23 @@ public final class BrwsrCtx {
         }
         return cb.build();
     }
-    
+
+    /** Runs provided code in the context of this {@link BrwsrCtx}.
+     * While the <code>exec</code> is running, the {@link #findDefault(java.lang.Class)}
+     * method returns <code>this</code>. The provided code is executed
+     * synchronously on the same thread; 
+     * the call returns when <code>exec.run()</code> is over.
+     * 
+     * @param exec the code to execute
+     * @since 0.7.6
+     */
+    public final void execute(Runnable exec) {
+        BrwsrCtx prev = CURRENT.get();
+        try {
+            CURRENT.set(this);
+            exec.run();
+        } finally {
+            CURRENT.set(prev);
+        }
+    }
 }

@@ -47,10 +47,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
+import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.apidesign.html.boot.spi.Fn;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.tck.KOTest;
+import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Factory;
 
 /**
@@ -106,6 +112,11 @@ public class BootstrapTest {
     }
     
     public static void initialized() throws Exception {
+        BrwsrCtx b1 = BrwsrCtx.findDefault(BootstrapTest.class);
+        TestingProvider.assertCalled("Our context created");
+        assertNotSame(b1, BrwsrCtx.EMPTY, "Browser context is not empty");
+        BrwsrCtx b2 = BrwsrCtx.findDefault(BootstrapTest.class);
+        assertSame(b1, b2, "Browser context remains stable");
         Assert.assertSame(
             BootstrapTest.class.getClassLoader(),
             ClassLoader.getSystemClassLoader(),
