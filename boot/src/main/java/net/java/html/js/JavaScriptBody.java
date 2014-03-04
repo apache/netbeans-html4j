@@ -93,4 +93,6 @@ public @interface JavaScriptBody {
      *   syntax
      */
     public boolean javacall() default false;
+    
+    public boolean wait4js() default true;
 }

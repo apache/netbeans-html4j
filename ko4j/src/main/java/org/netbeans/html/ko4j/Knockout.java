@@ -59,7 +59,9 @@ import org.apidesign.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
-    @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, body =
+    @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, 
+        wait4js = false,
+        body =
           "if (model) {\n"
         + "  var koProp = model[prop];\n"
         + "  if (koProp && koProp['valueHasMutated']) {\n"
@@ -75,7 +77,9 @@ final class Knockout {
         Object model, String prop, Object oldValue, Object newValue
     );
 
-    @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);\n")
+    @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
+        "ko.applyBindings(bindings);\n"
+    )
     native static void applyBindings(Object bindings);
     
     @JavaScriptBody(args = { "cnt" }, body = 
@@ -87,8 +91,9 @@ final class Knockout {
     
     @JavaScriptBody(
         javacall = true,
+        wait4js = false,
         args = {"ret", "model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
-        body =
+        body = 
           "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
         + "  function realGetter() {\n"
@@ -140,5 +145,8 @@ final class Knockout {
     );
     
     @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
-    static native Object toModel(Object wrapper);
+    private static native Object toModelImpl(Object wrapper);
+    static Object toModel(Object wrapper) {
+        return toModelImpl(wrapper);
+    }
 }
