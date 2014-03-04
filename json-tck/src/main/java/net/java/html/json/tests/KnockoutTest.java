@@ -50,8 +50,6 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.apidesign.html.json.tck.KOTest;
-import org.apidesign.html.json.tck.KnockoutTCK;
-import static org.testng.Assert.assertSame;
 
 /**
  *
@@ -225,7 +223,7 @@ public final class KnockoutTest {
 
             triggerChildClick("ul", 1);
             
-            assertSame(PairModel.ctx, ctx, "Context remains the same");
+            assert PairModel.ctx == ctx : "Context remains the same";
 
             assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
         } finally {
