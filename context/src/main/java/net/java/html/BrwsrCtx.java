@@ -141,7 +141,9 @@ public final class BrwsrCtx {
 
     /** Runs provided code in the context of this {@link BrwsrCtx}.
      * While the <code>exec</code> is running, the {@link #findDefault(java.lang.Class)}
-     * method returns <code>this</code>.
+     * method returns <code>this</code>. The provided code is executed
+     * synchronously on the same thread; 
+     * the call returns when <code>exec.run()</code> is over.
      * 
      * @param exec the code to execute
      * @since 0.7.6
