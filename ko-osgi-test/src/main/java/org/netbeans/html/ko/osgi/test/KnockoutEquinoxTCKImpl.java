@@ -53,6 +53,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -143,7 +144,8 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
             Object fx = cnstr.newInstance(browserContext);
             Contexts.Builder cb = Contexts.newBuilder().
                 register(Technology.class, (Technology)fx, 10).
-                register(Transfer.class, (Transfer)fx, 10);
+                register(Transfer.class, (Transfer)fx, 10).
+                register(Executor.class, (Executor)browserContext, 10);
 //        if (fx.areWebSocketsSupported()) {
 //            cb.register(WSTransfer.class, fx, 10);
 //        }

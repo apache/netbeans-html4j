@@ -42,6 +42,7 @@
  */
 package org.apidesign.html.context.spi;
 
+import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.impl.CtxImpl;
 
@@ -75,6 +76,47 @@ public final class Contexts {
      */
     public static <Tech> Tech find(BrwsrCtx context, Class<Tech> technology) {
         return CtxImpl.find(context, technology);
+    }
+
+    /** Seeks {@link ServiceLoader} for all registered instances of
+     * {@link Provider} and asks them to {@link Provider#fillContext(org.apidesign.html.context.spi.Contexts.Builder, java.lang.Class) fill
+     * the builder}.
+     * 
+     * @param requestor the application class for which to find the context
+     * @param cb the context builder to register technologies into
+     * @return <code>true</code>, if some instances of the provider were
+     *    found, <code>false</code> otherwise
+     * @since 0.7.6
+     */
+    public static boolean fillInByProviders(Class<?> requestor, Contexts.Builder cb) {
+        boolean found = false;
+        ClassLoader l;
+        try {
+            l = requestor.getClassLoader();
+        } catch (SecurityException ex) {
+            l = null;
+        }
+        for (Provider cp : ServiceLoader.load(Provider.class, l)) {
+            cp.fillContext(cb, requestor);
+            found = true;
+        }
+        try {
+            for (Provider cp : ServiceLoader.load(Provider.class, Provider.class.getClassLoader())) {
+                cp.fillContext(cb, requestor);
+                found = true;
+            }
+        } catch (SecurityException ex) {
+            if (!found) {
+                throw ex;
+            }
+        }
+        if (!found) {
+            for (Provider cp : ServiceLoader.load(Provider.class)) {
+                cp.fillContext(cb, requestor);
+                found = true;
+            }
+        }
+        return found;
     }
 
     /** Implementors of various HTML technologies should
@@ -143,5 +185,19 @@ public final class Contexts {
         public BrwsrCtx build() {
             return impl.build();
         }
+    }
+    
+    /** Injects a {@link BrwsrCtx} into a technology registered by
+     * {@link Builder#register(java.lang.Class, java.lang.Object, int)} when
+     * appropriate context is created.
+     * 
+     * @since 0.7.6
+     */
+    public interface CtxAware {
+        /** Injects associated context into an technology.
+         * 
+         * @param ctx the context this technology is registed in
+         */
+        public void injectCtx(BrwsrCtx ctx);
     }
 }

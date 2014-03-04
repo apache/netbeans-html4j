@@ -45,6 +45,7 @@ package org.apidesign.html.json.spi;
 import java.io.IOException;
 import java.io.OutputStream;
 import net.java.html.BrwsrCtx;
+import org.apidesign.html.context.spi.Contexts;
 import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.RcvrJSON;
 
@@ -123,7 +124,7 @@ public final class JSONCall {
     }
     
     private void dispatch(final RcvrJSON.MsgEvnt ev) {
-        JSON.runInBrowser(ctx, new Runnable() {
+        ctx.execute(new Runnable() {
             @Override
             public void run() {
                 ev.dispatch(whenDone);

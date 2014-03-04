@@ -42,7 +42,7 @@
  */
 package net.java.html;
 
-import java.util.ServiceLoader;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import org.netbeans.html.context.impl.CtxAccssr;
 import org.netbeans.html.context.impl.CtxImpl;
@@ -88,7 +88,8 @@ public final class BrwsrCtx {
     
     /** Seeks for the default context that is associated with the requesting
      * class. If no suitable context is found, a warning message is
-     * printed and {@link #EMPTY} context is returned.
+     * printed and {@link #EMPTY} context is returned. One can enter 
+     * a context by calling {@link #execute(java.lang.Runnable)}.
      * 
      * @param requestor the class that makes the request
      * @return appropriate context for the request
@@ -100,38 +101,7 @@ public final class BrwsrCtx {
         }
         
         org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
-        boolean found = false;
-        
-        ClassLoader l;
-        try {
-            l = requestor.getClassLoader();
-        } catch (SecurityException ex) {
-            l = null;
-        }
-        
-        for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(
-            org.apidesign.html.context.spi.Contexts.Provider.class, l
-        )) {
-            cp.fillContext(cb, requestor);
-            found = true;
-        }
-        try {
-            for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class, org.apidesign.html.context.spi.Contexts.Provider.class.getClassLoader())) {
-                cp.fillContext(cb, requestor);
-                found = true;
-            }
-        } catch (SecurityException ex) {
-            if (!found) {
-                throw ex;
-            }
-            // if we have some data from regular provides, go on
-        }
-        if (!found) {
-            for (org.apidesign.html.context.spi.Contexts.Provider cp : ServiceLoader.load(org.apidesign.html.context.spi.Contexts.Provider.class)) {
-                cp.fillContext(cb, requestor);
-                found = true;
-            }
-        }
+        boolean found = Contexts.fillInByProviders(requestor, cb);
         if (!found) {
             LOG.warning("No browser context found. Returning empty technology!");
             return EMPTY;
@@ -140,21 +110,37 @@ public final class BrwsrCtx {
     }
 
     /** Runs provided code in the context of this {@link BrwsrCtx}.
-     * While the <code>exec</code> is running, the {@link #findDefault(java.lang.Class)}
-     * method returns <code>this</code>. The provided code is executed
-     * synchronously on the same thread; 
-     * the call returns when <code>exec.run()</code> is over.
+     * If there is an {@link Executor} {@link Contexts#find(net.java.html.BrwsrCtx, java.lang.Class)  registered in the context}
+     * it is used to perform the given code. While the code <code>exec</code>
+     * is running the value of {@link #findDefault(java.lang.Class)} returns
+     * <code>this</code>. If the executor supports a single thread execution
+     * policy, it may execute the runnable later (in such case this method
+     * returns immediately). If the call to this method is done on the right
+     * thread, the runnable should be executed synchronously.
      * 
      * @param exec the code to execute
      * @since 0.7.6
      */
-    public final void execute(Runnable exec) {
-        BrwsrCtx prev = CURRENT.get();
-        try {
-            CURRENT.set(this);
-            exec.run();
-        } finally {
-            CURRENT.set(prev);
+    public final void execute(final Runnable exec) {
+        class Wrap implements Runnable {
+            @Override
+            public void run() {
+                BrwsrCtx prev = CURRENT.get();
+                try {
+                    CURRENT.set(BrwsrCtx.this);
+                    exec.run();
+                } finally {
+                    CURRENT.set(prev);
+                }
+            }
+        }
+        Wrap w = new Wrap();
+        Executor runIn = Contexts.find(this, Executor.class);
+        if (runIn == null) {
+            w.run();
+        } else {
+            runIn.execute(w);
         }
     }
 }
+

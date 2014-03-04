@@ -51,11 +51,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
+import org.apidesign.html.context.spi.Contexts;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.impl.FnUtils;
@@ -246,7 +248,15 @@ public final class BrowserBuilder {
                         if (browserClass != null) {
                             browserClass[0] = newClazz;
                         }
-                        BrwsrCtx c = BrwsrCtx.findDefault(newClazz);
+                        Contexts.Builder cb = Contexts.newBuilder();
+                        if (!Contexts.fillInByProviders(newClazz, cb)) {
+                            LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
+                        }
+                        if (currentP instanceof Executor) {
+                            cb.register(Executor.class, (Executor)currentP, 1000);
+                        }
+                        cb.register(Fn.Presenter.class, currentP, 1000);
+                        BrwsrCtx c = cb.build();
                         c.execute(this);
                         return;
                     }
