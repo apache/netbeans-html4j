@@ -45,6 +45,7 @@ package org.netbeans.html.ko4j;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
+import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.PropertyBinding;
 
@@ -59,7 +60,9 @@ import org.apidesign.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-2.2.1.js")
 final class Knockout {
-    @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, body =
+    @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, 
+        wait4js = false,
+        body =
           "if (model) {\n"
         + "  var koProp = model[prop];\n"
         + "  if (koProp && koProp['valueHasMutated']) {\n"
@@ -75,15 +78,17 @@ final class Knockout {
         Object model, String prop, Object oldValue, Object newValue
     );
 
-    @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);\n")
+    @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
+        "ko.applyBindings(bindings);\n"
+    )
     native static void applyBindings(Object bindings);
     
     @JavaScriptBody(
         javacall = true,
-        args = {"model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
-        body
-        = "var ret = {};\n"
-        + "ret['ko-fx.model'] = model;\n"
+        wait4js = false,
+        args = {"ret", "model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
+        body = 
+          "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
         + "  function realGetter() {\n"
         + "    try {\n"
@@ -126,14 +131,50 @@ final class Knockout {
         + "for (var i = 0; i < funcNames.length; i++) {\n"
         + "  koExpose(funcNames[i], funcArr[i]);\n"
         + "}\n"
-        + "return ret;\n"
         )
-    static native Object wrapModel(
-        Object model,
+    private static native void wrapImpl(
+        Object jsObject, Object model,
         String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
         String[] funcNames, FunctionBinding[] funcArr
     );
     
+    @JavaScriptBody(args = { "cnt" }, body = 
+        "var ret = new Array();\n"
+      + "while (cnt-- > 0) {\n"
+      + "  ret.push(new Object());\n"
+      + "}\n"
+      + "return ret;\n"
+    )
+    private static native Object[] newObjs(int cnt);
+    
+    private static Fn.Presenter prev;
+    private static int objCounter;
+    private static Object[] objs;
+    
+    private static synchronized Object createJSObj() {
+        if (prev != Fn.activePresenter()) {
+            objs = null;
+        }
+        if (objs == null || objs.length <= objCounter) {
+            objs = newObjs(128);
+            objCounter = 0;
+        }
+        return objs[objCounter++];
+    }
+    
+    static Object wrapModel(
+        Object model,
+        String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
+        String[] funcNames, FunctionBinding[] funcArr
+    ) {
+        Object js = createJSObj();
+        wrapImpl(js, model, propNames, propReadOnly, propValues, propArr, funcNames, funcArr);
+        return js;
+    }
+    
     @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
-    static native Object toModel(Object wrapper);
+    private static native Object toModelImpl(Object wrapper);
+    static Object toModel(Object wrapper) {
+        return toModelImpl(wrapper);
+    }
 }

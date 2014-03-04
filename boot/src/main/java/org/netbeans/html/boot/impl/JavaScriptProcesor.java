@@ -129,6 +129,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (params.size() != arr.length) {
                 msg.printMessage(Diagnostic.Kind.ERROR, "Number of args arguments does not match real arguments!", e);
             }
+            if (!jsb.wait4js() && ee.getReturnType().getKind() != TypeKind.VOID) {
+                msg.printMessage(Diagnostic.Kind.ERROR, "Methods that don't wait for JavaScript to finish must return void!", e);
+            }
             if (!jsb.javacall() && jsb.body().contains(".@")) {
                 msg.printMessage(Diagnostic.Kind.WARNING, "Usage of .@ usually requires javacall=true", e);
             }
