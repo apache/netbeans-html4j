@@ -116,12 +116,10 @@ public final class KO4J implements Provider {
      */
     @Override
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
-        if (FXContext.isJavaScriptEnabled()) {
-            context.register(Technology.class, knockout(), 100);
-            context.register(Transfer.class, transfer(), 100);
-            if (c.areWebSocketsSupported()) {
-                context.register(WSTransfer.class, websockets(), 100);
-            }
+        context.register(Technology.class, knockout(), 100);
+        context.register(Transfer.class, transfer(), 100);
+        if (c.areWebSocketsSupported()) {
+            context.register(WSTransfer.class, websockets(), 100);
         }
     }
     

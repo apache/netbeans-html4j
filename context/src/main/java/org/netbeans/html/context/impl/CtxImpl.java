@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.java.html.BrwsrCtx;
+import org.apidesign.html.context.spi.Contexts;
 
 /** Implementation detail. Holds list of technologies for particular
  * {@link BrwsrCtx}.
@@ -75,8 +76,10 @@ public final class CtxImpl {
 
     public BrwsrCtx build() {
         Collections.sort(techs);
-        CtxImpl impl = new CtxImpl(Collections.unmodifiableList(techs));
-        return CtxAccssr.getDefault().newContext(impl);
+        final List<Bind<?>> arr = Collections.unmodifiableList(techs);
+        CtxImpl impl = new CtxImpl(arr);
+        BrwsrCtx ctx = CtxAccssr.getDefault().newContext(impl);
+        return ctx;
     }
 
     public <Tech> void register(Class<Tech> type, Tech impl, int priority) {

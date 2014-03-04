@@ -54,6 +54,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -154,7 +155,10 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, ko.knockout(), 10).
             register(Transfer.class, tc, 10).
-            register(WSTransfer.class, tc, 10);
+            register(WSTransfer.class, tc, 10).
+            register(Executor.class, (Executor)browserContext, 10).
+            register(Fn.Presenter.class, (Fn.Presenter)browserContext, 10);
+                
         return cb.build();
     }
 

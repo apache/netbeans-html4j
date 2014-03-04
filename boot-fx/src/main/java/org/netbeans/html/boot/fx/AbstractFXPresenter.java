@@ -43,6 +43,8 @@
 package org.netbeans.html.boot.fx;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -234,11 +236,35 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
         }
     }
     
-    @Override public void execute(Runnable r) {
+    @Override public void execute(final Runnable r) {
         if (Platform.isFxApplicationThread()) {
-            r.run();
+            Closeable c = Fn.activate(this);
+            try {
+                r.run();
+            } finally {
+                try {
+                    c.close();
+                } catch (IOException ex) {
+                    // ignore
+                }
+            }                
         } else {
-            Platform.runLater(r);
+            class Wrap implements Runnable {
+                @Override
+                public void run() {
+                    Closeable c = Fn.activate(AbstractFXPresenter.this);
+                    try {
+                        r.run();
+                    } finally {
+                        try {
+                            c.close();
+                        } catch (IOException ex) {
+                            // ignore
+                        }
+                    }                
+                }
+            }
+            Platform.runLater(new Wrap());
         }
     }
 

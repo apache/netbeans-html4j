@@ -78,12 +78,18 @@ final class Knockout {
     @JavaScriptBody(args = { "bindings" }, body = "ko.applyBindings(bindings);\n")
     native static void applyBindings(Object bindings);
     
+    @JavaScriptBody(args = { "cnt" }, body = 
+        "var arr = new Array(cnt);\n" +
+        "for (var i = 0; i < cnt; i++) arr[i] = new Object();\n" +
+        "return arr;\n"
+    )
+    native static Object[] allocJS(int cnt);
+    
     @JavaScriptBody(
         javacall = true,
-        args = {"model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
-        body
-        = "var ret = {};\n"
-        + "ret['ko-fx.model'] = model;\n"
+        args = {"ret", "model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
+        body =
+          "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
         + "  function realGetter() {\n"
         + "    try {\n"
@@ -126,10 +132,9 @@ final class Knockout {
         + "for (var i = 0; i < funcNames.length; i++) {\n"
         + "  koExpose(funcNames[i], funcArr[i]);\n"
         + "}\n"
-        + "return ret;\n"
         )
-    static native Object wrapModel(
-        Object model,
+    static native void wrapModel(
+        Object ret, Object model,
         String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
         String[] funcNames, FunctionBinding[] funcArr
     );

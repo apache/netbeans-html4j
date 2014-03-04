@@ -80,16 +80,6 @@ public final class JSON {
         return t == null ? EmptyTech.EMPTY : t;
     }
     
-    public static void runInBrowser(final BrwsrCtx c, final Runnable runnable) {
-        class Wrap implements Runnable {
-            @Override
-            public void run() {
-                c.execute(runnable);
-            }
-        }
-        findTechnology(c).runSafe(new Wrap());
-    }
-    
     public static void extract(BrwsrCtx c, Object value, String[] props, Object[] values) {
         Transfer t = findTransfer(c);
         t.extract(value, props, values);

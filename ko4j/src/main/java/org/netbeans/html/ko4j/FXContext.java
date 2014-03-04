@@ -49,7 +49,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
@@ -71,43 +70,14 @@ final class FXContext
 implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>,
 Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
-    private static Boolean javaScriptEnabled;
-    private final Fn.Presenter browserContext;
+    private Object[] jsObjects;
+    private int jsIndex;
 
     public FXContext(Fn.Presenter browserContext) {
-        this.browserContext = browserContext;
     }
     
-    @JavaScriptBody(args = {}, body = "if (window) return true; else return false;")
-    private static boolean isJavaScriptEnabledJs() {
-        return false;
-    }
-    
-    static boolean isJavaScriptEnabled() {
-        if (javaScriptEnabled != null) {
-            return javaScriptEnabled;
-        }
-        if (!(javaScriptEnabled = isJavaScriptEnabledJs())) {
-            Closeable c = Fn.activate(new TrueFn());
-            try {
-                javaScriptEnabled = isJavaScriptEnabledJs();
-            } finally {
-                try {
-                    c.close();
-                } catch (IOException ex) {
-                    // cannot happen
-                }
-            }
-        }
-        return javaScriptEnabled;
-    }
-
-    final boolean areWebSocketsSupported() {
-        return isWebSocket();
-    }
-
     @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
-    private static boolean isWebSocket() {
+    final boolean areWebSocketsSupported() {
         return false;
     }
 
@@ -125,11 +95,22 @@ Transfer, WSTransfer<LoadWS> {
         for (int i = 0; i < funcNames.length; i++) {
             funcNames[i] = funcArr[i].getFunctionName();
         }
-        Object ret = Knockout.wrapModel(model, 
+        Object ret = getJSObject();
+        Knockout.wrapModel(ret, model, 
             propNames, propReadOnly, propValues, propArr,
             funcNames, funcArr
         );
         return ret;
+    }
+    
+    private Object getJSObject() {
+        int len = 64;
+        if (jsObjects != null && jsIndex < (len = jsObjects.length)) {
+            return jsObjects[jsIndex++];
+        }
+        jsObjects = Knockout.allocJS(len * 2);
+        jsIndex = 1;
+        return jsObjects[0];
     }
     
     @Override
@@ -213,26 +194,8 @@ Transfer, WSTransfer<LoadWS> {
 
     @Override
     public void runSafe(final Runnable r) {
-        class Wrap implements Runnable {
-            @Override public void run() {
-                Closeable c = Fn.activate(browserContext);
-                try {
-                    r.run();
-                } finally {
-                    try {
-                        c.close();
-                    } catch (IOException ex) {
-                        // cannot be thrown
-                    }
-                }
-            }
-        }
-        Wrap w = new Wrap();
-        if (browserContext instanceof Executor) {
-            ((Executor)browserContext).execute(w);
-        } else {
-            w.run();
-        }
+        LOG.warning("Technology.runSafe has been deprecated. Use BrwsrCtx.execute!");
+        r.run();
     }
 
     @Override

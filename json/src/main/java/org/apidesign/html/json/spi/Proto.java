@@ -154,7 +154,7 @@ public final class Proto {
      * @param run the action to execute
      */
     public void runInBrowser(Runnable run) {
-        JSON.runInBrowser(context, run);
+        context.execute(run);
     }
 
     /** Initializes the provided collection with a content of the <code>array</code>.
