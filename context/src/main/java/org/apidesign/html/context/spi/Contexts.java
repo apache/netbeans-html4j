@@ -186,18 +186,4 @@ public final class Contexts {
             return impl.build();
         }
     }
-    
-    /** Injects a {@link BrwsrCtx} into a technology registered by
-     * {@link Builder#register(java.lang.Class, java.lang.Object, int)} when
-     * appropriate context is created.
-     * 
-     * @since 0.7.6
-     */
-    public interface CtxAware {
-        /** Injects associated context into an technology.
-         * 
-         * @param ctx the context this technology is registed in
-         */
-        public void injectCtx(BrwsrCtx ctx);
-    }
 }

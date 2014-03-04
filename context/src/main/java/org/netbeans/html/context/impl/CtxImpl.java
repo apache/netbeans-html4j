@@ -79,12 +79,6 @@ public final class CtxImpl {
         final List<Bind<?>> arr = Collections.unmodifiableList(techs);
         CtxImpl impl = new CtxImpl(arr);
         BrwsrCtx ctx = CtxAccssr.getDefault().newContext(impl);
-        for (Bind<?> b : arr) {
-            if (b.impl instanceof Contexts.CtxAware) {
-                Contexts.CtxAware aw = (Contexts.CtxAware)b.impl;
-                aw.injectCtx(ctx);
-            }
-        }
         return ctx;
     }
 

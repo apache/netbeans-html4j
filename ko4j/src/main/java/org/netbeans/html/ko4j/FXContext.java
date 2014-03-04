@@ -49,12 +49,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
-import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
 import org.apidesign.html.json.spi.PropertyBinding;
@@ -71,51 +68,16 @@ import org.apidesign.html.json.spi.WSTransfer;
  */
 final class FXContext
 implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>,
-Transfer, WSTransfer<LoadWS>, Contexts.CtxAware {
+Transfer, WSTransfer<LoadWS> {
     static final Logger LOG = Logger.getLogger(FXContext.class.getName());
-    private static Boolean javaScriptEnabled;
-    private BrwsrCtx browserContext;
     private Object[] jsObjects;
     private int jsIndex;
 
     public FXContext(Fn.Presenter browserContext) {
-        Contexts.Builder cb = Contexts.newBuilder();
-        if (browserContext instanceof Executor) {
-            cb.register(Executor.class, (Executor)browserContext, 1000);
-        }
-        this.browserContext = cb.build();
     }
     
-    @JavaScriptBody(args = {}, body = "if (window) return true; else return false;")
-    private static boolean isJavaScriptEnabledJs() {
-        return false;
-    }
-    
-    static boolean isJavaScriptEnabled() {
-        if (javaScriptEnabled != null) {
-            return javaScriptEnabled;
-        }
-        if (!(javaScriptEnabled = isJavaScriptEnabledJs())) {
-            Closeable c = Fn.activate(new TrueFn());
-            try {
-                javaScriptEnabled = isJavaScriptEnabledJs();
-            } finally {
-                try {
-                    c.close();
-                } catch (IOException ex) {
-                    // cannot happen
-                }
-            }
-        }
-        return javaScriptEnabled;
-    }
-
-    final boolean areWebSocketsSupported() {
-        return isWebSocket();
-    }
-
     @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
-    private static boolean isWebSocket() {
+    final boolean areWebSocketsSupported() {
         return false;
     }
 
@@ -232,7 +194,8 @@ Transfer, WSTransfer<LoadWS>, Contexts.CtxAware {
 
     @Override
     public void runSafe(final Runnable r) {
-        browserContext.execute(r);
+        LOG.warning("Technology.runSafe has been deprecated. Use BrwsrCtx.execute!");
+        r.run();
     }
 
     @Override
@@ -248,11 +211,6 @@ Transfer, WSTransfer<LoadWS>, Contexts.CtxAware {
     @Override
     public void close(LoadWS socket) {
         socket.close();
-    }
-
-    @Override
-    public void injectCtx(BrwsrCtx ctx) {
-        browserContext = ctx;
     }
 
     private static final class TrueFn extends Fn implements Fn.Presenter {

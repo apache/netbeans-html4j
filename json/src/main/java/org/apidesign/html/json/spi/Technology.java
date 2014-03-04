@@ -42,6 +42,7 @@
  */
 package org.apidesign.html.json.spi;
 
+import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
 
@@ -108,7 +109,9 @@ public interface Technology<Data> {
      * runSafe method.
      * 
      * @param r the runnable to execute
+     * @deprecated Use {@link BrwsrCtx#execute(java.lang.Runnable)}
      */
+    @Deprecated
     public void runSafe(Runnable r);
 
     /** For certain rendering technologies it may be more efficient to register
