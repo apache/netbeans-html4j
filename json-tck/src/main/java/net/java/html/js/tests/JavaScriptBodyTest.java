@@ -292,6 +292,11 @@ public class JavaScriptBodyTest {
         assert r == 6 : "Sum is six: " + r;
     }
     
+    @KOTest public void staticCallback() {
+        int r = Bodies.staticCallback();
+        assert r == 42 : "Expecting 42: " + r;
+    }
+    
     Later l;
     @KOTest public void callLater() throws Exception{
         final Fn.Presenter p = Fn.activePresenter();
