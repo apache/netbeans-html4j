@@ -76,6 +76,9 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.startsWith("com.sun")) {
             return Class.forName(name);
         }
+        if (name.startsWith("org.apidesign.html.context.spi")) {
+            return Class.forName(name);
+        }
         if (name.equals(JsClassLoader.class.getName())) {
             return JsClassLoader.class;
         }
