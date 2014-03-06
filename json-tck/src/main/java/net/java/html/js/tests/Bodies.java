@@ -104,4 +104,13 @@ final class Bodies {
         "return s.@net.java.html.js.tests.Sum::sum([Ljava/lang/Object;)([1, 2, 3]);"
     )
     public static native int sumArr(Sum s);
+    
+    @JavaScriptBody(args = {}, javacall = true, body = 
+        "return @net.java.html.js.tests.Bodies::fourtyTwo()();"
+    )
+    public static native int staticCallback();
+    
+    static int fourtyTwo() {
+        return 42;
+    }
 }
