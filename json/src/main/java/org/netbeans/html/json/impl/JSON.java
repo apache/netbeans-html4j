@@ -265,6 +265,15 @@ public final class JSON {
         if (object instanceof Collection) {
             return JSONList.koData((Collection<?>) object, model);
         }
+        if (
+            object instanceof String ||
+            object instanceof Boolean ||
+            object instanceof Number ||
+            object instanceof Character ||
+            object instanceof Enum<?>
+        ) {
+            return object;
+        }
         Proto proto = findProto(object);
         if (proto == null) {
             return null;
