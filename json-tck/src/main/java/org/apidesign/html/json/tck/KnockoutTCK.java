@@ -48,11 +48,12 @@ import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
 import net.java.html.json.tests.JSONTest;
 import net.java.html.json.tests.KnockoutTest;
+import net.java.html.json.tests.MinesTest;
 import net.java.html.json.tests.OperationsTest;
 import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
-import org.openide.util.lookup.ServiceProvider;
 import org.apidesign.html.context.spi.Contexts.Builder;
+import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like
  * Knockout.js in JavaFX's WebView). Sample usage:
@@ -121,6 +122,7 @@ public abstract class KnockoutTCK {
             ConvertTypesTest.class,
             JSONTest.class,
             KnockoutTest.class,
+            MinesTest.class,
             OperationsTest.class,
             WebSocketTest.class
         };
