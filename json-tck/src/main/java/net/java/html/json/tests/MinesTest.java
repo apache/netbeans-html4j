@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Random;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
+import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
@@ -61,47 +62,66 @@ import org.apidesign.html.json.tck.KOTest;
     @Property(name = "rows", type = Row.class, array = true),
 })
 public final class MinesTest {
-    @KOTest public void paintTheGrid() throws Throwable {
-        BrwsrCtx ctx = Utils.newContext(KnockoutTest.class);
-        Object exp = Utils.exposeHTML(KnockoutTest.class, 
-"            <table class=\"field\">\n" +
-"                <tbody id='table'>\n" +
-"                    <!-- ko foreach: rows -->\n" +
-"                    <tr>\n" +
-"                        <!-- ko foreach: columns -->\n" +
-"                        <td data-bind=\"css: style, click: $parents[1].click\" >\n" +
-"                            <div data-bind='text: html'></div>\n" +
-"                        </td>\n" +
-"                        <!-- /ko -->\n" +
-"                    </tr>\n" +
-"                    <!-- /ko -->\n" +
-"                </tbody>\n" +
-"            </table>\n" +
-""
-        );
-        try {
-
-            Mines m = Models.bind(new Mines(), ctx);
-            m.init(10, 10, 0);
+    Mines m;
+    @KOTest public void paintTheGridOnClick() throws Throwable {
+        if (m == null) {
+            BrwsrCtx ctx = Utils.newContext(MinesTest.class);
+            Object exp = Utils.exposeHTML(MinesTest.class, 
+    "            <button id='init' data-bind='click: normalSize'></button>\n" +
+    "            <table>\n" +
+    "                <tbody id='table'>\n" +
+    "                    <!-- ko foreach: rows -->\n" +
+    "                    <tr>\n" +
+    "                        <!-- ko foreach: columns -->\n" +
+    "                        <td data-bind='css: style' >\n" +
+    "                            <div data-bind='text: html'></div>\n" +
+    "                        </td>\n" +
+    "                        <!-- /ko -->\n" +
+    "                    </tr>\n" +
+    "                    <!-- /ko -->\n" +
+    "                </tbody>\n" +
+    "            </table>\n" +
+    ""
+            );
+            m = Models.bind(new Mines(), ctx);
             m.applyBindings();
-
             int cnt = countChildren("table");
-            assert cnt == 10 : "There is ten rows in the table: " + cnt;
-        } catch (Throwable t) {
-            throw t;
-        } finally {
-            Utils.exposeHTML(KnockoutTest.class, "");
+            assert cnt == 0 : "Table is empty: " + cnt;
+            scheduleClick("init", 100);
         }
+
+
+        int cnt = countChildren("table");
+        if (cnt == 0) {
+            throw new InterruptedException();
+        }
+        assert cnt == 10 : "There is ten rows in the table now: " + cnt;
+        
+        Utils.exposeHTML(MinesTest.class, "");
     }
     
     private static int countChildren(String id) throws Exception {
         return ((Number)Utils.executeScript(
-          KnockoutTest.class,
+          MinesTest.class,
           "var e = window.document.getElementById(arguments[0]);\n "
         + "if (typeof e === 'undefined') return -2;\n "
         + "return e.children.length;", 
             id
         )).intValue();
+    }
+
+    private static void scheduleClick(String id, int delay) throws Exception {
+        String s = "var id = arguments[0]; var delay = arguments[1];"
+            + "var e = window.document.getElementById(id);\n "
+            + "var f = function() {;\n "
+            + "  var ev = window.document.createEvent('MouseEvents');\n "
+            + "  ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
+            + "  e.dispatchEvent(ev);\n"
+            + "};\n"
+            + "window.setTimeout(f, delay);";
+        Utils.executeScript(
+            MinesTest.class,
+            s, id, delay);
     }
     
     enum GameState {
@@ -159,6 +179,9 @@ public final class MinesTest {
         return state != null;
     }
     
+    @Function static void normalSize(Mines m) {
+        m.init(10, 10, 10);
+    }
     
     @ModelOperation static void init(Mines model, int width, int height, int mines) {
         List<Row> rows = new ArrayList<Row>(height);
