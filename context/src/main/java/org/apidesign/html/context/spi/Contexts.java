@@ -170,6 +170,9 @@ public final class Contexts {
          * @return this builder
          */
         public <Tech> Builder register(Class<Tech> type, Tech impl, int position) {
+            if (impl == null) {
+                return this;
+            }
             if (position <= 0) {
                 throw new IllegalStateException();
             }

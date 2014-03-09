@@ -118,9 +118,7 @@ public final class KO4J implements Provider {
     public void fillContext(Contexts.Builder context, Class<?> requestor) {
         context.register(Technology.class, knockout(), 100);
         context.register(Transfer.class, transfer(), 100);
-        if (c.areWebSocketsSupported()) {
-            context.register(WSTransfer.class, websockets(), 100);
-        }
+        context.register(WSTransfer.class, websockets(), 100);
     }
     
 }
