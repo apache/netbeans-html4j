@@ -203,10 +203,6 @@ public abstract class Fn {
         return FnContext.activate(p);
     }
     
-    public void invokeLater(Object thiz, Object... args) throws Exception {
-        invoke(this, args);
-    }
-    
     /** Invokes the defined function with specified <code>this</code> and
      * appropriate arguments.
      * 
@@ -217,6 +213,20 @@ public abstract class Fn {
      * @throws Exception if something goes wrong, as exception may be thrown
      */
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
+
+    /** Invokes the defined function with specified <code>this</code> and
+     * appropriate arguments asynchronously. The invocation may be 
+     * happen <em>"later"</em>.
+     * 
+     * @param thiz the meaning of <code>this</code> inside of the JavaScript
+     *   function - can be <code>null</code>
+     * @param args arguments for the function
+     * @throws Exception if something goes wrong, as exception may be thrown
+     * @since 0.7.6
+     */
+    public void invokeLater(Object thiz, Object... args) throws Exception {
+        invoke(this, args);
+    }
     
     /** Provides the function implementation access to the presenter provided
      * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor}.
