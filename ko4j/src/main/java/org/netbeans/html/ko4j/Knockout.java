@@ -141,4 +141,9 @@ final class Knockout {
     
     @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
     static native Object toModel(Object wrapper);
+    
+    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
+    static final boolean areWebSocketsSupported() {
+        return false;
+    }
 }
