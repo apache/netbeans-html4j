@@ -43,6 +43,8 @@
 package org.netbeans.html.boot.impl;
 
 import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -55,8 +57,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.apidesign.html.boot.spi.Fn;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -140,6 +144,40 @@ public class FnTest extends JsClassLoaderBase {
         Closeable close = FnContext.activate(impl);
         methodClass = loader.loadClass(JsMethods.class.getName());
         close.close();
+    }
+    
+    @Test public void flushingPresenter() throws IOException {
+        class FP implements Fn.Presenter, Flushable {
+            int flush;
+
+            @Override
+            public Fn defineFn(String code, String... names) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void displayPage(URL page, Runnable onPageLoad) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void loadScript(Reader code) throws Exception {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void flush() throws IOException {
+                flush++;
+            }
+        }
+        
+        FP p = new FP();
+        Closeable c1 = Fn.activate(p);
+        Closeable c2 = Fn.activate(p);
+        c2.close();
+        assertEquals(p.flush, 0, "No flush yet");
+        c1.close();
+        assertEquals(p.flush, 1, "Now flushed");
     }
 
     @BeforeMethod public void initPresenter() {

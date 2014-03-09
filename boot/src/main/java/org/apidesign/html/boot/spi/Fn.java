@@ -52,6 +52,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
@@ -140,6 +142,17 @@ public abstract class Fn {
         return new Fn(fn.presenter()) {
             @Override
             public Object invoke(Object thiz, Object... args) throws Exception {
+                loadResource();
+                return fn.invoke(thiz, args);
+            }
+
+            @Override
+            public void invokeLater(Object thiz, Object... args) throws Exception {
+                loadResource();
+                fn.invokeLater(thiz, args);
+            }
+            
+            private void loadResource() throws Exception {
                 Presenter p = presenter();
                 if (p == null) {
                     p = FnContext.currentPresenter(false);
@@ -160,10 +173,10 @@ public abstract class Fn {
                         }
                     }
                 }
-                return fn.invoke(thiz, args);
             }
         };
     }
+
     
     /** The currently active presenter.
      * 
@@ -200,6 +213,20 @@ public abstract class Fn {
      * @throws Exception if something goes wrong, as exception may be thrown
      */
     public abstract Object invoke(Object thiz, Object... args) throws Exception;
+
+    /** Invokes the defined function with specified <code>this</code> and
+     * appropriate arguments asynchronously. The invocation may be 
+     * happen <em>"later"</em>.
+     * 
+     * @param thiz the meaning of <code>this</code> inside of the JavaScript
+     *   function - can be <code>null</code>
+     * @param args arguments for the function
+     * @throws Exception if something goes wrong, as exception may be thrown
+     * @since 0.7.6
+     */
+    public void invokeLater(Object thiz, Object... args) throws Exception {
+        invoke(this, args);
+    }
     
     /** Provides the function implementation access to the presenter provided
      * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor}.

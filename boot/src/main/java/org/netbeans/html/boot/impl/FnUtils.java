@@ -467,31 +467,38 @@ public final class FnUtils {
                     FindInMethod.super.visitInsn(Opcodes.AASTORE);
                 }
 
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                        "org/apidesign/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
-                );
-                switch (sv.returnType.getSort()) {
-                    case Type.VOID:
-                        super.visitInsn(Opcodes.RETURN);
-                        break;
-                    case Type.ARRAY:
-                    case Type.OBJECT:
-                        super.visitTypeInsn(Opcodes.CHECKCAST, sv.returnType.getInternalName());
-                        super.visitInsn(Opcodes.ARETURN);
-                        break;
-                    case Type.BOOLEAN:
-                        super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
-                        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                                "java/lang/Boolean", "booleanValue", "()Z"
-                        );
-                        super.visitInsn(Opcodes.IRETURN);
-                        break;
-                    default:
-                        super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Number");
-                        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                                "java/lang/Number", sv.returnType.getClassName() + "Value", "()" + sv.returnType.getDescriptor()
-                        );
-                        super.visitInsn(sv.returnType.getOpcode(Opcodes.IRETURN));
+                if (fia.wait4js) {
+                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                            "org/apidesign/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
+                    );
+                    switch (sv.returnType.getSort()) {
+                        case Type.VOID:
+                            super.visitInsn(Opcodes.RETURN);
+                            break;
+                        case Type.ARRAY:
+                        case Type.OBJECT:
+                            super.visitTypeInsn(Opcodes.CHECKCAST, sv.returnType.getInternalName());
+                            super.visitInsn(Opcodes.ARETURN);
+                            break;
+                        case Type.BOOLEAN:
+                            super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
+                            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                                    "java/lang/Boolean", "booleanValue", "()Z"
+                            );
+                            super.visitInsn(Opcodes.IRETURN);
+                            break;
+                        default:
+                            super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Number");
+                            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                                    "java/lang/Number", sv.returnType.getClassName() + "Value", "()" + sv.returnType.getDescriptor()
+                            );
+                            super.visitInsn(sv.returnType.getOpcode(Opcodes.IRETURN));
+                    }
+                } else {
+                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                            "org/apidesign/html/boot/spi/Fn", "invokeLater", "(Ljava/lang/Object;[Ljava/lang/Object;)V"
+                    );
+                    super.visitInsn(Opcodes.RETURN);
                 }
                 if (hasCode) {
                     super.visitLabel(noPresenter);
@@ -522,6 +529,7 @@ public final class FnUtils {
                 List<String> args = new ArrayList<String>();
                 String body;
                 boolean javacall = false;
+                boolean wait4js = true;
 
                 public FindInAnno() {
                     super(Opcodes.ASM4);
@@ -535,6 +543,10 @@ public final class FnUtils {
                     }
                     if (name.equals("javacall")) { // NOI18N
                         javacall = (Boolean) value;
+                        return;
+                    }
+                    if (name.equals("wait4js")) { // NOI18N
+                        wait4js = (Boolean) value;
                         return;
                     }
                     assert name.equals("body");

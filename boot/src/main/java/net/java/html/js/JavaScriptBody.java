@@ -93,4 +93,31 @@ public @interface JavaScriptBody {
      *   syntax
      */
     public boolean javacall() default false;
+
+    /** Should we wait before the JavaScript snippet execution finishes?
+     * Or not. 
+     * <p>
+     * Some implementations that recognize the {@link JavaScriptBody} annotation
+     * need to reschedule the JavaScript execution into different thread and
+     * then it is easier for them to perform the execution asynchronously
+     * and not wait for the result of the execution. This may however be
+     * unexpected (for example when one awaits a callback into Java)
+     * and as such it has to be explicitly allowed by specifying
+     * <code>wait4js = false</code>. Such methods need to return <code>void</code>.
+     * <p>
+     * Implementations that execute the JavaScript synchronously may ignore
+     * this attribute.
+     * <p>
+     * Implementations that delay execution of JavaScript need to guarantee
+     * the order of snippets. Those that were submitted sooner, need to be
+     * executed sooner. Each snippet need to be executed in a timely manner
+     * (e.g. by a second, or so) even if there are no other calls made
+     * in the main program.
+     * <p>
+     * 
+     * @since 0.7.6
+     * @return <code>false</code> in case one allows asynchronous execution
+     *   of the JavaScript snippet
+     */
+    public boolean wait4js() default true;
 }

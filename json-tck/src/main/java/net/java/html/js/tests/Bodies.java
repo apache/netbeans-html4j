@@ -56,6 +56,9 @@ final class Bodies {
     @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void callback(Runnable r);
 
+    @JavaScriptBody(args = {"r"}, wait4js = false, javacall = true, body = "r.@java.lang.Runnable::run()();")
+    static native void asyncCallback(Runnable r);
+
     @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
     static native Object callback(Callable<? extends Object> c);
 

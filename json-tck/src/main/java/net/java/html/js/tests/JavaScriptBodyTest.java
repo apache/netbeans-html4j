@@ -77,6 +77,18 @@ public class JavaScriptBodyTest {
         assert run.cnt == 1 : "Can call even private implementation classes: " + run.cnt;
     }
     
+    private R asyncRun;
+    @KOTest public void asyncCallbackToRunnable() throws InterruptedException {
+        if (asyncRun == null) {
+            asyncRun = new R();
+            Bodies.asyncCallback(asyncRun);
+        }
+        if (asyncRun.cnt == 0) {
+            throw new InterruptedException();
+        }
+        assert asyncRun.cnt == 1 : "Even async callback must arrive once: " + asyncRun.cnt;
+    }
+    
     @KOTest public void typeOfCharacter() {
         String charType = Bodies.typeof('a', false);
         assert "number".equals(charType) : "Expecting number type: " + charType;

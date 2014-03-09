@@ -43,6 +43,7 @@
 package org.netbeans.html.boot.impl;
 
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.util.logging.Logger;
 import org.apidesign.html.boot.spi.Fn;
@@ -53,10 +54,17 @@ import org.apidesign.html.boot.spi.Fn;
  */
 public final class FnContext implements Closeable {
     private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
+    private static final FnContext DUMMY;
+    static {
+        DUMMY = new FnContext(null, null);
+        DUMMY.prev = DUMMY;
+    }
 
     private Object prev;
-    private FnContext(Fn.Presenter p) {
-        this.prev = p;
+    private final Fn.Presenter current;
+    private FnContext(Fn.Presenter prevP, Fn.Presenter newP) {
+        this.current = newP;
+        this.prev = prevP;
     }
 
     @Override
@@ -64,6 +72,9 @@ public final class FnContext implements Closeable {
         if (prev != this) {
             currentPresenter((Fn.Presenter)prev);
             prev = this;
+            if (current instanceof Flushable) {
+                ((Flushable)current).flush();
+            }
         }
     }
 /*
@@ -75,7 +86,11 @@ public final class FnContext implements Closeable {
     }
 */
     public static Closeable activate(Fn.Presenter newP) {
-        return new FnContext(currentPresenter(newP));
+        final Fn.Presenter oldP = currentPresenter(newP);
+        if (oldP == newP) {
+            return DUMMY;
+        }
+        return new FnContext(oldP, newP);
     }
     
     
