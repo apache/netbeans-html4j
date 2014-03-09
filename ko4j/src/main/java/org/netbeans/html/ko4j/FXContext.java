@@ -50,7 +50,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.logging.Logger;
-import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.json.spi.FunctionBinding;
 import org.apidesign.html.json.spi.JSONCall;
@@ -76,11 +75,6 @@ Transfer, WSTransfer<LoadWS> {
     public FXContext(Fn.Presenter browserContext) {
     }
     
-    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
-    final boolean areWebSocketsSupported() {
-        return false;
-    }
-
     @Override
     public Object wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
         String[] propNames = new String[propArr.length];
@@ -211,6 +205,10 @@ Transfer, WSTransfer<LoadWS> {
     @Override
     public void close(LoadWS socket) {
         socket.close();
+    }
+
+    boolean areWebSocketsSupported() {
+        return Knockout.areWebSocketsSupported();
     }
 
     private static final class TrueFn extends Fn implements Fn.Presenter {
