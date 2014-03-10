@@ -88,6 +88,16 @@ public class JavaScriptBodyTest {
         }
         assert asyncRun.cnt == 1 : "Even async callback must arrive once: " + asyncRun.cnt;
     }
+
+    @KOTest public void asyncCallbackFlushed() throws InterruptedException {
+        R r = new R();
+        for (int i = 0; i < 10; i++) {
+            Bodies.asyncCallback(r);
+        }
+        int fourtyTwo = Bodies.sum(35, 7);
+        assert r.cnt == 10 : "Ten calls: " + r.cnt;
+        assert fourtyTwo == 42 : "Meaning of the world expected: " + fourtyTwo;
+    }
     
     @KOTest public void typeOfCharacter() {
         String charType = Bodies.typeof('a', false);
