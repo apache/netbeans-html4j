@@ -951,7 +951,12 @@ public final class ModelProcessor extends AbstractProcessor {
                         call.append("model");
                         continue;
                     }
-                    call.append(", ").append("(").append(ve.asType()).append(")arr[").append(i - 2).append("]");
+                    String type = ve.asType().toString();
+                    String boxedType = findBoxedType(type);
+                    if (boxedType != null) {
+                        type = boxedType;
+                    }
+                    call.append(", ").append("(").append(type).append(")arr[").append(i - 2).append("]");
                 }
                 call.append("); }");
                 functions.add(call.toString());

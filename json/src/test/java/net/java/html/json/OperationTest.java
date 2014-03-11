@@ -62,9 +62,10 @@ public class OperationTest {
         m.getNames().add(name);
     }
 
-    @ModelOperation static void add(OpModel m, BrwsrCtx exp, String name) throws IOException {
-        assertSame(BrwsrCtx.findDefault(OpModel.class), exp, "Context is passed in");
-        m.getNames().add(name.toUpperCase());
+    @ModelOperation static void add(OpModel m, int times, String name) throws IOException {
+        while (times-- > 0) {
+            m.getNames().add(name.toUpperCase());
+        }
     }
 
     @Test public void addOneToTheModel() {
@@ -74,12 +75,13 @@ public class OperationTest {
         assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
     }
 
-    @Test public void addUpperCaseToTheModel() {
+    @Test public void addTwoUpperCasesToTheModel() {
         BrwsrCtx ctx = Contexts.newBuilder().build();
         OpModel m = Models.bind(new OpModel("One"), ctx);
-        m.add(ctx, "Second");
-        assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
+        m.add(2, "Second");
+        assertEquals(m.getNames().size(), 3, "Both are there: " + m.getNames());
         assertEquals(m.getNames().get(1), "SECOND", "Converted to upper case");
+        assertEquals(m.getNames().get(2), "SECOND", "Also converted to upper case");
     }
     
     @Test public void noAnnonymousInnerClass() {
