@@ -58,7 +58,7 @@ import org.apidesign.html.context.spi.Contexts;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class BrwsrCtx {
+public final class BrwsrCtx implements Executor {
     private static final Logger LOG = Logger.getLogger(BrwsrCtx.class.getName());
     private final CtxImpl impl;
     private BrwsrCtx(CtxImpl impl) {
@@ -121,7 +121,7 @@ public final class BrwsrCtx {
      * @param exec the code to execute
      * @since 0.7.6
      */
-    public final void execute(final Runnable exec) {
+    @Override public final void execute(final Runnable exec) {
         class Wrap implements Runnable {
             @Override
             public void run() {
