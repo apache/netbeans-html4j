@@ -344,7 +344,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
-                w.append("    @Override public void call(" + className + " model, int type, Object data, Object ev) {\n");
+                w.append("    @Override public void call(" + className + " model, int type, Object data, Object ev) throws Exception {\n");
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < functions.size(); i += 2) {
                     final String name = (String)functions.get(i);

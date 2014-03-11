@@ -42,6 +42,7 @@
  */
 package net.java.html.json;
 
+import java.io.IOException;
 import java.util.Arrays;
 import net.java.html.BrwsrCtx;
 import org.apidesign.html.context.spi.Contexts;
@@ -61,7 +62,7 @@ public class OperationTest {
         m.getNames().add(name);
     }
 
-    @ModelOperation static void add(OpModel m, BrwsrCtx exp, String name) {
+    @ModelOperation static void add(OpModel m, BrwsrCtx exp, String name) throws IOException {
         assertSame(BrwsrCtx.findDefault(OpModel.class), exp, "Context is passed in");
         m.getNames().add(name.toUpperCase());
     }

@@ -174,7 +174,11 @@ public final class Proto {
         context.execute(new Runnable() {
             @Override
             public void run() {
-                type.call(obj, index, args, null);
+                try {
+                    type.call(obj, index, args, null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }
@@ -503,8 +507,10 @@ public final class Proto {
          * @param index index of the property used during registration
          * @param data the currently selected object the function is about to operate on
          * @param event the event that triggered the event
+         * @throws Exception the method can throw exception which is then logged
          */
-        protected abstract void call(Model model, int index, Object data, Object event);
+        protected abstract void call(Model model, int index, Object data, Object event)
+        throws Exception;
         
         /** Re-binds the model object to new browser context.
          * 

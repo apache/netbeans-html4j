@@ -42,6 +42,7 @@
  */
 package net.java.html.json;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -97,7 +98,7 @@ final class PersonImpl {
         @Property(array = true, name = "sex", type = Sex.class)
     })
     public static class PeopleImpl {
-        @Function static void inInnerClass(People p) {
+        @Function static void inInnerClass(People p) throws IOException {
         }
     }
 }
