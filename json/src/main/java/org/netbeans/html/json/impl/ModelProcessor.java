@@ -312,9 +312,9 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 {
-                    for (int i = 0; i < functionsCount; i += 2) {
-                        w.append("      registerFunction(\"").append((String)functions.get(i)).append("\", ");
-                        w.append((i / 2) + ");\n");
+                    for (int i = 0; i < functionsCount; i++) {
+                        w.append("      registerFunction(\"").append((String)functions.get(i * 2)).append("\", ");
+                        w.append(i + ");\n");
                     }
                 }
                 w.append("    }\n");
