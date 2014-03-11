@@ -157,6 +157,28 @@ public final class Proto {
         context.execute(run);
     }
 
+    /** Invokes the specified function index in the {@link #getContext() context}
+     * of the browser. If the caller is already on the right thread, the
+     * index-th function is invoked immediately and synchronously. 
+     * Otherwise the method returns immediately and the function is invoked
+     * later.
+     * 
+     * @param index the index of the function as will be passed to
+     *   {@link Type#call(java.lang.Object, int, java.lang.Object, java.lang.Object)}
+     *   method
+     * @param args array of arguments that will be passed as
+     *   <code>data</code> argument of the <code>call</code> method.
+     * @since 0.7.6
+     */
+    public void runInBrowser(final int index, final Object... args) {
+        context.execute(new Runnable() {
+            @Override
+            public void run() {
+                type.call(obj, index, args, null);
+            }
+        });
+    }
+    
     /** Initializes the provided collection with a content of the <code>array</code>.
      * The initialization can only be done soon after the the collection 
      * is created, otherwise an exception is throw

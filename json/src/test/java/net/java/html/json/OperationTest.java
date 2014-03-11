@@ -42,10 +42,10 @@
  */
 package net.java.html.json;
 
+import java.util.Arrays;
 import net.java.html.BrwsrCtx;
 import org.apidesign.html.context.spi.Contexts;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
+import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 /**
@@ -61,10 +61,48 @@ public class OperationTest {
         m.getNames().add(name);
     }
 
+    @ModelOperation static void add(OpModel m, BrwsrCtx exp, String name) {
+        assertSame(BrwsrCtx.findDefault(OpModel.class), exp, "Context is passed in");
+        m.getNames().add(name.toUpperCase());
+    }
+
     @Test public void addOneToTheModel() {
         BrwsrCtx ctx = Contexts.newBuilder().build();
         OpModel m = Models.bind(new OpModel("One"), ctx);
         m.add("Second", ctx);
         assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
+    }
+
+    @Test public void addUpperCaseToTheModel() {
+        BrwsrCtx ctx = Contexts.newBuilder().build();
+        OpModel m = Models.bind(new OpModel("One"), ctx);
+        m.add(ctx, "Second");
+        assertEquals(m.getNames().size(), 2, "Both are there: " + m.getNames());
+        assertEquals(m.getNames().get(1), "SECOND", "Converted to upper case");
+    }
+    
+    @Test public void noAnnonymousInnerClass() {
+        int cnt = 0;
+        for (Class<?> c : OpModel.class.getDeclaredClasses()) {
+            cnt++;
+            int dolar = c.getName().lastIndexOf('$');
+            assertNotEquals(dolar, -1, "There is dolar in : " + c.getName());
+            String res = c.getName().substring(dolar + 1);
+            try {
+                int number = Integer.parseInt(res);
+                if (number == 1) {
+                    // one is OK, #2 was a problem
+                    continue;
+                }
+                fail("There seems to annonymous innerclass! " + c.getName() + "\nImplements: " 
+                    + Arrays.toString(c.getInterfaces()) + " extends: " + c.getSuperclass()
+                );
+            } catch (NumberFormatException ex) {
+                // OK, go on
+            }
+        }
+        if (cnt == 0) {
+            fail("There should be at least one inner class: " + cnt);
+        }
     }
 }

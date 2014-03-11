@@ -202,10 +202,11 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
                 ok = false;
             }
+            int functionsCount = functions.size() / 2;
             if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType)) {
                 ok = false;
             }
-            if (!generateOperation(e, body, className, e.getEnclosedElements())) {
+            if (!generateOperation(e, body, className, e.getEnclosedElements(), functions)) {
                 ok = false;
             }
             FileObject java = processingEnv.getFiler().createSourceFile(pkg + '.' + className, e);
@@ -303,7 +304,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  private static class Html4JavaType extends org.apidesign.html.json.spi.Proto.Type<").append(className).append("> {\n");
                 w.append("    private Html4JavaType() {\n      super(").append(className).append(".class, ").
                     append(inPckName(e)).append(".class, " + (propsGetSet.size() / 5) + ", "
-                    + (functions.size() / 2) + ");\n");
+                    + functionsCount + ");\n");
                 {
                     for (int i = 0; i < propsGetSet.size(); i += 5) {
                         w.append("      registerProperty(\"").append(propsGetSet.get(i)).append("\", ");
@@ -311,7 +312,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 {
-                    for (int i = 0; i < functions.size(); i += 2) {
+                    for (int i = 0; i < functionsCount; i += 2) {
                         w.append("      registerFunction(\"").append((String)functions.get(i)).append("\", ");
                         w.append((i / 2) + ");\n");
                     }
@@ -347,12 +348,21 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < functions.size(); i += 2) {
                     final String name = (String)functions.get(i);
-                    ExecutableElement ee = (ExecutableElement)functions.get(i + 1);
-                    w.append("        case " + (i / 2) + ":\n"); // model." + name + "(data, ev); return;\n");
-                    w.append("          ").append(((TypeElement)e).getQualifiedName()).append(".").append(name).append("(");
-                    w.append(wrapParams(ee, null, className, "model", "ev", "data"));
-                    w.append(");\n");
-                    w.append("          return;\n");
+                    final Object param = functions.get(i + 1);
+                    if (param instanceof ExecutableElement) {
+                        ExecutableElement ee = (ExecutableElement)param;
+                        w.append("        case " + (i / 2) + ":\n");
+                        w.append("          ").append(((TypeElement)e).getQualifiedName()).append(".").append(name).append("(");
+                        w.append(wrapParams(ee, null, className, "model", "ev", "data"));
+                        w.append(");\n");
+                        w.append("          return;\n");
+                    } else {
+                        String call = (String)param;
+                        w.append("        case " + (i / 2) + ":\n"); // model." + name + "(data, ev); return;\n");
+                        w.append("          ").append(call).append("\n");
+                        w.append("          return;\n");
+                        
+                    }
                 }
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
@@ -871,7 +881,8 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private boolean generateOperation(Element clazz, 
         StringWriter body, String className, 
-        List<? extends Element> enclosedElements
+        List<? extends Element> enclosedElements,
+        List<Object> functions
     ) {
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
@@ -922,15 +933,28 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 body.append(") {\n");
-                body.append("    proto.runInBrowser(new Runnable() { public void run() {\n");
-                body.append("      ").append(clazz.getSimpleName()).append(".").append(m.getSimpleName()).append("(");
-                body.append(className).append(".this");
+                int idx = functions.size() / 2;
+                functions.add(m.getSimpleName().toString());
+                body.append("    proto.runInBrowser(" + idx);
                 for (String s : args) {
                     body.append(", ").append(s);
                 }
                 body.append(");\n");
-                body.append("    }});\n");
                 body.append("  }\n");
+
+                StringBuilder call = new StringBuilder();
+                call.append("{ Object[] arr = (Object[])data; ");
+                call.append(clazz.getSimpleName()).append(".").append(m.getSimpleName()).append("(");
+                int i = 0;
+                for (VariableElement ve : e.getParameters()) {
+                    if (i++ == 0) {
+                        call.append("model");
+                        continue;
+                    }
+                    call.append(", ").append("(").append(ve.asType()).append(")arr[").append(i - 2).append("]");
+                }
+                call.append("); }");
+                functions.add(call.toString());
             }
             
         }
