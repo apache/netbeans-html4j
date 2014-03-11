@@ -72,7 +72,7 @@ import java.lang.annotation.Target;
  * 
  *   {@link OnReceive @OnReceive}(url = "{protocol}://your.server.com/person/{name}")
  *   static void getANewPerson(MyModel m, Person p) {
- *     alert("Adding " + p.getFullName() + '!');
+ *     System.out.println("Adding " + p.getFullName() + '!');
  *     m.getPeople().add(p);
  *   }
  * 
@@ -88,7 +88,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * When the server returns <code>{ "firstName" : "John", "lastName" : "Smith" }</code>
- * the browser will show alert message <em>Adding John Smith!</em>.
+ * the system will print a message <em>Adding John Smith!</em>.
  * <p>
  * One can use this method to communicate with the server
  * via <a href="doc-files/websockets.html">WebSocket</a> protocol since version 0.6.
