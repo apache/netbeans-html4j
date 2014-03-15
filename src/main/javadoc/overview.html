@@ -133,6 +133,55 @@ $ ls src/main/webapp/pages/index.html
         modify them and enjoy
         <a href="http://html.java.net">Html for Java</a>!
         
+        <h2>IDE Support</h2>
+        
+        <p>
+            This API is part of <a target="_blank"
+            href="http://netbeans.org">NetBeans.org</a> project and as such
+            it works naturally with the <a target="_blank"
+            href="https://netbeans.org/features/index.html">NetBeans IDE</a>.
+            On the other hand, the API is using nothing NetBeans specific,
+            it builds on standard Java6 APIs and as such it shall work fine
+            in any IDE.
+        </p>
+        
+        <p>
+            A lot of work is done by 
+            <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">
+            annotation processors</a>
+            that generate various boiler plate code during compilation. This
+            is a standard part of Java since JDK6, but for example Eclipse
+            is known not to deal with processors well and developers using
+            it need to be careful. IntelliJ users hasn't reported any issues
+            and of course, NetBeans IDE support for 
+            <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">processors</a>
+            is outstanding.
+        </p>
+        
+        <p>
+            When using {@link net.java.html.js.JavaScriptBody} annotation, it is
+            useful to do a bit of post processing of classes. There is a
+            <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a> 
+            plugin for that.
+            NetBeans IDE will invoke it when doing a build. Other IDEs may 
+            need some hint to do so. 
+            Anyway: If one does not see all (generated) sources or is getting
+            {@link java.lang.LinkageError}s when executing the application, 
+            switch to command line and do clean build
+            from there:
+        </p>
+        <pre>$ mvn clean install</pre>
+        <p>
+            If that succeeds, your IDE of choice will hopefully
+            pick the generated sources up and present the result of the build 
+            properly. If not, 
+            <a href="https://netbeans.org/downloads/">download NetBeans</a>, 
+            you will be pleasantly 
+            surprised - for example with our excellent 
+            <a href="net/java/html/js/package-summary.html#debugging">Java/JavaScript 
+            debugging</a> support.
+        </p>
+        
         <h2>Other Resources</h2>
         
         <img src="net/java/html/json/doc-files/DukeHTML.png" width="256" height="184" alt="Duke and HTML5. Together at last!" align="right"/>
