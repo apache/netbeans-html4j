@@ -253,8 +253,37 @@ $ ls src/main/webapp/pages/index.html
             is called <em>Bck2Brwsr</em>, another <em>TeaVM</em>. Both support the
             {@link net.java.html.js.JavaScriptBody} annotation. Read 
             <a href="http://wiki.apidesign.org/wiki/Bck2BrwsrViaCLI">more</a> or play
-            a minesweeper game packaged for your browser:
+            a minesweeper game packaged for your browser 
+            (of course <a target="_blank"
+                href="http://source.apidesign.org/hg/html~demo/file/ea79b73d590a/minesweeper/src/main/java/org/apidesign/demo/minesweeper/MinesModel.java">
+                written</a> in Java):
         </p>
+        
+        <script type="text/html" id="field">
+            <table class="field">
+                <tbody>
+                    <!-- ko foreach: rows -->
+                    <tr>
+                        <!-- ko foreach: columns -->
+                        <td data-bind="css: style, click: $parents[1].click" >
+                            <div data-bind='html: html'></div>
+                        </td>
+                        <!-- /ko -->
+                    </tr>
+                    <!-- /ko -->
+                </tbody>
+            </table>
+        </script>
+
+        <div data-bind="template: { name : 'field', if: fieldShowing }"></div>
+
+        <!-- boot bck2brwsr -->
+        <script type="text/javascript" src="resources/teavm.js"></script>
+        <script>
+            var vm = new VM();
+            vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
+        </script>
+
         <p>
             <img src='resources/android_logo.jpg' width="64"
                  height="64" align="right"/>
@@ -289,5 +318,25 @@ $ ls src/main/webapp/pages/index.html
             <li>Current <a target="_blank" href="http://bits.netbeans.org/html+java/dev/">development</a> version
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>
         </ul>
+        
+<style type="text/css">
+table.field td {
+    padding: 4px;
+    width: 18px;
+    height: 18px;
+    font-size: 1.5em;
+    border: 1px solid black;
+}
+table.field td.UNKNOWN {
+    background-color: #D6E4E1;
+    cursor: pointer;
+}
+table.field td.EXPLOSION {
+    background-color: #A31E39;
+}
+table.field td.DISCOVERED {
+    background-color: #9DB2B1;
+}
+</style>        
     </body>
 </html>
