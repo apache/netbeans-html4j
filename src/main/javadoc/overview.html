@@ -104,7 +104,8 @@ $ mvn archetype:generate \
  -DarchetypeArtifactId=knockout4j-archetype \
  -DarchetypeVersion=0.7.5 <em># or newer version, if available</em>
         </pre>
-        Answer few questions (for example choose myfirstbrwsrpage as artifactId) and then you can:
+        Answer few questions (for example choose myfirstbrwsrpage as artifactId) 
+        and then you can:
         <pre>
 $ cd myfirstbrwsrpage
 $ mvn process-classes exec:java
@@ -112,13 +113,24 @@ $ mvn process-classes exec:java
         In a few seconds (or minutes if 
         <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
         decides to download the whole Internet of dependencies) you should 
-        see a sample Hello World application. It is basically composed from one 
-        Java and one HTML file:
+        see a sample Hello World application rendered in a 
+        <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
+        web view component (that of course requires your JDK to come
+        with <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>; 
+        <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7 
+            and JDK8 from Oracle</a> contain everything that is needed). 
+        The generated application is built around one 
+        Java source (uses the {@link net.java.html.json.Model} annotation to
+        auto-generate another <code>Data.java</code> class during compilation)
+        and one HTML file (uses the <a href="http://knockoutjs.com">Knockout</a>
+        syntax to <code>data-bind</code> the HTML elements to the 
+        generated <code>Data</code> model):
         <pre>
 $ ls src/main/java/**/DataModel.java
 $ ls src/main/webapp/pages/index.html
         </pre>
-        Play with them, modify them and enjoy
+        That is all you need to get started. Play with the sources, 
+        modify them and enjoy
         <a href="http://html.java.net">Html for Java</a>!
         
         <h2>Other Resources</h2>
