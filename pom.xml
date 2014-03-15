@@ -115,6 +115,7 @@
               <artifactId>maven-javadoc-plugin</artifactId>
               <version>2.9</version>
               <configuration>
+                  <docfilessubdirs>true</docfilessubdirs>
                   <subpackages>${publicPackages}</subpackages>
                   <skip>false</skip>
                   <excludePackageNames>org.netbeans.html.*:net.java.html.js.tests:net.java.html.json.tests</excludePackageNames>
