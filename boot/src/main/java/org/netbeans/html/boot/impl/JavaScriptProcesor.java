@@ -396,7 +396,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 }
                 source.append(") throws Throwable {\n");
                 source.append(convert);
-                if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
+                if (useTryResources()) {
                     source.append("    try (java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p)) { \n");
                 } else {
                     source.append("    java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p); try {\n");
@@ -430,7 +430,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     source.append("    }\n");
                     source.append("    return $ret;\n");
                 }
-                if (processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0) {
+                if (useTryResources()) {
                     source.append("    }\n");
                 } else {
                     
@@ -453,6 +453,15 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     Diagnostic.Kind.ERROR, "Can't write " + srcName + ": " + ex.getMessage()
                 );
             }
+        }
+    }
+
+    private boolean useTryResources() {
+        try {
+            return processingEnv.getSourceVersion().compareTo(SourceVersion.RELEASE_7) >= 0;
+        } catch (LinkageError err) {
+            // can happen when running on JDK6
+            return false;
         }
     }
     
