@@ -88,7 +88,12 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * When the server returns <code>{ "firstName" : "John", "lastName" : "Smith" }</code>
- * the system will print a message <em>Adding John Smith!</em>.
+ * the system will print a message <em>Adding John Smith!</em>. It is not 
+ * necessary to fully describe the server message - enumerate only the fields
+ * in the response you are interested in. The others will be discarded. So,
+ * if the server <code>{ "firstName" : "John", "lastName" : "Smith", "age" : 33 }</code>
+ * the above code will behave the same (e.g. ignore the <code>age</code>
+ * value).
  * <p>
  * One can use this method to communicate with the server
  * via <a href="doc-files/websockets.html">WebSocket</a> protocol since version 0.6.
