@@ -97,6 +97,7 @@
                        <exclude>.*/**</exclude>
                        <exclude>ko-archetype/src/main/resources/**</exclude>
                        <exclude>ko4j/src/main/resources/org/netbeans/html/ko4j/knockout*.js</exclude>
+                       <exclude>src/main/javadoc/resources/teavm.js</exclude>
                   </excludes>
               </configuration>
           </plugin>
