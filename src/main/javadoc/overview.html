@@ -70,8 +70,26 @@
          component to display the <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>. 
          We eliminate the need to manipulate the DOM directly, 
          there is a special {@link net.java.html.json Java to Knockout.js binding}. 
-         As a result the <a href="http://wiki.apidesign.org/wiki/Knockout4Java">HTML uses Knockout.js syntax</a>, 
+         As a result the <a href="http://knockoutjs.com">HTML uses Knockout.js syntax</a>, 
          yet the application code can be written in Java.
+        </p>
+        
+        <h3>What's New in Version 0.7.6?</h3>
+        
+        <p>
+            {@link net.java.html.js.JavaScriptBody} annotation has new attribute
+            {@link net.java.html.js.JavaScriptBody#wait4js()} which allows
+            asynchronous execution. Libraries using
+            {@link net.java.html.js.JavaScriptBody} are urged to use this
+            new attribute as much as possible, as it can speed up execution
+            in certain environments.
+        </p>
+        
+        <p>
+            Use {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable)} in
+            multi-threaded environment to execute your code on the browser thread.
+            See example 
+            {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable) using Java timer}.
         </p>
         
         <h3>Interesting Entry Points</h3>

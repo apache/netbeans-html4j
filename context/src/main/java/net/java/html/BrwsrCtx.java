@@ -117,6 +117,36 @@ public final class BrwsrCtx implements Executor {
      * policy, it may execute the runnable later (in such case this method
      * returns immediately). If the call to this method is done on the right
      * thread, the runnable should be executed synchronously.
+     * <h5>Example Using a Timer</h5>
+<pre>
+<b>public final class</b> Periodicaly <b>extends</b> {@link java.util.TimerTask} {
+    <b>private final</b> {@link BrwsrCtx} ctx;
+
+    <b>private</b> Periodicaly() {
+        // remember the browser context
+        ctx = BrwsrCtx.findDefault(getClass());
+    }
+    
+    <b>public void</b> run() {
+        // arrives on wrong thread, needs to be re-scheduled
+        ctx.{@link #execute(java.lang.Runnable) execute}(new Runnable() {
+            <b>public void</b> run() {
+                // code that needs to run in a browser environment
+            }
+        });
+    }
+
+    // called when your page is ready
+    <b>public static void</b> onPageLoad(String... args) <b>throws</b> Exception {
+        // the task that is associated with context 
+        Periodicaly task = new Periodicaly();
+        // creates a timer
+        {@link java.util.Timer} t = new {@link java.util.Timer}("Move the box");
+        // run the task ever 100ms
+        t.{@link java.util.Timer#scheduleAtFixedRate(java.util.TimerTask, long, long) scheduleAtFixedRate}(task, 0, 100);
+    }
+}
+</pre>    
      * 
      * @param exec the code to execute
      * @since 0.7.6
