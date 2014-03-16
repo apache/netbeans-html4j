@@ -212,13 +212,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
 
     @Override
     public boolean canFailWebSocketTest() {
-        try {
-            Class.forName("java.util.function.Function");
-            return false;
-        } catch (ClassNotFoundException ex) {
-            // running on JDK7, FX WebView WebSocket impl does not work
-            return true;
-        }
+        return true;
     }
 
 }
