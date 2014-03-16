@@ -97,7 +97,9 @@ public final class Bindings<Data> {
     public void valueHasMutated(String firstName, Object oldValue, Object newValue) {
         if (bp instanceof Technology.ValueMutated) {
             Technology.ValueMutated<Data> vm = (Technology.ValueMutated<Data>)bp;
-            vm.valueHasMutated(data, firstName, oldValue, newValue);
+            Object ov = JSON.find(oldValue, this);
+            Object nv = JSON.find(newValue, this);
+            vm.valueHasMutated(data, firstName, ov, nv);
         } else {
             bp.valueHasMutated(data, firstName);
         }

@@ -200,6 +200,16 @@ public final class KnockoutTest {
             triggerChildClick("ul", 1);
 
             assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            
+            m.setLastName("Verylast");
+
+            cnt = countChildren("ul");
+            assert cnt == 2 : "Two children now, but was " + cnt;
+            
+            triggerChildClick("ul", 1);
+
+            assert "Verylast".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
