@@ -166,16 +166,30 @@ public class FXBrwsr extends Application {
         root.setCenter(view);
         final Worker<Void> w = view.getEngine().getLoadWorker();
         w.stateProperty().addListener(new ChangeListener<Worker.State>() {
+            private String previous;
+            
             @Override
             public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                 if (newState.equals(Worker.State.SUCCEEDED)) {
-                    FXConsole.register(view.getEngine());
-                    onLoad.onPageLoad();
+                    if (checkValid()) {
+                        FXConsole.register(view.getEngine());
+                        onLoad.onPageLoad();
+                    }
                 }
                 if (newState.equals(Worker.State.FAILED)) {
                     throw new IllegalStateException("Failed to load " + url);
                 }
             }
+            private boolean checkValid() {
+                final String crnt = view.getEngine().getLocation();
+                if (previous != null && !previous.equals(crnt)) {
+                    w.stateProperty().removeListener(this);
+                    return false;
+                }
+                previous = crnt;
+                return true;
+            }
+            
         });
         return view;
     }

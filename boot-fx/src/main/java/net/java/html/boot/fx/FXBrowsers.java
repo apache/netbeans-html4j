@@ -88,17 +88,32 @@ public final class FXBrowsers {
             }
 
             @Override
-            protected WebView findView(URL resource) {
+            protected WebView findView(final URL resource) {
                 final Worker<Void> w = webView.getEngine().getLoadWorker();
                 w.stateProperty().addListener(new ChangeListener<Worker.State>() {
+                    private String previous;
+                    
                     @Override
                     public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                         if (newState.equals(Worker.State.SUCCEEDED)) {
-                            onPageLoad();
+                            if (checkValid()) {
+                                onPageLoad();
+                            }
                         }
                         if (newState.equals(Worker.State.FAILED)) {
+                            checkValid();
                             throw new IllegalStateException("Failed to load " + url);
                         }
+                    }
+
+                    private boolean checkValid() {
+                        final String crnt = webView.getEngine().getLocation();
+                        if (previous != null && !previous.equals(crnt)) {
+                            w.stateProperty().removeListener(this);
+                            return false;
+                        }
+                        previous = crnt;
+                        return true;
                     }
                 });
                 
