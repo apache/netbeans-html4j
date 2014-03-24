@@ -239,11 +239,12 @@ $ ls src/main/webapp/pages/index.html
             <img src='resources/eclipse_logo.png' width="64"
                  height="64" align="right"/>
             All the <a href="http://html.java.net">HTML for Java</a> libraries
-            are package as <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
+            are packaged as <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
             bundles and as such they can easily be run in NetBeans as well as
             in Eclipse. As a result one can use 
             <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
-            and have a common module system for both platforms and render using
+            and have a common module system for both platforms. In addition to that 
+            one can render using
             HTML and have a common UI in both platforms. In such case
             your application would be packaged as a set of
             <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a> bundles.
@@ -262,13 +263,14 @@ $ ls src/main/webapp/pages/index.html
                  height="64" align="left"/>
             
             There is more and more attempts to execute Java bytecode
-            in any browser, without any special Java plugin installed.
+            in a browser, without any special Java plugin installed.
             The <a href="http://html.java.net">HTML for Java</a> is
             carefully designed to produce lightweight, well performing
             applications even on such restricted environments. It uses
             no reflection calls and that allows to statically pre-compile
             the applications into JavaScript. One of such environments
-            is called <em>Bck2Brwsr</em>, another <em>TeaVM</em>. Both support the
+            is called <a href="http://wiki.apidesign.org/wiki/Bck2Brwsr">Bck2Brwsr</a>, 
+            another <a href="http://wiki.apidesign.org/wiki/TeaVM">TeaVM</a>. Both support the
             {@link net.java.html.js.JavaScriptBody} annotation. Read 
             <a href="http://wiki.apidesign.org/wiki/Bck2BrwsrViaCLI">more</a> or play
             a minesweeper game packaged for your browser 
