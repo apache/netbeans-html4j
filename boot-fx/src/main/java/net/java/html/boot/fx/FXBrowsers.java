@@ -52,7 +52,10 @@ import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.fx.AbstractFXPresenter;
 
 /** Utility methods for working with <em>JavaFX</em> <code>WebView</code>s.
- *
+ * This class is for those who want to instantiate their own <code>WebView</code>
+ * and configure it manually. In case such detailed control is not necessary,
+ * consider using {@link BrowserBuilder}.
+ * 
  * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
  * @since 0.6
  */
