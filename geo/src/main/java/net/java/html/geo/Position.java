@@ -49,7 +49,7 @@ import org.netbeans.html.geo.impl.JsG;
 /** Class that represents a geolocation position provided as a callback
  * to {@link Handle#onLocation(net.java.html.geo.Position)} method. The
  * class getters mimic closely the structure of the position object as
- * specified by <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
+ * specified by <a href="http://www.w3.org/TR/geolocation-API/">
  * W3C's Geolocation API</a>.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
@@ -80,7 +80,7 @@ public final class Position {
     }
 
     /** Actual location of a {@link Position}. 
-     *  Mimics closely <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
+     *  Mimics closely <a href="http://www.w3.org/TR/geolocation-API/">
      * W3C's Geolocation API</a>.
      */
     public static final class Coordinates {
@@ -102,18 +102,22 @@ public final class Position {
             return ((Number)JsG.get(data, "accuracy")).doubleValue(); // NOI18N
         }
         
+        /** @return may return null, if the information is not available */
         public Double getAltitude() {
             return (Double)JsG.get(data, "altitude"); // NOI18N
         }
         
+        /** @return may return null, if the information is not available */
         public Double getAltitudeAccuracy() {
             return (Double)JsG.get(data, "altitudeAccuracy"); // NOI18N
         }
         
+        /** @return may return null, if the information is not available */
         public Double getHeading() {
             return (Double)JsG.get(data, "heading"); // NOI18N
         }
         
+        /** @return may return null, if the information is not available */
         public Double getSpeed() {
             return (Double)JsG.get(data, "speed"); // NOI18N
         }
