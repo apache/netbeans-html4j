@@ -22,8 +22,6 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
-    <module>ko-archetype</module>
-    <module>ko-archetype-test</module>
     <module>ko4j</module>
     <module>sound</module>
     <module>context</module>
@@ -95,7 +93,6 @@
                   <excludes>
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
-                       <exclude>ko-archetype/src/main/resources/**</exclude>
                        <exclude>ko4j/src/main/resources/org/netbeans/html/ko4j/knockout*.js</exclude>
                        <exclude>src/main/javadoc/resources/teavm.js</exclude>
                   </excludes>
