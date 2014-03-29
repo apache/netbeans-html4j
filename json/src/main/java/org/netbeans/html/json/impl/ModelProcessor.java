@@ -918,7 +918,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     } else {
                         simpleName = type.toString();
                     }
-                    if (simpleName.toString().equals(className)) {
+                    if (checkFirst && simpleName.toString().equals(className)) {
                         checkFirst = false;
                     } else {
                         if (checkFirst) {
