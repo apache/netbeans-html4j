@@ -67,6 +67,11 @@ public class OperationTest {
             m.getNames().add(name.toUpperCase());
         }
     }
+    
+    @ModelOperation static void copy(OpModel m, OpModel orig) {
+        m.getNames().clear();
+        m.getNames().addAll(orig.getNames());
+    }
 
     @Test public void addOneToTheModel() {
         BrwsrCtx ctx = Contexts.newBuilder().build();
@@ -107,5 +112,14 @@ public class OperationTest {
         if (cnt == 0) {
             fail("There should be at least one inner class: " + cnt);
         }
+    }
+    
+    @Test public void copyOperation() {
+        OpModel orig = new OpModel("Ahoj", "Jardo");
+        OpModel n = new OpModel();
+        n.copy(orig);
+        assertEquals(n.getNames().size(), 2, "Two elems");
+        assertEquals(n.getNames().get(0), "Ahoj", "1st");
+        assertEquals(n.getNames().get(1), "Jardo", "2nd");
     }
 }
