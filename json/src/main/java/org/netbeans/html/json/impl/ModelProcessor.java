@@ -944,7 +944,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
                 StringBuilder call = new StringBuilder();
                 call.append("{ Object[] arr = (Object[])data; ");
-                call.append(clazz.getSimpleName()).append(".").append(m.getSimpleName()).append("(");
+                call.append(inPckName(clazz)).append(".").append(m.getSimpleName()).append("(");
                 int i = 0;
                 for (VariableElement ve : e.getParameters()) {
                     if (i++ == 0) {

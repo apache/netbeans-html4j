@@ -98,6 +98,10 @@ final class PersonImpl {
         @Property(array = true, name = "sex", type = Sex.class)
     })
     public static class PeopleImpl {
+        @ModelOperation static void addAge42(People p) {
+            p.getAge().add(42);
+        }
+        
         @Function static void inInnerClass(People p) throws IOException {
         }
     }
