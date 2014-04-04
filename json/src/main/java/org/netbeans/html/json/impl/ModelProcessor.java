@@ -1022,55 +1022,61 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("POST method needs to specify a data() class", e);
                 return false;
             }
-            String modelClass = null;
+            if (e.getParameters().size() < 2) {
+                error("@OnReceive method needs at least two parameters", e);
+            }
             int expectsList = 0;
             List<String> args = new ArrayList<String>();
+            // first argument is model class
+            {
+                TypeMirror type = e.getParameters().get(0).asType();
+                CharSequence simpleName;
+                if (type.getKind() == TypeKind.DECLARED) {
+                    simpleName = ((DeclaredType) type).asElement().getSimpleName();
+                } else {
+                    simpleName = type.toString();
+                }
+                if (simpleName.toString().equals(className)) {
+                    args.add("model");
+                } else {
+                    error("First parameter needs to be " + className, e);
+                    return false;
+                }                    
+            }
+                
+            String modelClass;
             {
                 final Types tu = processingEnv.getTypeUtils();
-                for (VariableElement ve : e.getParameters()) {
-                    TypeMirror modelType = null;
-                    final TypeMirror type = ve.asType();
-                    TypeMirror ert = tu.erasure(type);
-                    CharSequence simpleName;
-                    if (type.getKind() == TypeKind.DECLARED) {
-                        simpleName = ((DeclaredType)type).asElement().getSimpleName();
-                    } else {
-                        simpleName = type.toString();
+                TypeMirror type = e.getParameters().get(1).asType();
+                TypeMirror modelType = null;
+                TypeMirror ert = tu.erasure(type);
+
+                if (isModel(type)) {
+                    modelType = type;
+                } else if (type.getKind() == TypeKind.ARRAY) {
+                    modelType = ((ArrayType)type).getComponentType();
+                    expectsList = 1;
+                } else if ("java.util.List".equals(fqn(ert, e))) {
+                    List<? extends TypeMirror> typeArgs = ((DeclaredType)type).getTypeArguments();
+                    if (typeArgs.size() == 1) {
+                        modelType = typeArgs.get(0);
+                        expectsList = 2;
                     }
-                    if (simpleName.toString().equals(className)) {
-                        args.add("model");
-                    } else if (isModel(ve.asType())) {
-                        modelType = ve.asType();
-                    } else if (ve.asType().getKind() == TypeKind.ARRAY) {
-                        modelType = ((ArrayType)ve.asType()).getComponentType();
-                        expectsList = 1;
-                    } else if ("java.util.List".equals(fqn(ert, e))) {
-                        List<? extends TypeMirror> typeArgs = ((DeclaredType)ve.asType()).getTypeArguments();
-                        if (typeArgs.size() == 1) {
-                            modelType = typeArgs.get(0);
-                            expectsList = 2;
-                        }
-                    } else if (ve.asType().toString().equals("java.lang.String")) {
-                        modelType = ve.asType();
-                    }
-                    if (modelType != null) {
-                        if (modelClass != null) {
-                            error("There can be only one model class among arguments", e);
-                        } else {
-                            modelClass = modelType.toString();
-                            if (expectsList == 1) {
-                                args.add("arr");
-                            } else if (expectsList == 2) {
-                                args.add("java.util.Arrays.asList(arr)");
-                            } else {
-                                args.add("arr[0]");
-                            }
-                        }
-                    }
+                } else if (type.toString().equals("java.lang.String")) {
+                    modelType = type;
                 }
-            }
-            if (modelClass == null) {
-                error("The method needs to have one @Model class as parameter", e);
+                if (modelType == null) {
+                    error("Second arguments needs to be a model, String or array or List of models", e);
+                    return false;
+                }
+                modelClass = modelType.toString();
+                if (expectsList == 1) {
+                    args.add("arr");
+                } else if (expectsList == 2) {
+                    args.add("java.util.Arrays.asList(arr)");
+                } else {
+                    args.add("arr[0]");
+                }
             }
             String n = e.getSimpleName().toString();
             if ("WebSocket".equals(onR.method())) {
