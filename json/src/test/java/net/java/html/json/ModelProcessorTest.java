@@ -278,6 +278,25 @@ public class ModelProcessorTest {
         res.assertErrors();
         res.assertError("not find doesNotExist");
     }
+    
+    @Test public void usingListIsOK() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class UseOnReceive {\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\")\n"
+            + "  static void onMessage(MyModel model, java.util.List<MyData> value) {\n"
+            + "  }\n"
+            + "\n"
+            + "  @net.java.html.json.Model(className=\"MyData\", properties={\n"
+            + "  })\n"
+            + "  static class MyDataModel {\n"
+            + "  }\n"
+            + "}\n"
+        );
+        res.assertNoErrors();
+    }
 
     @Test public void onErrorWouldHaveToBeStatic() throws IOException {
         Compile res = Compile.create("", "package x;\n"

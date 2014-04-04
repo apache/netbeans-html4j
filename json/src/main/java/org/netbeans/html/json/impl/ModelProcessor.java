@@ -1008,12 +1008,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 return false;
             }
             String modelClass = null;
-            boolean expectsList = false;
+            int expectsList = 0;
             List<String> args = new ArrayList<String>();
             {
+                final Types tu = processingEnv.getTypeUtils();
                 for (VariableElement ve : e.getParameters()) {
                     TypeMirror modelType = null;
                     final TypeMirror type = ve.asType();
+                    TypeMirror ert = tu.erasure(type);
                     CharSequence simpleName;
                     if (type.getKind() == TypeKind.DECLARED) {
                         simpleName = ((DeclaredType)type).asElement().getSimpleName();
@@ -1026,7 +1028,13 @@ public final class ModelProcessor extends AbstractProcessor {
                         modelType = ve.asType();
                     } else if (ve.asType().getKind() == TypeKind.ARRAY) {
                         modelType = ((ArrayType)ve.asType()).getComponentType();
-                        expectsList = true;
+                        expectsList = 1;
+                    } else if ("java.util.List".equals(fqn(ert, e))) {
+                        List<? extends TypeMirror> typeArgs = ((DeclaredType)ve.asType()).getTypeArguments();
+                        if (typeArgs.size() == 1) {
+                            modelType = typeArgs.get(0);
+                            expectsList = 2;
+                        }
                     } else if (ve.asType().toString().equals("java.lang.String")) {
                         modelType = ve.asType();
                     }
@@ -1035,8 +1043,10 @@ public final class ModelProcessor extends AbstractProcessor {
                             error("There can be only one model class among arguments", e);
                         } else {
                             modelClass = modelType.toString();
-                            if (expectsList) {
+                            if (expectsList == 1) {
                                 args.add("arr");
+                            } else if (expectsList == 2) {
+                                args.add("java.util.Arrays.asList(arr)");
                             } else {
                                 args.add("arr[0]");
                             }
@@ -1084,13 +1094,13 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(") {\n");
             boolean webSocket = onR.method().equals("WebSocket");
             if (webSocket) {
-                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
                 body.append("  }\n");
                 body.append("  private Object ws_" + e.getSimpleName() + ";\n");
             } else {
-                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
                 body.append("  }\n");

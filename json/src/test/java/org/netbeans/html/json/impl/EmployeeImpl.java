@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.json.impl;
 
+import java.util.List;
 import net.java.html.json.Model;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Person;
@@ -59,5 +60,10 @@ public class EmployeeImpl {
     @OnReceive(url = "some/url")
     static void changePersonality(Employee e, Person p) {
         e.setPerson(p);
+    }
+
+    @OnReceive(url = "some/other/url")
+    static void changePersonalities(Employee e, List<Person> p) {
+        e.setPerson(p.get(0));
     }
 }
