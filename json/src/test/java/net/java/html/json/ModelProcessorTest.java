@@ -298,6 +298,49 @@ public class ModelProcessorTest {
         res.assertNoErrors();
     }
 
+    @Test public void functionAndPropertyCollide() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class Collision {\n"
+            + "  @net.java.html.json.Function\n"
+            + "  static void x(MyModel model, String value) {\n"
+            + "  }\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("cannot have the name");
+    }
+
+    @Test public void twoPropertiesCollide() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class),\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=int.class)\n"
+            + "})\n"
+            + "class Collision {\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("Cannot have the name");
+    }
+
+    @Test public void propertyAndComputedOneCollide() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class),\n"
+            + "})\n"
+            + "class Collision {\n"
+            + "  @net.java.html.json.ComputedProperty static int x(String x) {\n"
+            + "    return x.length();\n"
+            + "  }\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("Cannot have the name");
+    }
+    
     @Test public void onErrorWouldHaveToBeStatic() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"

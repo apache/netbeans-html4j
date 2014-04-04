@@ -203,6 +203,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 ok = false;
             }
             int functionsCount = functions.size() / 2;
+            for (int i = 0; i < functions.size(); i += 2) {
+                for (Prprt p : props) {
+                    if (p.name().equals(functions.get(i))) {
+                        error("Function cannot have the name of an existing property", e);
+                        ok = false;
+                    }
+                }
+            }
             if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType)) {
                 ok = false;
             }
@@ -415,7 +423,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (int i = 0, cnt = 0, prop = 0; i < propsGetSet.size(); i += 5) {
                     final String pn = propsGetSet.get(i);
                     Prprt p = findPrprt(props, pn);
-                    if (p == null) {
+                    if (p == null || prop >= props.length) {
                         continue;
                     }
                     boolean[] isModel = { false };
@@ -520,7 +528,7 @@ public final class ModelProcessor extends AbstractProcessor {
     private boolean generateProperties(
         Element where,
         Writer w, String className, Prprt[] properties,
-        Collection<String> props, 
+        List<String> props, 
         Map<String,Collection<String[]>> deps,
         Map<String,Collection<String>> functionDeps
     ) throws IOException {
@@ -570,6 +578,13 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.write("  }\n");
+            }
+            
+            for (int i = 0; i < props.size(); i += 5) {
+                if (props.get(i).equals(p.name())) {
+                    error("Cannot have the name " + p.name() + " defined twice", where);
+                    ok = false;
+                }
             }
             
             props.add(p.name());
