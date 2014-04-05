@@ -155,13 +155,13 @@ public final class JSONTest {
     private static BrwsrCtx onCallback;
     
     @OnReceive(url="{url}")
-    static void fetch(Person p, JSONik model) {
+    static void fetch(JSONik model, Person p) {
         model.setFetched(p);
         onCallback = BrwsrCtx.findDefault(model.getClass());
     }
 
     @OnReceive(url="{url}", onError = "setMessage")
-    static void fetchArray(Person[] p, JSONik model) {
+    static void fetchArray(JSONik model, Person[] p) {
         model.setFetchedCount(p.length);
         model.setFetched(p[0]);
         onCallback = BrwsrCtx.findDefault(model.getClass());
@@ -173,7 +173,7 @@ public final class JSONTest {
     }
     
     @OnReceive(url="{url}")
-    static void fetchPeople(People p, JSONik model) {
+    static void fetchPeople(JSONik model, People p) {
         final int size = p.getInfo().size();
         if (size > 0) {
             model.setFetched(p.getInfo().get(0));
@@ -182,7 +182,7 @@ public final class JSONTest {
     }
 
     @OnReceive(url="{url}")
-    static void fetchPeopleAge(People p, JSONik model) {
+    static void fetchPeopleAge(JSONik model, People p) {
         int sum = 0;
         for (int a : p.getAge()) {
             sum += a;
@@ -215,7 +215,7 @@ public final class JSONTest {
     }
     
     @OnReceive(url="{url}?callme={me}", jsonp = "me")
-    static void fetchViaJSONP(Person p, JSONik model) {
+    static void fetchViaJSONP(JSONik model, Person p) {
         model.setFetched(p);
     }
     
@@ -396,7 +396,7 @@ public final class JSONTest {
     }
     
     @OnReceive(url="{url}")
-    static void fetchPeopleSex(People p, JSONik model) {
+    static void fetchPeopleSex(JSONik model, People p) {
         model.setFetchedCount(1);
         model.getFetchedSex().addAll(p.getSex());
     }

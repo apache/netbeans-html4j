@@ -226,6 +226,17 @@ public final class Proto {
         return JSON.read(context, modelClass, data);
     }
 
+    /** Initializes asynchronous JSON connection to specified URL. Delegates
+     * to {@link #loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...) }
+     * with no extra parameters.
+     */
+    public void loadJSON(final int index, 
+        String urlBefore, String urlAfter, String method,
+        final Object data
+    ) {
+        loadJSON(index, urlBefore, urlAfter, method, data, new Object[0]);
+    }
+    
     /** Initializes asynchronous JSON connection to specified URL. The 
      * method returns immediately and later does callback later.
      * 
@@ -237,20 +248,23 @@ public final class Proto {
      * @param method method to use for connection to the server
      * @param data string, number or a {@link Model} generated class to send to
      *    the server when doing a query
+     * @param params extra params to pass back when calling
+     *   {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object, java.lang.Object[])}
+     * @since 0.8.1
      */
     public void loadJSON(final int index, 
         String urlBefore, String urlAfter, String method,
-        final Object data
+        final Object data, final Object... params
     ) {
         class Rcvr extends RcvrJSON {
             @Override
             protected void onMessage(MsgEvnt msg) {
-                type.onMessage(obj, index, 1, msg.getValues());
+                type.onMessage(obj, index, 1, msg.getValues(), params);
             }
 
             @Override
             protected void onError(MsgEvnt msg) {
-                type.onMessage(obj, index, 2, msg.getException());
+                type.onMessage(obj, index, 2, msg.getException(), params);
             }
         }
         JSON.loadJSON(context, new Rcvr(), urlBefore, urlAfter, method, data);
@@ -546,7 +560,7 @@ public final class Proto {
 
         /** Called to report results of asynchronous over-the-wire 
          * communication. Result of calling {@link Proto#wsOpen(int, java.lang.String, java.lang.Object)}
-         * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)}.
+         * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...)}.
          * 
          * @param model the instance of the model class
          * @param index index used during initiating the communication (via <code>loadJSON</code> or <code>wsOpen</code> calls)
@@ -555,7 +569,28 @@ public final class Proto {
          * @param data <code>null</code> or string, number or a {@link Model} class
          *   obtained to the server as a response
          */
-        protected abstract void onMessage(Model model, int index, int type, Object data);
+        protected void onMessage(Model model, int index, int type, Object data) {
+            onMessage(model, index, type, data, new Object[0]);
+        }
+        
+        /** Called to report results of asynchronous over-the-wire 
+         * communication. Result of calling {@link Proto#wsOpen(int, java.lang.String, java.lang.Object)}
+         * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...)}.
+         * 
+         * @param model the instance of the model class
+         * @param index index used during initiating the communication (via <code>loadJSON</code> or <code>wsOpen</code> calls)
+         * @param type type of the message: 0 - onOpen, 1 - onMessage, 2 - onError, 3 - onClose -
+         *   not all messages are applicable to all communication protocols (JSON has only 1 and 2).
+         * @param data <code>null</code> or string, number or a {@link Model} class
+         *   obtained to the server as a response
+         * @param params extra parameters as passed for example to
+         *   {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...)}
+         *   method
+         * @since 0.8.1
+         */
+        protected void onMessage(Model model, int index, int type, Object data, Object[] params) {
+            onMessage(model, index, type, data);
+        }
 
         //
         // Various support methods the generated classes use

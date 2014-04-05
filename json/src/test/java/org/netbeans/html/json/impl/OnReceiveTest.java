@@ -42,60 +42,71 @@
  */
 package org.netbeans.html.json.impl;
 
-import java.util.List;
-import net.java.html.json.Model;
-import net.java.html.json.OnReceive;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import net.java.html.BrwsrCtx;
+import net.java.html.json.Models;
 import net.java.html.json.Person;
-import net.java.html.json.Property;
+import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.json.spi.JSONCall;
+import org.apidesign.html.json.spi.Transfer;
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@Model(className = "Employee", properties = {
-    @Property(name = "person", type = Person.class),
-    @Property(name = "employer", type = Employer.class),
-    @Property(name = "call", type = Call.class)
-})
-public class EmployeeImpl {
-    @OnReceive(url = "some/url")
-    static void changePersonality(Employee e, Person p) {
-        e.setPerson(p);
+public class OnReceiveTest {
+    @Test public void performJSONCall() {
+        MockTrans mt = new MockTrans();
+        BrwsrCtx ctx = Contexts.newBuilder().register(Transfer.class, mt, 1).build();
+        
+        Employee e = Models.bind(new Employee(), ctx);
+        e.setCall(null);
+        Person p = new Person();
+        
+        mt.result = new HashMap<String, String>();
+        mt.result.put("firstName", "Jarda");
+        mt.result.put("lastName", "Tulach");
+        e.changePersonalities(1, 2.0, "3", p);
+        final Call c = e.getCall();
+        assertNotNull(c, "A call has been made");
+        assertEquals(c.getI(), 1);
+        assertEquals(c.getD(), 2.0);
+        assertEquals(c.getS(), "3");
+        assertEquals(c.getP(), p);
+        assertEquals(c.getData().size(), 1, "One result sent over wire");
+        assertEquals(c.getData().get(0).getFirstName(), "Jarda");
+        assertEquals(c.getData().get(0).getLastName(), "Tulach");
     }
 
-    private static void callChangePers(Employee e) {
-        Person per = new Person();
-        e.changePersonalities(10, 3.14, "Ahoj", per);
-        e.updatePersonalities("kuk", new Person(), 1, 2, "3", new Person());
-        e.socketPersonalities("where", null);
-    }
-
-    @OnReceive(url = "some/other/url")
-    static void changePersonalities(Employee e, List<Person> data, int i, double d, String s, Person o) {
-        e.setCall(new Call(i, d, s, o, data.toArray(new Person[0])));
-    }
-
-    @OnReceive(url = "{url}", method = "PUT", data = Person.class)
-    static void updatePersonalities(Employee e, List<Person> p, int i, double d, String s, Person o) {
-        e.setPerson(p.get(0));
-    }
-
-    @OnReceive(url = "{url}", method = "WebSocket", data = Person.class)
-    static void socketPersonalities(Employee e, List<Person> p) {
-        e.setPerson(p.get(0));
-    }
-    @OnReceive(url = "{url}", method = "WebSocket", data = Person.class)
-    static void socketArrayPersonalities(Employee e, Person[] p) {
-        e.setPerson(p[0]);
-    }
     
-    @Model(className="Call", properties = {
-        @Property(name = "i", type=int.class),
-        @Property(name = "d", type=double.class),
-        @Property(name = "s", type=String.class),
-        @Property(name = "p", type=Person.class),
-        @Property(name = "data", type=Person.class, array = true)
-    })
-    static class CallModel {
+    public static class MockTrans implements Transfer {
+        Map<String,String> result;
+        
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            assertTrue(obj instanceof Map, "It is a map: " + obj);
+            Map<?,?> mt = (Map<?,?>) obj;
+            for (int i = 0; i < props.length; i++) {
+                values[i] = mt.get(props[i]);
+            }
+        }
+
+        @Override
+        public Object toJSON(InputStream is) throws IOException {
+            throw new IOException();
+        }
+
+        @Override
+        public void loadJSON(JSONCall call) {
+            Object r = result;
+            assertNotNull(r, "We need a reply!");
+            result = null;
+            call.notifySuccess(r);
+        }
     }
 }

@@ -986,7 +986,7 @@ public final class ModelProcessor extends AbstractProcessor {
         Element clazz, StringWriter body, String className, 
         List<? extends Element> enclosedElements, StringBuilder inType
     ) {
-        inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data) {\n");
+        inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data, Object[] params) {\n");
         inType.append("    switch (index) {\n");
         int index = 0;
         for (Element m : enclosedElements) {
@@ -1027,6 +1027,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             int expectsList = 0;
             List<String> args = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             // first argument is model class
             {
                 TypeMirror type = e.getParameters().get(0).asType();
@@ -1079,7 +1080,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             String n = e.getSimpleName().toString();
-            if ("WebSocket".equals(onR.method())) {
+            final boolean isWebSocket = "WebSocket".equals(onR.method());
+            if (isWebSocket) {
                 body.append("  /** Performs WebSocket communication. Call with <code>null</code> data parameter\n");
                 body.append("  * to open the connection (even if not required). Call with non-null data to\n");
                 body.append("  * send messages to server. Call again with <code>null</code> data to close the socket.\n");
@@ -1111,17 +1113,34 @@ public final class ModelProcessor extends AbstractProcessor {
                 if (dataMirror != null) {
                     body.append(sep).append(dataMirror.toString()).append(" data");
                 }
+                for (int i = 2; i < e.getParameters().size(); i++) {
+                    if (isWebSocket) {
+                        error("@OnReceive(method=\"WebSocket\") can only have two arguments", e);
+                        return false;
+                    }
+                    
+                    VariableElement ve = e.getParameters().get(i);
+                    body.append(sep).append(ve.asType().toString()).append(" ").append(ve.getSimpleName());
+                    final String tp = ve.asType().toString();
+                    String btn = findBoxedType(tp);
+                    if (btn == null) {
+                        btn = tp;
+                    }
+                    args.add("(" + btn + ")params[" + (i - 2) + "]");
+                    params.add(ve.getSimpleName().toString());
+                    sep = ", ";
+                }
             }
             body.append(") {\n");
             boolean webSocket = onR.method().equals("WebSocket");
             if (webSocket) {
-                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
                 body.append("  }\n");
                 body.append("  private Object ws_" + e.getSimpleName() + ";\n");
             } else {
-                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
                     return false;
                 }
                 body.append("  }\n");
@@ -1133,7 +1152,7 @@ public final class ModelProcessor extends AbstractProcessor {
         return true;
     }
 
-    private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 2) { /* on error */\n" +
@@ -1199,11 +1218,14 @@ public final class ModelProcessor extends AbstractProcessor {
         } else {
             method.append(", null, null");
         }
+        for (String a : params) {
+            method.append(", ").append(a);
+        }
         method.append(");\n");
         return false;
     }
     
-    private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 0) { /* on open */\n" +
@@ -1212,7 +1234,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
-                if (arg.startsWith("arr")) {
+                if (arg.startsWith("arr") || arg.startsWith("java.util.Array")) {
                     body.append("null");
                 } else {
                     body.append(arg);
@@ -1284,7 +1306,11 @@ public final class ModelProcessor extends AbstractProcessor {
         method.append("= proto.wsOpen(" + index + ", ");
         method.append(urlBefore).append(", data);\n");
         method.append("    } else {\n");
-        method.append("      proto.wsSend(this.ws_").append(e.getSimpleName()).append(", ").append(urlBefore).append(", data);\n");
+        method.append("      proto.wsSend(this.ws_").append(e.getSimpleName()).append(", ").append(urlBefore).append(", data");
+        for (String a : params) {
+            method.append(", ").append(a);
+        }
+        method.append(");\n");
         method.append("    }\n");
         return false;
     }

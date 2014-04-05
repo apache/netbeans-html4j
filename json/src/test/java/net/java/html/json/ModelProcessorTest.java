@@ -341,6 +341,21 @@ public class ModelProcessorTest {
         res.assertError("Cannot have the name");
     }
     
+    @Test public void onWebSocketJustTwoArgs() throws IOException {
+        Compile res = Compile.create("", "package x;\n"
+            + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
+            + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
+            + "})\n"
+            + "class UseOnReceive {\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", method=\"WebSocket\")\n"
+            + "  static void onMessage(MyModel model, String value, int arg) {\n"
+            + "  }\n"
+            + "}\n"
+        );
+        res.assertErrors();
+        res.assertError("only have two arg");
+    }
+    
     @Test public void onErrorWouldHaveToBeStatic() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
