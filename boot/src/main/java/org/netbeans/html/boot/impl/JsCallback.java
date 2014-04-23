@@ -118,7 +118,8 @@ abstract class JsCallback {
             int sigBeg = body.indexOf('(', next);
             int sigEnd = body.indexOf(')', sigBeg);
             int colon4 = body.indexOf("::", next);
-            if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
+            int paramBeg = body.indexOf('(', sigEnd + 1);
+            if (sigBeg == -1 || sigEnd == -1 || colon4 == -1 || paramBeg == -1) {
                 throw new IllegalStateException(
                     "Wrong format of static callback. "
                     + "Should be: '@pkg.Class::staticMethod(Ljava/lang/Object;)(param)':\n" 
@@ -129,7 +130,6 @@ abstract class JsCallback {
             String method = body.substring(colon4 + 2, sigBeg);
             String params = body.substring(sigBeg, sigEnd + 1);
 
-            int paramBeg = body.indexOf('(', sigEnd + 1);
             
             sb.append(callMethod(null, fqn, method, params));
             pos = paramBeg + 1;
