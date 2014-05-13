@@ -122,9 +122,9 @@ public final class BrwsrCtx implements Executor {
 <b>public final class</b> Periodicaly <b>extends</b> {@link java.util.TimerTask} {
     <b>private final</b> {@link BrwsrCtx} ctx;
 
-    <b>private</b> Periodicaly() {
-        // remember the browser context
-        ctx = BrwsrCtx.findDefault(getClass());
+    <b>private</b> Periodicaly(BrwsrCtx ctx) {
+        // remember the browser context and use it later
+        this.ctx = ctx;
     }
     
     <b>public void</b> run() {
@@ -138,8 +138,10 @@ public final class BrwsrCtx implements Executor {
 
     // called when your page is ready
     <b>public static void</b> onPageLoad(String... args) <b>throws</b> Exception {
+        // the context at the time of page initialization
+        BrwsrCtx initialCtx = BrwsrCtx.findDefault(getClass());
         // the task that is associated with context 
-        Periodicaly task = new Periodicaly();
+        Periodicaly task = new Periodicaly(initialCtx);
         // creates a timer
         {@link java.util.Timer} t = new {@link java.util.Timer}("Move the box");
         // run the task ever 100ms
