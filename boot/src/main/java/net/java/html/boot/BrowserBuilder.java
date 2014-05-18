@@ -43,10 +43,15 @@
 package net.java.html.boot;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -180,7 +185,7 @@ public final class BrowserBuilder {
         }
         
         URL url = null;
-        MalformedURLException mal = null;
+        IOException mal = null;
         try {
             String baseURL = System.getProperty("browser.rootdir");
             if (baseURL != null) {
@@ -195,11 +200,41 @@ public final class BrowserBuilder {
             url = clazz.getResource(resource);
         }
         if (url == null) {
-            URL jar = clazz.getProtectionDomain().getCodeSource().getLocation();
-            try {
-                url = new URL(jar, resource);
-            } catch (MalformedURLException ex) {
-                ex.initCause(mal);
+            final ProtectionDomain pd = clazz.getProtectionDomain();
+            if (pd != null && pd.getCodeSource() != null) {
+                URL jar = pd.getCodeSource().getLocation();
+                try {
+                    url = new URL(jar, resource);
+                } catch (MalformedURLException ex) {
+                    ex.initCause(mal);
+                    mal = ex;
+                }
+            }
+        }
+        if (url == null) {
+            URL res = BrowserBuilder.class.getResource("html4j.txt");
+            LOG.log(Level.FINE, "Found html4j {0}", res);
+            if (res != null) try {
+                URLConnection c = res.openConnection();
+                LOG.log(Level.FINE, "testing : {0}", c);
+                if (c instanceof JarURLConnection) {
+                    JarURLConnection jc = (JarURLConnection)c;
+                    URL base = jc.getJarFileURL();
+                    for (int i = 0; i < 50; i++) {
+                        URL u = new URL(base, resource);
+                        try {
+                            InputStream is = u.openStream();
+                            is.close();
+                            url = u;
+                            LOG.log(Level.FINE, "found real url: {0}", url);
+                            break;
+                        } catch (FileNotFoundException ignore) {
+                            LOG.log(Level.FINE, "Cannot open " + u, ignore);
+                        }
+                        base = new URL(base, "..");
+                    }
+                }
+            } catch (IOException ex) {
                 mal = ex;
             }
         }
