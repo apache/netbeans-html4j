@@ -75,6 +75,22 @@
          yet the application code can be written in Java.
         </p>
         
+        <h3>What's New in Version 0.8.1?</h3>
+        
+        <p>
+            This is mostly a bugfix release. The annotation processor is made
+            more robust with respect to errors in callback syntax of
+            {@link net.java.html.js.JavaScriptBody} body parameter.
+            Javadoc of {@link net.java.html.BrwsrCtx#execute} method
+            has been improved based on a failure of its usability study.
+            There can be additional parameters to methods annotated by
+            {@link net.java.html.json.OnReceive} that allows one to
+            pass state when a JSON call is made and use it when it finishes.
+            The mechanism of discovery of sibling HTML page has been
+            extended to work on systems that don't support
+            {@link java.lang.Class#getProtectionDomain}.
+        </p>
+        
         <h3>What's New in Version 0.8?</h3>
         
         <p>
@@ -321,6 +337,8 @@ $ ls src/main/webapp/pages/index.html
         </script>
 
         <p>
+            <img src='resources/ios_logo.jpg' width="64"
+                 height="64" align="right"/>
             <img src='resources/android_logo.jpg' width="64"
                  height="64" align="right"/>
             
@@ -332,6 +350,13 @@ $ ls src/main/webapp/pages/index.html
             packaging you can create an APK file and deploy it to your
             Android phone. 
             Read <a target="_blank" href="http://wiki.apidesign.org/wiki/DlvkBrwsr">more</a>...
+            In case you'd like your application to reach out to second biggest
+            group of smartphone users, don't despair: It 
+            seems the set of devices that can execute
+            <a href="http://html.java.net">HTML for Java</a> applications 
+            has been extended to <em>iPads</em> and <em>iPhones</em>. Get the 
+            <a target="_blank" href="http://wiki.apidesign.org/wiki/IBrwsr">details here</a>
+            and deploy everywhere!
         </p>
         <p>
             Convinced it makes sense to use 
@@ -352,7 +377,7 @@ $ ls src/main/webapp/pages/index.html
         online:
         <ul>
             <li>Current <a target="_blank" href="http://bits.netbeans.org/html+java/dev/">development</a> version
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.6">0.7.6</a>
+            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.8">0.8</a>
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>
         </ul>
         
