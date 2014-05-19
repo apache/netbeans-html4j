@@ -141,7 +141,8 @@
                 </groups>   
                 <links>
                     <link>http://testng.org/javadocs/</link>
-                    <link>http://bits.netbeans.org/7.4/javadoc/org-openide-util-lookup/</link>
+                    <link>http://bits.netbeans.org/8.0/javadoc/org-openide-util-lookup/</link>
+                    <link>http://docs.oracle.com/javase/8/javafx/api/</link>
                 </links>              
               </configuration>
             </plugin>
