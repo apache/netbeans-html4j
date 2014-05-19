@@ -136,6 +136,20 @@ public final class BrowserBuilder {
         this.clazz = mainClass;
         return this;
     }
+    
+    /** Allows one to specify a runnable that should be invoked when a load
+     * of a page is finished. This method may be used in addition or instead
+     * of {@link #loadClass(java.lang.Class)} and 
+     * {@link #invoke(java.lang.String, java.lang.String...)} methods.
+     * 
+     * @param r the code to run when the page is loaded
+     * @return this builder
+     * @since 0.8.1
+     */
+    public BrowserBuilder loadFinished(Runnable r) {
+        this.onLoad = r;
+        return this;
+    }
 
     /** Page to load into the browser. If the <code>page</code> represents
      * a {@link URL} known to the Java system, the URL is passed to the browser. 
@@ -196,11 +210,20 @@ public final class BrowserBuilder {
         } catch (MalformedURLException ex) {
             mal = ex;
         }
+        final Class<?> myCls;
+        if (clazz != null) {
+            myCls = clazz;
+        } else if (onLoad != null) {
+            myCls = onLoad.getClass();
+        } else {
+            throw new NullPointerException("loadClass, neither loadFinished was called!");
+        }
+        
         if (url == null) {
-            url = clazz.getResource(resource);
+            url = myCls.getResource(resource);
         }
         if (url == null) {
-            final ProtectionDomain pd = clazz.getProtectionDomain();
+            final ProtectionDomain pd = myCls.getProtectionDomain();
             if (pd != null && pd.getCodeSource() != null) {
                 URL jar = pd.getCodeSource().getLocation();
                 try {
@@ -239,7 +262,7 @@ public final class BrowserBuilder {
             }
         }
         if (url == null) {
-            IllegalStateException ise = new IllegalStateException("Can't find resouce: " + resource + " relative to " + clazz);
+            IllegalStateException ise = new IllegalStateException("Can't find resouce: " + resource + " relative to " + myCls);
             if (mal != null) {
                 ise.initCause(mal);
             }
@@ -264,11 +287,11 @@ public final class BrowserBuilder {
         }
         
         final ClassLoader loader;
-        if (FnUtils.isJavaScriptCapable(clazz.getClassLoader())) {
-            loader = clazz.getClassLoader();
+        if (FnUtils.isJavaScriptCapable(myCls.getClassLoader())) {
+            loader = myCls.getClassLoader();
         } else {
-            FImpl impl = new FImpl(clazz.getClassLoader());
-            loader = FnUtils.newLoader(impl, dfnr, clazz.getClassLoader().getParent());
+            FImpl impl = new FImpl(myCls.getClassLoader());
+            loader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }
 
         final Fn.Presenter currentP = dfnr;
@@ -279,7 +302,7 @@ public final class BrowserBuilder {
                 try {
                     if (newClazz == null) {
                         Thread.currentThread().setContextClassLoader(loader);
-                        newClazz = Class.forName(clazz.getName(), true, loader);
+                        newClazz = Class.forName(myCls.getName(), true, loader);
                         if (browserClass != null) {
                             browserClass[0] = newClazz;
                         }
@@ -296,11 +319,18 @@ public final class BrowserBuilder {
                         return;
                     }
                     
+                    Throwable firstError = null;
                     if (onLoad != null) {
-                        onLoad.run();
+                        try {
+                            FnContext.currentPresenter(currentP);
+                            onLoad.run();
+                        } catch (Throwable ex) {
+                            firstError = ex;
+                        } finally {
+                            FnContext.currentPresenter(null);
+                        }
                     }
                     INIT: if (methodName != null) {
-                        Throwable firstError = null;
                         if (methodArgs.length == 0) {
                             try {
                                 Method m = newClazz.getMethod(methodName);
@@ -318,16 +348,16 @@ public final class BrowserBuilder {
                             FnContext.currentPresenter(currentP);
                             m.invoke(m, (Object) methodArgs);
                         } catch (Throwable ex) {
-                            if (firstError != null) {
-                                LOG.log(Level.SEVERE, "Can't call " + methodName, firstError);
-                            }
                             LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
                         } finally {
                             FnContext.currentPresenter(null);
                         }
                     }
+                    if (firstError != null) {
+                        LOG.log(Level.SEVERE, "Can't initialize the view", firstError);
+                    }
                 } catch (ClassNotFoundException ex) {
-                    LOG.log(Level.SEVERE, "Can't load " + clazz.getName(), ex);
+                    LOG.log(Level.SEVERE, "Can't load " + myCls.getName(), ex);
                 }
             }
         }

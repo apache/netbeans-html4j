@@ -43,10 +43,12 @@
 package net.java.html.boot.fx;
 
 import java.net.URL;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
+import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.fx.AbstractFXPresenter;
@@ -84,49 +86,105 @@ public final class FXBrowsers {
         Class<?> onPageLoad, String methodName,
         String... args
     ) {
-        class Load extends AbstractFXPresenter {
-            @Override
-            protected void waitFinished() {
-                // don't wait
-            }
-
-            @Override
-            protected WebView findView(final URL resource) {
-                final Worker<Void> w = webView.getEngine().getLoadWorker();
-                w.stateProperty().addListener(new ChangeListener<Worker.State>() {
-                    private String previous;
-                    
-                    @Override
-                    public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
-                        if (newState.equals(Worker.State.SUCCEEDED)) {
-                            if (checkValid()) {
-                                onPageLoad();
-                            }
-                        }
-                        if (newState.equals(Worker.State.FAILED)) {
-                            checkValid();
-                            throw new IllegalStateException("Failed to load " + url);
-                        }
-                    }
-
-                    private boolean checkValid() {
-                        final String crnt = webView.getEngine().getLocation();
-                        if (previous != null && !previous.equals(crnt)) {
-                            w.stateProperty().removeListener(this);
-                            return false;
-                        }
-                        previous = crnt;
-                        return true;
-                    }
-                });
-                
-                return webView;
-            }
-        }
-        BrowserBuilder.newBrowser(new Load()).
+        BrowserBuilder.newBrowser(new Load(webView)).
             loadPage(url.toExternalForm()).
             loadClass(onPageLoad).
             invoke(methodName, args).
             showAndWait();
     }
+    
+    /** Enables the Java/JavaScript bridge (that supports {@link JavaScriptBody} and co.)
+     * in the provided <code>webView</code>. This method returns 
+     * immediately. Once the support is active, it calls back specified
+     * method in <code>onPageLoad</code>'s run method. 
+     * This is more convenient way to initialize the webview, 
+     * but it requires one to make sure
+     * all {@link JavaScriptBody} methods has been post-processed during
+     * compilation and there will be no need to instantiate new classloader.
+     * 
+     * @param webView the instance of Web View to tweak
+     * @param url the URL of the HTML page to load into the view
+     * @param onPageLoad callback to call when the page is ready
+     * @since 0.8.1
+     */
+    public static void load(
+        WebView webView, final URL url, Runnable onPageLoad
+    ) {
+        BrowserBuilder.newBrowser(new Load(webView)).
+                loadPage(url.toExternalForm()).
+                loadFinished(onPageLoad).
+                showAndWait();
+    }
+    
+    /** Executes a code inside of provided {@link WebView}. This method
+     * is necessary to associte the execution context with a browser,
+     * so the {@link JavaScriptBody} annotations know in what context
+     * they should execute. The code is going to be executed synchronously
+     * in case {@link Platform#isFxApplicationThread()} returns <code>true</code>.
+     * Otherwise this method returns immediately and the code is executed
+     * later via {@link Platform#runLater(java.lang.Runnable)}.
+     * 
+     * @param webView the web view previously prepared by one of the <code>load</code>
+     *   in this class
+     * @param code the code to execute
+     * @throws IllegalArgumentException if the web view was not properly
+     *   initialized
+     * @see BrwsrCtx#execute(java.lang.Runnable) 
+     * @since 0.8.1
+     */
+    public static void runInBrowser(WebView webView, Runnable code) {
+        Object ud = webView.getUserData();
+        if (!(ud instanceof Load)) {
+            throw new IllegalArgumentException();
+        }
+        ((Load)ud).execute(code);
+    }
+    
+    private static class Load extends AbstractFXPresenter {
+        private final WebView webView;
+
+        public Load(WebView webView) {
+            webView.setUserData(this);
+            this.webView = webView;
+        }
+        
+        @Override
+        protected void waitFinished() {
+            // don't wait
+        }
+
+        @Override
+        protected WebView findView(final URL resource) {
+            final Worker<Void> w = webView.getEngine().getLoadWorker();
+            w.stateProperty().addListener(new ChangeListener<Worker.State>() {
+                private String previous;
+
+                @Override
+                public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
+                    if (newState.equals(Worker.State.SUCCEEDED)) {
+                        if (checkValid()) {
+                            onPageLoad();
+                        }
+                    }
+                    if (newState.equals(Worker.State.FAILED)) {
+                        checkValid();
+                        throw new IllegalStateException("Failed to load " + resource);
+                    }
+                }
+
+                private boolean checkValid() {
+                    final String crnt = webView.getEngine().getLocation();
+                    if (previous != null && !previous.equals(crnt)) {
+                        w.stateProperty().removeListener(this);
+                        return false;
+                    }
+                    previous = crnt;
+                    return true;
+                }
+            });
+
+            return webView;
+        }
+    }
+    
 }

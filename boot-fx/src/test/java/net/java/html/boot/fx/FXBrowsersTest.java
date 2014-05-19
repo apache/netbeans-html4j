@@ -51,9 +51,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import net.java.html.js.JavaScriptBody;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -116,6 +114,21 @@ public class FXBrowsersTest {
         
         assertEquals(Integer.getInteger("finalFirst"), Integer.valueOf(3), "Three times in view one");
         assertEquals(Integer.getInteger("finalSecond"), Integer.valueOf(2), "Two times in view one");
+
+        final CountDownLatch finish = new CountDownLatch(1);
+        final Object[] three = { 0 };
+        assertFalse(Platform.isFxApplicationThread());
+        FXBrowsers.runInBrowser(App.getV1(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(Platform.isFxApplicationThread());
+                three[0] = App.getV1().getEngine().executeScript("window.cnt");
+                finish.countDown();
+            }
+        });
+        finish.await();
+        
+        assertEquals(three[0], Integer.valueOf(3));
     }
     
     public static class OnPages {
@@ -131,7 +144,12 @@ public class FXBrowsersTest {
             
             URL u = FXBrowsersTest.class.getResource("/org/netbeans/html/boot/fx/empty.html");
             assertNotNull(u, "URL found");
-            FXBrowsers.load(App.getV2(), u, OnPages.class, "second", "Hello");
+            FXBrowsers.load(App.getV2(), u, new Runnable() {
+                @Override
+                public void run() {
+                    OnPages.second("Hello");
+                }
+            });
             
             assertEquals(increment(), 2, "Now it is two and not influenced by second view");
             System.setProperty("finalFirst", "" + increment());
