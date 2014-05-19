@@ -336,6 +336,7 @@ public final class BrowserBuilder {
                                 Method m = newClazz.getMethod(methodName);
                                 FnContext.currentPresenter(currentP);
                                 m.invoke(null);
+                                firstError = null;
                                 break INIT;
                             } catch (Throwable ex) {
                                 firstError = ex;
@@ -347,6 +348,7 @@ public final class BrowserBuilder {
                             Method m = newClazz.getMethod(methodName, String[].class);
                             FnContext.currentPresenter(currentP);
                             m.invoke(m, (Object) methodArgs);
+                            firstError = null;
                         } catch (Throwable ex) {
                             LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
                         } finally {
