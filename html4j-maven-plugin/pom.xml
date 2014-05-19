@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.netbeans.html</groupId>
     <artifactId>pom</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.8.1</version>
   </parent>
   <packaging>maven-plugin</packaging>
   <groupId>org.netbeans.html</groupId>
   <artifactId>html4j-maven-plugin</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.8.1</version>
   <name>Html for Java Maven Plugin</name>
   <url>http://maven.apache.org</url>
   <description>Maven plugin to post process the classes with @JavaScriptBody annotations</description>
