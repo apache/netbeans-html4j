@@ -46,12 +46,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
 
 /** Implementation detail. Holds list of technologies for particular
  * {@link BrwsrCtx}.
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public final class CtxImpl {
     private final List<Bind<?>> techs;

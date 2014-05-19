@@ -56,7 +56,7 @@ import org.netbeans.html.boot.fx.AbstractFXPresenter;
  * and configure it manually. In case such detailed control is not necessary,
  * consider using {@link BrowserBuilder}.
  * 
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  * @since 0.6
  */
 public final class FXBrowsers {

@@ -96,7 +96,7 @@ import java.lang.annotation.Target;
  * by selected name. 
  * Try <a target="_blank" href="http://dew.apidesign.org/dew/#8848505">this sample on-line</a>!
  * 
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)

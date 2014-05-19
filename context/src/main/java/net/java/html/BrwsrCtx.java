@@ -56,7 +56,7 @@ import org.apidesign.html.context.spi.Contexts;
  * <a href="http://knockoutjs.com">knockout.js</a> and different one
  * for <a href="http://angularjs.org">angular</a>.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class BrwsrCtx implements Executor {
     private static final Logger LOG = Logger.getLogger(BrwsrCtx.class.getName());

@@ -52,7 +52,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import net.java.html.js.JavaScriptBody;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import org.testng.annotations.BeforeClass;
@@ -60,7 +59,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public class FXBrowsersTest {
     

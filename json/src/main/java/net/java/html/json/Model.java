@@ -129,7 +129,7 @@ import java.net.URL;
  * to see a histogram driven by the {@link Model} annotation or try 
  * a little <a target="_blank" href="http://dew.apidesign.org/dew/#7263102">math test</a>.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)

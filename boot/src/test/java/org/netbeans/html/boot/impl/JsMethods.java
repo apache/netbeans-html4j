@@ -48,7 +48,7 @@ import net.java.html.js.JavaScriptResource;
 
 /**
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 @JavaScriptResource("jsmethods.js")
 public class JsMethods {

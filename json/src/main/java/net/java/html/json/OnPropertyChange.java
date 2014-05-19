@@ -86,7 +86,7 @@ import java.lang.annotation.Target;
  * request and {@link net.java.html.json.OnReceive asynchronously updates}
  * list of code snippets.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)

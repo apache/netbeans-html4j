@@ -61,7 +61,7 @@ import org.netbeans.html.json.impl.RcvrJSON.MsgEvnt;
  * associated {@link Technology} the necessary information about the 
  * generated {@link Model} class.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  * @since 0.7
  */
 public final class Proto {

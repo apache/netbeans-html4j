@@ -62,7 +62,7 @@ import org.testng.annotations.BeforeMethod;
 
 /**
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public class JsClassLoaderTest extends JsClassLoaderBase{
     private static Fn.Presenter loader;

@@ -61,7 +61,7 @@ import org.apidesign.html.boot.spi.Fn;
 
 /**
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public abstract class AbstractFXPresenter 
 implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {

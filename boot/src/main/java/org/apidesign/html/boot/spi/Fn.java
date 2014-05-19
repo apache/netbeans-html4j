@@ -52,15 +52,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
 /** Represents single JavaScript function that can be invoked. 
  * Created via {@link Presenter#defineFn(java.lang.String, java.lang.String...)}.
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public abstract class Fn {
     private final Presenter presenter;

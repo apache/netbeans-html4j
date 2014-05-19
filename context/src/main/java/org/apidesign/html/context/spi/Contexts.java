@@ -51,7 +51,7 @@ import org.netbeans.html.context.impl.CtxImpl;
  * and then assign technologies with {@link Builder#register(java.lang.Class, java.lang.Object, int)}
  * method.
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 public final class Contexts {
     private Contexts() {
@@ -124,7 +124,7 @@ public final class Contexts {
      * {@link java.util.ServiceProvider} can find them, when their JARs are included
      * on the classpath of the running application.
      *
-     * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+     * @author Jaroslav Tulach
      */
     public static interface Provider {
 
@@ -149,7 +149,7 @@ public final class Contexts {
      * designing their application with existing technologies should rather
      * point their attention to {@link BrwsrCtx} and co.
      *
-     * @author Jaroslav Tulach <jtulach@netbeans.org>
+     * @author Jaroslav Tulach
      */
     public static final class Builder {
         private final CtxImpl impl = new CtxImpl();

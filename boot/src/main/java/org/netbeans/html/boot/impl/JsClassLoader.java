@@ -51,7 +51,7 @@ import java.util.Enumeration;
 
 /** 
  *
- * @author Jaroslav Tulach <jaroslav.tulach@apidesign.org>
+ * @author Jaroslav Tulach
  */
 abstract class JsClassLoader extends ClassLoader {
     JsClassLoader(ClassLoader parent) {
