@@ -53,9 +53,14 @@ import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.fx.AbstractFXPresenter;
 
-/** Utility methods for working with <em>JavaFX</em> <code>WebView</code>s.
- * This class is for those who want to instantiate their own <code>WebView</code>
- * and configure it manually. In case such detailed control is not necessary,
+/** Utility methods to use {@link WebView} and {@link JavaScriptBody} code
+ * in existing <em>JavaFX</em> applications.
+ * This class is for those who want to instantiate their own {@link WebView},
+ * configure it manually, embed it into own <em>JavaFX</em>
+ * application and based on other events in the application
+ * {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable) re-execute code} 
+ * inside of such {@link WebView}s.
+ * In case such detailed control is not necessary,
  * consider using {@link BrowserBuilder}.
  * 
  * @author Jaroslav Tulach
@@ -74,6 +79,9 @@ public final class FXBrowsers {
      * versions). The method <code>methodName</code> needs to be <code>public</code>
      * (in a public class), <code>static</code> and take either no parameters
      * or an array of {@link String}s.
+     * <p>
+     * This method sets {@link WebView#getUserData()} and {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable)}
+     * relies on the value. Please don't alter it.
      * 
      * @param webView the instance of Web View to tweak
      * @param url the URL of the HTML page to load into the view
@@ -101,6 +109,9 @@ public final class FXBrowsers {
      * but it requires one to make sure
      * all {@link JavaScriptBody} methods has been post-processed during
      * compilation and there will be no need to instantiate new classloader.
+     * <p>
+     * This method sets {@link WebView#getUserData()} and {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable)}
+     * relies on the value. Please don't alter it.
      * 
      * @param webView the instance of Web View to tweak
      * @param url the URL of the HTML page to load into the view
@@ -117,12 +128,16 @@ public final class FXBrowsers {
     }
     
     /** Executes a code inside of provided {@link WebView}. This method
-     * is necessary to associte the execution context with a browser,
-     * so the {@link JavaScriptBody} annotations know in what context
-     * they should execute. The code is going to be executed synchronously
+     * is associates the execution context with provided browser,
+     * so the {@link JavaScriptBody} annotations know where to execute
+     * their JavaScript bodies.
+     * The code is going to be executed synchronously
      * in case {@link Platform#isFxApplicationThread()} returns <code>true</code>.
      * Otherwise this method returns immediately and the code is executed
      * later via {@link Platform#runLater(java.lang.Runnable)}.
+     * <p>
+     * This method relies on {@link WebView#getUserData()} being properly
+     * provided by the <code>load</code> methods in this class.
      * 
      * @param webView the web view previously prepared by one of the <code>load</code>
      *   in this class
