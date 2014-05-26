@@ -100,6 +100,17 @@ public final class MinesTest {
         Utils.exposeHTML(MinesTest.class, "");
     }
     
+    @KOTest public void countAround() throws Exception {
+        Mines mines = new Mines();
+        mines.init(5, 5, 0);
+        mines.getRows().get(0).getColumns().get(0).setMine(true);
+        mines.getRows().get(1).getColumns().get(0).setMine(true);
+        mines.getRows().get(0).getColumns().get(1).setMine(true);
+        
+        int cnt = around(mines, 1, 1);
+        assert cnt == 3 : "There are three mines around. Was: " + cnt;
+    }
+    
     private static int countChildren(String id) throws Exception {
         return ((Number)Utils.executeScript(
           MinesTest.class,
@@ -315,8 +326,9 @@ public final class MinesTest {
         }
         final Square sq = columns.get(x);
         if (sq.getState() == SquareType.UNKNOWN) {
-            sq.setState(SquareType.N_0);
-            model.computeMines();
+            int around = around(model, x, y);
+            final SquareType t = SquareType.valueOf("N_" + around);
+            sq.setState(t);
             if (sq.getState() == SquareType.N_0) {
                 expandKnown(model, x - 1, y - 1);
                 expandKnown(model, x - 1, y);
@@ -328,5 +340,27 @@ public final class MinesTest {
                 expandKnown(model, x + 1, y + 1);
             }
         }
+    }
+    private static int around(Mines model, int x, int y) {
+        return minesAt(model, x - 1, y - 1)
+                + minesAt(model, x - 1, y)
+                + minesAt(model, x - 1, y + 1)
+                + minesAt(model, x, y - 1)
+                + minesAt(model, x, y + 1)
+                + minesAt(model, x + 1, y - 1)
+                + minesAt(model, x + 1, y)
+                + minesAt(model, x + 1, y + 1);
+    }
+
+    private static int minesAt(Mines model, int x, int y) {
+        if (y < 0 || y >= model.getRows().size()) {
+            return 0;
+        }
+        final List<Square> columns = model.getRows().get(y).getColumns();
+        if (x < 0 || x >= columns.size()) {
+            return 0;
+        }
+        Square sq = columns.get(x);
+        return sq.isMine() ? 1 : 0;
     }
 }

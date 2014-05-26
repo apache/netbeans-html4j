@@ -109,6 +109,7 @@ final class Knockout {
         + "    read: function() {\n"
         + "      var r = activeGetter();\n"
         + "      activeGetter = realGetter;\n"
+        + "      if (r) try { r = r.valueOf(); } catch (err) {}\n"
         + "      return r;\n"
         + "    },\n"
         + "    owner: ret\n"
