@@ -1312,6 +1312,7 @@ ko.dependentObservable = function (evaluatorFunctionOrOptions, evaluatorFunction
     ko.subscribable.call(dependentObservable);
     ko.utils.extend(dependentObservable, ko.dependentObservable['fn']);
 
+    ko.exportProperty(dependentObservable, 'valueHasMutated', dependentObservable.valueHasMutated);
     ko.exportProperty(dependentObservable, 'peek', dependentObservable.peek);
     ko.exportProperty(dependentObservable, 'dispose', dependentObservable.dispose);
     ko.exportProperty(dependentObservable, 'isActive', dependentObservable.isActive);
