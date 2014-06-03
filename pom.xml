@@ -32,6 +32,7 @@
     <module>html4j-maven-plugin</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
+    <module>boot-script</module>
   </modules>
   <licenses>
       <license>
