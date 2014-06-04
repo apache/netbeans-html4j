@@ -72,7 +72,7 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  */
 public final class ScriptPresenter 
 implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
-    private static Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
+    private static final Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
 
     public ScriptPresenter() {
@@ -232,7 +232,7 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
 
             final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
-                List<Object> all = new ArrayList<Object>(args.length + 1);
+                List<Object> all = new ArrayList<>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
                 for (int i = 0; i < args.length; i++) {
                     if (arrayChecks) {
