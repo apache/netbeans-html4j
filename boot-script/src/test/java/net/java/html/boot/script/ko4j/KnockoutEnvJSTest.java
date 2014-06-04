@@ -55,6 +55,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -166,6 +167,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             register(Technology.class, fx.knockout(), 10).
             register(Transfer.class, fx.transfer(), 10);
         cb.register(Fn.Presenter.class, browserContext, 10);
+        cb.register(Executor.class, (Executor)browserContext, 10);
         BrwsrCtx ctx = cb.build();
         return ctx;
     }
