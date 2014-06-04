@@ -53,6 +53,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -99,7 +100,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         
         baseUri = DynamicHTTP.initServer();
         
-        final ScriptPresenter p = new ScriptPresenter();
+        final ScriptPresenter p = new ScriptPresenter(KOCase.JS);
         InputStream is = KnockoutEnvJSTest.class.getResourceAsStream("env.nashorn.1.2-debug.js");
         p.loadScript(new InputStreamReader(is));
         is.close();

@@ -57,7 +57,7 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class KOCase implements ITest, Runnable {
-    private static final Executor JS = Executors.newSingleThreadExecutor();
+    static final Executor JS = Executors.newSingleThreadExecutor();
     private final Fn.Presenter p;
     private final Method m;
     private Object result;

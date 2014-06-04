@@ -74,8 +74,10 @@ public final class ScriptPresenter
 implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private static final Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
+    private final Executor exc;
 
-    public ScriptPresenter() {
+    public ScriptPresenter(Executor exc) {
+        this.exc = exc;
         try {
             eng = new ScriptEngineManager().getEngineByName("javascript");
             eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
@@ -209,12 +211,22 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     }
 
     @Override
-    public void execute(Runnable command) {
-        try (Closeable c = Fn.activate(this)) {
+    public void execute(final Runnable command) {
+        if (Fn.activePresenter() == this) {
             command.run();
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
+            return;
         }
+        
+        class Wrap implements Runnable {
+            public void run() {
+                try (Closeable c = Fn.activate(ScriptPresenter.this)) {
+                    command.run();
+                } catch (IOException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        exc.execute(new Wrap());
     }
 
     private class FnImpl extends Fn {

@@ -59,7 +59,7 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class SingleCase implements ITest, IHookable, Runnable {
-    private static final Executor JS = Executors.newSingleThreadExecutor();
+    static final Executor JS = Executors.newSingleThreadExecutor();
     private final Fn.Presenter p;
     private final Method m;
     private Object result;
