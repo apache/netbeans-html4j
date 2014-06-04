@@ -114,7 +114,7 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
         try {
-            eng.eval("if (!!window) window.location = '" + page + "'");
+            eng.eval("if (typeof window !== 'undefined') window.location = '" + page + "'");
         } catch (ScriptException ex) {
             LOG.log(Level.SEVERE, "Cannot load " + page, ex);
         }
