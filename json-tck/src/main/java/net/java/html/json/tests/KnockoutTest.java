@@ -430,9 +430,14 @@ public final class KnockoutTest {
     private static void triggerClick(String id) throws Exception {
         String s = "var id = arguments[0];"
             + "var e = window.document.getElementById(id);\n "
+            + "if (e.checked) throw 'It should not be checked yet: ' + e;\n "
             + "var ev = window.document.createEvent('MouseEvents');\n "
             + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "e.dispatchEvent(ev);\n ";
+            + "e.dispatchEvent(ev);\n "
+            + "if (!e.checked) {\n"
+            + "  e.checked = true;\n "
+            + "  e.dispatchEvent(ev);\n "
+            + "}\n";
         Utils.executeScript(
             KnockoutTest.class,
             s, id);
