@@ -121,8 +121,6 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             Class<?> c = Class.forName(arr[i].getName(), true, l);
             seekKOTests(c, res);
         }
-        Class<?> c = Class.forName(LessCallbacksCheck.class.getName(), true, l);
-        seekKOTests(c, res);
         return res.toArray();
     }
 
