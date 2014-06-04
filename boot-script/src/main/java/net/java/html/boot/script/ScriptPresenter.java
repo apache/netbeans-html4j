@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -73,6 +72,7 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  */
 public final class ScriptPresenter 
 implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
+    private static Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
 
     public ScriptPresenter() {
@@ -113,7 +113,11 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-        // not really displaying anything
+        try {
+            eng.eval("if (!!window) window.location = '" + page + "'");
+        } catch (ScriptException ex) {
+            LOG.log(Level.SEVERE, "Cannot load " + page, ex);
+        }
         if (onPageLoad != null) {
             onPageLoad.run();
         }
