@@ -45,8 +45,6 @@ package org.apidesign.html.json.spi;
 import java.io.IOException;
 import java.io.OutputStream;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
-import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.RcvrJSON;
 
 /** Description of a JSON call request that is supposed to be processed
