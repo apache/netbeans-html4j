@@ -151,7 +151,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             final String res;
             if (r.value().startsWith("/")) {
-                res = r.value();
+                res = r.value().substring(1);
             } else {
                 res = findPkg(e).replace('.', '/') + "/" + r.value();
             }
@@ -164,7 +164,12 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     FileObject os2 = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", res);
                     os2.openInputStream().close();
                 } catch (IOException ex2) {
-                    msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find " + res + " in " + res + " package", e);
+                    try {
+                        FileObject os3 = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, "", res);
+                        os3.openInputStream().close();
+                    } catch (IOException ex3) {
+                        msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find resource " + res, e);
+                    }
                 }
             }
             
