@@ -85,13 +85,13 @@ public final class MinesTest {
             );
             m = Models.bind(new Mines(), ctx);
             m.applyBindings();
-            int cnt = countChildren("table");
+            int cnt = Utils.countChildren(MinesTest.class, "table");
             assert cnt == 0 : "Table is empty: " + cnt;
             scheduleClick("init", 100);
         }
 
 
-        int cnt = countChildren("table");
+        int cnt = Utils.countChildren(MinesTest.class, "table");
         if (cnt == 0) {
             throw new InterruptedException();
         }
@@ -111,16 +111,6 @@ public final class MinesTest {
         assert cnt == 3 : "There are three mines around. Was: " + cnt;
     }
     
-    private static int countChildren(String id) throws Exception {
-        return ((Number)Utils.executeScript(
-          MinesTest.class,
-          "var e = window.document.getElementById(arguments[0]);\n "
-        + "if (typeof e === 'undefined') return -2;\n "
-        + "return e.children.length;", 
-            id
-        )).intValue();
-    }
-
     private static void scheduleClick(String id, int delay) throws Exception {
         String s = "var id = arguments[0]; var delay = arguments[1];"
             + "var e = window.document.getElementById(id);\n "

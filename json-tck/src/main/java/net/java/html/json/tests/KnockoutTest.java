@@ -167,12 +167,12 @@ public final class KnockoutTest {
             m.getResults().add("Ahoj");
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             m.getResults().add("Hi");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -194,7 +194,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair("First", "Last", null), newContext());
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -203,7 +203,7 @@ public final class KnockoutTest {
             
             m.setLastName("Verylast");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
             
             triggerChildClick("ul", 1);
@@ -228,7 +228,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), ctx);
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -253,7 +253,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), newContext());
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -295,12 +295,12 @@ public final class KnockoutTest {
             m.getResults().add("Ahoj");
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             m.getResults().add("hello");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
@@ -323,21 +323,21 @@ public final class KnockoutTest {
 
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             final Person second = Models.bind(new Person(), c);
             second.setFirstName("second");
             m.getPeople().add(second);
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
 
             assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "Again one child, but was " + cnt;
 
             String txt = childText("ul", 0);
@@ -394,7 +394,7 @@ public final class KnockoutTest {
 
         m.applyBindings();
 
-        int cnt = countChildren("ul");
+        int cnt = Utils.countChildren(KnockoutTest.class, "ul");
         assert cnt == 1 : "One child, but was " + cnt;
 
 
@@ -426,16 +426,6 @@ public final class KnockoutTest {
         return results;
     }
     
-    private static int countChildren(String id) throws Exception {
-        return ((Number)Utils.executeScript(
-          KnockoutTest.class,
-          "var e = window.document.getElementById(arguments[0]);\n "
-        + "if (typeof e === 'undefined') return -2;\n "
-        + "return e.children.length;", 
-            id
-        )).intValue();
-    }
-
     private static void triggerClick(String id) throws Exception {
         String s = "var id = arguments[0];"
             + "var e = window.document.getElementById(id);\n "
