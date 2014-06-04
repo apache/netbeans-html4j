@@ -173,7 +173,7 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "  }\n"
         + "};\n"
         + "request.onerror = function (e) {\n"
-        + "  console.log('error loading :' url + ' props: ' + Object.getOwnPropertyNames(e));\n"
+        + "  console.log('error loading :' + url + ' props: ' + Object.getOwnPropertyNames(e));\n"
         + "  @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e);\n"
         + "}\n"
         + "if (data) request.send(data);"
