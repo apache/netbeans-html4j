@@ -437,11 +437,18 @@ public final class KnockoutTest {
             s, id);
     }
     private static void triggerChildClick(String id, int pos) throws Exception {
-        String s = "var id = arguments[0]; var pos = arguments[1];"
-            + "var e = window.document.getElementById(id);\n "
-            + "var ev = window.document.createEvent('MouseEvents');\n "
-            + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "e.children[pos].dispatchEvent(ev);\n ";
+        String s = 
+            "var id = arguments[0]; var pos = arguments[1];\n" +
+            "var e = window.document.getElementById(id);\n " +
+            "var ev = window.document.createEvent('MouseEvents');\n " +
+            "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n " +
+            "var list = e.childNodes;\n" +
+            "var cnt = -1;\n" + 
+            "for (var i = 0; i < list.length; i++) {\n" + 
+            "  if (list[i].nodeType == 1) cnt++;\n" + 
+            "  if (cnt === pos) return list[i].dispatchEvent(ev);\n" + 
+            "}\n" + 
+            "return null;\n";
         Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);
