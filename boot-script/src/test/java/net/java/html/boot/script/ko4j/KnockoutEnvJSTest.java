@@ -68,6 +68,7 @@ import org.apidesign.html.json.spi.Transfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
 import org.netbeans.html.ko4j.KO4J;
+import org.netbeans.html.wstyrus.TyrusContext;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
 import static org.testng.Assert.*;
@@ -161,9 +162,10 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     @Override
     public BrwsrCtx createContext() {
         KO4J fx = new KO4J(browserContext);
+        TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx.knockout(), 10).
-            register(Transfer.class, fx.transfer(), 10);
+            register(Transfer.class, tc, 10);
         cb.register(Fn.Presenter.class, browserContext, 10);
         cb.register(Executor.class, (Executor)browserContext, 10);
         BrwsrCtx ctx = cb.build();
