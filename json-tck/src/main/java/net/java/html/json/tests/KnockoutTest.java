@@ -448,10 +448,16 @@ public final class KnockoutTest {
     }
 
     private static String childText(String id, int pos) throws Exception {
-        String s = "var id = arguments[0]; var pos = arguments[1];"
-        + "var e = window.document.getElementById(id);\n "
-        + "var t = e.children[pos].innerHTML;\n "
-        + "return t ? t : null;";
+        String s = 
+            "var id = arguments[0]; var pos = arguments[1];" +
+            "var e = window.document.getElementById(id);\n" +
+            "var list = e.childNodes;\n" +
+            "var cnt = -1;\n" + 
+            "for (var i = 0; i < list.length; i++) {\n" + 
+            "  if (list[i].nodeType == 1) cnt++;\n" + 
+            "  if (cnt === pos) return list[i].innerHTML;\n" + 
+            "}\n" + 
+            "return null;\n";
         return (String)Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);
