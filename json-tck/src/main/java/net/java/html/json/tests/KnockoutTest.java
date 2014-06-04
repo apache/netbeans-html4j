@@ -142,10 +142,11 @@ public final class KnockoutTest {
         + "var n = window.document.getElementById('input'); \n "
         + "if (value != null) n['value'] = value; \n "
         + "return n['value'];";
-        return (String)Utils.executeScript(
+        Object ret = Utils.executeScript(
             KnockoutTest.class,
             s, value
         );
+        return ret == null ? null : ret.toString();
     }
     
     public static void triggerEvent(String id, String ev) throws Exception {
