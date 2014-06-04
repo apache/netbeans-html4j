@@ -43,6 +43,7 @@
 package org.apidesign.html.boot.spi;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -162,7 +163,14 @@ public abstract class Fn {
                         LOADED.put(resource, there);
                     }
                     if (there.add(p)) {
-                        InputStream is = caller.getClassLoader().getResourceAsStream(resource);
+                        final ClassLoader l = caller.getClassLoader();
+                        InputStream is = l.getResourceAsStream(resource);
+                        if (is == null && resource.startsWith("/")) {
+                            is = l.getResourceAsStream(resource.substring(1));
+                        }
+                        if (is == null) {
+                            throw new IOException("Cannot find " + resource + " in " + l);
+                        }
                         try {
                             InputStreamReader r = new InputStreamReader(is, "UTF-8");
                             p.loadScript(r);

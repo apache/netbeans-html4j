@@ -44,6 +44,7 @@ package net.java.html.boot.script.ko4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -54,21 +55,17 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.boot.script.ScriptPresenter;
 import net.java.html.js.JavaScriptBody;
-import net.java.html.js.JavaScriptResource;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
-import org.apidesign.html.json.spi.WSTransfer;
 import org.apidesign.html.json.tck.KOTest;
 import org.apidesign.html.json.tck.KnockoutTCK;
-import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.ko4j.KO4J;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
@@ -79,11 +76,11 @@ import org.testng.annotations.Factory;
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@JavaScriptResource("/META-INF/resources/webjars/envjs/1.2/env.rhino.js")
 @ServiceProvider(service = KnockoutTCK.class)
 public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
+    private static URI baseUri;
     
     public KnockoutEnvJSTest() {
     }
@@ -98,11 +95,16 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             );
         }
         
-        URI uri = DynamicHTTP.initServer();
-    
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter()).
+        baseUri = DynamicHTTP.initServer();
+        
+        final ScriptPresenter p = new ScriptPresenter();
+        InputStream is = KnockoutEnvJSTest.class.getResourceAsStream("env.nashorn.1.2-debug.js");
+        p.loadScript(new InputStreamReader(is));
+        is.close();
+
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(p).
             loadClass(KnockoutEnvJSTest.class).
-            loadPage(uri.toString()).
+            loadPage(baseUri.toString()).
             invoke("initialized");
         
         Executors.newSingleThreadExecutor().submit(new Runnable() {
@@ -163,7 +165,6 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx.knockout(), 10).
             register(Transfer.class, fx.transfer(), 10);
-        cb.register(Executor.class, (Executor)browserContext, 10);
         cb.register(Fn.Presenter.class, browserContext, 10);
         BrwsrCtx ctx = cb.build();
         return ctx;
@@ -184,21 +185,15 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static native void setProperty(Object json, String key, Object value);
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = ""
-        + "var f = new Function(s); "
-        + "return f.apply(null, args);"
+    @JavaScriptBody(args = { "s", "args" }, body = "\n"
+        + "var f = new Function(s);\n"
+        + "return f.apply(null, args);\n"
     )
     public native Object executeScript(String script, Object[] arguments);
 
-    @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
-    )
-    private static native String findBaseURL();
+    private static String findBaseURL() {
+        return baseUri.toString();
+    }
     
     @Override
     public URI prepareURL(String content, String mimeType, String[] parameters) {

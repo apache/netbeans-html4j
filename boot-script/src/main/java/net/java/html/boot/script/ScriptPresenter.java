@@ -42,11 +42,14 @@
  */
 package net.java.html.boot.script;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Invocable;
@@ -68,7 +71,8 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  *
  * @author Jaroslav Tulach
  */
-public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript {
+public final class ScriptPresenter 
+implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private final ScriptEngine eng;
 
     public ScriptPresenter() {
@@ -197,6 +201,15 @@ public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.T
             }
         } else {
             return toReturn;
+        }
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        try (Closeable c = Fn.activate(this)) {
+            command.run();
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
         }
     }
 
