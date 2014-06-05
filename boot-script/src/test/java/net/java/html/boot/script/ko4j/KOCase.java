@@ -50,6 +50,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 /**

@@ -53,7 +53,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -89,6 +88,14 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     }
     
     @Factory public static Object[] compatibilityTests() throws Exception {
+        try {
+            Class.forName("java.lang.FunctionalInterface");
+        } catch (ClassNotFoundException ex) {
+            // only runs on JDK8
+            return new Object[0];
+        }
+        
+        
         Class[] arr = testClasses();
         for (int i = 0; i < arr.length; i++) {
             assertEquals(
