@@ -139,9 +139,24 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             asSubclass(Annotation.class);
         for (Method m : c.getMethods()) {
             if (m.getAnnotation(koTest) != null) {
-                res.add(new KOCase(browserContext, m));
+                res.add(new KOCase(browserContext, m, skipMsg(m.getName())));
             }
         }
+    }
+    
+    private static String skipMsg(String methodName) {
+        if (!"1.8.0_05-b13".equals(System.getProperty("java.runtime.version"))) { // NOI18N
+            // we know that 1.8.0_05 is broken, 
+            // let's not speculate about anything else
+            return null;
+        }
+        switch (methodName) {
+            case "paintTheGridOnClick":
+            case "displayContentOfArrayOfPeople":
+            case "connectUsingWebSocket":
+                return "Does not work on JDK8b132, due to JDK-8046013";
+        }
+        return null;
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {

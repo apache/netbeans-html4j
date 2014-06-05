@@ -61,13 +61,15 @@ public final class KOCase implements ITest, Runnable {
     static final Executor JS = Executors.newSingleThreadExecutor();
     private final Fn.Presenter p;
     private final Method m;
+    private final String skipMsg;
     private Object result;
     private Object inst;
     private int count;
 
-    KOCase(Fn.Presenter p, Method m) {
+    KOCase(Fn.Presenter p, Method m, String skipMsg) {
         this.p = p;
         this.m = m;
+        this.skipMsg = skipMsg;
     }
 
     @Override
@@ -77,6 +79,9 @@ public final class KOCase implements ITest, Runnable {
 
     @Test
     public synchronized void executeTest() throws Exception {
+        if (skipMsg != null) {
+            throw new SkipException(skipMsg);
+        }
         if (result == null) {
             JS.execute(this);
             wait();
