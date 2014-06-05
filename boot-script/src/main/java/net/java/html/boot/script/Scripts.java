@@ -44,10 +44,25 @@ package net.java.html.boot.script;
 
 import java.util.concurrent.Executor;
 import javax.script.ScriptEngine;
+import net.java.html.boot.BrowserBuilder;
+import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn.Presenter;
 
 /** Implementations of {@link Presenter}s that delegate
- * to Java {@link ScriptEngine scripting} API.
+ * to Java {@link ScriptEngine scripting} API. Initialize your presenter
+ * like this:
+ * 
+ * <pre>
+ * 
+ * {@link Runnable} <em>run</em> = ...; // your own init code
+ * {@link Presenter Fn.Presenter} <em>p</em> = Scripts.{@link Scripts#createPresenter()};
+ * BrowserBuilder.{@link BrowserBuilder#newBrowser(java.lang.Object...) newBrowser(<em>p</em>)}.
+ *      {@link BrowserBuilder#loadFinished(java.lang.Runnable) loadFinished(run)}.
+ *      {@link BrowserBuilder#showAndWait()};
+ * </pre>
+ * 
+ * and your runnable can make extensive use of {@link JavaScriptBody} directly or
+ * indirectly via APIs using {@link JavaScriptBody such annotation} themselves.
  * 
  * @author Jaroslav Tulach
  */
@@ -69,8 +84,9 @@ public final class Scripts {
         return new ScriptPresenter(null);
     }
 
-    /** Simple implementation of {@link Presenter} that delegates
-     * to Java {@link ScriptEngine scripting} API. The presenter runs headless
+    /** Implementation of {@link Presenter} that delegates
+     * to Java {@link ScriptEngine scripting} API and can control execution
+     * thread. The presenter runs headless
      * without appropriate simulation of browser APIs. Its primary usefulness
      * is inside testing environments. The presenter implements {@link Executor}
      * interface, and passes all runnables from {@link Executor#execute(java.lang.Runnable)}

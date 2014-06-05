@@ -137,6 +137,10 @@
                     <packages>net.java.html.sound</packages>
                   </group>
                   <group>
+                    <title>Testing and Headless API</title>
+                    <packages>net.java.html.boot.script</packages>
+                  </group>
+                  <group>
                     <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.apidesign.html.*</packages>
                   </group>
