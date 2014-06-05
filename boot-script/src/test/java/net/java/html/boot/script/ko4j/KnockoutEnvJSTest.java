@@ -59,7 +59,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
-import net.java.html.boot.script.ScriptPresenter;
+import net.java.html.boot.script.Scripts;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.context.spi.Contexts;
@@ -107,7 +107,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         
         baseUri = DynamicHTTP.initServer();
         
-        final ScriptPresenter p = new ScriptPresenter(KOCase.JS);
+        final Fn.Presenter p = Scripts.createPresenter(KOCase.JS);
         InputStream is = KnockoutEnvJSTest.class.getResourceAsStream("env.nashorn.1.2-debug.js");
         p.loadScript(new InputStreamReader(is));
         is.close();

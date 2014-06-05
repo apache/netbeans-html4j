@@ -65,12 +65,12 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  * <p>
  * One can load in browser simulation for example from 
  * <a href="http://www.envjs.com/">env.js</a>. The best way to achieve so,
- * is to add dependency on XXX
+ * is to wait until JDK-8046013 gets fixed....
  * 
  *
  * @author Jaroslav Tulach
  */
-public final class ScriptPresenter 
+final class ScriptPresenter 
 implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private static final Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
@@ -226,7 +226,12 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
                 }
             }
         }
-        exc.execute(new Wrap());
+        final Runnable wrap = new Wrap();
+        if (exc == null) {
+            wrap.run();
+        } else {
+            exc.execute(wrap);
+        }
     }
 
     private class FnImpl extends Fn {
