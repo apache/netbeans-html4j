@@ -40,34 +40,36 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package net.java.html.boot.script;
+package net.java.html.boot.script.ko4j;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apidesign.html.boot.spi.Fn;
-import org.netbeans.html.boot.impl.FnContext;
-import org.testng.IHookCallBack;
-import org.testng.IHookable;
 import org.testng.ITest;
-import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 /**
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public final class SingleCase implements ITest, IHookable, Runnable {
+public final class KOCase implements ITest, Runnable {
     static final Executor JS = Executors.newSingleThreadExecutor();
     private final Fn.Presenter p;
     private final Method m;
+    private final String skipMsg;
     private Object result;
     private Object inst;
+    private int count;
 
-    SingleCase(Fn.Presenter p, Method m) {
+    KOCase(Fn.Presenter p, Method m, String skipMsg) {
         this.p = p;
         this.m = m;
+        this.skipMsg = skipMsg;
     }
 
     @Override
@@ -77,6 +79,9 @@ public final class SingleCase implements ITest, IHookable, Runnable {
 
     @Test
     public synchronized void executeTest() throws Exception {
+        if (skipMsg != null) {
+            throw new SkipException(skipMsg);
+        }
         if (result == null) {
             JS.execute(this);
             wait();
@@ -92,8 +97,8 @@ public final class SingleCase implements ITest, IHookable, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
+        Closeable a = Fn.activate(p);
         try {
-            FnContext.currentPresenter(p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -104,9 +109,11 @@ public final class SingleCase implements ITest, IHookable, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                notify = false;
-                JS.execute(this);
-                return;
+                if (count++ < 10000) {
+                    notify = false;
+                    JS.execute(this);
+                    return;
+                }
             }
             result = r;
         } catch (Exception ex) {
@@ -115,13 +122,12 @@ public final class SingleCase implements ITest, IHookable, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
+            try {
+                a.close();
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
-    }
-
-    @Override
-    public void run(IHookCallBack ihcb, ITestResult itr) {
-        ihcb.runTestMethod(itr);
     }
     
 }

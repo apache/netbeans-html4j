@@ -42,11 +42,13 @@
  */
 package net.java.html.boot.script;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Invocable;
@@ -63,15 +65,19 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  * <p>
  * One can load in browser simulation for example from 
  * <a href="http://www.envjs.com/">env.js</a>. The best way to achieve so,
- * is to add dependency on XXX
+ * is to wait until JDK-8046013 gets fixed....
  * 
  *
  * @author Jaroslav Tulach
  */
-public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript {
+final class ScriptPresenter 
+implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
+    private static final Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
+    private final Executor exc;
 
-    public ScriptPresenter() {
+    public ScriptPresenter(Executor exc) {
+        this.exc = exc;
         try {
             eng = new ScriptEngineManager().getEngineByName("javascript");
             eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
@@ -109,7 +115,11 @@ public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.T
 
     @Override
     public void displayPage(URL page, Runnable onPageLoad) {
-        // not really displaying anything
+        try {
+            eng.eval("if (typeof window !== 'undefined') window.location = '" + page + "'");
+        } catch (ScriptException ex) {
+            LOG.log(Level.SEVERE, "Cannot load " + page, ex);
+        }
         if (onPageLoad != null) {
             onPageLoad.run();
         }
@@ -200,6 +210,30 @@ public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.T
         }
     }
 
+    @Override
+    public void execute(final Runnable command) {
+        if (Fn.activePresenter() == this) {
+            command.run();
+            return;
+        }
+        
+        class Wrap implements Runnable {
+            public void run() {
+                try (Closeable c = Fn.activate(ScriptPresenter.this)) {
+                    command.run();
+                } catch (IOException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        final Runnable wrap = new Wrap();
+        if (exc == null) {
+            wrap.run();
+        } else {
+            exc.execute(wrap);
+        }
+    }
+
     private class FnImpl extends Fn {
 
         private final Object fn;
@@ -215,7 +249,7 @@ public final class ScriptPresenter implements Presenter, Fn.FromJavaScript, Fn.T
         }
 
             final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
-                List<Object> all = new ArrayList<Object>(args.length + 1);
+                List<Object> all = new ArrayList<>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
                 for (int i = 0; i < args.length; i++) {
                     if (arrayChecks) {

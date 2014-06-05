@@ -72,7 +72,7 @@ import org.netbeans.html.boot.impl.FnUtils;
  * <pre>
  * 
  * <b>public static void</b> <em>main</em>(String... args) {
- *     BrowserBuilder.{@link #newBrowser}.
+ *     BrowserBuilder.{@link #newBrowser newBrowser()}.
  *          {@link #loadClass(java.lang.Class) loadClass(YourMain.class)}.
  *          {@link #loadPage(java.lang.String) loadPage("index.html")}.
  *          {@link #invoke(java.lang.String, java.lang.String[]) invoke("initialized", args)}.

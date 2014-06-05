@@ -95,6 +95,7 @@
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>ko4j/src/main/resources/org/netbeans/html/ko4j/knockout*.js</exclude>
+                       <exclude>boot-script/src/test/resources/net/java/html/boot/script/ko4j/env.nashorn.1.2-debug.js</exclude>
                        <exclude>src/main/javadoc/resources/teavm.js</exclude>
                   </excludes>
               </configuration>
@@ -134,6 +135,10 @@
                   <group>
                     <title>Sound API</title>
                     <packages>net.java.html.sound</packages>
+                  </group>
+                  <group>
+                    <title>Testing and Headless API</title>
+                    <packages>net.java.html.boot.script</packages>
                   </group>
                   <group>
                     <title>Service Provider APIs (not commonly interesting)</title>

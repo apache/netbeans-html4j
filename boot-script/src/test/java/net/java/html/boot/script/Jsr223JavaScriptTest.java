@@ -65,7 +65,7 @@ public class Jsr223JavaScriptTest {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter()).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter(SingleCase.JS)).
             loadClass(Jsr223JavaScriptTest.class).
             loadPage("empty.html").
             invoke("initialized");

@@ -142,10 +142,11 @@ public final class KnockoutTest {
         + "var n = window.document.getElementById('input'); \n "
         + "if (value != null) n['value'] = value; \n "
         + "return n['value'];";
-        return (String)Utils.executeScript(
+        Object ret = Utils.executeScript(
             KnockoutTest.class,
             s, value
         );
+        return ret == null ? null : ret.toString();
     }
     
     public static void triggerEvent(String id, String ev) throws Exception {
@@ -167,12 +168,12 @@ public final class KnockoutTest {
             m.getResults().add("Ahoj");
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             m.getResults().add("Hi");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -194,7 +195,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair("First", "Last", null), newContext());
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -203,7 +204,7 @@ public final class KnockoutTest {
             
             m.setLastName("Verylast");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
             
             triggerChildClick("ul", 1);
@@ -228,7 +229,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), ctx);
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -253,7 +254,7 @@ public final class KnockoutTest {
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), newContext());
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
@@ -295,12 +296,12 @@ public final class KnockoutTest {
             m.getResults().add("Ahoj");
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             m.getResults().add("hello");
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
@@ -323,21 +324,21 @@ public final class KnockoutTest {
 
             m.applyBindings();
 
-            int cnt = countChildren("ul");
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             final Person second = Models.bind(new Person(), c);
             second.setFirstName("second");
             m.getPeople().add(second);
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 2 : "Two children now, but was " + cnt;
 
             triggerChildClick("ul", 1);
 
             assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
 
-            cnt = countChildren("ul");
+            cnt = Utils.countChildren(KnockoutTest.class, "ul");
             assert cnt == 1 : "Again one child, but was " + cnt;
 
             String txt = childText("ul", 0);
@@ -394,7 +395,7 @@ public final class KnockoutTest {
 
         m.applyBindings();
 
-        int cnt = countChildren("ul");
+        int cnt = Utils.countChildren(KnockoutTest.class, "ul");
         assert cnt == 1 : "One child, but was " + cnt;
 
 
@@ -426,42 +427,50 @@ public final class KnockoutTest {
         return results;
     }
     
-    private static int countChildren(String id) throws Exception {
-        return ((Number)Utils.executeScript(
-          KnockoutTest.class,
-          "var e = window.document.getElementById(arguments[0]);\n "
-        + "if (typeof e === 'undefined') return -2;\n "
-        + "return e.children.length;", 
-            id
-        )).intValue();
-    }
-
     private static void triggerClick(String id) throws Exception {
         String s = "var id = arguments[0];"
             + "var e = window.document.getElementById(id);\n "
+            + "if (e.checked) throw 'It should not be checked yet: ' + e;\n "
             + "var ev = window.document.createEvent('MouseEvents');\n "
             + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "e.dispatchEvent(ev);\n ";
+            + "e.dispatchEvent(ev);\n "
+            + "if (!e.checked) {\n"
+            + "  e.checked = true;\n "
+            + "  e.dispatchEvent(ev);\n "
+            + "}\n";
         Utils.executeScript(
             KnockoutTest.class,
             s, id);
     }
     private static void triggerChildClick(String id, int pos) throws Exception {
-        String s = "var id = arguments[0]; var pos = arguments[1];"
-            + "var e = window.document.getElementById(id);\n "
-            + "var ev = window.document.createEvent('MouseEvents');\n "
-            + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "e.children[pos].dispatchEvent(ev);\n ";
+        String s = 
+            "var id = arguments[0]; var pos = arguments[1];\n" +
+            "var e = window.document.getElementById(id);\n " +
+            "var ev = window.document.createEvent('MouseEvents');\n " +
+            "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n " +
+            "var list = e.childNodes;\n" +
+            "var cnt = -1;\n" + 
+            "for (var i = 0; i < list.length; i++) {\n" + 
+            "  if (list[i].nodeType == 1) cnt++;\n" + 
+            "  if (cnt === pos) return list[i].dispatchEvent(ev);\n" + 
+            "}\n" + 
+            "return null;\n";
         Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);
     }
 
     private static String childText(String id, int pos) throws Exception {
-        String s = "var id = arguments[0]; var pos = arguments[1];"
-        + "var e = window.document.getElementById(id);\n "
-        + "var t = e.children[pos].innerHTML;\n "
-        + "return t ? t : null;";
+        String s = 
+            "var id = arguments[0]; var pos = arguments[1];" +
+            "var e = window.document.getElementById(id);\n" +
+            "var list = e.childNodes;\n" +
+            "var cnt = -1;\n" + 
+            "for (var i = 0; i < list.length; i++) {\n" + 
+            "  if (list[i].nodeType == 1) cnt++;\n" + 
+            "  if (cnt === pos) return list[i].innerHTML;\n" + 
+            "}\n" + 
+            "return null;\n";
         return (String)Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);

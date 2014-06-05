@@ -55,7 +55,7 @@ import org.apidesign.html.json.tck.KnockoutTCK;
  */
 public final class Utils {
     private static KnockoutTCK instantiatedTCK;
-    
+
     private Utils() {
     }
     
@@ -110,6 +110,20 @@ public final class Utils {
         return executeScript(clazz, s, html);
     }
 
+    static int countChildren(Class<?> caller, String id) throws Exception {
+        return ((Number) executeScript(caller, 
+            "var e = window.document.getElementById(arguments[0]);\n" + 
+            "if (typeof e === 'undefined') return -2;\n " + 
+            "var list = e.childNodes;\n" +
+            "var cnt = 0;\n" + 
+            "for (var i = 0; i < list.length; i++) {\n" + 
+            "  if (list[i].nodeType == 1) cnt++;\n" + 
+            "}\n" + 
+            "return cnt;\n"
+            , id
+        )).intValue();
+    }
+    
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
         for (KnockoutTCK tck : tcks(clazz)) {
