@@ -452,7 +452,7 @@ public final class KnockoutTest {
             "var cnt = -1;\n" + 
             "for (var i = 0; i < list.length; i++) {\n" + 
             "  if (list[i].nodeType == 1) cnt++;\n" + 
-            "  if (cnt === pos) return list[i].dispatchEvent(ev);\n" + 
+            "  if (cnt == pos) return list[i].dispatchEvent(ev);\n" + 
             "}\n" + 
             "return null;\n";
         Utils.executeScript(
