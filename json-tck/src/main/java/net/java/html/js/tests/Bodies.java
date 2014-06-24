@@ -116,4 +116,24 @@ final class Bodies {
     static int fourtyTwo() {
         return 42;
     }
+    
+    @JavaScriptBody(args = { "arr" }, body = 
+        "var sum = 0;\n" +
+        "for (var i = 0; i < arr.length; i++) {\n" +
+        "  sum += arr[i];\n" +
+        "}\n" +
+        "return sum;\n"
+    )
+    public static native double sumVector(double[] arr);
+    
+    @JavaScriptBody(args = { "arr" }, body = 
+        "var sum = 0;\n" +
+        "for (var i = 0; i < arr.length; i++) {\n" +
+        "  for (var j = 0; j < arr[i].length; j++) {\n" +
+        "    sum += arr[i][j];\n" +
+        "  }\n" +
+        "}\n" +
+        "return sum;\n"
+    )
+    public static native double sumMatrix(double[][] arr);
 }
