@@ -248,7 +248,7 @@ public final class Position {
             }
 
             @Override
-            public void onError(Object error) {
+            public void onError(final String message, int code) {
                 if (handle != this) {
                     return;
                 }
@@ -256,7 +256,13 @@ public final class Position {
                     stop();
                 }
                 try {
-                    Handle.this.onError(new Exception());
+                    final Exception err = new Exception(message + " errno: " + code) {
+                        @Override
+                        public String getLocalizedMessage() {
+                            return message;
+                        }
+                    };
+                    Handle.this.onError(err);
                 } catch (Throwable ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }

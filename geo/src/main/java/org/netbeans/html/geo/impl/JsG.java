@@ -57,7 +57,7 @@ public abstract class JsG {
     }
     
     public abstract void onLocation(Object position);
-    public abstract void onError(Object error);
+    public abstract void onError(String message, int code);
     
     @JavaScriptBody(args = {}, body = "return !!navigator.geolocation;")
     public static boolean hasGeolocation() {
@@ -73,7 +73,7 @@ public abstract class JsG {
         "  self.@org.netbeans.html.geo.impl.JsG::onLocation(Ljava/lang/Object;)(position);\n" +
         "};\n" +
         "var fail = function (error) {\n" +
-        "  self.@org.netbeans.html.geo.impl.JsG::onError(Ljava/lang/Object;)(error);\n" +
+        "  self.@org.netbeans.html.geo.impl.JsG::onError(Ljava/lang/String;I)(error.message, error.code);\n" +
         "};\n" +
         "var options = {};\n" +
         "options.enableHighAccuracy = enableHighAccuracy;\n" +
