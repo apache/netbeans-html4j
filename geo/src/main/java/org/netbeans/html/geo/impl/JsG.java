@@ -80,10 +80,10 @@ public abstract class JsG {
         "if (timeout >= 0) options.timeout = timeout;\n" +
         "if (maximumAge >= 0) options.maximumAge = maximumAge;\n" +
         "if (onlyOnce) {\n" +
-        "  navigator.geolocation.getCurrentPosition(ok, fail);\n" +
+        "  navigator.geolocation.getCurrentPosition(ok, fail, options);\n" +
         "  return 0;\n" +
         "} else {\n" +
-        "  return navigator.geolocation.watchPosition(ok, fail);\n" +
+        "  return navigator.geolocation.watchPosition(ok, fail, options);\n" +
         "}\n"
     )
     protected long start(
