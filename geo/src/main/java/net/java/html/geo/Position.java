@@ -90,24 +90,46 @@ public final class Position {
             this.data = data;
         }
         
+        /**
+         * @return geographic coordinate specified in decimal degrees.
+         */
         public double getLatitude() {
             return ((Number)JsG.get(data, "latitude")).doubleValue(); // NOI18N
         }
 
+        /**
+         * @return geographic coordinate specified in decimal degrees.
+         */
         public double getLongitude() {
             return ((Number)JsG.get(data, "longitude")).doubleValue(); // NOI18N
-        }
+        } 
 
+        /**
+         * The accuracy attribute denotes the accuracy level of the latitude 
+         * and longitude coordinates. It is specified in meters. 
+         * The value of the accuracy attribute must be a non-negative number.
+         * 
+         * @return accuracy in meters
+         */
         public double getAccuracy() {
             return ((Number)JsG.get(data, "accuracy")).doubleValue(); // NOI18N
         }
         
-        /** @return may return null, if the information is not available */
+        /** Denotes the height of the position, specified in meters above the ellipsoid. 
+         * If the implementation cannot provide altitude information, 
+         * the value of this attribute must be null.
+         * @return value in meters, may return null, if the information is not available 
+         */
         public Double getAltitude() {
             return (Double)JsG.get(data, "altitude"); // NOI18N
         }
         
-        /** @return may return null, if the information is not available */
+        /**  The altitude accuracy is specified in meters. 
+         * If the implementation cannot provide altitude information, 
+         * the value of this attribute must be null. Otherwise, the value 
+         * must be a non-negative real number.
+         * @return value in meters; may return null, if the information is not available 
+         */
         public Double getAltitudeAccuracy() {
             return (Double)JsG.get(data, "altitudeAccuracy"); // NOI18N
         }
