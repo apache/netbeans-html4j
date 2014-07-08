@@ -110,7 +110,10 @@ public final class Proto {
     }
     
     /** Whenever model changes a property. It should notify the
-     * associated technology by calling this method.
+     * associated technology by calling this method. 
+     * Since 0.8.3: This method may be called by any thread - it reschedules
+     * its actual execution into appropriate one by using
+     * {@link BrwsrCtx#execute(java.lang.Runnable)}.
      * 
      * @param propName name of the changed property
      */
@@ -130,6 +133,9 @@ public final class Proto {
      * (if the new value is known and different to the old one) or
      * via (slightly ineffective) {@link #valueHasMutated(java.lang.String)}
      * method.
+     * Since 0.8.3: This method may be called by any thread - it reschedules
+     * its actual execution into appropriate one by using
+     * {@link BrwsrCtx#execute(java.lang.Runnable)}.
      * 
      * @param propName name of the changed property
      * @param oldValue provides previous value of the property
