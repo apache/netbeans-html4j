@@ -56,6 +56,22 @@ import org.apidesign.html.json.tck.KnockoutTCK;
 public final class Utils {
     private static KnockoutTCK instantiatedTCK;
 
+    static boolean skipIfNoFullJDK() {
+        try {
+            Class<?> thread = Class.forName("java.lang.Thread");
+            Thread t = new Thread("Empty");
+            t.setName("Different");
+            t.setDaemon(false);
+            t.interrupt();
+            t.start();
+        } catch (ClassNotFoundException ex) {
+            return true;
+        } catch (SecurityException ex) {
+            return true;
+        }
+        return false;
+    }
+
     private Utils() {
     }
     

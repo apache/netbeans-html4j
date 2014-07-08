@@ -114,10 +114,15 @@ public final class Proto {
      * 
      * @param propName name of the changed property
      */
-    public void valueHasMutated(String propName) {
-        if (ko != null) {
-            ko.valueHasMutated(propName, null, null);
-        }
+    public void valueHasMutated(final String propName) {
+        context.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (ko != null) {
+                    ko.valueHasMutated(propName, null, null);
+                }
+            }
+        });
     }
 
     /** Whenever model changes a propertyit should notify the
@@ -131,10 +136,17 @@ public final class Proto {
      * @param newValue provides new value of the property
      * @since 0.7.6
      */
-    public void valueHasMutated(String propName, Object oldValue, Object newValue) {
-        if (ko != null) {
-            ko.valueHasMutated(propName, oldValue, newValue);
-        }
+    public void valueHasMutated(
+        final String propName, final Object oldValue, final Object newValue
+    ) {
+        context.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (ko != null) {
+                    ko.valueHasMutated(propName, oldValue, newValue);
+                }
+            }
+        });
     }
     
     /** Initializes the associated model in the current {@link #getContext() context}.
