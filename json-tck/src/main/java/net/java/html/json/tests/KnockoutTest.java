@@ -220,6 +220,45 @@ public final class KnockoutTest {
         }
     }
     
+    @KOTest public void displayContentOfAsyncArray() throws Exception {
+        if (js == null) {
+            Utils.exposeHTML(KnockoutTest.class, 
+                "<ul id='ul' data-bind='foreach: results'>\n"
+                + "  <li data-bind='text: $data, click: $root.call'/>\n"
+                + "</ul>\n"
+            );
+            js = Models.bind(new KnockoutModel(), newContext());
+            js.getResults().add("Ahoj");
+            js.applyBindings();
+
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 1 : "One child, but was " + cnt;
+            
+            Timer t = new Timer("add to array");
+            t.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    js.getResults().add("Hi");
+                }
+            }, 1);
+        }
+
+
+        int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+        if (cnt != 2) {
+            throw new InterruptedException();
+        }
+
+        try {
+            triggerChildClick("ul", 1);
+
+            assert 1 == js.getCallbackCount() : "One callback " + js.getCallbackCount();
+            assert "Hi".equals(js.getName()) : "We got callback from 2nd child " + js.getName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
     @KOTest public void displayContentOfComputedArray() throws Exception {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 
             "<ul id='ul' data-bind='foreach: bothNames'>\n"
