@@ -272,6 +272,18 @@ public class JavaScriptBodyTest {
         assert "Hello".equals(arr[0]) : "Hello expected: " + arr[0];
         assert "World!".equals(arr[1]) : "World! expected: " + arr[1];
     }
+    
+    @KOTest public void sumVector() {
+        double[] arr = { 1.0, 2.0, 3.0 };
+        double res = Bodies.sumVector(arr);
+        assert 6.0 == res : "Expecting six: " + res;
+    }
+
+    @KOTest public void sumMatrix() {
+        double[][] arr = { { 1.0 }, { 1.0, 1.0 }, { 1.0, 1.0, 1.0 } };
+        double res = Bodies.sumMatrix(arr);
+        assert 6.0 == res : "Expecting six: " + res;
+    }
 
     @KOTest public void truth() {
         assert Bodies.truth() : "True is true";

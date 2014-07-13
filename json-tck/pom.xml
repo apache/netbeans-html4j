@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.netbeans.html</groupId>
     <artifactId>pom</artifactId>
-    <version>0.8.2</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   <groupId>org.netbeans.html</groupId>
   <artifactId>net.java.html.json.tck</artifactId>
-  <version>0.8.2</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>HTML for Java TCK</name>
   <url>http://maven.apache.org</url>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.netbeans.html</groupId>
       <artifactId>net.java.html.json</artifactId>
-      <version>0.8.2</version>
+      <version>1.0-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
     <dependency>
