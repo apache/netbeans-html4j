@@ -174,16 +174,21 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     private void notifyChange() {
-        Bindings m = PropertyBindingAccessor.getBindings(proto, false);
-        if (m != null) {
-            m.valueHasMutated(name, null, null);
-            for (String dependant : deps) {
-                m.valueHasMutated(dependant, null, null);
+        proto.getContext().execute(new Runnable() {
+            @Override
+            public void run() {
+                Bindings m = PropertyBindingAccessor.getBindings(proto, false);
+                if (m != null) {
+                    m.valueHasMutated(name, null, null);
+                    for (String dependant : deps) {
+                        m.valueHasMutated(dependant, null, null);
+                    }
+                    if (index >= 0) {
+                        PropertyBindingAccessor.notifyProtoChange(proto, index);
+                    }
+                }
             }
-            if (index >= 0) {
-                PropertyBindingAccessor.notifyProtoChange(proto, index);
-            }
-        }
+        });
     }
 
     @Override

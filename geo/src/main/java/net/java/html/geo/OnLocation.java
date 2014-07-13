@@ -64,7 +64,7 @@ import java.lang.annotation.Target;
  * In case something goes wrong a method in the same class named {@link #onError()}
  * can be specified (should take one {@link Exception} parameter). 
  * <p>
- * The overall behavior of the system mimics <a href="http://www.w3.org/TR/2012/PR­geolocation­API­20120510/">
+ * The overall behavior of the system mimics <a href="http://www.w3.org/TR/geolocation-API/">
  * W3C's Geolocation API</a>.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>

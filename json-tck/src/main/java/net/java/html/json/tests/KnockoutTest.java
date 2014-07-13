@@ -43,6 +43,8 @@
 package net.java.html.json.tests;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
@@ -64,6 +66,7 @@ import org.apidesign.html.json.tck.KOTest;
     @Property(name="latitude", type=double.class)
 }) 
 public final class KnockoutTest {
+    private KnockoutModel js;
     
     @KOTest public void modifyValueAssertChangeInModelOnDouble() throws Throwable {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 
@@ -137,6 +140,38 @@ public final class KnockoutTest {
         }
     }
     
+    @KOTest public void modifyValueAssertAsyncChangeInModel() throws Exception {
+        if (js == null) {
+            Utils.exposeHTML(KnockoutTest.class, 
+                "<h1 data-bind=\"text: helloMessage\">Loading Bck2Brwsr's Hello World...</h1>\n" +
+                "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
+                "<button id=\"hello\">Say Hello!</button>\n"
+            );
+            
+            js = Models.bind(new KnockoutModel(), newContext());
+            js.setName("Kukuc");
+            js.applyBindings();
+            
+            String v = getSetInput(null);
+            assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
+            
+            Timer t = new Timer("Set to Jardo");
+            t.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    js.setName("Jardo");
+                }
+            }, 1);
+        }
+        
+        String v = getSetInput(null);
+        if (!"Jardo".equals(v)) {
+            throw new InterruptedException();
+        }
+        
+        Utils.exposeHTML(KnockoutTest.class, "");
+    }
+    
     private static String getSetInput(String value) throws Exception {
         String s = "var value = arguments[0];\n"
         + "var n = window.document.getElementById('input'); \n "
@@ -180,6 +215,45 @@ public final class KnockoutTest {
 
             assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
             assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
+    @KOTest public void displayContentOfAsyncArray() throws Exception {
+        if (js == null) {
+            Utils.exposeHTML(KnockoutTest.class, 
+                "<ul id='ul' data-bind='foreach: results'>\n"
+                + "  <li data-bind='text: $data, click: $root.call'/>\n"
+                + "</ul>\n"
+            );
+            js = Models.bind(new KnockoutModel(), newContext());
+            js.getResults().add("Ahoj");
+            js.applyBindings();
+
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 1 : "One child, but was " + cnt;
+            
+            Timer t = new Timer("add to array");
+            t.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    js.getResults().add("Hi");
+                }
+            }, 1);
+        }
+
+
+        int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+        if (cnt != 2) {
+            throw new InterruptedException();
+        }
+
+        try {
+            triggerChildClick("ul", 1);
+
+            assert 1 == js.getCallbackCount() : "One callback " + js.getCallbackCount();
+            assert "Hi".equals(js.getName()) : "We got callback from 2nd child " + js.getName();
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }

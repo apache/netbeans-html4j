@@ -42,10 +42,12 @@
  */
 package net.java.html.boot.script;
 
+import java.io.Closeable;
 import java.util.concurrent.Executor;
 import javax.script.ScriptEngine;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.apidesign.html.boot.spi.Fn;
 import org.apidesign.html.boot.spi.Fn.Presenter;
 
 /** Implementations of {@link Presenter}s that delegate
@@ -55,14 +57,29 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  * <pre>
  * 
  * {@link Runnable} <em>run</em> = ...; // your own init code
- * {@link Presenter Fn.Presenter} <em>p</em> = Scripts.{@link Scripts#createPresenter()};
- * BrowserBuilder.{@link BrowserBuilder#newBrowser(java.lang.Object...) newBrowser(<em>p</em>)}.
+ * {@link Presenter Fn.Presenter} <b>p</b> = Scripts.{@link Scripts#createPresenter()};
+ * BrowserBuilder.{@link BrowserBuilder#newBrowser(java.lang.Object...) newBrowser(<b>p</b>)}.
  *      {@link BrowserBuilder#loadFinished(java.lang.Runnable) loadFinished(run)}.
  *      {@link BrowserBuilder#showAndWait()};
  * </pre>
  * 
  * and your runnable can make extensive use of {@link JavaScriptBody} directly or
  * indirectly via APIs using {@link JavaScriptBody such annotation} themselves.
+ * <p>
+ * Alternatively one can manipulate the presenter manually, which is
+ * especially useful when writing tests:
+ * <pre>
+ * {@code @Test} public void runInASimulatedBrowser() throws Exception {
+ *   {@link Presenter Fn.Presenter} <b>p</b> = Scripts.{@link Scripts#createPresenter()};
+ *   try ({@link Closeable} c = {@link Fn#activate(org.apidesign.html.boot.spi.Fn.Presenter) Fn.activate}(<b>p</b>)) {
+ *     // your code operating in context of <b>p</b>
+ *   }
+ * }
+ * </pre>
+ * The previous code snippet requires Java 7 language syntax, as it relies
+ * on try-with-resources language syntactic sugar feature. The same block
+ * of code can be used on older versions of Java, but it is slightly more
+ * verbose.
  * 
  * @author Jaroslav Tulach
  */
