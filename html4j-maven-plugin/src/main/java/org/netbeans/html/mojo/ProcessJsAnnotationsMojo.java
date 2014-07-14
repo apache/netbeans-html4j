@@ -56,6 +56,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -86,7 +87,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<URL> arr = new ArrayList<URL>();
+        LinkedList<URL> arr = new LinkedList<URL>();
         boolean foundAsm = false;
         for (Artifact a : prj.getArtifacts()) {
             final File f = a.getFile();
@@ -103,7 +104,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         }
         if (!foundAsm) {
             URL loc = ClassReader.class.getProtectionDomain().getCodeSource().getLocation();
-            arr.add(loc);
+            arr.addFirst(loc);
         }
         URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
         try {
