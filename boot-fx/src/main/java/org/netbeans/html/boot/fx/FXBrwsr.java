@@ -121,6 +121,7 @@ public class FXBrwsr extends Application {
             return INSTANCE.newView(url, onLoad);
         }
     }
+    private Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -133,6 +134,7 @@ public class FXBrwsr extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         this.root = r;
+        this.stage = primaryStage;
     }
 
     private WebView newView(final URL url, final FXPresenter onLoad) {
@@ -143,6 +145,7 @@ public class FXBrwsr extends Application {
             public void handle(WebEvent<String> t) {
                 final Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.WINDOW_MODAL);
+                dialogStage.initOwner(stage);
                 dialogStage.setTitle("Warning");
                 final Button button = new Button("Close");
                 final Text text = new Text(t.getData());
