@@ -57,15 +57,18 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 /** This is an implementation class, to implement browser builder API. Just
  * include this JAR on classpath and the browser builder API will find
@@ -158,14 +161,42 @@ public class FXBrwsr extends Application {
                 box.getChildren().addAll(text, button);
                 dialogStage.setScene(new Scene(box));
                 button.setCancelButton(true);
-                button.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent t) {
-                        dialogStage.close();
-                    }
-                });
+                button.setOnAction(new CloseDialogHandler(dialogStage, null));
                 dialogStage.centerOnScreen();
                 dialogStage.showAndWait();
+            }
+        });
+        view.getEngine().setConfirmHandler(new Callback<String, Boolean>() {
+            @Override
+            public Boolean call(String question) {
+                final Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.WINDOW_MODAL);
+                dialogStage.initOwner(stage);
+                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
+                dialogStage.setTitle(r.getString("ConfirmTitle")); // NOI18N
+                final Button ok = new Button(r.getString("ConfirmOKButton")); // NOI18N
+                final Button cancel = new Button(r.getString("ConfirmCancelButton")); // NOI18N
+                final Text text = new Text(question);
+                final Insets ins = new Insets(10);
+                final VBox box = new VBox();
+                box.setAlignment(Pos.CENTER);
+                box.setSpacing(10);
+                box.setPadding(ins);
+                final HBox buttons = new HBox(ok, cancel);
+                buttons.setAlignment(Pos.CENTER);
+                buttons.setSpacing(10);
+                buttons.setPadding(ins);
+                box.getChildren().addAll(text, buttons);
+                dialogStage.setScene(new Scene(box));
+                ok.setCancelButton(false);
+                
+                final boolean[] res = new boolean[1];
+                ok.setOnAction(new CloseDialogHandler(dialogStage, res));
+                cancel.setCancelButton(true);
+                cancel.setOnAction(new CloseDialogHandler(dialogStage, null));
+                dialogStage.centerOnScreen();
+                dialogStage.showAndWait();
+                return res[0];
             }
         });
         root.setCenter(view);
@@ -206,6 +237,24 @@ public class FXBrwsr extends Application {
                 break;
             } catch (InterruptedException ex) {
                 LOG.log(Level.INFO, null, ex);
+            }
+        }
+    }
+    
+    private static final class CloseDialogHandler implements EventHandler<ActionEvent> {
+        private final Stage dialogStage;
+        private final boolean[] res;
+
+        public CloseDialogHandler(Stage dialogStage, boolean[] res) {
+            this.dialogStage = dialogStage;
+            this.res = res;
+        }
+
+        @Override
+        public void handle(ActionEvent t) {
+            dialogStage.close();
+            if (res != null) {
+                res[0] = true;
             }
         }
     }
