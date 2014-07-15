@@ -43,6 +43,7 @@
 package org.netbeans.html.boot.fx;
 
 import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -146,8 +147,9 @@ public class FXBrwsr extends Application {
                 final Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.WINDOW_MODAL);
                 dialogStage.initOwner(stage);
-                dialogStage.setTitle("Warning");
-                final Button button = new Button("Close");
+                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
+                dialogStage.setTitle(r.getString("AlertTitle")); // NOI18N
+                final Button button = new Button(r.getString("AlertCloseButton")); // NOI18N
                 final Text text = new Text(t.getData());
                 VBox box = new VBox();
                 box.setAlignment(Pos.CENTER);
