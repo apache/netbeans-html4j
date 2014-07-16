@@ -81,6 +81,8 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         try {
             eng = new ScriptEngineManager().getEngineByName("javascript");
             eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
+            eng.eval("function confirm(msg) { Packages.java.lang.System.out.println(msg); return true; };");
+            eng.eval("function prompt(msg, txt) { Packages.java.lang.System.out.println(msg + ':' + txt); return txt; };");
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
         }
