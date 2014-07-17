@@ -293,78 +293,83 @@ public final class BrowserBuilder {
             FImpl impl = new FImpl(myCls.getClassLoader());
             loader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }
+        
+        final Fn.Presenter dP = dfnr;
 
-        final Fn.Presenter currentP = dfnr;
         class OnPageLoad implements Runnable {
-            Class<?> newClazz;
             @Override
             public void run() {
                 try {
-                    if (newClazz == null) {
-                        Thread.currentThread().setContextClassLoader(loader);
-                        newClazz = Class.forName(myCls.getName(), true, loader);
-                        if (browserClass != null) {
-                            browserClass[0] = newClazz;
-                        }
-                        Contexts.Builder cb = Contexts.newBuilder();
-                        if (!Contexts.fillInByProviders(newClazz, cb)) {
-                            LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
-                        }
-                        if (currentP instanceof Executor) {
-                            cb.register(Executor.class, (Executor)currentP, 1000);
-                        }
-                        cb.register(Fn.Presenter.class, currentP, 1000);
-                        BrwsrCtx c = cb.build();
-                        c.execute(this);
-                        return;
-                    }
+                    final Fn.Presenter aP = Fn.activePresenter();
+                    final Fn.Presenter currentP = aP != null ? aP : dP;
                     
-                    Throwable firstError = null;
-                    if (onLoad != null) {
-                        try {
-                            FnContext.currentPresenter(currentP);
-                            onLoad.run();
-                        } catch (Throwable ex) {
-                            firstError = ex;
-                        } finally {
-                            FnContext.currentPresenter(null);
-                        }
+                    Thread.currentThread().setContextClassLoader(loader);
+                    final Class<?> newClazz = Class.forName(myCls.getName(), true, loader);
+                    if (browserClass != null) {
+                        browserClass[0] = newClazz;
                     }
-                    INIT: if (methodName != null) {
-                        if (methodArgs.length == 0) {
-                            try {
-                                Method m = newClazz.getMethod(methodName);
-                                FnContext.currentPresenter(currentP);
-                                m.invoke(null);
-                                firstError = null;
-                                break INIT;
-                            } catch (Throwable ex) {
-                                firstError = ex;
-                            } finally {
-                                FnContext.currentPresenter(null);
+                    Contexts.Builder cb = Contexts.newBuilder();
+                    if (!Contexts.fillInByProviders(newClazz, cb)) {
+                        LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
+                    }
+                    if (currentP instanceof Executor) {
+                        cb.register(Executor.class, (Executor)currentP, 1000);
+                    }
+                    cb.register(Fn.Presenter.class, currentP, 1000);
+                    BrwsrCtx c = cb.build();
+
+                    class CallInitMethod implements Runnable {
+                        @Override
+                        public void run() {
+                            Throwable firstError = null;
+                            if (onLoad != null) {
+                                try {
+                                    FnContext.currentPresenter(currentP);
+                                    onLoad.run();
+                                } catch (Throwable ex) {
+                                    firstError = ex;
+                                } finally {
+                                    FnContext.currentPresenter(null);
+                                }
+                            }
+                            INIT: if (methodName != null) {
+                                if (methodArgs.length == 0) {
+                                    try {
+                                        Method m = newClazz.getMethod(methodName);
+                                        FnContext.currentPresenter(currentP);
+                                        m.invoke(null);
+                                        firstError = null;
+                                        break INIT;
+                                    } catch (Throwable ex) {
+                                        firstError = ex;
+                                    } finally {
+                                        FnContext.currentPresenter(null);
+                                    }
+                                }
+                                try {
+                                    Method m = newClazz.getMethod(methodName, String[].class);
+                                    FnContext.currentPresenter(currentP);
+                                    m.invoke(m, (Object) methodArgs);
+                                    firstError = null;
+                                } catch (Throwable ex) {
+                                    LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
+                                } finally {
+                                    FnContext.currentPresenter(null);
+                                }
+                            }
+                            if (firstError != null) {
+                                LOG.log(Level.SEVERE, "Can't initialize the view", firstError);
                             }
                         }
-                        try {
-                            Method m = newClazz.getMethod(methodName, String[].class);
-                            FnContext.currentPresenter(currentP);
-                            m.invoke(m, (Object) methodArgs);
-                            firstError = null;
-                        } catch (Throwable ex) {
-                            LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
-                        } finally {
-                            FnContext.currentPresenter(null);
-                        }
                     }
-                    if (firstError != null) {
-                        LOG.log(Level.SEVERE, "Can't initialize the view", firstError);
-                    }
+                    
+                    c.execute(new CallInitMethod());
                 } catch (ClassNotFoundException ex) {
                     LOG.log(Level.SEVERE, "Can't load " + myCls.getName(), ex);
                 }
             }
         }
         dfnr.displayPage(url, new OnPageLoad());
-        return;
     }
 
     private static final class FImpl implements FindResources {

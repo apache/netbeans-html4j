@@ -64,13 +64,28 @@ import org.apidesign.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public abstract class AbstractFXPresenter 
-implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
+implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
-    protected List<String> scripts;
     protected Runnable onLoad;
     protected WebEngine engine;
 
+    // transient - e.g. not cloneable
+    private JSObject arraySize;
+    private JSObject wrapArrImpl;
+
+    @Override
+    protected AbstractFXPresenter clone() {
+        try {
+            AbstractFXPresenter p = (AbstractFXPresenter) super.clone();
+            p.arraySize = null;
+            p.wrapArrImpl = null;
+            return p;
+        } catch (CloneNotSupportedException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+    
     @Override
     public Fn defineFn(String code, String... names) {
         return defineJSFn(code, names);
@@ -111,19 +126,20 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
             sb.append(l).append('\n');
         }
         final String script = sb.toString();
-        if (scripts != null) {
-            scripts.add(script);
-        }
         engine.executeScript(script);
     }
 
     protected final void onPageLoad() {
-        if (scripts != null) {
-            for (String s : scripts) {
-                engine.executeScript(s);
+        Closeable c = Fn.activate(this.clone());
+        try {
+            onLoad.run();
+        } finally {
+            try {
+                c.close();
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
-        onLoad.run();
     }
 
     @Override
@@ -131,19 +147,21 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
         this.onLoad = onLoad;
         final WebView view = findView(resource);
         this.engine = view.getEngine();
+        boolean inspectOn = false;
         try {
             if (FXInspect.initialize(engine)) {
-                scripts = new ArrayList<String>();
+                inspectOn = true;
             }
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+        final boolean isInspectOn = inspectOn;
 
         class Run implements Runnable {
 
             @Override
             public void run() {
-                if (scripts != null) {
+                if (isInspectOn) {
                     view.setContextMenuEnabled(true);
                 }
                 engine.load(resource.toExternalForm());
@@ -172,7 +190,6 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
         return wrapArr;
     }
 
-    private JSObject wrapArrImpl;
     private final JSObject wrapArrFn() {
         if (wrapArrImpl == null) {
             try {
@@ -198,7 +215,6 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor {
         arraySizeFn().call("array", val, arr);
         return arr;
     }
-    private JSObject arraySize;
     private final JSObject arraySizeFn() {
         if (arraySize == null) {
             try {
