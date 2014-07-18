@@ -145,8 +145,12 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     }
     
     private static String skipMsg(String methodName) {
-        if (!"1.8.0_05-b13".equals(System.getProperty("java.runtime.version"))) { // NOI18N
-            // we know that 1.8.0_05 is broken, 
+        final String ver = System.getProperty("java.runtime.version"); // NOI18N
+        if (
+            !"1.8.0_05-b13".equals(ver) &&
+            !"1.8.0_11-b12".equals(ver) 
+        ) {
+            // we know that 1.8.0_05 and 1.8.0_11 are broken, 
             // let's not speculate about anything else
             return null;
         }
@@ -154,7 +158,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             case "paintTheGridOnClick":
             case "displayContentOfArrayOfPeople":
             case "connectUsingWebSocket":
-                return "Does not work on JDK8b132, due to JDK-8046013";
+                return "Does not work on JDK8, due to JDK-8046013";
         }
         return null;
     }
