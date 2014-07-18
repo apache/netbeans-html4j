@@ -59,7 +59,7 @@ import javafx.util.Callback;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 final class FXInspect implements Runnable {
-    private static final Logger LOG = Logger.getLogger(FXInspect.class.getName());
+    static final Logger LOG = Logger.getLogger(FXInspect.class.getName());
     
     
     private final WebEngine engine;

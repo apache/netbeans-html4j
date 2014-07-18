@@ -42,13 +42,21 @@
  */
 package org.netbeans.html.boot.fx;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.prefs.Preferences;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
@@ -68,9 +76,10 @@ final class FXToolbar extends ToolBar {
     private final BorderPane container;
     private final ToggleGroup resizeGroup = new ToggleGroup();
     private final ComboBox<String> comboZoom = new ComboBox<String>();
+    private WatchDir watcher;
     
-    FXToolbar(WebView webView, BorderPane container) {
-        this.webView = webView;
+    FXToolbar(WebView wv, BorderPane container) {
+        this.webView = wv;
         this.container = container;
         
         List<ResizeOption> options = ResizeOption.loadAll();
@@ -110,6 +119,34 @@ final class FXToolbar extends ToolBar {
             public void changed( ObservableValue<? extends String> ov, String t, String t1 ) {
                 String newZoom = zoom( t1 );
                 comboZoom.setValue( newZoom );
+            }
+        });
+        
+        getItems().add(new Separator());
+        final CheckBox automatic = new CheckBox("Automatic");
+        final Preferences prefs = Preferences.userNodeForPackage(FXToolbar.class);
+        final String ar = "automaticReload"; // NOI18N
+        automatic.setSelected(prefs.getBoolean(ar, true));
+        getItems().add(automatic);
+        final Button reload = new Button("Reload");
+        getItems().add(reload);
+        reload.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                webView.getEngine().reload();
+            }
+        });
+        automatic.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                prefs.putBoolean(ar, automatic.isSelected());
+                listenOnChanges(automatic.isSelected());
+            }
+        });
+        webView.getEngine().locationProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                listenOnChanges(automatic.isSelected());
             }
         });
     }
@@ -357,6 +394,20 @@ final class FXToolbar extends ToolBar {
             hash = 11 * hash + this.height;
             hash = 11 * hash + (this.isDefault ? 1 : 0);
             return hash;
+        }
+    }
+    
+    private void listenOnChanges(boolean turnOn) {
+        try {
+            if (watcher != null) {
+                watcher.close();
+                watcher = null;
+            }
+            if (turnOn) {
+                watcher = new WatchDir(webView.getEngine());
+            }
+        } catch (Exception ex) {
+            FXInspect.LOG.log(Level.SEVERE, null, ex);
         }
     }
 }
