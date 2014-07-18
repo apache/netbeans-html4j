@@ -54,6 +54,10 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
@@ -163,6 +167,13 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
             public void run() {
                 if (isInspectOn) {
                     view.setContextMenuEnabled(true);
+                    final Parent p = view.getParent();
+                    if (p instanceof BorderPane) {
+                        BorderPane bp = (BorderPane) p;
+                        if (bp.getTop() == null) {
+                            bp.setTop(new FXToolbar(view, bp));
+                        }
+                    }
                 }
                 engine.load(resource.toExternalForm());
             }
