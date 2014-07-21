@@ -95,6 +95,7 @@ public class KnockoutEquinoxIT {
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
             config.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "sun.misc,"
                 + "javafx.application,"
+                + "javafx.beans,"
                 + "javafx.beans.property,"
                 + "javafx.beans.value,"
                 + "javafx.collections,"
@@ -103,6 +104,7 @@ public class KnockoutEquinoxIT {
                 + "javafx.geometry,"
                 + "javafx.scene,"
                 + "javafx.scene.control,"
+                + "javafx.scene.image,"
                 + "javafx.scene.layout,"
                 + "javafx.scene.text,"
                 + "javafx.scene.web,"
