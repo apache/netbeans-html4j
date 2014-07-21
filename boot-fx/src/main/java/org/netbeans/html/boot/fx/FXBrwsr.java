@@ -212,6 +212,9 @@ public class FXBrwsr extends Application {
                 final Button cancel = new Button(r.getString("PromptCancelButton")); // NOI18N
                 final Text text = new Text(prompt.getMessage());
                 final TextField line = new TextField();
+                if (prompt.getDefaultValue() != null) {
+                    line.setText(prompt.getDefaultValue());
+                }
                 final Insets ins = new Insets(10);
                 final VBox box = new VBox();
                 box.setAlignment(Pos.CENTER);
