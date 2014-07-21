@@ -188,7 +188,9 @@ final class FXToolbar extends ToolBar {
     private void _resize( final double width, final double height ) {
         ScrollPane scroll;
         if (container.getCenter() == webView) {
-            container.setCenter(scroll = new ScrollPane(webView));
+            scroll = new ScrollPane();
+            scroll.setContent(webView);
+            container.setCenter(scroll);
         } else {
             scroll = (ScrollPane) container.getCenter();
         }
