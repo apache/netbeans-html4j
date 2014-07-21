@@ -43,7 +43,10 @@
 package net.java.html.sound;
 
 import java.util.ServiceLoader;
+import net.java.html.BrwsrCtx;
+import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.sound.spi.AudioEnvironment;
+import org.netbeans.html.sound.impl.BrowserAudioEnv;
 
 /** Handle to an audio clip which can be {@link #play() played}, {@link #pause() paused}
  * and etc. Obtain new instance via {@link #create(java.lang.String) create} factory 
@@ -59,6 +62,10 @@ public abstract class AudioClip {
      * If no suitable audio environment provider is found, the method 
      * returns a dummy instance that does nothing and only returns
      * false from its {@link #isSupported()} method.
+     * <p>
+     * The <code>src</code> can be absolute URL or it can be relative
+     * to current {@link BrwsrCtx browser context} - e.g. usually to the
+     * page that is just being displayed.
      * 
      * @param src the URL where to find the audio clip
      * @return the audio clip handle
@@ -66,13 +73,22 @@ public abstract class AudioClip {
      */
     public static AudioClip create(String src) {
         src.getClass();
+        BrwsrCtx brwsrCtx = BrwsrCtx.findDefault(AudioClip.class);
+        AudioEnvironment brwsrAE = Contexts.find(brwsrCtx, AudioEnvironment.class);
+        if (brwsrAE != null) {
+            Impl handle = create(brwsrAE, src);
+            if (handle != null) {
+                return handle;
+            }
+        }
         for (AudioEnvironment<?> ae : ServiceLoader.load(AudioEnvironment.class)) {
             Impl handle = create(ae, src);
             if (handle != null) {
                 return handle;
             }
         }
-        return DummyClip.INSTANCE;
+        Impl handle = create(BrowserAudioEnv.DEFAULT, src);
+        return handle != null ? handle : DummyClip.INSTANCE;
     }
     
     /** Plays the clip from begining to the end.

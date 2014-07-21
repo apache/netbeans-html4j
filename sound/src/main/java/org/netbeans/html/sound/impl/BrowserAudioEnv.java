@@ -44,14 +44,18 @@ package org.netbeans.html.sound.impl;
 
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.sound.spi.AudioEnvironment;
-import org.openide.util.lookup.ServiceProvider;
 
-/** Registers an audio provider that delegates to HTML5 Audio tag.
+/** The default audio provider that delegates to HTML5 Audio tag
+ * it is used if no other {@link AudioEnvironment} is found.
  *
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-@ServiceProvider(service = AudioEnvironment.class, position = 100)
 public final class BrowserAudioEnv implements AudioEnvironment<Object> {
+    public static final AudioEnvironment<?> DEFAULT = new BrowserAudioEnv();
+    
+    private BrowserAudioEnv() {
+    }
+    
     @Override
     @JavaScriptBody(args = { "src" }, body = ""
         + "if (!Audio) return null;"

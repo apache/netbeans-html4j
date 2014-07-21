@@ -42,9 +42,15 @@
  */
 package org.apidesign.html.sound.spi;
 
+import net.java.html.BrwsrCtx;
+import org.apidesign.html.context.spi.Contexts;
+
 /** Basic interface for sound playback providers. Register your implementation
  * in a way {@link java.util.ServiceLoader} can find it - e.g. use
- * {@link org.openide.util.lookup.ServiceProvider} annotation.
+ * {@link org.openide.util.lookup.ServiceProvider} annotation. Possibly
+ * one can register the provider into {@link Contexts#newBuilder()}, in
+ * case the implementation is somehow associated 
+ * with the actual {@link BrwsrCtx} (works since version 0.8.3).
  *
  * @author antonepple
  * @param <Audio> custom type representing the internal audio state
