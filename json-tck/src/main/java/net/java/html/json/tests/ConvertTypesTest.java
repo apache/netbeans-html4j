@@ -56,9 +56,12 @@ import org.apidesign.html.json.tck.KOTest;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    private static InputStream createIS(boolean includeSex, boolean includeAddress) 
+    private static InputStream createIS(boolean includeSex, boolean includeAddress, boolean array) 
     throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
+        if (array) {
+            sb.append("[\n");
+        }
         sb.append("{ \"firstName\" : \"son\",\n");
         sb.append("  \"lastName\" : \"dj\" \n");
         if (includeSex) {
@@ -68,6 +71,9 @@ public final class ConvertTypesTest {
             sb.append(",  \"address\" : { \"street\" : \"Schnirchova\" } \n");
         }
         sb.append("}\n");
+        if (array) {
+            sb.append(']');
+        }
         return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
     }
     private static Object createJSON(boolean includeSex) 
@@ -95,7 +101,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeople() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, false);
+        final InputStream o = createIS(true, false, false);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -107,7 +113,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithAddress() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, true);
+        final InputStream o = createIS(true, true, false);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -132,7 +138,32 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false);
+        final InputStream o = createIS(false, false, false);
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+    
+    @KOTest
+    public void parseConvertToPeopleWithAddressOnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, true, true);
+        
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assert p.getAddress() != null : "Some address provided";
+        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+    }
+
+    @KOTest
+    public void parseConvertToPeopleWithoutSexOnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, true);
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();

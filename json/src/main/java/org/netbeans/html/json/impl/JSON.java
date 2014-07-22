@@ -407,7 +407,12 @@ public final class JSON {
     public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 
     throws IOException {
         Transfer tr = findTransfer(c);
-        return read(c, modelClazz, tr.toJSON((InputStream)data));
+        Object rawJSON = tr.toJSON((InputStream)data);
+        if (rawJSON instanceof Object[]) {
+            final Object[] arr = (Object[])rawJSON;
+            rawJSON = arr.length > 0 ? arr[0] : null;
+        }
+        return read(c, modelClazz, rawJSON);
     }
     public static <T> T read(BrwsrCtx c, Class<T> modelClazz, Object data) {
         if (data == null) {

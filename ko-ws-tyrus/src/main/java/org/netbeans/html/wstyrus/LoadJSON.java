@@ -123,43 +123,15 @@ final class LoadJSON implements Runnable {
             final PushbackInputStream is = new PushbackInputStream(
                 conn.getInputStream(), 1
             );
-            boolean array = false;
-            boolean string = false;
-            if (call.isJSONP()) {
-                for (;;) {
-                    int ch = is.read();
-                    if (ch == -1) {
-                        break;
-                    }
-                    if (ch == '[') {
-                        is.unread(ch);
-                        array = true;
-                        break;
-                    }
-                    if (ch == '{') {
-                        is.unread(ch);
-                        break;
-                    }
-                }
-            } else {
-                int ch = is.read();
-                if (ch == -1) {
-                    string = true;
-                } else {
-                    array = ch == '[';
-                    is.unread(ch);
-                    if (!array && ch != '{') {
-                        string = true;
-                    }
-                }
-            }
+            boolean[] arrayOrString = { false, false };
+            detectJSONType(call.isJSONP(), is, arrayOrString);
             try {
-                if (string) {
+                if (arrayOrString[1]) {
                     throw new JSONException("");
                 }
                 JSONTokener tok = createTokener(is);
                 Object obj;
-                obj = array ? new JSONArray(tok) : new JSONObject(tok);
+                obj = arrayOrString[0] ? new JSONArray(tok) : new JSONObject(tok);
                 json = convertToArray(obj);
             } catch (JSONException ex) {
                 Reader r = new InputStreamReader(is, "UTF-8");
@@ -180,6 +152,34 @@ final class LoadJSON implements Runnable {
                 call.notifyError(error);
             } else {
                 call.notifySuccess(json);
+            }
+        }
+    }
+
+    private static void detectJSONType(boolean skipAnything, final PushbackInputStream is, boolean[] arrayOrString) throws IOException {
+        for (;;) {
+            int ch = is.read();
+            if (ch == -1) {
+                arrayOrString[1] = true;
+                break;
+            }
+            if (Character.isWhitespace(ch)) {
+                continue;
+            }
+
+            if (ch == '[') {
+                is.unread(ch);
+                arrayOrString[0] = true;
+                break;
+            }
+            if (ch == '{') {
+                is.unread(ch);
+                break;
+            }
+            if (!skipAnything) {
+                is.unread(ch);
+                arrayOrString[1] = true;
+                break;
             }
         }
     }
@@ -252,8 +252,12 @@ final class LoadJSON implements Runnable {
     
     public static Object parse(InputStream is) throws IOException {
         try {
-            JSONTokener t = createTokener(is);
-            return new JSONObject(t);
+            PushbackInputStream push = new PushbackInputStream(is, 1);
+            boolean[] arrayOrString = { false, false };
+            detectJSONType(false, push, arrayOrString);
+            JSONTokener t = createTokener(push);
+            Object obj = arrayOrString[0] ? new JSONArray(t) : new JSONObject(t);
+            return convertToArray(obj);
         } catch (JSONException ex) {
             throw new IOException(ex);
         }
