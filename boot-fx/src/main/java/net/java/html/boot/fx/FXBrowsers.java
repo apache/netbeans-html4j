@@ -128,7 +128,7 @@ public final class FXBrowsers {
     }
     
     /** Executes a code inside of provided {@link WebView}. This method
-     * is associates the execution context with provided browser,
+     * associates the execution context with provided browser,
      * so the {@link JavaScriptBody} annotations know where to execute
      * their JavaScript bodies.
      * The code is going to be executed synchronously
