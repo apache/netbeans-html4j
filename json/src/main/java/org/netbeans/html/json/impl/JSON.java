@@ -405,18 +405,28 @@ public final class JSON {
         return PropertyBindingAccessor.clone(from, model, c);
     }
     
-    public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data) 
+    public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data, Collection<? super T> collectTo) 
     throws IOException {
         Transfer tr = findTransfer(c);
         Object rawJSON = tr.toJSON((InputStream)data);
         if (rawJSON instanceof Object[]) {
             final Object[] arr = (Object[])rawJSON;
+            if (collectTo != null) {
+                for (int i = 0; i < arr.length; i++) {
+                    collectTo.add(read(c, modelClazz, arr[i]));
+                }
+                return null;
+            }
             if (arr.length == 0) {
                 throw new EOFException("Recieved an empty array");
             }
             rawJSON = arr[0];
         }
-        return read(c, modelClazz, rawJSON);
+        T res = read(c, modelClazz, rawJSON);
+        if (collectTo != null) {
+            collectTo.add(res);
+        }
+        return res;
     }
     public static <T> T read(BrwsrCtx c, Class<T> modelClazz, Object data) {
         if (data == null) {
