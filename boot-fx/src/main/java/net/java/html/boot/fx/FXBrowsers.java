@@ -128,7 +128,7 @@ public final class FXBrowsers {
     }
     
     /** Executes a code inside of provided {@link WebView}. This method
-     * associates the execution context with provided browser,
+     * associates the {@link BrwsrCtx execution context} with provided browser,
      * so the {@link JavaScriptBody} annotations know where to execute
      * their JavaScript bodies.
      * The code is going to be executed synchronously
@@ -140,7 +140,7 @@ public final class FXBrowsers {
      * provided by the <code>load</code> methods in this class.
      * 
      * @param webView the web view previously prepared by one of the <code>load</code>
-     *   in this class
+     *   methods in this class
      * @param code the code to execute
      * @throws IllegalArgumentException if the web view was not properly
      *   initialized
