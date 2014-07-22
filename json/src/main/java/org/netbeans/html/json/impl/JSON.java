@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.json.impl;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -410,7 +411,10 @@ public final class JSON {
         Object rawJSON = tr.toJSON((InputStream)data);
         if (rawJSON instanceof Object[]) {
             final Object[] arr = (Object[])rawJSON;
-            rawJSON = arr.length > 0 ? arr[0] : null;
+            if (arr.length == 0) {
+                throw new EOFException("Recieved an empty array");
+            }
+            rawJSON = arr[0];
         }
         return read(c, modelClazz, rawJSON);
     }

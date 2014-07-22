@@ -43,6 +43,7 @@
 package net.java.html.json.tests;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -169,6 +170,20 @@ public final class ConvertTypesTest {
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+    
+    @KOTest
+    public void parseOnEmptyArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = new ByteArrayInputStream("[]".getBytes("UTF-8"));
+        
+        try {
+            Models.parse(c, Person.class, o);
+        } catch (EOFException ex) {
+            // OK
+            return;
+        }
+        throw new IllegalStateException("Should throw end of file exception, as the array is empty");
     }
     
     private static BrwsrCtx newContext() {
