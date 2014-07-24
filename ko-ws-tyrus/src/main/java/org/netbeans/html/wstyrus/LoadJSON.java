@@ -218,6 +218,8 @@ final class LoadJSON implements Runnable {
                 obj.put(key, convertToArray(obj.get(key)));
             }
             return obj;
+        } else if (o == JSONObject.NULL) {
+            return null;
         } else {
             return o;
         }

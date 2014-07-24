@@ -169,6 +169,26 @@ public final class ConvertTypesTest {
         assert null == p.getLastName() : "Last name: " + p.getLastName();
     }
 
+    @KOTest 
+    public void parseNullArrayValue() throws Exception {
+        final BrwsrCtx c = newContext();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("[ null, { \"firstName\" : \"son\",\n");
+        sb.append("  \"lastName\" : null } ]\n");  
+        
+        final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+        List<Person> arr = new ArrayList<Person>();
+        Models.parse(c, Person.class, is, arr);
+        
+        assert arr.size() == 2 : "There are two items in " + arr;
+        assert arr.get(0) == null : "first is null " + arr;
+        
+        Person p = arr.get(1);
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert null == p.getLastName() : "Last name: " + p.getLastName();
+    }
+
     @KOTest
     public void testConvertToPeopleWithoutSex() throws Exception {
         final Object o = createJSON(false);
