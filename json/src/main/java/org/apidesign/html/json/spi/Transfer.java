@@ -68,7 +68,10 @@ public interface Transfer {
     /** Reads content of a stream and creates its JSON representation.
      * The returned object is implementation dependant. It however needs
      * to be acceptable as first argument of {@link #extract(java.lang.Object, java.lang.String[], java.lang.Object[]) extract}
-     * method.
+     * method. If the stream contains representation or a JSON array,
+     * an Object[] should be returned - each of its members should, by itself
+     * be acceptable argument to 
+     * the {@link #extract(java.lang.Object, java.lang.String[], java.lang.Object[]) extract} method.
      * 
      * @param is input stream to read data from
      * @return an object representing the JSON data

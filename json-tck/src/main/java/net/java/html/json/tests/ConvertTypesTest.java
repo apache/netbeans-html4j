@@ -43,9 +43,12 @@
 package net.java.html.json.tests;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
@@ -56,18 +59,33 @@ import org.apidesign.html.json.tck.KOTest;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 public final class ConvertTypesTest {
-    private static InputStream createIS(boolean includeSex, boolean includeAddress) 
+    private static InputStream createIS(boolean includeSex, boolean includeAddress, int array) 
     throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"firstName\" : \"son\",\n");
-        sb.append("  \"lastName\" : \"dj\" \n");
-        if (includeSex) {
-            sb.append(",  \"sex\" : \"MALE\" \n");
+        int repeat;
+        if (array != -1) {
+            sb.append("[\n");
+            repeat = array;
+        } else {
+            repeat = 1;
         }
-        if (includeAddress) {
-            sb.append(",  \"address\" : { \"street\" : \"Schnirchova\" } \n");
+        for (int i = 0; i < repeat; i++) {
+            sb.append("{ \"firstName\" : \"son\",\n");
+            sb.append("  \"lastName\" : \"dj\" \n");
+            if (includeSex) {
+                sb.append(",  \"sex\" : \"MALE\" \n");
+            }
+            if (includeAddress) {
+                sb.append(",  \"address\" : { \"street\" : \"Schnirchova\" } \n");
+            }
+            sb.append("}\n");
+            if (i < array - 1) {
+                sb.append(",");
+            }
         }
-        sb.append("}\n");
+        if (array != -1) {
+            sb.append(']');
+        }
         return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
     }
     private static Object createJSON(boolean includeSex) 
@@ -95,7 +113,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeople() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, false);
+        final InputStream o = createIS(true, false, -1);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -107,7 +125,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithAddress() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, true);
+        final InputStream o = createIS(true, true, -1);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -116,6 +134,59 @@ public final class ConvertTypesTest {
         assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
         assert p.getAddress() != null : "Some address provided";
         assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+    }
+
+    @KOTest
+    public void parseConvertToPeopleWithAddressIntoAnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, true, -1);
+        
+        List<Person> arr = new ArrayList<Person>();
+        Models.parse(c, Person.class, o, arr);
+        
+        assert arr.size() == 1 : "There is one item in " + arr;
+        
+        Person p = arr.get(0);
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assert p.getAddress() != null : "Some address provided";
+        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+    }
+    
+    @KOTest 
+    public void parseNullValue() throws Exception {
+        final BrwsrCtx c = newContext();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"firstName\" : \"son\",\n");
+        sb.append("  \"lastName\" : null } \n");  
+        
+        final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+        Person p = Models.parse(c, Person.class, is);
+
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert null == p.getLastName() : "Last name: " + p.getLastName();
+    }
+
+    @KOTest 
+    public void parseNullArrayValue() throws Exception {
+        final BrwsrCtx c = newContext();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("[ null, { \"firstName\" : \"son\",\n");
+        sb.append("  \"lastName\" : null } ]\n");  
+        
+        final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+        List<Person> arr = new ArrayList<Person>();
+        Models.parse(c, Person.class, is, arr);
+        
+        assert arr.size() == 2 : "There are two items in " + arr;
+        assert arr.get(0) == null : "first is null " + arr;
+        
+        Person p = arr.get(1);
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert null == p.getLastName() : "Last name: " + p.getLastName();
     }
 
     @KOTest
@@ -132,12 +203,79 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false);
+        final InputStream o = createIS(false, false, -1);
         Person p = Models.parse(c, Person.class, o);
         
         assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
         assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
         assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+    
+    @KOTest
+    public void parseConvertToPeopleWithAddressOnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(true, true, 1);
+        
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assert p.getAddress() != null : "Some address provided";
+        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+    }
+
+    @KOTest
+    public void parseConvertToPeopleWithoutSexOnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, 1);
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+
+    @KOTest
+    public void parseFirstElementFromAbiggerArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, 5);
+        Person p = Models.parse(c, Person.class, o);
+        
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+        assert p.getSex() == null : "No sex: " + p.getSex();
+    }
+
+    @KOTest
+    public void parseAllElementFromAbiggerArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, 5);
+        
+        List<Person> res = new ArrayList<Person>();
+        Models.parse(c, Person.class, o, res);
+        
+        assert res.size() == 5 : "Five elements found" + res;
+        
+        for (Person p : res) {
+            assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+            assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
+            assert p.getSex() == null : "No sex: " + p.getSex();
+        }
+    }
+    
+    @KOTest
+    public void parseOnEmptyArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, 0);
+        
+        try {
+            Models.parse(c, Person.class, o);
+        } catch (EOFException ex) {
+            // OK
+            return;
+        }
+        throw new IllegalStateException("Should throw end of file exception, as the array is empty");
     }
     
     private static BrwsrCtx newContext() {
