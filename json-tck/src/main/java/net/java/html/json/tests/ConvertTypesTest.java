@@ -153,6 +153,21 @@ public final class ConvertTypesTest {
         assert p.getAddress() != null : "Some address provided";
         assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
     }
+    
+    @KOTest 
+    public void parseNullValue() throws Exception {
+        final BrwsrCtx c = newContext();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"firstName\" : \"son\",\n");
+        sb.append("  \"lastName\" : null } \n");  
+        
+        final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+        Person p = Models.parse(c, Person.class, is);
+
+        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
+        assert null == p.getLastName() : "Last name: " + p.getLastName();
+    }
 
     @KOTest
     public void testConvertToPeopleWithoutSex() throws Exception {

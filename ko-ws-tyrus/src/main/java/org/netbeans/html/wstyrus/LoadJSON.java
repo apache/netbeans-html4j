@@ -227,11 +227,11 @@ final class LoadJSON implements Runnable {
         if (jsonObject instanceof JSONObject) {
             JSONObject obj = (JSONObject)jsonObject;
             for (int i = 0; i < props.length; i++) {
-                try {
-                    values[i] = obj.has(props[i]) ? obj.get(props[i]) : null;
-                } catch (JSONException ex) {
-                    LoadJSON.LOG.log(Level.SEVERE, "Can't read " + props[i] + " from " + jsonObject, ex);
+                Object val = obj.opt(props[i]);
+                if (val == JSONObject.NULL) {
+                    val = null;
                 }
+                values[i] = val;
             }
             return;
         }
