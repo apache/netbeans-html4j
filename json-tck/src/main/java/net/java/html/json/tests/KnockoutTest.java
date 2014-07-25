@@ -63,10 +63,39 @@ import org.apidesign.html.json.tck.KOTest;
     @Property(name="callbackCount", type=int.class),
     @Property(name="people", type=PersonImpl.class, array = true),
     @Property(name="enabled", type=boolean.class),
-    @Property(name="latitude", type=double.class)
+    @Property(name="latitude", type=double.class),
+    @Property(name="choice", type=KnockoutTest.Choice.class),
 }) 
 public final class KnockoutTest {
     private KnockoutModel js;
+    
+    enum Choice {
+        A, B;
+    }
+    
+    @KOTest public void modifyValueAssertChangeInModelOnEnum() throws Throwable {
+        Object exp = Utils.exposeHTML(KnockoutTest.class, 
+            "Latitude: <input id='input' data-bind=\"value: choice\"></input>\n"
+        );
+        try {
+
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.setChoice(Choice.A);
+            m.applyBindings();
+
+            String v = getSetInput(null);
+            assert "A".equals(v) : "Value is really A: " + v;
+
+            getSetInput("B");
+            triggerEvent("input", "change");
+
+            assert Choice.B == m.getChoice(): "Enum property updated: " + m.getChoice();
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
     
     @KOTest public void modifyValueAssertChangeInModelOnDouble() throws Throwable {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 
