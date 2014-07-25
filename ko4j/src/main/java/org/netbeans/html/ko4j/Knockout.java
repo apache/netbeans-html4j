@@ -110,7 +110,7 @@ final class Knockout {
         + "      var r = activeGetter();\n"
         + "      activeGetter = realGetter;\n"
         + "      if (r) try { var br = r.valueOf(); } catch (err) {}\n"
-        + "      return br ? br : r;\n"
+        + "      return br === undefined ? r: br;\n"
         + "    },\n"
         + "    'owner': ret\n"
         + "  };\n"
