@@ -51,11 +51,12 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.apidesign.html.json.spi.JSONCall;
@@ -213,9 +214,19 @@ final class LoadJSON implements Runnable {
         } else if (o instanceof JSONObject) {
             JSONObject obj = (JSONObject)o;
             Iterator it = obj.keys();
+            List<Object> collect = new ArrayList<Object>();
             while (it.hasNext()) {
                 String key = (String)it.next();
-                obj.put(key, convertToArray(obj.get(key)));
+                final Object val = obj.get(key);
+                final Object newVal = convertToArray(val);
+                if (val != newVal) {
+                    collect.add(key);
+                    collect.add(newVal);
+                }
+            }
+            int size = collect.size();
+            for (int i = 0; i < size; i += 2) {
+                obj.put((String) collect.get(i), collect.get(i + 1));
             }
             return obj;
         } else if (o == JSONObject.NULL) {
