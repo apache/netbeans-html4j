@@ -166,7 +166,7 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "  if (request.readyState !== 4) return;\n"
         + "  var r = request.response || request.responseText;\n"
         + "  try {\n"
-        + "    if (request.status >= 400) throw request.status + ': ' + request.statusText;"
+        + "    if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;"
         + "    try { r = eval('(' + r + ')'); } catch (ignore) { }"
         + "    done.@org.apidesign.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(r);\n"
         + "  } catch (error) {;\n"
