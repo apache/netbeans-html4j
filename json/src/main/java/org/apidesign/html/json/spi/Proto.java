@@ -757,6 +757,9 @@ public final class Proto {
             if (Float.class == type) {
                 val = val instanceof Number ? ((Number) val).floatValue() : Float.NaN;
             }
+            if (type.isEnum() && val instanceof String) {
+                val = Enum.valueOf(type.asSubclass(Enum.class), (String)val);
+            }
             return type.cast(val);
         }
 

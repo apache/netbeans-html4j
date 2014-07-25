@@ -119,6 +119,22 @@ public class MapModelTest {
         assertEquals(o.changes, 2, "Snd change");
     }
     
+    @Test public void canSetEnumAsString() throws Exception {
+        Person p = Models.bind(new Person(), c);
+        p.setFirstName("Jirka");
+        p.setSex(Sex.MALE);
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("sex");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        
+        o.set("FEMALE");
+
+        assertEquals(p.getSex(), Sex.FEMALE, "Changed to female");
+    }
+    
     @Test public void derivedProperty() throws Exception {
         Person p = Models.bind(new Person(), c);
         
