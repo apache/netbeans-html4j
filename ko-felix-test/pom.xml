@@ -6,10 +6,10 @@
         <artifactId>pom</artifactId>
         <version>0.8.3</version>
     </parent>
-    <name>KO Tests in Equinox OSGi Container</name>
-    <artifactId>ko-osgi-test</artifactId>
+    <name>KO Tests in Felix OSGi Container</name>
+    <artifactId>ko-felix-test</artifactId>
     <packaging>bundle</packaging>
-    <description>Runs the TCK for Knockout in Equinox OSGi Container</description>
+    <description>Runs the TCK for Knockout in Felix OSGi Container</description>
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
     </properties>
@@ -114,18 +114,10 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>test</scope>
-            <version>3.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.8.0.v20120529-1548</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>equinox-agentclass-hook</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -30,6 +30,7 @@
     <module>geo</module>
     <module>ko-ws-tyrus</module>
     <module>html4j-maven-plugin</module>
+    <module>ko-felix-test</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
     <module>boot-script</module>
@@ -312,6 +313,16 @@
             <groupId>org.netbeans.modules</groupId>
             <artifactId>org-netbeans-lib-nbjavac</artifactId>
             <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+      <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency> 
             <groupId>org.netbeans.modules</groupId>

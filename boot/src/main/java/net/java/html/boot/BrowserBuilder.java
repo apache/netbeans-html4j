@@ -108,6 +108,7 @@ public final class BrowserBuilder {
     private String methodName;
     private String[] methodArgs;
     private final Object[] context;
+    private ClassLoader loader;
     
     private BrowserBuilder(Object[] context) {
         this.context = context;
@@ -183,6 +184,22 @@ public final class BrowserBuilder {
     public BrowserBuilder invoke(String methodName, String... args) {
         this.methodName = methodName;
         this.methodArgs = args;
+        return this;
+    }
+
+    /** Loader to use when searching for classes to initialize. 
+     * If specified, this loader is going to be used to load {@link Fn.Presenter}
+     * and {@link Contexts#fillInByProviders(java.lang.Class, org.apidesign.html.context.spi.Contexts.Builder) fill} {@link BrwsrCtx} in.
+     * Specifying special classloader may be useful in modular systems, 
+     * like OSGi, where one needs to load classes from many otherwise independent
+     * modules.
+     * 
+     * @param l the loader to use (or <code>null</code>)
+     * @return this builder
+     * @since 0.9
+     */
+    public BrowserBuilder classloader(ClassLoader l) {
+        this.loader = l;
         return this;
     }
 
@@ -277,6 +294,11 @@ public final class BrowserBuilder {
             }
         }
 
+        if (dfnr == null && loader != null) for (Fn.Presenter o : ServiceLoader.load(Fn.Presenter.class, loader)) {
+            dfnr = o;
+            break;
+        }
+        
         if (dfnr == null) for (Fn.Presenter o : ServiceLoader.load(Fn.Presenter.class)) {
             dfnr = o;
             break;
@@ -286,12 +308,17 @@ public final class BrowserBuilder {
             throw new IllegalStateException("Can't find any Fn.Presenter");
         }
         
-        final ClassLoader loader;
-        if (FnUtils.isJavaScriptCapable(myCls.getClassLoader())) {
-            loader = myCls.getClassLoader();
+        final ClassLoader activeLoader;
+        if (loader != null) {
+            if (!FnUtils.isJavaScriptCapable(loader)) {
+                throw new IllegalStateException("Loader cannot resolve @JavaScriptBody: " + loader);
+            }
+            activeLoader = loader;
+        } else if (FnUtils.isJavaScriptCapable(myCls.getClassLoader())) {
+            activeLoader = myCls.getClassLoader();
         } else {
             FImpl impl = new FImpl(myCls.getClassLoader());
-            loader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
+            activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }
         
         final Fn.Presenter dP = dfnr;
@@ -303,8 +330,8 @@ public final class BrowserBuilder {
                     final Fn.Presenter aP = Fn.activePresenter();
                     final Fn.Presenter currentP = aP != null ? aP : dP;
                     
-                    Thread.currentThread().setContextClassLoader(loader);
-                    final Class<?> newClazz = Class.forName(myCls.getName(), true, loader);
+                    Thread.currentThread().setContextClassLoader(activeLoader);
+                    final Class<?> newClazz = Class.forName(myCls.getName(), true, activeLoader);
                     if (browserClass != null) {
                         browserClass[0] = newClazz;
                     }
