@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.ko.osgi.test;
+package org.netbeans.html.ko.felix.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,6 +51,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -75,7 +79,7 @@ import org.osgi.framework.FrameworkUtil;
  * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
 @ServiceProvider(service = KnockoutTCK.class)
-public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Class[]> {
+public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[]> {
     
     private static Fn.Presenter browserContext;
 
@@ -99,7 +103,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     }
     
     public static void start(URI server) throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutEquinoxTCKImpl.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFelixTCKImpl.class).
             loadPage(server.toString()).
             invoke("initialized");
 
@@ -107,7 +111,8 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
             @Override
             public void run() {
                 try {
-                    final ClassLoader osgiClassLoader = BrowserBuilder.class.getClassLoader();
+                    Bundle[] arr = FrameworkUtil.getBundle(BrowserBuilder.class).getBundleContext().getBundles();
+                    final ClassLoader osgiClassLoader = new AllBundlesLoader(arr);
                     bb.classloader(osgiClassLoader);
                     bb.showAndWait();
                 } catch (Throwable t) {
@@ -118,18 +123,18 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     }
 
     public static void initialized() throws Exception {
-        Bundle bundle = FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class);
+        Bundle bundle = FrameworkUtil.getBundle(KnockoutFelixTCKImpl.class);
         if (bundle == null) {
             throw new IllegalStateException(
-                "Should be loaded from a bundle. But was: " + KnockoutEquinoxTCKImpl.class.getClassLoader()
+                "Should be loaded from a bundle. But was: " + KnockoutFelixTCKImpl.class.getClassLoader()
             );
         }
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(
-            "org.netbeans.html.ko.osgi.test.KnockoutEquinoxIT"
+            "org.netbeans.html.ko.felix.test.KnockoutFelixIT"
         );
         Method m = classpathClass.getMethod("initialized", Class.class, Object.class);
         browserContext = Fn.activePresenter();
-        m.invoke(null, KnockoutEquinoxTCKImpl.class, browserContext);
+        m.invoke(null, KnockoutFelixTCKImpl.class, browserContext);
     }
     
     @Override
@@ -137,7 +142,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
         try {
             Class<?> fxCls = loadOSGiClass(
                 "org.netbeans.html.ko4j.FXContext",
-                FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class).getBundleContext()
+                FrameworkUtil.getBundle(KnockoutFelixTCKImpl.class).getBundleContext()
             );
             final Constructor<?> cnstr = fxCls.getConstructor(Fn.Presenter.class);
             cnstr.setAccessible(true);
@@ -215,4 +220,60 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
         return true;
     }
 
+    private static final class AllBundlesLoader extends ClassLoader {
+        private final Bundle[] arr;
+
+        public AllBundlesLoader(Bundle[] arr) {
+            super(ClassLoader.getSystemClassLoader().getParent());
+            this.arr = arr;
+        }
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            return loadClass(name, false);
+        }
+
+        @Override
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            ClassNotFoundException err = null;
+            for (Bundle b : arr) {
+                try {
+                    Class<?> cls = b.loadClass(name);
+                    if (FrameworkUtil.getBundle(cls) == b) {
+                        return cls;
+                    }
+                } catch (ClassNotFoundException ex) {
+                    err = ex;
+                }
+            }
+            throw err;
+        }
+
+        @Override
+        protected URL findResource(String name) {
+            for (Bundle b : arr) {
+                URL r = b.getResource(name);
+                if (r != null) {
+                    return r;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected Enumeration<URL> findResources(String name) throws IOException {
+            List<URL> ret = new ArrayList<URL>();
+            for (Bundle b : arr) {
+                Enumeration<URL> en = b.getResources(name);
+                if (en != null) while (en.hasMoreElements()) {
+                    URL u = en.nextElement();
+                    ret.add(u);
+                }
+            }
+            return Collections.enumeration(ret);
+        }
+        
+        
+        
+    }
 }
