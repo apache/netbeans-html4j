@@ -101,8 +101,10 @@ public class DeepChangeTest {
 
         @ComputedProperty(deep = true)
         static String firstFromNames(List<MyY> all) {
-            if (all.size() > 0) {
-                return all.get(0).getValue();
+            for (MyY y : all) {
+                if (y != null && y.getValue() != null) {
+                    return y.getValue();
+                }
             }
             return null;
         }
@@ -188,6 +190,10 @@ public class DeepChangeTest {
         assertEquals(o.changes, 2, "2nd change so far");
         assertEquals(o.get(), "HiHelloNazdar");
         
+        y.setValue("Zdravim");
+
+        assertEquals(o.changes, 3, "3rd change so far");
+        assertEquals(o.get(), "HiHelloZdravim");
     }
     
     @Test public void firstChangeInArrayNotifiedProperly() throws Exception {
@@ -208,6 +214,31 @@ public class DeepChangeTest {
         
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
+    }
+    
+    @Test public void firstChangeInArrayToNull() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("firstFromNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+
+        p.getAll().get(0).setValue(null);
+        
+        assertEquals(o.get(), "Hello");
+        assertEquals(o.changes, 1, "One change so far");
+        
+        p.getAll().get(0).setValue("Nazdar");
+
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 2, "2nd change so far");
     }
     
     @Test public void firstChangeInArrayNotifiedTransitively() throws Exception {
