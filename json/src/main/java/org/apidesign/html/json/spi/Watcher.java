@@ -70,6 +70,9 @@ final class Watcher {
     }
 
     static Watcher register(Watcher mine, Watcher locked) {
+        if (locked == DUMMY) {
+            return mine;
+        }
         Watcher current = mine;
         for (;;) {
             if (current == null) {
@@ -97,13 +100,13 @@ final class Watcher {
     
     Ref observe(Ref prev, String prop) {
         if (this == DUMMY) {
-            throw new IllegalStateException();
+            return prev;
         }
         return new Ref(this, prop).chain(prev);
     }
 
     final boolean forbiddenValue(Proto aThis) {
-        return proto == aThis;
+        return this == DUMMY || proto == aThis;
     }
     
     static final class Ref extends WeakReference<Watcher> {

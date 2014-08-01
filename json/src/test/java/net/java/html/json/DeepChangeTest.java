@@ -80,6 +80,10 @@ public class DeepChangeTest {
         static String sndName(MyY one) {
             return one.getValue().toUpperCase();
         }
+        @ComputedProperty(deep = false) 
+        static String noName(MyY one) {
+            return one.getValue().toUpperCase();
+        }
         @ComputedProperty(deep = true) 
         static String thrdName(MyY one) {
             return "X" + one.getCount();
@@ -163,4 +167,38 @@ public class DeepChangeTest {
         assertEquals(o2.changes, 1, "One change so far");
         assertEquals(o2.get(), "X10");
     }
+    
+    @Test public void onlyDeepPropsAreNotified() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("oneName");
+        assertNotNull(v, "Value should be in the map");
+        Object v2 = m.get("noName");
+        assertNotNull(v2, "Value2 should be in the map");
+        One o = (One)v;
+        One o2 = (One)v2;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertEquals(o2.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Ahoj");
+        try {
+            assertEquals(o2.get(), "AHOJ");
+        } catch (IllegalStateException ex) {
+            // is it OK to forbid access to subproperties of 
+            // when the deep is not true?
+            // that would be incompatible change...
+            return;
+        }
+
+        p.getOne().setValue("Nazdar");
+        
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+        assertEquals(o2.changes, 0, "This change is not noticed");
+        assertEquals(o2.get(), "NAZDAR", "but property value changes when computed");
+    }
+    
 }

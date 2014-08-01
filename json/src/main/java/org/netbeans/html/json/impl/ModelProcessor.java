@@ -606,7 +606,8 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.getKind() != ElementKind.METHOD) {
                 continue;
             }
-            if (e.getAnnotation(ComputedProperty.class) == null) {
+            final ComputedProperty cp = e.getAnnotation(ComputedProperty.class);
+            if (cp == null) {
                 continue;
             }
             if (!e.getModifiers().contains(Modifier.STATIC)) {
@@ -676,7 +677,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
-            w.write("      proto.acquireLock(\"" + sn + "\");\n");
+            if (cp.deep()) {
+                w.write("      proto.acquireLock(\"" + sn + "\");\n");
+            } else {
+                w.write("      proto.acquireLock();\n");
+            }
             w.write("      return " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + e.getSimpleName() + "(");
             String sep = "";
             for (int i = 1; i <= arg; i++) {
