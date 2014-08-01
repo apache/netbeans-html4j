@@ -49,7 +49,8 @@ import java.lang.ref.WeakReference;
  * @author Jaroslav Tulach
  */
 final class Watcher {
-    static final Watcher DUMMY = new Watcher(null, null);
+    private static final Object LOCK = new Object();
+    private static Watcher global;
 
     private final Proto proto;
     private final String prop;
@@ -60,17 +61,75 @@ final class Watcher {
         this.prop = prop;
     }
     
-    static Watcher find(Watcher first, String prop) {
+    static void beginComputing(Proto p, String name) {
+        synchronized (LOCK) {
+            Watcher alreadyThere = find(global, p, null);
+            if (alreadyThere != null) {
+                throw new IllegalStateException("Re-entrant attempt to access " + p);
+            }
+            final Watcher nw = new Watcher(p, name);
+            nw.next = global;
+            global = nw;
+        }
+    }
+    
+    static void verifyUnlocked(Proto p) {
+        synchronized (LOCK) {
+            Watcher alreadyThere = find(global, p, null);
+            if (alreadyThere != null) {
+                throw new IllegalStateException("Re-entrant attempt to access " + p);
+            }
+        }        
+    }
+
+    static Ref accessingValue(Proto p, Ref observers, String propName) {
+        synchronized (LOCK) {
+            Watcher alreadyThere = find(global, p, null);
+            if (alreadyThere != null) {
+                throw new IllegalStateException("Re-entrant attempt to access " + p);
+            }
+            Watcher w = global;
+            for (;;) {
+                if (w == null) {
+                    return observers;
+                }
+                observers = w.observe(observers, propName);
+                w = w.next;
+            }
+        }
+    }
+    
+    static Watcher finishComputing(Proto p, Watcher mine) {
+        synchronized (LOCK) {
+            Watcher w = global;
+            global = w.next;
+            w.next = null;
+            if (w.proto != p) {
+                throw new IllegalStateException("Inconsistency: " + w.proto + " != " + p);
+            }
+            return register(mine, w);
+        }
+    }
+    
+    static Watcher find(Watcher first, Proto proto, String prop) {
+    //    assert Thread.holdsLock(LOCK);
         for (;;) {
-            if (prop.equals(first.prop)) {
+            if (first == null) {
+                return null;
+            }
+            if (prop != null && prop.equals(first.prop)) {
+                return first;
+            }
+            if (proto != null && proto == first.proto) {
                 return first;
             }
             first = first.next;
         }
     }
 
-    static Watcher register(Watcher mine, Watcher locked) {
-        if (locked == DUMMY) {
+    private static Watcher register(Watcher mine, Watcher locked) {
+        assert Thread.holdsLock(LOCK);
+        if (locked.prop == null) {
             return mine;
         }
         Watcher current = mine;
@@ -99,16 +158,12 @@ final class Watcher {
     }
     
     Ref observe(Ref prev, String prop) {
-        if (this == DUMMY) {
+        if (prop == null) {
             return prev;
         }
         return new Ref(this, prop).chain(prev);
     }
 
-    final boolean forbiddenValue(Proto aThis) {
-        return this == DUMMY || proto == aThis;
-    }
-    
     static final class Ref extends WeakReference<Watcher> {
         private final String prop;
         private Ref next;

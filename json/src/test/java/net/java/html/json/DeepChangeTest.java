@@ -113,6 +113,15 @@ public class DeepChangeTest {
     })
     static class Y {
     }
+    @Model(className = "MyOverall", properties = {
+        @Property(name = "x", type = MyX.class)
+    })
+    static class Overall {
+        @ComputedProperty(deep = true) 
+        static String valueAccross(MyX x) {
+            return x.getFirstFromNames();
+        }
+    }
     
     @Test public void isTransitiveChangeNotifiedProperly() throws Exception {
         MyX p = Models.bind(
@@ -173,6 +182,27 @@ public class DeepChangeTest {
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
     }
+    
+    @Test public void firstChangeInArrayNotifiedTransitively() throws Exception {
+        MyOverall p = Models.bind(
+            new MyOverall(new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999))
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("valueAccross");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+
+        p.getX().getAll().get(0).setValue("Nazdar");
+        
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+    }
+    
     @Test public void secondChangeInArrayIgnored() throws Exception {
         MyX p = Models.bind(
             new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
@@ -281,14 +311,7 @@ public class DeepChangeTest {
         assertEquals(o2.changes, 0, "No changes so far");
         assertTrue(o.pb.isReadOnly(), "Derived property");
         assertEquals(o.get(), "Ahoj");
-        try {
-            assertEquals(o2.get(), "AHOJ");
-        } catch (IllegalStateException ex) {
-            // is it OK to forbid access to subproperties of 
-            // when the deep is not true?
-            // that would be incompatible change...
-            return;
-        }
+        assertEquals(o2.get(), "AHOJ");
 
         p.getOne().setValue("Nazdar");
         
