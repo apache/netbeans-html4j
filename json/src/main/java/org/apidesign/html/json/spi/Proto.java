@@ -422,6 +422,9 @@ public final class Proto {
     // internal state
     //
     
+    final String toStr() {
+        return "Proto[" + obj + "]@" + Integer.toHexString(System.identityHashCode(this));
+    }
     
     final Bindings initBindings() {
         if (ko == null) {

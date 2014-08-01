@@ -162,6 +162,33 @@ public class DeepChangeTest {
         assertEquals(o.get(), "NazdarHello");
         assertEquals(o.changes, 1, "One change so far");
     }
+
+    @Test public void addingIntoArray() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("allNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "HiHello");
+
+        MyY y = new MyY("Cus", 1);
+        p.getAll().add(y);
+        
+        assertEquals(o.changes, 1, "One change so far");
+        assertEquals(o.get(), "HiHelloCus");
+        
+        y.setValue("Nazdar");
+        
+        assertEquals(o.changes, 2, "2nd change so far");
+        assertEquals(o.get(), "HiHelloNazdar");
+        
+    }
     
     @Test public void firstChangeInArrayNotifiedProperly() throws Exception {
         MyX p = Models.bind(

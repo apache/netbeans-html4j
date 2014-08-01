@@ -132,17 +132,21 @@ final class Watcher {
         if (locked.prop == null) {
             return mine;
         }
+        if (mine == null) {
+            return locked;
+        }
+        if (locked.prop.equals(mine.prop)) {
+            locked.next = mine.next;
+            return locked;
+        }
         Watcher current = mine;
         for (;;) {
-            if (current == null) {
-                return locked;
-            }
             Watcher next = current.next;
             if (next == null) {
                 current.next = locked;
                 return mine;
             }
-            if (next.prop.equals(locked.prop)) {
+            if (locked.prop.equals(next.prop)) {
                 locked.next = next.next;
                 current.next = locked;
                 return mine;
@@ -162,6 +166,11 @@ final class Watcher {
             return prev;
         }
         return new Ref(this, prop).chain(prev);
+    }
+
+    @Override
+    public String toString() {
+        return "Watcher: " + proto + ", " + prop + "\n -> " + next;
     }
 
     static final class Ref extends WeakReference<Watcher> {
