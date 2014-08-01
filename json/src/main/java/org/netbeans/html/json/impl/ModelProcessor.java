@@ -544,14 +544,14 @@ public final class ModelProcessor extends AbstractProcessor {
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
-                w.write("    proto.verifyUnlocked();\n");
+                w.write("    proto.accessValue(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
             } else {
                 castTo = tn;
                 w.write("  private " + tn + " prop_" + p.name() + ";\n");
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
-                w.write("    proto.verifyUnlocked();\n");
+                w.write("    proto.accessValue(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
@@ -676,7 +676,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
-            w.write("      proto.acquireLock();\n");
+            w.write("      proto.acquireLock(\"" + sn + "\");\n");
             w.write("      return " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + e.getSimpleName() + "(");
             String sep = "";
             for (int i = 1; i <= arg; i++) {

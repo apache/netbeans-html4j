@@ -83,7 +83,7 @@ public class DeepChangeTest {
     static class Y {
     }
     
-    @Test public void isThereABinding() throws Exception {
+    @Test public void isTransitiveChangeNotifiedProperly() throws Exception {
         MyX p = Models.bind(
             new MyX(new MyY("Ahoj"), new MyY("Hi"), new MyY("Hello")
         ), c).applyBindings();
