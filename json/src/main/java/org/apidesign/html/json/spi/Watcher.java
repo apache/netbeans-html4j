@@ -50,15 +50,44 @@ import java.lang.ref.WeakReference;
  */
 final class Watcher {
     static final Watcher DUMMY = new Watcher(null, null);
-    
-    final Proto proto;
-    final String prop;
+
+    private final Proto proto;
+    private final String prop;
+    private Watcher next;
 
     private Watcher(Proto proto, String prop) {
         this.proto = proto;
         this.prop = prop;
     }
     
+    static Watcher find(Watcher first, String prop) {
+        for (;;) {
+            if (prop.equals(first.prop)) {
+                return first;
+            }
+            first = first.next;
+        }
+    }
+
+    static Watcher register(Watcher mine, Watcher locked) {
+        Watcher current = mine;
+        for (;;) {
+            if (current == null) {
+                return locked;
+            }
+            Watcher next = current.next;
+            if (next == null) {
+                current.next = locked;
+                return mine;
+            }
+            if (next.prop.equals(locked.prop)) {
+                locked.next = next.next;
+                current.next = locked;
+                return mine;
+            }
+            current = next;
+        }
+    }
     
     static Watcher computing(Proto proto, String prop) {
         proto.getClass();
@@ -71,6 +100,10 @@ final class Watcher {
             throw new IllegalStateException();
         }
         return new Ref(this, prop).chain(prev);
+    }
+
+    final boolean forbiddenValue(Proto aThis) {
+        return proto == aThis;
     }
     
     static final class Ref extends WeakReference<Watcher> {

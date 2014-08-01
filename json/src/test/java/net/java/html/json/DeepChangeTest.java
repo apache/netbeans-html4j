@@ -76,16 +76,25 @@ public class DeepChangeTest {
         static String oneName(MyY one) {
             return one.getValue();
         }
+        @ComputedProperty(deep = true) 
+        static String sndName(MyY one) {
+            return one.getValue().toUpperCase();
+        }
+        @ComputedProperty(deep = true) 
+        static String thrdName(MyY one) {
+            return "X" + one.getCount();
+        }
     }
     @Model(className = "MyY", properties = {
-        @Property(name = "value", type = String.class)
+        @Property(name = "value", type = String.class),
+        @Property(name = "count", type = int.class)
     })
     static class Y {
     }
     
     @Test public void isTransitiveChangeNotifiedProperly() throws Exception {
         MyX p = Models.bind(
-            new MyX(new MyY("Ahoj"), new MyY("Hi"), new MyY("Hello")
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
         ), c).applyBindings();
         
         Map m = (Map)Models.toRaw(p);
@@ -101,5 +110,57 @@ public class DeepChangeTest {
         
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
+    }
+    
+    @Test public void doublePropertyChangeNotified() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("oneName");
+        assertNotNull(v, "Value should be in the map");
+        Object v2 = m.get("sndName");
+        assertNotNull(v2, "Value2 should be in the map");
+        One o = (One)v;
+        One o2 = (One)v2;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertEquals(o2.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Ahoj");
+        assertEquals(o2.get(), "AHOJ");
+
+        p.getOne().setValue("Nazdar");
+        
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+        assertEquals(o2.changes, 1, "One change so far");
+        assertEquals(o2.get(), "NAZDAR");
+    }
+    
+    @Test public void onlyAffectedPropertyChangeNotified() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("oneName");
+        assertNotNull(v, "Value should be in the map");
+        Object v2 = m.get("thrdName");
+        assertNotNull(v2, "Value2 should be in the map");
+        One o = (One)v;
+        One o2 = (One)v2;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertEquals(o2.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Ahoj");
+        assertEquals(o2.get(), "X0");
+
+        p.getOne().setCount(10);
+        
+        assertEquals(o.get(), "Ahoj");
+        assertEquals(o.changes, 0, "Still no change");
+        assertEquals(o2.changes, 1, "One change so far");
+        assertEquals(o2.get(), "X10");
     }
 }
