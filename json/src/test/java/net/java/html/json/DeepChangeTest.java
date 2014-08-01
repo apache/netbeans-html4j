@@ -42,6 +42,7 @@
  */
 package net.java.html.json;
 
+import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.MapModelTest.MapTechnology;
@@ -88,6 +89,23 @@ public class DeepChangeTest {
         static String thrdName(MyY one) {
             return "X" + one.getCount();
         }
+        
+        @ComputedProperty(deep = true)
+        static String allNames(List<MyY> all) {
+            StringBuilder sb = new StringBuilder();
+            for (MyY y : all) {
+                sb.append(y.getValue());
+            }
+            return sb.toString();
+        }
+
+        @ComputedProperty(deep = true)
+        static String firstFromNames(List<MyY> all) {
+            if (all.size() > 0) {
+                return all.get(0).getValue();
+            }
+            return null;
+        }
     }
     @Model(className = "MyY", properties = {
         @Property(name = "value", type = String.class),
@@ -114,6 +132,85 @@ public class DeepChangeTest {
         
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
+    }
+    
+    @Test public void isTransitiveChangeInArrayNotifiedProperly() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("allNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "HiHello");
+
+        p.getAll().get(0).setValue("Nazdar");
+        
+        assertEquals(o.get(), "NazdarHello");
+        assertEquals(o.changes, 1, "One change so far");
+    }
+    
+    @Test public void firstChangeInArrayNotifiedProperly() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("firstFromNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+
+        p.getAll().get(0).setValue("Nazdar");
+        
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+    }
+    @Test public void secondChangeInArrayIgnored() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("firstFromNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+
+        p.getAll().get(1).setValue("Nazdar");
+        
+        assertEquals(o.get(), "Hi");
+        assertEquals(o.changes, 0, "No change so far");
+    }
+    
+    @Test public void changeInArraySizeNeedsToBeRecomputed() throws Exception {
+        MyX p = Models.bind(
+            new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+        
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("firstFromNames");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+
+        p.getAll().remove(1);
+        
+        assertEquals(o.get(), "Hi");
+        assertEquals(o.changes, 1, "This required a change");
     }
     
     @Test public void doublePropertyChangeNotified() throws Exception {
