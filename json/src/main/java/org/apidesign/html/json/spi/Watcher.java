@@ -43,18 +43,20 @@
 package org.apidesign.html.json.spi;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
  * @author Jaroslav Tulach
  */
 final class Watcher {
-    private static final Object LOCK = new Object();
-    private static Watcher global;
+    private static final LinkedList<Watcher> GLOBAL = new LinkedList<Watcher>();
 
     private final Proto proto;
     private final String prop;
-    private Watcher next;
 
     private Watcher(Proto proto, String prop) {
         this.proto = proto;
@@ -62,96 +64,47 @@ final class Watcher {
     }
     
     static void beginComputing(Proto p, String name) {
-        synchronized (LOCK) {
-            Watcher alreadyThere = find(global, p, null);
-            if (alreadyThere != null) {
-                throw new IllegalStateException("Re-entrant attempt to access " + p);
-            }
+        synchronized (GLOBAL) {
+            verifyUnlocked(p);
             final Watcher nw = new Watcher(p, name);
-            nw.next = global;
-            global = nw;
+            GLOBAL.push(nw);
         }
     }
     
     static void verifyUnlocked(Proto p) {
-        synchronized (LOCK) {
-            Watcher alreadyThere = find(global, p, null);
-            if (alreadyThere != null) {
-                throw new IllegalStateException("Re-entrant attempt to access " + p);
+        synchronized (GLOBAL) {
+            for (Watcher w : GLOBAL) {
+                if (w.proto == p) {
+                    throw new IllegalStateException("Re-entrant attempt to access " + p);
+                }
             }
         }        
     }
 
-    static Ref accessingValue(Proto p, Ref observers, String propName) {
-        synchronized (LOCK) {
-            Watcher alreadyThere = find(global, p, null);
-            if (alreadyThere != null) {
-                throw new IllegalStateException("Re-entrant attempt to access " + p);
-            }
-            Watcher w = global;
-            for (;;) {
-                if (w == null) {
-                    return observers;
+    static Observers accessingValue(Proto p, Observers observers, String propName) {
+        synchronized (GLOBAL) {
+            verifyUnlocked(p);
+            for (Watcher w : GLOBAL) {
+                if (observers == null) {
+                    observers = new Observers();
                 }
-                observers = w.observe(observers, propName);
-                w = w.next;
+                observers.add(w, new Ref(w, propName));
             }
+            return observers;
         }
     }
     
-    static Watcher finishComputing(Proto p, Watcher mine) {
-        synchronized (LOCK) {
-            Watcher w = global;
-            global = w.next;
-            w.next = null;
+    static Watchers finishComputing(Proto p, Watchers mine) {
+        synchronized (GLOBAL) {
+            Watcher w = GLOBAL.pop();
             if (w.proto != p) {
                 throw new IllegalStateException("Inconsistency: " + w.proto + " != " + p);
             }
-            return register(mine, w);
-        }
-    }
-    
-    static Watcher find(Watcher first, Proto proto, String prop) {
-    //    assert Thread.holdsLock(LOCK);
-        for (;;) {
-            if (first == null) {
-                return null;
+            if (mine == null) {
+                mine = new Watchers();
             }
-            if (prop != null && prop.equals(first.prop)) {
-                return first;
-            }
-            if (proto != null && proto == first.proto) {
-                return first;
-            }
-            first = first.next;
-        }
-    }
-
-    private static Watcher register(Watcher mine, Watcher locked) {
-        assert Thread.holdsLock(LOCK);
-        if (locked.prop == null) {
+            mine.add(w);
             return mine;
-        }
-        if (mine == null) {
-            return locked;
-        }
-        if (locked.prop.equals(mine.prop)) {
-            locked.next = mine.next;
-            return locked;
-        }
-        Watcher current = mine;
-        for (;;) {
-            Watcher next = current.next;
-            if (next == null) {
-                current.next = locked;
-                return mine;
-            }
-            if (locked.prop.equals(next.prop)) {
-                locked.next = next.next;
-                current.next = locked;
-                return mine;
-            }
-            current = next;
         }
     }
     
@@ -161,71 +114,107 @@ final class Watcher {
         return new Watcher(proto, prop);
     }
     
-    Ref observe(Ref prev, String prop) {
-        if (prop == null) {
-            return prev;
-        }
-        return new Ref(this, prop).chain(prev);
-    }
-
     @Override
     public String toString() {
-        return "Watcher: " + proto + ", " + prop + "\n -> " + next;
+        return "Watcher: " + proto + ", " + prop;
     }
 
-    static final class Ref extends WeakReference<Watcher> {
+    private static final class Ref extends WeakReference<Watcher> {
         private final String prop;
-        private Ref next;
         
         public Ref(Watcher ref, String prop) {
             super(ref);
             this.prop = prop;
         }
         
-        Ref chain(Ref prev) {
-            this.next = dropDead(prev, null);
-            return this;
-        }
-        
-        private Watcher watcher() {
+        final Watcher watcher() {
             Watcher w = get();
             if (w != null && w.proto.watcher(w.prop) == w) {
                 return w;
             }
             return null;
         }
-        
-        private static Ref dropDead(Ref self, String fireProp) {
-            while (self != null && self.watcher() == null) {
-                self = self.next;
-            }
-            if (self == null) {
+    }
+    
+    static final class Watchers {
+        private final List<Watcher> watchers = new ArrayList<Watcher>();
+
+        Watcher find(String prop) {
+            if (prop == null) {
                 return null;
             }
-            Ref current = self;
-            for (;;) {
-                Watcher w = current.watcher();
-                if (w != null && fireProp != null && fireProp.equals(current.prop)) {
-                    w.proto.valueHasMutated(w.prop);
+            for (Watcher w : watchers) {
+                if (prop.equals(w.prop)) {
+                    return w;
                 }
-                for (;;) {
-                    Ref next = current.next;
-                    if (next == null) {
-                        return self;
+            }
+            return null;
+        }
+
+        final void add(Watcher w) {
+            for (int i = 0; i < watchers.size(); i++) {
+                Watcher ith = watchers.get(i);
+                if (w.prop == null) {
+                    if (ith.prop == null) {
+                        watchers.set(i, w);
+                        return;
                     }
-                    if (next.watcher() != null) {
-                        current = next;
-                        break;
-                    } else {
-                        current.next = next.next;
+                } else if (w.prop.equals(ith.prop)) {
+                    watchers.set(i, w);
+                    return;
+                }
+            }
+            watchers.add(w);
+        }
+    }
+    
+    static final class Observers {
+        private final List<Ref> observers = new ArrayList<Ref>();
+
+        void valueHasMutated(String propName) {
+            List<Watcher> mutated = new LinkedList<Watcher>();
+            synchronized (GLOBAL) {
+                Iterator<Ref> it = observers.iterator();
+                while (it.hasNext()) {
+                    Ref ref = it.next();
+                    if (ref.get() == null) {
+                        it.remove();
+                        continue;
+                    }
+                    if (ref.prop.equals(propName)) {
+                        Watcher w = ref.watcher();
+                        if (w != null) {
+                            mutated.add(w);
+                        }
                     }
                 }
             }
-            
+            for (Watcher w : mutated) {
+                w.proto.valueHasMutated(w.prop);
+            }
         }
 
-        static Ref valueHasMutated(Ref self, String propName) {
-            return dropDead(self, propName);
+        void add(Watcher w, Ref r) {
+            Thread.holdsLock(GLOBAL);
+            if (w == null) {
+                return;
+            }
+            Iterator<Ref> it = observers.iterator();
+            while (it.hasNext()) {
+                Ref ref = it.next();
+                if (r == ref) {
+                    return;
+                }
+                final Watcher rw = ref.get();
+                if (rw == null) {
+                    it.remove();
+                    continue;
+                }
+                if (rw == w && r.prop.equals(r.prop)) {
+                    return;
+                }
+            }
+            observers.add(r);
         }
     }
 }
