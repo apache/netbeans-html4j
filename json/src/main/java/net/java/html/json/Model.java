@@ -73,29 +73,29 @@ import java.util.List;
  * <code>fullName</code>) follows:
  * <pre>
  * {@link Model @Model}(className="Person", properties={
- *   {@link Property @Property}(name = "firstName", type=String.class),
- *   {@link Property @Property}(name = "lastName", type=String.class)
- *   {@link Property @Property}(name = "addresses", type=Address.class, array = true)
+ *   {@link Property @Property}(name = "firstName", type=String.<b>class</b>),
+ *   {@link Property @Property}(name = "lastName", type=String.<b>class</b>)
+ *   {@link Property @Property}(name = "addresses", type=Address.<b>class</b>, array = <b>true</b>)
  * })
- * static class PersonModel {
+ * <b>static class</b> PersonModel {
  *   {@link ComputedProperty @ComputedProperty}
- *   static String fullName(String firstName, String lastName) {
- *     return firstName + " " + lastName;
+ *   <b>static</b> String fullName(String firstName, String lastName) {
+ *     <b>return</b> firstName + " " + lastName;
  *   }
  * 
  *   {@link ComputedProperty @ComputedProperty}
- *   static String mainAddress({@link List List&lt;Address&gt;} addresses) {
- *     for (Address a : addresses) {
- *       return a.getStreet() + " " + a.getTown();
+ *   <b>static</b> String mainAddress({@link List List&lt;Address&gt;} addresses) {
+ *     <b>for</b> (Address a : addresses) {
+ *       <b>return</b> a.getStreet() + " " + a.getTown();
  *     }
- *     return "No address";
+ *     <b>return</b> "No address";
  *   }
  * 
  *   {@link Model @Model}(className="Address", properties={
- *     {@link Property @Property}(name = "street", type=String.class),
- *     {@link Property @Property}(name = "town", type=String.class)
+ *     {@link Property @Property}(name = "street", type=String.<b>class</b>),
+ *     {@link Property @Property}(name = "town", type=String.<b>class</b>)
  *   })
- *   static class AddressModel {
+ *   <b>static class</b> AddressModel {
  *   }
  * }
  * </pre>
@@ -105,10 +105,9 @@ import java.util.List;
  * for the first array property (if any). One can thus use following code
  * to create an instance of the Person and Address classes:
  * <pre>
- * 
- * Person p = new Person("Jaroslav", "Tulach",
- *   new Address("Markoušovice", "Úpice"),
- *   new Address("V Parku", "Praha")
+ * Person p = <b>new</b> Person("Jaroslav", "Tulach",
+ *   <b>new</b> Address("Markoušovice", "Úpice"),
+ *   <b>new</b> Address("V Parku", "Praha")
  * );
  * // p.toString() then returns equivalent of following <a href="http://en.wikipedia.org/wiki/JSON">JSON</a> object
  * {
