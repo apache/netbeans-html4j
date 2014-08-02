@@ -40,14 +40,23 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package net.java.html.json;
+package org.netbeans.html.json.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
-import net.java.html.json.MapModelTest.MapTechnology;
-import net.java.html.json.MapModelTest.One;
+import net.java.html.json.ComputedProperty;
+import net.java.html.json.Model;
+import net.java.html.json.Models;
+import net.java.html.json.Property;
 import org.apidesign.html.context.spi.Contexts;
+import org.apidesign.html.json.spi.FunctionBinding;
+import org.apidesign.html.json.spi.JSONCall;
+import org.apidesign.html.json.spi.PropertyBinding;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
 import static org.testng.Assert.*;
@@ -73,24 +82,24 @@ public class DeepChangeTest {
         @Property(name = "all", type = MyY.class, array = true)
     })
     static class X {
-        @ComputedProperty(deep = true) 
+        @ComputedProperty @Transitive(deep = true) 
         static String oneName(MyY one) {
             return one.getValue();
         }
-        @ComputedProperty(deep = true) 
+        @ComputedProperty @Transitive(deep = true) 
         static String sndName(MyY one) {
             return one.getValue().toUpperCase();
         }
-        @ComputedProperty(deep = false) 
+        @ComputedProperty @Transitive(deep = false) 
         static String noName(MyY one) {
             return one.getValue().toUpperCase();
         }
-        @ComputedProperty(deep = true) 
+        @ComputedProperty @Transitive(deep = true) 
         static String thrdName(MyY one) {
             return "X" + one.getCount();
         }
         
-        @ComputedProperty(deep = true)
+        @ComputedProperty @Transitive(deep = true)
         static String allNames(List<MyY> all) {
             StringBuilder sb = new StringBuilder();
             for (MyY y : all) {
@@ -99,7 +108,7 @@ public class DeepChangeTest {
             return sb.toString();
         }
 
-        @ComputedProperty(deep = true)
+        @ComputedProperty @Transitive(deep = true)
         static String firstFromNames(List<MyY> all) {
             for (MyY y : all) {
                 if (y != null && y.getValue() != null) {
@@ -119,7 +128,7 @@ public class DeepChangeTest {
         @Property(name = "x", type = MyX.class)
     })
     static class Overall {
-        @ComputedProperty(deep = true) 
+        @ComputedProperty @Transitive(deep = true) 
         static String valueAccross(MyX x) {
             return x.getFirstFromNames();
         }
@@ -377,6 +386,111 @@ public class DeepChangeTest {
         assertEquals(o.changes, 1, "One change so far");
         assertEquals(o2.changes, 0, "This change is not noticed");
         assertEquals(o2.get(), "NAZDAR", "but property value changes when computed");
+    }
+
+    static final class One {
+
+        int changes;
+        final PropertyBinding pb;
+        final FunctionBinding fb;
+
+        One(Object m, PropertyBinding pb) throws NoSuchMethodException {
+            this.pb = pb;
+            this.fb = null;
+        }
+
+        One(Object m, FunctionBinding fb) throws NoSuchMethodException {
+            this.pb = null;
+            this.fb = fb;
+        }
+
+        Object get() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            return pb.getValue();
+        }
+
+        void set(Object v) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            pb.setValue(v);
+        }
+    }
+
+    static final class MapTechnology
+            implements Technology<Map<String, One>>, Transfer {
+
+        @Override
+        public Map<String, One> wrapModel(Object model) {
+            return new HashMap<String, One>();
+        }
+
+        @Override
+        public void valueHasMutated(Map<String, One> data, String propertyName) {
+            One p = data.get(propertyName);
+            if (p != null) {
+                p.changes++;
+            }
+        }
+
+        @Override
+        public void bind(PropertyBinding b, Object model, Map<String, One> data) {
+            try {
+                One o = new One(model, b);
+                data.put(b.getPropertyName(), o);
+            } catch (NoSuchMethodException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        @Override
+        public void expose(FunctionBinding fb, Object model, Map<String, One> data) {
+            try {
+                data.put(fb.getFunctionName(), new One(model, fb));
+            } catch (NoSuchMethodException ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+
+        @Override
+        public void applyBindings(Map<String, One> data) {
+        }
+
+        @Override
+        public Object wrapArray(Object[] arr) {
+            return arr;
+        }
+
+        @Override
+        public void extract(Object obj, String[] props, Object[] values) {
+            Map<?, ?> map = obj instanceof Map ? (Map<?, ?>) obj : null;
+            for (int i = 0; i < Math.min(props.length, values.length); i++) {
+                if (map == null) {
+                    values[i] = null;
+                } else {
+                    values[i] = map.get(props[i]);
+                    if (values[i] instanceof One) {
+                        values[i] = ((One) values[i]).pb.getValue();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void loadJSON(JSONCall call) {
+            call.notifyError(new UnsupportedOperationException());
+        }
+
+        @Override
+        public <M> M toModel(Class<M> modelClass, Object data) {
+            return modelClass.cast(data);
+        }
+
+        @Override
+        public Object toJSON(InputStream is) throws IOException {
+            throw new IOException();
+        }
+
+        @Override
+        public void runSafe(Runnable r) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
     
 }

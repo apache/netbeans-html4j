@@ -40,15 +40,20 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package net.java.html.json;
+package org.netbeans.html.json.impl;
 
 import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
-import net.java.html.json.MapModelTest.One;
+import net.java.html.json.ComputedProperty;
+import net.java.html.json.Model;
+import net.java.html.json.Models;
+import net.java.html.json.Property;
 import org.apidesign.html.context.spi.Contexts;
 import org.apidesign.html.json.spi.Technology;
 import org.apidesign.html.json.spi.Transfer;
+import org.netbeans.html.json.impl.DeepChangeTest.MapTechnology;
+import org.netbeans.html.json.impl.DeepChangeTest.One;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -69,7 +74,7 @@ public class ToDoTest {
     static class ItemCtrl {
     }
 
-    @ComputedProperty(deep = true)
+    @ComputedProperty @Transitive(deep = true)
     static int remaining(
         List<Todo> todos, String todoText
     ) {
@@ -82,12 +87,12 @@ public class ToDoTest {
         return count;
     }
     
-    private MapModelTest.MapTechnology t;
+    private MapTechnology t;
     private BrwsrCtx c;
 
     @BeforeMethod
     public void initTechnology() {
-        t = new MapModelTest.MapTechnology();
+        t = new MapTechnology();
         c = Contexts.newBuilder().register(Technology.class, t, 1).
                 register(Transfer.class, t, 1).build();
     }

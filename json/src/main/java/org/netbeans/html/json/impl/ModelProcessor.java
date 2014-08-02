@@ -607,6 +607,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             final ComputedProperty cp = e.getAnnotation(ComputedProperty.class);
+            final Transitive tp = e.getAnnotation(Transitive.class);
             if (cp == null) {
                 continue;
             }
@@ -677,7 +678,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
-            if (cp.deep()) {
+            if (tp != null && tp.deep()) {
                 w.write("      proto.acquireLock(\"" + sn + "\");\n");
             } else {
                 w.write("      proto.acquireLock();\n");
