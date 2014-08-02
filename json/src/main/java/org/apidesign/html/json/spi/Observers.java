@@ -97,10 +97,12 @@ final class Observers {
             if (w.proto != p) {
                 throw new IllegalStateException("Inconsistency: " + w.proto + " != " + p);
             }
-            if (mine == null) {
-                mine = new Observers();
+            if (w.prop != null) {
+                if (mine == null) {
+                    mine = new Observers();
+                }
+                mine.add(w);
             }
-            mine.add(w);
             return mine;
         }
     }
