@@ -544,14 +544,14 @@ public final class ModelProcessor extends AbstractProcessor {
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
-                w.write("    proto.verifyUnlocked();\n");
+                w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
             } else {
                 castTo = tn;
                 w.write("  private " + tn + " prop_" + p.name() + ";\n");
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
-                w.write("    proto.verifyUnlocked();\n");
+                w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
@@ -606,7 +606,9 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.getKind() != ElementKind.METHOD) {
                 continue;
             }
-            if (e.getAnnotation(ComputedProperty.class) == null) {
+            final ComputedProperty cp = e.getAnnotation(ComputedProperty.class);
+            final Transitive tp = e.getAnnotation(Transitive.class);
+            if (cp == null) {
                 continue;
             }
             if (!e.getModifiers().contains(Modifier.STATIC)) {
@@ -656,14 +658,24 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             w.write(" " + gs[0] + "() {\n");
             int arg = 0;
+            boolean deep = false;
             for (VariableElement pe : ee.getParameters()) {
                 final String dn = pe.getSimpleName().toString();
                 
                 if (!verifyPropName(pe, dn, fixedProps)) {
                     ok = false;
                 }
-                
-                final String dt = fqn(pe.asType(), ee);
+                final TypeMirror pt = pe.asType();
+                if (isModel(pt)) {
+                    deep = true;
+                }
+                final String dt = fqn(pt, ee);
+                if (dt.startsWith("java.util.List") && pt instanceof DeclaredType) {
+                    final List<? extends TypeMirror> ptArgs = ((DeclaredType)pt).getTypeArguments();
+                    if (ptArgs.size() == 1 && isModel(ptArgs.get(0))) {
+                        deep = true;
+                    }
+                }
                 String[] call = toGetSet(dn, dt, false);
                 w.write("    " + dt + " arg" + (++arg) + " = ");
                 w.write(call[0] + "();\n");
@@ -676,7 +688,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
-            w.write("      proto.acquireLock();\n");
+            if (tp != null) {
+                deep = tp.deep();
+            }
+            if (deep) {
+                w.write("      proto.acquireLock(\"" + sn + "\");\n");
+            } else {
+                w.write("      proto.acquireLock();\n");
+            }
             w.write("      return " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + e.getSimpleName() + "(");
             String sep = "";
             for (int i = 1; i <= arg; i++) {

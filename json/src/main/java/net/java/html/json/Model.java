@@ -47,6 +47,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URL;
+import java.util.List;
 
 /** Defines a model class that represents a single 
  * <a href="http://en.wikipedia.org/wiki/JSON">JSON</a>-like object
@@ -80,6 +81,14 @@ import java.net.URL;
  *   {@link ComputedProperty @ComputedProperty}
  *   static String fullName(String firstName, String lastName) {
  *     return firstName + " " + lastName;
+ *   }
+ * 
+ *   {@link ComputedProperty @ComputedProperty}
+ *   static String mainAddress({@link List List&lt;Address&gt;} addresses) {
+ *     for (Address a : addresses) {
+ *       return a.getStreet() + " " + a.getTown();
+ *     }
+ *     return "No address";
  *   }
  * 
  *   {@link Model @Model}(className="Address", properties={
