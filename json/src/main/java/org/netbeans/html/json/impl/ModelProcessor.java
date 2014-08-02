@@ -658,14 +658,24 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             w.write(" " + gs[0] + "() {\n");
             int arg = 0;
+            boolean deep = false;
             for (VariableElement pe : ee.getParameters()) {
                 final String dn = pe.getSimpleName().toString();
                 
                 if (!verifyPropName(pe, dn, fixedProps)) {
                     ok = false;
                 }
-                
-                final String dt = fqn(pe.asType(), ee);
+                final TypeMirror pt = pe.asType();
+                if (isModel(pt)) {
+                    deep = true;
+                }
+                final String dt = fqn(pt, ee);
+                if (dt.startsWith("java.util.List") && pt instanceof DeclaredType) {
+                    final List<? extends TypeMirror> ptArgs = ((DeclaredType)pt).getTypeArguments();
+                    if (ptArgs.size() == 1 && isModel(ptArgs.get(0))) {
+                        deep = true;
+                    }
+                }
                 String[] call = toGetSet(dn, dt, false);
                 w.write("    " + dt + " arg" + (++arg) + " = ");
                 w.write(call[0] + "();\n");
@@ -678,7 +688,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 depends.add(new String[] { sn, gs[0] });
             }
             w.write("    try {\n");
-            if (tp != null && tp.deep()) {
+            if (tp != null) {
+                deep = tp.deep();
+            }
+            if (deep) {
                 w.write("      proto.acquireLock(\"" + sn + "\");\n");
             } else {
                 w.write("      proto.acquireLock();\n");

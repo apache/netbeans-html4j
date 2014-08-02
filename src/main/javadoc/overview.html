@@ -79,6 +79,9 @@
         
         <p>
             System can run in {@link net.java.html.boot.BrowserBuilder#classloader(java.lang.ClassLoader) Felix OSGi container} (originally only Equinox).
+            {@link net.java.html.json.ComputedProperty Derived properties}
+            now deeply check changes in other {@link net.java.html.json.Model model
+            classes} they depend on and recompute their values accordingly.
         </p>
         
         <h3>What's New in 0.8.x Versions?</h3>

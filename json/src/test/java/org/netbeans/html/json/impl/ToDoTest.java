@@ -74,7 +74,7 @@ public class ToDoTest {
     static class ItemCtrl {
     }
 
-    @ComputedProperty @Transitive(deep = true)
+    @ComputedProperty
     static int remaining(
         List<Todo> todos, String todoText
     ) {

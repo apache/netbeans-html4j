@@ -86,7 +86,7 @@ public class DeepChangeTest {
         static String oneName(MyY one) {
             return one.getValue();
         }
-        @ComputedProperty @Transitive(deep = true) 
+        @ComputedProperty
         static String sndName(MyY one) {
             return one.getValue().toUpperCase();
         }
@@ -99,7 +99,7 @@ public class DeepChangeTest {
             return "X" + one.getCount();
         }
         
-        @ComputedProperty @Transitive(deep = true)
+        @ComputedProperty
         static String allNames(List<MyY> all) {
             StringBuilder sb = new StringBuilder();
             for (MyY y : all) {
