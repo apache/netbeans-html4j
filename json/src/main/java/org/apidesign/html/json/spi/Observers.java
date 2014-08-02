@@ -57,7 +57,8 @@ final class Observers {
     private final List<Watcher> watchers = new ArrayList<Watcher>();
     private final List<Ref> observers = new ArrayList<Ref>();
 
-    private Observers() {
+    Observers() {
+        assert Thread.holdsLock(GLOBAL);
     }
     
     static void beginComputing(Proto p, String name) {
@@ -78,39 +79,27 @@ final class Observers {
         }        
     }
 
-    static Observers accessingValue(Proto p, Observers observers, String propName) {
+    static void accessingValue(Proto p, String propName) {
         synchronized (GLOBAL) {
             verifyUnlocked(p);
             for (Watcher w : GLOBAL) {
-                if (observers == null) {
-                    observers = new Observers();
-                }
-                observers.add(w, new Ref(w, propName));
+                Observers mine = p.observers(true);
+                mine.add(w, new Ref(w, propName));
             }
-            return observers;
         }
     }
     
-    static Observers finishComputing(Proto p, Observers mine) {
+    static void finishComputing(Proto p) {
         synchronized (GLOBAL) {
             Watcher w = GLOBAL.pop();
             if (w.proto != p) {
                 throw new IllegalStateException("Inconsistency: " + w.proto + " != " + p);
             }
             if (w.prop != null) {
-                if (mine == null) {
-                    mine = new Observers();
-                }
+                Observers mine = p.observers(true);
                 mine.add(w);
             }
-            return mine;
         }
-    }
-    
-    static Watcher computing(Proto proto, String prop) {
-        proto.getClass();
-        prop.getClass();
-        return new Watcher(proto, prop);
     }
     
     private static final class Ref extends WeakReference<Watcher> {
@@ -126,7 +115,7 @@ final class Observers {
             if (w == null) {
                 return null;
             }
-            final Observers o = w.proto.observers();
+            final Observers o = w.proto.observers(false);
             if (o == null) {
                 return null;
             }
@@ -165,10 +154,14 @@ final class Observers {
         watchers.add(w);
     }
 
-    final void valueHasMutated(String propName) {
+    static final void valueHasMutated(Proto p, String propName) {
         List<Watcher> mutated = new LinkedList<Watcher>();
         synchronized (GLOBAL) {
-            Iterator<Ref> it = observers.iterator();
+            Observers mine = p.observers(false);
+            if (mine == null) {
+                return;
+            }
+            Iterator<Ref> it = mine.observers.iterator();
             while (it.hasNext()) {
                 Ref ref = it.next();
                 if (ref.get() == null) {
@@ -183,12 +176,12 @@ final class Observers {
                 }
             }
         }
-            for (Watcher w : mutated) {
+        for (Watcher w : mutated) {
             w.proto.valueHasMutated(w.prop);
         }
     }
 
-        void add(Watcher w, Ref r) {
+    void add(Watcher w, Ref r) {
         Thread.holdsLock(GLOBAL);
         if (w == null) {
             return;

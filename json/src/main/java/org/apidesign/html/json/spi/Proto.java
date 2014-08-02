@@ -98,7 +98,7 @@ public final class Proto {
     }
     
     public void accessValue(String propName) {
-        observers = Observers.accessingValue(this, observers, propName);
+        Observers.accessingValue(this, propName);
     }
     
     /** Verifies the model is not locked otherwise throws an exception.
@@ -112,7 +112,7 @@ public final class Proto {
      * unlocked state by calling this method.
      */
     public void releaseLock() {
-        observers = Observers.finishComputing(this, observers);
+        Observers.finishComputing(this);
     }
     
     /** Whenever model changes a property. It should notify the
@@ -130,9 +130,7 @@ public final class Proto {
                 if (ko != null) {
                     ko.valueHasMutated(propName, null, null);
                 }
-                if (observers != null) {
-                    observers.valueHasMutated(propName);
-                }
+                Observers.valueHasMutated(Proto.this, propName);
             }
         });
     }
@@ -160,9 +158,7 @@ public final class Proto {
                 if (ko != null) {
                     ko.valueHasMutated(propName, oldValue, newValue);
                 }
-                if (observers != null) {
-                    observers.valueHasMutated(propName);
-                }
+                Observers.valueHasMutated(Proto.this, propName);
             }
         });
     }
@@ -454,7 +450,10 @@ public final class Proto {
         type.onChange(obj, index);
     }
 
-    final Observers observers() {
+    final Observers observers(boolean create) {
+        if (create && observers == null) {
+            observers = new Observers();
+        }
         return observers;
     }
 
