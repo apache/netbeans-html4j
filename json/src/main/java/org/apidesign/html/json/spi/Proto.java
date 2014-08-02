@@ -86,18 +86,43 @@ public final class Proto {
         return context;
     }
 
-    /** Before doing modification of the model properties, the
-     * generated code enters write lock by calling this method.
+    /** Acquires global lock to compute a {@link ComputedProperty derived property}
+     * on this proto object. This proto object must not be locked yet. No
+     * dependency tracking is performed.
+     * 
      * @throws IllegalStateException if already locked
      */
     public void acquireLock() throws IllegalStateException {
         acquireLock(null);
     }
+    
+    /** Acquires global lock to compute a {@link ComputedProperty derived property}
+     * on this proto object. This proto object must not be locked yet. The
+     * name of the property is used to track dependencies on own
+     * properties of other proto objects - when they are changed, this
+     * {@link #valueHasMutated(java.lang.String) property is changed too}.
+     * 
+     * @param propName name of property we are about to compute
+     * @throws IllegalStateException thrown when there is a cyclic
+     *   call is detected
+     * @since 0.9
+     */
     public void acquireLock(String propName) throws IllegalStateException {
         Observers.beginComputing(this, propName);
     }
     
-    public void accessValue(String propName) {
+    /** A property on this proto object is about to be accessed. Verifies
+     * whether this proto object is accessible - e.g. it has not been
+     * {@link #acquireLock() locked yet}. If everything is OK, the
+     * <code>propName</code> is recorded in the chain of dependencies
+     * tracked by {@link #acquireLock(java.lang.String)} and watched by
+     * {@link #valueHasMutated(java.lang.String)}.
+     * 
+     * @param propName name of the property that is requested
+     * @throws IllegalStateException if the model is locked
+     * @since 0.9
+     */
+    public void accessProperty(String propName) throws IllegalStateException {
         Observers.accessingValue(this, propName);
     }
     

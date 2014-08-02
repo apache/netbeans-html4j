@@ -544,14 +544,14 @@ public final class ModelProcessor extends AbstractProcessor {
             
                 castTo = "java.util.List";
                 w.write("  public java.util.List<" + tn + "> " + gs[0] + "() {\n");
-                w.write("    proto.accessValue(\"" + p.name() + "\");\n");
+                w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
             } else {
                 castTo = tn;
                 w.write("  private " + tn + " prop_" + p.name() + ";\n");
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
-                w.write("    proto.accessValue(\"" + p.name() + "\");\n");
+                w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
