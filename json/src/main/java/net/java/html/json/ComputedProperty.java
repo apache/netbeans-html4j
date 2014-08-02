@@ -70,7 +70,7 @@ import java.lang.annotation.Target;
  * whether a number is a prime</a> using a {@link ComputedProperty} is available
  * on-line.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)

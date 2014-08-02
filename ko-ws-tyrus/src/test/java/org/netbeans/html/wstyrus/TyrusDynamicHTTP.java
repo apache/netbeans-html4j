@@ -68,7 +68,7 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class TyrusDynamicHTTP extends HttpHandler {
     private static int resourcesCount;

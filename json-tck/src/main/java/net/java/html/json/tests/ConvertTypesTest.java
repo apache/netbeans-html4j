@@ -56,7 +56,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class ConvertTypesTest {
     private static InputStream createIS(boolean includeSex, boolean includeAddress, int array) 

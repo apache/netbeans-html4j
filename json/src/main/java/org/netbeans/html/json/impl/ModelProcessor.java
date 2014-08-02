@@ -102,7 +102,7 @@ import org.openide.util.lookup.ServiceProvider;
 /** Annotation processor to process {@link Model @Model} annotations and
  * generate appropriate model classes.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service=Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_6)

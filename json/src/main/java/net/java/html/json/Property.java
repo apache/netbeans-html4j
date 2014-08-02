@@ -49,7 +49,7 @@ import java.util.List;
 
 /** Represents a property in a class defined with {@link Model} annotation.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({})

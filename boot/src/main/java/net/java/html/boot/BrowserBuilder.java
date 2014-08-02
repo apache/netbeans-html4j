@@ -96,7 +96,7 @@ import org.netbeans.html.boot.impl.FnUtils;
  * &lt;/dependency&gt;
  * </pre>
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class BrowserBuilder {
     private static final Logger LOG = Logger.getLogger(BrowserBuilder.class.getName());

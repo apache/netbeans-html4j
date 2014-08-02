@@ -76,7 +76,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = KnockoutTCK.class)
 public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[]> {

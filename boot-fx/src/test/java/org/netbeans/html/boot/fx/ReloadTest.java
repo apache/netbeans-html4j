@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class ReloadTest {
     private static Runnable whenInitialized;

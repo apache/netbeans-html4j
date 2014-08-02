@@ -51,7 +51,7 @@ import org.apidesign.html.json.tck.KnockoutTCK;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class Utils {
     private static KnockoutTCK instantiatedTCK;

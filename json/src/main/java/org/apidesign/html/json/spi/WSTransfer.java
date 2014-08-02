@@ -48,7 +48,7 @@ import org.apidesign.html.context.spi.Contexts.Provider;
 /** Interface for providers of WebSocket protocol. Register into a 
  * {@link BrwsrCtx context} in your own {@link Provider}
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  * @param <WebSocket> internal implementation type representing the socket
  * @since 0.5
  */

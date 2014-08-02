@@ -76,7 +76,7 @@ import org.testng.annotations.Factory;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = KnockoutTCK.class)
 public final class KnockoutEnvJSTest extends KnockoutTCK {

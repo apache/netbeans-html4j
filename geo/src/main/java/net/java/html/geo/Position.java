@@ -52,7 +52,7 @@ import org.netbeans.html.geo.impl.JsG;
  * specified by <a href="http://www.w3.org/TR/geolocation-API/">
  * W3C's Geolocation API</a>.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class Position {
     static final Logger LOG = Logger.getLogger(Position.class.getName());

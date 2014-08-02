@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  * this annotation will be public instance method of its class 
  * with no arguments.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

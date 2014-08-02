@@ -55,7 +55,7 @@ import org.openide.util.lookup.ServiceProvider;
  * and its Java binding via {@link Model model classes}.
  * Registers {@link Provider}, so {@link java.util.ServiceLoader} can find it.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  * @since 0.7
  */
 @ServiceProvider(service = Provider.class)

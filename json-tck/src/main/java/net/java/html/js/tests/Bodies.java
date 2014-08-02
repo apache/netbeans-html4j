@@ -47,7 +47,7 @@ import net.java.html.js.JavaScriptBody;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class Bodies {
     @JavaScriptBody(args = { "a", "b" }, body = "return a + b;")

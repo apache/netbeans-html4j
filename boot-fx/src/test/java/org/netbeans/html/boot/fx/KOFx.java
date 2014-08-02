@@ -55,7 +55,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class KOFx implements ITest, IHookable, Runnable {
     private final Fn.Presenter p;

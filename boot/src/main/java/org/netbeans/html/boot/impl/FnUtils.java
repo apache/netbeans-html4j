@@ -67,7 +67,7 @@ import org.objectweb.asm.signature.SignatureWriter;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class FnUtils {
     

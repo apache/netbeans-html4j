@@ -106,7 +106,7 @@ import java.lang.annotation.Target;
  * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7138581">on-line demo</a>
  * to see REST access via {@link OnReceive} annotation.
  * 
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  * @since 0.3
  */
 @Retention(RetentionPolicy.SOURCE)

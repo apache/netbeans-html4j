@@ -46,7 +46,7 @@ import org.apidesign.html.json.tck.JavaScriptTCK;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class FxJavaScriptTst extends JavaScriptTCK {
     public static Class[] tests() {

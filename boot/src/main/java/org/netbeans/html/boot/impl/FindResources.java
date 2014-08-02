@@ -47,7 +47,7 @@ import java.util.Collection;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public interface FindResources {
 

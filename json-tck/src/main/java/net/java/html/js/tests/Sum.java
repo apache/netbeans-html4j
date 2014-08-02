@@ -44,7 +44,7 @@ package net.java.html.js.tests;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class Sum {
     public int sum(int a, int b) {

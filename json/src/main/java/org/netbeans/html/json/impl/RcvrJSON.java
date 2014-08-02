@@ -47,7 +47,7 @@ import net.java.html.BrwsrCtx;
 
 /** Super type for those who wish to receive JSON messages.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class RcvrJSON {
     protected void onOpen(MsgEvnt msg) {}

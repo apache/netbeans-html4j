@@ -46,7 +46,7 @@ import net.java.html.js.JavaScriptBody;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class Later {
     volatile int call;

@@ -44,7 +44,7 @@ package net.java.html.json;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public enum Sex {
     MALE, FEMALE;

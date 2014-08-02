@@ -51,7 +51,7 @@ import org.netbeans.html.json.impl.RcvrJSON;
 /** Describes a property when one is asked to 
  * bind it 
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class PropertyBinding {
     PropertyBinding() {

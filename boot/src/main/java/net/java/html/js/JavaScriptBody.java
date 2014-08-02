@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7102188">on-line demo</a>
  * to play with {@link JavaScriptBody} annotation for real.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })

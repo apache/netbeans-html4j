@@ -50,7 +50,7 @@ import org.netbeans.html.json.impl.RcvrJSON;
 /** Description of a JSON call request that is supposed to be processed
  * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class JSONCall {
     private final RcvrJSON whenDone;

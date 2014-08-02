@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className="Man", properties={
     @Property(name = "name", type = String.class),

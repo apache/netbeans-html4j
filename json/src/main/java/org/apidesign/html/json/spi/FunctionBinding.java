@@ -49,7 +49,7 @@ import net.java.html.json.Model;
 /** Describes a function provided by the {@link Model} and 
  * annotated by {@link Function} annotation.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class FunctionBinding {
     FunctionBinding() {

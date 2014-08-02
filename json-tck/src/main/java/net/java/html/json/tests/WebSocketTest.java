@@ -51,7 +51,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /** Testing support of WebSocket communication.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "WebSocketik", properties = {
     @Property(name = "fetched", type = Person.class),

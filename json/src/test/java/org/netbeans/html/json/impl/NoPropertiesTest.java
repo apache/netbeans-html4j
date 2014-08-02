@@ -46,7 +46,7 @@ import net.java.html.json.Model;
 
 /** Originally could not compile.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className="NoProperties", properties = {
 })

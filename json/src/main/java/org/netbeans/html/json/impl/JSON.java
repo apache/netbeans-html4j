@@ -60,7 +60,7 @@ import org.apidesign.html.json.spi.WSTransfer;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class JSON {
     private JSON() {

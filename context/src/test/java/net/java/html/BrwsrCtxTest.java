@@ -47,7 +47,7 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class BrwsrCtxTest {
     

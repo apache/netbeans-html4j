@@ -50,7 +50,7 @@ import static org.netbeans.html.boot.fx.AbstractFXPresenter.LOG;
 
 /** Debugger bridge to shield us from propriatory impl APIs.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class Dbgr {
     final Object dbg;

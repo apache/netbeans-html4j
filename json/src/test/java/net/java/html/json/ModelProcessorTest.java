@@ -51,7 +51,7 @@ import org.testng.annotations.Test;
 
 /** Verify errors emitted by the processor.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class ModelProcessorTest {
     @Test public void verifyWrongType() throws IOException {

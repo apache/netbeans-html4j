@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
  * <a href="package-summary.html#library">use-cases</a> includes sample use
  * of this annotation.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)

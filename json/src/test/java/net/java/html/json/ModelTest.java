@@ -58,7 +58,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "Modelik", properties = {
     @Property(name = "value", type = int.class),

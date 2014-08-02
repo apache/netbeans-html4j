@@ -53,7 +53,7 @@ import org.apidesign.html.json.spi.WSTransfer;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
     private LoadJSON() {}

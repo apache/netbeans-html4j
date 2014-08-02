@@ -55,7 +55,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className="KnockoutModel", properties={
     @Property(name="name", type=String.class),

@@ -52,7 +52,7 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  * find methods annotated by {@link KOTest} annotation and execute them.
  * <p>
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  * @since 0.7
  */
 public abstract class JavaScriptTCK {

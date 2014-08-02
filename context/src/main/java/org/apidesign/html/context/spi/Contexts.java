@@ -120,8 +120,8 @@ public final class Contexts {
     }
 
     /** Implementors of various HTML technologies should
-     * register their implementation via {@link java.util.ServiceProvider} so
-     * {@link java.util.ServiceProvider} can find them, when their JARs are included
+     * register their implementation via <code>org.openide.util.lookup.ServiceProvider</code>, so
+     * {@link ServiceLoader} can find them, when their JARs are included
      * on the classpath of the running application.
      *
      * @author Jaroslav Tulach

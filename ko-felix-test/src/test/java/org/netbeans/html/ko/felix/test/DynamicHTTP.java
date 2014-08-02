@@ -68,7 +68,7 @@ import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class DynamicHTTP extends HttpHandler {
     private static final Logger LOG = Logger.getLogger(DynamicHTTP.class.getName());

@@ -47,7 +47,7 @@ import org.apidesign.html.json.spi.JSONCall;
 
 /** Communication with WebSockets via browser's WebSocket object.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class LoadWS {
     private final Object ws;

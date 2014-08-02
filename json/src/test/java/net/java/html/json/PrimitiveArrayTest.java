@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className="ByteArray", properties = {
     @Property(name = "array", type = byte.class, array = true)

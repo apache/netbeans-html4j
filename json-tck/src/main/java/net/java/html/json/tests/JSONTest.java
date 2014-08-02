@@ -55,7 +55,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /** Need to verify that models produce reasonable JSON objects.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "JSONik", properties = {
     @Property(name = "fetched", type = Person.class),

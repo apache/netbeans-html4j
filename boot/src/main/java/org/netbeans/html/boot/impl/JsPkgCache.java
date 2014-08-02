@@ -58,7 +58,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class JsPkgCache {
     private final Map<String,Set<String>> props = new WeakHashMap<String, Set<String>>();

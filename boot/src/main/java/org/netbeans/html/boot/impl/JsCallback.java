@@ -45,7 +45,7 @@ package org.netbeans.html.boot.impl;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 abstract class JsCallback {
     final String parse(String body) {

@@ -59,7 +59,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @JavaScriptResource("empty.js")
 public class CountFnCreationTest implements Fn.Presenter {

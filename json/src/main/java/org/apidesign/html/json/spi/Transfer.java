@@ -49,7 +49,7 @@ import org.apidesign.html.context.spi.Contexts.Builder;
 /** A {@link Builder service provider interface} responsible for 
  * conversion of JSON objects to Java ones and vice-versa.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public interface Transfer {
     /**

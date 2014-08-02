@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
 
 /** Test whether the annotation processor detects errors correctly.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class GeoProcessorTest {
     

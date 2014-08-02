@@ -50,7 +50,7 @@ import org.apidesign.html.boot.spi.Fn;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class FnContext implements Closeable {
     private static final Logger LOG = Logger.getLogger(FnContext.class.getName());

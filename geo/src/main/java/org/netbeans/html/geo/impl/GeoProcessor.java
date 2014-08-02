@@ -72,7 +72,7 @@ import org.openide.util.lookup.ServiceProvider;
 
 /** Annotation processor to generate callbacks from {@link Handle} class.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service=Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_6)

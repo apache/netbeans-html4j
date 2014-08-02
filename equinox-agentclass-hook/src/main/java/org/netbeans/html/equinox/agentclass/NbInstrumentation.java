@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class NbInstrumentation implements Instrumentation {
     private static final Logger LOG = Logger.getLogger(NbInstrumentation.class.getName());

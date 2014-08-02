@@ -48,7 +48,7 @@ import java.util.List;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "Person", properties = {
     @Property(name = "firstName", type = String.class),

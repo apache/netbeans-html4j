@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
 
 /** Verify behavior of the callback parser.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class JsCallbackTest {
     

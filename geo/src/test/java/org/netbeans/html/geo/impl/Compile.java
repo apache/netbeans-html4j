@@ -72,7 +72,7 @@ import static org.testng.Assert.*;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class Compile implements DiagnosticListener<JavaFileObject> {
     private final List<Diagnostic<? extends JavaFileObject>> errors = 

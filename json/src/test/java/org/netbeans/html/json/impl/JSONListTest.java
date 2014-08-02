@@ -61,7 +61,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "JSNLst", properties = {
     @Property(name = "names", type = String.class, array = true)

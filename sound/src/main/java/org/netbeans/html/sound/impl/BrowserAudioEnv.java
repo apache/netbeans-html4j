@@ -48,7 +48,7 @@ import org.apidesign.html.sound.spi.AudioEnvironment;
 /** The default audio provider that delegates to HTML5 Audio tag
  * it is used if no other {@link AudioEnvironment} is found.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class BrowserAudioEnv implements AudioEnvironment<Object> {
     public static final AudioEnvironment<?> DEFAULT = new BrowserAudioEnv();

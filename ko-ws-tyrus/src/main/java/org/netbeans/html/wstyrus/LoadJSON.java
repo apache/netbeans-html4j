@@ -69,7 +69,7 @@ import org.json.JSONTokener;
  * include its JAR on classpath and use official {@link Context} API
  * to access the functionality.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class LoadJSON implements Runnable {
     private static final Logger LOG = Logger.getLogger(LoadJSON.class.getName());

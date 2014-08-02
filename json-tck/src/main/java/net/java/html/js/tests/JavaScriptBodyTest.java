@@ -50,7 +50,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class JavaScriptBodyTest {
     @KOTest public void sumTwoNumbers() {

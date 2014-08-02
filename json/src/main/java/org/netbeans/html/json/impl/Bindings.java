@@ -50,7 +50,7 @@ import org.apidesign.html.json.spi.Technology;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class Bindings<Data> {
     private Data data;

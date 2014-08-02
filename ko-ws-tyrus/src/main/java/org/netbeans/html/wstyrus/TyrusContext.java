@@ -80,7 +80,7 @@ import org.openide.util.lookup.ServiceProvider;
  * WebSocket API based on WebSocket object inside a browser. This is included
  * in the <code>org.apidesign.html:ko-fx:0.5</code> module.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = Contexts.Provider.class)
 public final class TyrusContext 

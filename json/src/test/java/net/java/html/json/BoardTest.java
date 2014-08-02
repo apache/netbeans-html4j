@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "Board", properties = {
     @Property(name = "rows", type = Row.class, array = true)

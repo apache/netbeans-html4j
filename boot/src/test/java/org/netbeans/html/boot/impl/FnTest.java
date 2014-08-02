@@ -64,7 +64,7 @@ import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class FnTest extends JsClassLoaderBase {
     private static Fn.Presenter presenter;

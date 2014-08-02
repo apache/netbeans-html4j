@@ -63,7 +63,7 @@ import org.apidesign.html.json.spi.WSTransfer;
  * to access the functionality.
  * <p>
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 final class FXContext
 implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>,

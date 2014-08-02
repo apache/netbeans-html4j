@@ -48,7 +48,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = Contexts.Provider.class)
 public final class TestingProvider implements Contexts.Provider {

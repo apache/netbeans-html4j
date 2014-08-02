@@ -53,7 +53,7 @@ import netscape.javascript.JSObject;
  * <p>
  * Redirects JavaScript's messages to Java's {@link Logger}.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class FXConsole {
     static final Logger LOG = Logger.getLogger(FXConsole.class.getName());

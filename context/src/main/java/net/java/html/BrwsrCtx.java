@@ -109,7 +109,9 @@ public final class BrwsrCtx implements Executor {
         return cb.build();
     }
 
-    /** Runs provided code in the context of this {@link BrwsrCtx}.
+    /** 
+     * <p>
+     * Runs provided code in the context of this {@link BrwsrCtx}.
      * If there is an {@link Executor} {@link Contexts#find(net.java.html.BrwsrCtx, java.lang.Class)  registered in the context}
      * it is used to perform the given code. While the code <code>exec</code>
      * is running the value of {@link #findDefault(java.lang.Class)} returns
@@ -117,7 +119,10 @@ public final class BrwsrCtx implements Executor {
      * policy, it may execute the runnable later (in such case this method
      * returns immediately). If the call to this method is done on the right
      * thread, the runnable should be executed synchronously.
-     * <h5>Example Using a Timer</h5>
+     * </p>
+     * <p>
+     * <b>Example Using a Timer</b>
+     * </p>
 <pre>
 <b>public final class</b> Periodicaly <b>extends</b> {@link java.util.TimerTask} {
     <b>private final</b> {@link BrwsrCtx} ctx;

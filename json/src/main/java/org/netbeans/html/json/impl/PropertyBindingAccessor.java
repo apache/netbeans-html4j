@@ -50,7 +50,7 @@ import org.apidesign.html.json.spi.Proto;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class PropertyBindingAccessor {
     private static PropertyBindingAccessor DEFAULT;

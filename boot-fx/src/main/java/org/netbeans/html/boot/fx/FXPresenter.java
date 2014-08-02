@@ -55,7 +55,7 @@ import org.openide.util.lookup.ServiceProvider;
  * include this JAR on classpath and the {@link BrowserBuilder} API will find
  * this implementation automatically.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = Fn.Presenter.class)
 public final class FXPresenter extends AbstractFXPresenter {

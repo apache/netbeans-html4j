@@ -50,7 +50,7 @@ import net.java.html.json.Property;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "Employee", properties = {
     @Property(name = "person", type = Person.class),

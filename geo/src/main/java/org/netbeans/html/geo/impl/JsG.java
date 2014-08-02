@@ -47,7 +47,7 @@ import net.java.html.js.JavaScriptBody;
 /** Implementation class to deal with browser's <code>navigator.geolocation</code> 
  * object.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class JsG {
     protected JsG() {

@@ -51,7 +51,7 @@ import org.apidesign.html.json.tck.KOTest;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Model(className = "LessCalls", properties = {
     @Property(name = "value", type = int.class)

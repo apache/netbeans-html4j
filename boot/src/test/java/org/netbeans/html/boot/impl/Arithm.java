@@ -44,7 +44,7 @@ package org.netbeans.html.boot.impl;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class Arithm {
     public int sumTwo(int a, int b) {

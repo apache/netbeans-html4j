@@ -72,7 +72,7 @@ import org.testng.annotations.Factory;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class KnockoutEquinoxIT {
     private static final Logger LOG = Logger.getLogger(KnockoutEquinoxIT.class.getName());

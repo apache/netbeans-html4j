@@ -55,7 +55,7 @@ import org.testng.annotations.Factory;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public class Jsr223JavaScriptTest {
     private static Class<?> browserClass;

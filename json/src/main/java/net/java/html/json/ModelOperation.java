@@ -71,7 +71,7 @@ import java.lang.annotation.Target;
  *   {@link Property @Property}(name = "names", type=String.class, array = true)
  * })
  * static class NamesModel {
- *   {@link ModelOperation @ModelOperation} static void <b>updateNames</b>(Names model, {@link java.util.List}<String> arr) {
+ *   {@link ModelOperation @ModelOperation} static void <b>updateNames</b>(Names model, {@link java.util.List}&lt;String;gt; arr) {
  *     <em>// can safely access the model</em>
  *     model.getNames().addAll(arr);
  *   }
@@ -82,15 +82,16 @@ import java.lang.annotation.Target;
  * 
  *     <em>// spawn to different thread</em>
  *     {@link java.util.concurrent.Executors}.newSingleThreadExecutor().execute({
- *       List<String> arr = <em>// ... obtain the names somewhere from network</em>
+ *       List&lt;String&gt; arr = <em>// ... obtain the names somewhere from network</em>
  *       pageModel.<b>updateNames</b>(arr);
  *       // returns immediately, later it invokes the model operation
  *     });
  * 
  *   }
  * }
+ * </pre>
  * 
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)

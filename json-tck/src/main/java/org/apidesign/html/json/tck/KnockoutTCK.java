@@ -72,7 +72,7 @@ public final class MyKnockoutBindingTest extends KnockoutTCK {
 }
  * </pre>
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public abstract class KnockoutTCK {
     protected KnockoutTCK() {

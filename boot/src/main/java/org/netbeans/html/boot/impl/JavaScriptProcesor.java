@@ -83,7 +83,7 @@ import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @ServiceProvider(service = Processor.class)
 public final class JavaScriptProcesor extends AbstractProcessor {

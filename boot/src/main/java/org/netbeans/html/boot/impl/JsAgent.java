@@ -49,7 +49,7 @@ import java.security.ProtectionDomain;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class JsAgent implements ClassFileTransformer {
     public static void premain(String args, Instrumentation instr) {

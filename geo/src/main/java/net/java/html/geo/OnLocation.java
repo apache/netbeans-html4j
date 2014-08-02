@@ -67,7 +67,7 @@ import java.lang.annotation.Target;
  * The overall behavior of the system mimics <a href="http://www.w3.org/TR/geolocation-API/">
  * W3C's Geolocation API</a>.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)

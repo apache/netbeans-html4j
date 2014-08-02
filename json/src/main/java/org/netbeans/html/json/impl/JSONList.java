@@ -50,7 +50,7 @@ import org.apidesign.html.json.spi.Proto;
 
 /**
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public final class JSONList<T> extends ArrayList<T> {
     private final Proto proto;

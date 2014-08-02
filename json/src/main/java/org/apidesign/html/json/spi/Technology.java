@@ -50,7 +50,7 @@ import net.java.html.json.Models;
  * and particular technology like <a href="http://knockoutjs.com">knockout.js</a>
  * in a browser window, etc.
  *
- * @author Jaroslav Tulach <jtulach@netbeans.org>
+ * @author Jaroslav Tulach
  */
 public interface Technology<Data> {
     /** Creates an object to wrap the provided model object. The model
