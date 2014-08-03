@@ -106,8 +106,9 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
             URL loc = ClassReader.class.getProtectionDomain().getCodeSource().getLocation();
             arr.addFirst(loc);
         }
-        URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
         try {
+            arr.add(classes.toURI().toURL());
+            URLClassLoader l = new URLClassLoader(arr.toArray(new URL[arr.size()]));
             File master = new File(new File(classes, "META-INF"), "net.java.html.js.classes");
             processClasses(l, master, classes);
         } catch (IOException ex) {
