@@ -65,6 +65,8 @@ import org.apidesign.html.json.tck.KOTest;
     @Property(name="enabled", type=boolean.class),
     @Property(name="latitude", type=double.class),
     @Property(name="choice", type=KnockoutTest.Choice.class),
+    @Property(name="archetype", type=ArchetypeData.class),
+    @Property(name="archetypes", type=ArchetypeData.class, array = true),
 }) 
 public final class KnockoutTest {
     private KnockoutModel js;
@@ -167,6 +169,66 @@ public final class KnockoutTest {
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
+    }
+    
+    private static String getSetSelected(int index, Object value) throws Exception {
+        String s = "var index = arguments[0];\n"
+        + "var value = arguments[1];\n"
+        + "var n = window.document.getElementById('input'); \n "
+        + "if (value != null) {\n"
+        + "  n.options[index].value = 'me'; \n"
+        + "  n.value = 'me'; \n"
+        + "  ko.dataFor(n.options[index]).archetype(value); // haven't found better way to trigger ko change yet \n"
+        + "} \n "
+        + "var op = n.options[n.selectedIndex]; \n"
+        + "return op ? op.text : n.selectedIndex;\n";
+        Object ret = Utils.executeScript(
+            KnockoutTest.class,
+            s, index, value
+        );
+        return ret == null ? null : ret.toString();
+    }
+    
+    @Model(className = "ArchetypeData", properties = {
+        @Property(name = "artifactId", type = String.class),
+        @Property(name = "groupId", type = String.class),
+        @Property(name = "version", type = String.class),
+        @Property(name = "name", type = String.class),
+        @Property(name = "description", type = String.class),
+        @Property(name = "url", type = String.class),
+    })
+    static class ArchModel {
+    }
+    
+    @KOTest public void selectWorksOnModels() throws Exception {
+        if (js == null) {
+            Utils.exposeHTML(KnockoutTest.class, 
+                "<select id='input' data-bind=\"options: archetypes,\n" +
+"                       optionsText: 'name',\n" +
+"                       value: archetype\">\n" +
+"                  </select>\n" +
+""
+            );
+            
+            js = Models.bind(new KnockoutModel(), newContext());
+            js.getArchetypes().add(new ArchetypeData("ko4j", "org.netbeans.html", "0.8.3", "ko4j", "ko4j", null));
+            js.getArchetypes().add(new ArchetypeData("crud", "org.netbeans.html", "0.8.3", "crud", "crud", null));
+            js.getArchetypes().add(new ArchetypeData("3rd", "org.netbeans.html", "0.8.3", "3rd", "3rd", null));
+            js.setArchetype(js.getArchetypes().get(1));
+            js.applyBindings();
+            
+            String v = getSetSelected(0, null);
+            assert "crud".equals(v) : "Second index (e.g. crud) is selected: " + v;
+            
+            String sel = getSetSelected(2, Models.toRaw(js.getArchetypes().get(2)));
+            assert "3rd".equals(sel) : "3rd is selected now: " + sel;
+        }
+        
+        if (js.getArchetype() != js.getArchetypes().get(2)) {
+            throw new InterruptedException();
+        }
+        
+        Utils.exposeHTML(KnockoutTest.class, "");
     }
     
     @KOTest public void modifyValueAssertAsyncChangeInModel() throws Exception {

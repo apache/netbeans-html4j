@@ -158,6 +158,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             case "paintTheGridOnClick":
             case "displayContentOfArrayOfPeople":
             case "connectUsingWebSocket":
+            case "selectWorksOnModels":
                 return "Does not work on JDK8, due to JDK-8046013";
         }
         return null;
