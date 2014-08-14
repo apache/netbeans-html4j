@@ -48,6 +48,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apidesign.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.SkipException;
@@ -109,8 +111,13 @@ public final class KOCase implements ITest, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                if (count++ < 10000) {
+                if (count++ < 1000) {
                     notify = false;
+                    try {
+                        Thread.sleep(30);
+                    } catch (InterruptedException ignore) {
+                        // just go on
+                    }
                     JS.execute(this);
                     return;
                 }
