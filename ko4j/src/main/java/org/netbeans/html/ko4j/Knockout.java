@@ -57,7 +57,7 @@ import org.apidesign.html.json.spi.PropertyBinding;
  *
  * @author Jaroslav Tulach
  */
-@JavaScriptResource("knockout-2.2.1.js")
+@JavaScriptResource("knockout-3.2.0.debug.js")
 final class Knockout {
     @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, 
         wait4js = false,
@@ -78,6 +78,7 @@ final class Knockout {
     );
 
     @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
+        "ko.cleanNode(window.document.body);\n" +
         "ko.applyBindings(bindings);\n"
     )
     native static void applyBindings(Object bindings);
@@ -96,6 +97,7 @@ final class Knockout {
         body = 
           "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
+        + "  var trigger = ko.observable().extend({notify:'always'});"
         + "  function realGetter() {\n"
         + "    try {\n"
         + "      var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();\n"
@@ -107,6 +109,7 @@ final class Knockout {
         + "  var activeGetter = function() { return value; };\n"
         + "  var bnd = {\n"
         + "    'read': function() {\n"
+        + "      trigger();\n"
         + "      var r = activeGetter();\n"
         + "      activeGetter = realGetter;\n"
         + "      if (r) try { var br = r.valueOf(); } catch (err) {}\n"
@@ -121,10 +124,9 @@ final class Knockout {
         + "    };\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"
-        + "  var vhm = cmpt['valueHasMutated'];\n"
         + "  cmpt['valueHasMutated'] = function(val) {\n"
         + "    if (arguments.length === 1) activeGetter = function() { return val; };\n"
-        + "    vhm();\n"
+        + "    trigger.valueHasMutated();\n"
         + "  };\n"
         + "  ret[name] = cmpt;\n"
         + "}\n"
