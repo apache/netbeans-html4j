@@ -184,7 +184,7 @@ public final class ModelProcessor extends AbstractProcessor {
         try {
             StringWriter body = new StringWriter();
             StringBuilder onReceiveType = new StringBuilder();
-            List<String> propsGetSet = new ArrayList<String>();
+            List<GetSet> propsGetSet = new ArrayList<GetSet>();
             List<Object> functions = new ArrayList<Object>();
             Map<String, Collection<String[]>> propsDeps = new HashMap<String, Collection<String[]>>();
             Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
@@ -311,12 +311,12 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("  private static class Html4JavaType extends org.apidesign.html.json.spi.Proto.Type<").append(className).append("> {\n");
                 w.append("    private Html4JavaType() {\n      super(").append(className).append(".class, ").
-                    append(inPckName(e)).append(".class, " + (propsGetSet.size() / 5) + ", "
+                    append(inPckName(e)).append(".class, " + propsGetSet.size() + ", "
                     + functionsCount + ");\n");
                 {
-                    for (int i = 0; i < propsGetSet.size(); i += 5) {
-                        w.append("      registerProperty(\"").append(propsGetSet.get(i)).append("\", ");
-                        w.append((i / 5) + ", " + (propsGetSet.get(i + 2) == null) + ");\n");
+                    for (int i = 0; i < propsGetSet.size(); i++) {
+                        w.append("      registerProperty(\"").append(propsGetSet.get(i).name).append("\", ");
+                        w.append((i) + ", " + (propsGetSet.get(i).setter == null) + ");\n");
                     }
                 }
                 {
@@ -328,25 +328,25 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    }\n");
                 w.append("    @Override public void setValue(" + className + " data, int type, Object value) {\n");
                 w.append("      switch (type) {\n");
-                for (int i = 0; i < propsGetSet.size(); i += 5) {
-                    final String set = propsGetSet.get(i + 2);
-                    String tn = propsGetSet.get(i + 4);
+                for (int i = 0; i < propsGetSet.size(); i++) {
+                    final String set = propsGetSet.get(i).setter;
+                    String tn = propsGetSet.get(i).type;
                     String btn = findBoxedType(tn);
                     if (btn != null) {
                         tn = btn;
                     }
                     if (set != null) {
-                        w.append("        case " + (i / 5) + ": data." + strip(set) + "(TYPE.extractValue(" + tn + ".class, value)); return;\n");
+                        w.append("        case " + i + ": data." + strip(set) + "(TYPE.extractValue(" + tn + ".class, value)); return;\n");
                     }
                 }
                 w.append("      }\n");
                 w.append("    }\n");
                 w.append("    @Override public Object getValue(" + className + " data, int type) {\n");
                 w.append("      switch (type) {\n");
-                for (int i = 0; i < propsGetSet.size(); i += 5) {
-                    final String get = propsGetSet.get(i + 1);
+                for (int i = 0; i < propsGetSet.size(); i++) {
+                    final String get = propsGetSet.get(i).getter;
                     if (get != null) {
-                        w.append("        case " + (i / 5) + ": return data." + strip(get) + "();\n");
+                        w.append("        case " + i + ": return data." + strip(get) + "();\n");
                     }
                 }
                 w.append("      }\n");
@@ -403,8 +403,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx c, Object json) {\n");
                 w.append("    this(c);\n");
                 int values = 0;
-                for (int i = 0; i < propsGetSet.size(); i += 5) {
-                    Prprt p = findPrprt(props, propsGetSet.get(i));
+                for (int i = 0; i < propsGetSet.size(); i++) {
+                    Prprt p = findPrprt(props, propsGetSet.get(i).name);
                     if (p == null) {
                         continue;
                     }
@@ -412,16 +412,16 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("    Object[] ret = new Object[" + values + "];\n");
                 w.append("    proto.extract(json, new String[] {\n");
-                for (int i = 0; i < propsGetSet.size(); i += 5) {
-                    Prprt p = findPrprt(props, propsGetSet.get(i));
+                for (int i = 0; i < propsGetSet.size(); i++) {
+                    Prprt p = findPrprt(props, propsGetSet.get(i).name);
                     if (p == null) {
                         continue;
                     }
-                    w.append("      \"").append(propsGetSet.get(i)).append("\",\n");
+                    w.append("      \"").append(propsGetSet.get(i).name).append("\",\n");
                 }
                 w.append("    }, ret);\n");
-                for (int i = 0, cnt = 0, prop = 0; i < propsGetSet.size(); i += 5) {
-                    final String pn = propsGetSet.get(i);
+                for (int i = 0, cnt = 0, prop = 0; i < propsGetSet.size(); i++) {
+                    final String pn = propsGetSet.get(i).name;
                     Prprt p = findPrprt(props, pn);
                     if (p == null || prop >= props.length) {
                         continue;
@@ -528,7 +528,7 @@ public final class ModelProcessor extends AbstractProcessor {
     private boolean generateProperties(
         Element where,
         Writer w, String className, Prprt[] properties,
-        List<String> props, 
+        List<GetSet> props, 
         Map<String,Collection<String[]>> deps,
         Map<String,Collection<String>> functionDeps
     ) throws IOException {
@@ -580,25 +580,26 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
             }
             
-            for (int i = 0; i < props.size(); i += 5) {
-                if (props.get(i).equals(p.name())) {
+            for (int i = 0; i < props.size(); i++) {
+                if (props.get(i).name.equals(p.name())) {
                     error("Cannot have the name " + p.name() + " defined twice", where);
                     ok = false;
                 }
             }
             
-            props.add(p.name());
-            props.add(gs[2]);
-            props.add(gs[3]);
-            props.add(gs[0]);
-            props.add(castTo);
+            props.add(new GetSet(
+                p.name(),
+                gs[2],
+                gs[3],
+                castTo
+            ));
         }
         return ok;
     }
 
     private boolean generateComputedProperties(
         Writer w, Prprt[] fixedProps,
-        Collection<? extends Element> arr, Collection<String> props,
+        Collection<? extends Element> arr, Collection<GetSet> props,
         Map<String,Collection<String[]>> deps
     ) throws IOException {
         boolean ok = true;
@@ -709,11 +710,12 @@ public final class ModelProcessor extends AbstractProcessor {
             w.write("    }\n");
             w.write("  }\n");
 
-            props.add(e.getSimpleName().toString());
-            props.add(gs[2]);
-            props.add(null);
-            props.add(gs[0]);
-            props.add(tn);
+            props.add(new GetSet(
+                e.getSimpleName().toString(),
+                gs[2],
+                null,
+                tn
+            ));
         }
         
         return ok;
@@ -1811,6 +1813,19 @@ public final class ModelProcessor extends AbstractProcessor {
                 
             }
             return ret;
+        }
+    } // end of Prprt
+    
+    private static final class GetSet {
+        final String name;
+        final String getter;
+        final String setter;
+        final String type;
+        GetSet(String name, String getter, String setter, String type) {
+            this.name = name;
+            this.getter = getter;
+            this.setter = setter;
+            this.type = type;
         }
     }
 
