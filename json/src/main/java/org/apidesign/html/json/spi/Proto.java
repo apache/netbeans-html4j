@@ -280,6 +280,15 @@ public final class Proto {
     /** Initializes asynchronous JSON connection to specified URL. Delegates
      * to {@link #loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...) }
      * with no extra parameters.
+     * 
+     * @param index the callback index to be used when a reply is received
+     *   to call {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}.
+     * 
+     * @param urlBefore the part of the URL before JSON-P callback parameter
+     * @param urlAfter the rest of the URL or <code>null</code> if no JSON-P is used
+     * @param method method to use for connection to the server
+     * @param data string, number or a {@link Model} generated class to send to
+     *    the server when doing a query
      */
     public void loadJSON(final int index, 
         String urlBefore, String urlAfter, String method,

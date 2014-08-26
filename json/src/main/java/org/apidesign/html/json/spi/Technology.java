@@ -63,6 +63,7 @@ public interface Technology<Data> {
     public Data wrapModel(Object model);
     
     /** Converts an element potentially representing a model into the model.
+     * @param <M> the type of the <code>modelClass</code>
      * @param modelClass expected class to convert the data to
      * @param data the current data provided from the browser
      * @return the instance of modelClass somehow extracted from the data, may return <code>null</code>

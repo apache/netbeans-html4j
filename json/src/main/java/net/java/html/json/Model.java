@@ -142,9 +142,12 @@ import java.util.List;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface Model {
-    /** Name of the model class */
+    /** Name of the model class.
+     * @return valid Java identifier to use as a name of the model class
+     */
     String className();
     /** List of properties in the model.
+     * @return array of property definitions
      */
     Property[] properties();
 }

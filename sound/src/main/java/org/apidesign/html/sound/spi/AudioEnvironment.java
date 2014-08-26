@@ -87,7 +87,7 @@ public interface AudioEnvironment<Audio> {
 
     /** Checks whether given audio is supported
      * 
-     * @param a
+     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
      * @return <code>true</code> or <code>false</code>
      */
     public boolean isSupported(Audio a);
