@@ -140,18 +140,19 @@ public final class Utils {
         )).intValue();
     }
 
-    static Object addChildren(Class<?> caller, String id, Object value) throws Exception {
+    static Object addChildren(Class<?> caller, String id, String field, Object value) throws Exception {
         return executeScript(caller, 
             "var e = window.document.getElementById(arguments[0]);\n" + 
-            "var v = arguments[1];\n" + 
+            "var f = arguments[1];\n" + 
+            "var v = arguments[2];\n" + 
             "if (typeof e === 'undefined') return -2;\n " + 
             "var c = ko.contextFor(e);\n" +
-            "var fn = c.$rawData.results;\n" +
-            "var arr = c.$rawData.results();\n" +
+            "var fn = c.$rawData[f];\n" +
+            "var arr = c.$rawData[f]();\n" +
             "arr.push(v);\n" + 
             "fn(arr);\n" + 
             "return arr;\n"
-            , id, value
+            , id, field, value
         );
     }
     
