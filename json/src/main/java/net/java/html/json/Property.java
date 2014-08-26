@@ -71,9 +71,9 @@ public @interface Property {
     
     /** Is this property an array of the {@link #type()} or a single value?
      * If the property is an array, only its getter (returning mutable {@link List} of
-     * the boxed {@link #type()}).
+     * the boxed {@link #type()}) is generated.
      * 
-     * @return true, if this is supposed to be an array of values.
+     * @return true, if this property is supposed to represent an array of values
      */
     boolean array() default false;
 }
