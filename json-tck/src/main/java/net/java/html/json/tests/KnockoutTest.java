@@ -634,6 +634,38 @@ public final class KnockoutTest {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
     }
+    
+    @KOTest public void archetypeArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: archetypes'>\n"
+                + "  <li data-bind='text: artifactId'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 0 : "No children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "archetypes", new ArchetypeData("aid", "gid", "v", "n", "d", "u"));
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 1 : "One element in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 1 : "One child in the DOM: " + newCnt;
+            
+            assert m.getArchetypes().size() == 1 : "One archetype: " + m.getArchetypes();
+            assert m.getArchetypes().get(0) != null : "Not null: " + m.getArchetypes();
+            assert m.getArchetypes().get(0).getArtifactId().equals("aid") : "'aid' == " + m.getArchetypes();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
 
     @Function
     static void call(KnockoutModel m, String data) {
