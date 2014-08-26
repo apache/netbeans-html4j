@@ -118,7 +118,9 @@
                   <docfilessubdirs>true</docfilessubdirs>
                   <subpackages>${publicPackages}</subpackages>
                   <skip>false</skip>
-                  <excludePackageNames>org.netbeans.html.*:net.java.html.js.tests:net.java.html.json.tests</excludePackageNames>
+                  <excludePackageNames>
+org.netbeans.html.boot.impl:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests
+                  </excludePackageNames>
                 <groups>
                   <group>
                     <title>JSON for Java</title>
