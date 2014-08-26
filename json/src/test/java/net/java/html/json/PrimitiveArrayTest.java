@@ -42,6 +42,7 @@
  */
 package net.java.html.json;
 
+import java.util.Collections;
 import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -57,6 +58,14 @@ public class PrimitiveArrayTest {
     @ComputedProperty static int length(List<Byte> array) {
         return array.size();
     }
+
+    @ComputedProperty static List<Integer> lengthAsList(List<Byte> array) {
+        return Collections.nCopies(1, array.size());
+    }
+
+    @ComputedProperty static List<String> lengthTextList(List<Byte> array) {
+        return Collections.nCopies(1, "" + array.size());
+    }
     
     @Test public void generatedConstructorWithPrimitiveType() {
         byte[] arr = new byte[10];
@@ -65,5 +74,7 @@ public class PrimitiveArrayTest {
         Assert.assertEquals(a.getArray().size(), 10, "Ten elements");
         Assert.assertEquals(a.getArray().get(3).byteValue(), 10, "Value ten");
         Assert.assertEquals(a.getLength(), 10, "Derived property is OK too");
+        Assert.assertEquals(a.getLengthTextList().get(0), "10", "Derived string list property is OK");
+        Assert.assertEquals((int)a.getLengthAsList().get(0), 10, "Derived Integer list property is OK");
     }
 }
