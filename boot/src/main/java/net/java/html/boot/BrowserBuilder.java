@@ -43,10 +43,10 @@
 package net.java.html.boot;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,6 +55,7 @@ import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -109,6 +110,7 @@ public final class BrowserBuilder {
     private String[] methodArgs;
     private final Object[] context;
     private ClassLoader loader;
+    private Locale locale;
     
     private BrowserBuilder(Object[] context) {
         this.context = context;
@@ -162,12 +164,31 @@ public final class BrowserBuilder {
      * If such resource is not found, a file relative to the location JAR
      * that contains the {@link #loadClass(java.lang.Class) main class} is 
      * searched for.
+     * <p>
+     * The search honors provided {@link #locale}, if specified.
+     * E.g. it will prefer <code>index_cs.html</code> over <code>index.html</code>
+     * if the locale is set to <code>cs_CZ</code>.
      * 
      * @param page the location (relative, absolute, or URL) of a page to load
-     * @return this browser
+     * @return this builder
      */
     public BrowserBuilder loadPage(String page) {
         this.resource = page;
+        return this;
+    }
+    
+    /** Locale to use when searching for an initial {@link #loadPage(java.lang.String) page to load}.
+     * Localization is best done by providing different versions of the 
+     * initial page with appropriate suffixes (like <code>index_cs.html</code>).
+     * Then one can call this method with value of {@link Locale#getDefault()}
+     * to instruct the builder to use the user's current locale.
+     * 
+     * @param locale the locale to use or <code>null</code> if no suffix search should be performed
+     * @return this builder
+     * @since 1.0
+     */
+    public BrowserBuilder locale(Locale locale) {
+        this.locale = locale;
         return this;
     }
     
@@ -215,18 +236,6 @@ public final class BrowserBuilder {
             throw new NullPointerException("Need to specify resource via loadPage method");
         }
         
-        URL url = null;
-        IOException mal = null;
-        try {
-            String baseURL = System.getProperty("browser.rootdir");
-            if (baseURL != null) {
-                url = new File(baseURL, resource).toURI().toURL();
-            } else {
-                url = new URL(resource);
-            }
-        } catch (MalformedURLException ex) {
-            mal = ex;
-        }
         final Class<?> myCls;
         if (clazz != null) {
             myCls = clazz;
@@ -235,56 +244,8 @@ public final class BrowserBuilder {
         } else {
             throw new NullPointerException("loadClass, neither loadFinished was called!");
         }
-        
-        if (url == null) {
-            url = myCls.getResource(resource);
-        }
-        if (url == null) {
-            final ProtectionDomain pd = myCls.getProtectionDomain();
-            if (pd != null && pd.getCodeSource() != null) {
-                URL jar = pd.getCodeSource().getLocation();
-                try {
-                    url = new URL(jar, resource);
-                } catch (MalformedURLException ex) {
-                    ex.initCause(mal);
-                    mal = ex;
-                }
-            }
-        }
-        if (url == null) {
-            URL res = BrowserBuilder.class.getResource("html4j.txt");
-            LOG.log(Level.FINE, "Found html4j {0}", res);
-            if (res != null) try {
-                URLConnection c = res.openConnection();
-                LOG.log(Level.FINE, "testing : {0}", c);
-                if (c instanceof JarURLConnection) {
-                    JarURLConnection jc = (JarURLConnection)c;
-                    URL base = jc.getJarFileURL();
-                    for (int i = 0; i < 50; i++) {
-                        URL u = new URL(base, resource);
-                        try {
-                            InputStream is = u.openStream();
-                            is.close();
-                            url = u;
-                            LOG.log(Level.FINE, "found real url: {0}", url);
-                            break;
-                        } catch (FileNotFoundException ignore) {
-                            LOG.log(Level.FINE, "Cannot open " + u, ignore);
-                        }
-                        base = new URL(base, "..");
-                    }
-                }
-            } catch (IOException ex) {
-                mal = ex;
-            }
-        }
-        if (url == null) {
-            IllegalStateException ise = new IllegalStateException("Can't find resouce: " + resource + " relative to " + myCls);
-            if (mal != null) {
-                ise.initCause(mal);
-            }
-            throw ise;
-        }
+        IOException mal[] = { null };
+        URL url = findLocalizedResourceURL(resource, locale, mal, myCls);
         
         Fn.Presenter dfnr = null;
         for (Object o : context) {
@@ -397,6 +358,117 @@ public final class BrowserBuilder {
             }
         }
         dfnr.displayPage(url, new OnPageLoad());
+    }
+
+    private static URL findResourceURL(String resource, String suffix, IOException[] mal, Class<?> relativeTo) {
+        if (suffix != null) {
+            int lastDot = resource.lastIndexOf('.');
+            if (lastDot != -1) {
+                resource = resource.substring(0, lastDot) + suffix + resource.substring(lastDot);
+            } else {
+                resource = resource + suffix;
+            }
+        }
+        
+        URL url = null;
+        try {
+            String baseURL = System.getProperty("browser.rootdir"); // NOI18N
+            if (baseURL != null) {
+                URL u = new File(baseURL, resource).toURI().toURL();
+                if (isReal(u)) {
+                    url = u;
+                }
+            } 
+            
+            {
+                URL u = new URL(resource);
+                if (suffix == null || isReal(u)) {
+                    url = u;
+                }
+                return url;
+            }
+        } catch (MalformedURLException ex) {
+            mal[0] = ex;
+        }
+        
+        if (url == null) {
+            url = relativeTo.getResource(resource);
+        }
+        if (url == null) {
+            final ProtectionDomain pd = relativeTo.getProtectionDomain();
+            if (pd != null && pd.getCodeSource() != null) {
+                URL jar = pd.getCodeSource().getLocation();
+                try {
+                    URL u = new URL(jar, resource);
+                    if (isReal(u)) {
+                        url = u;
+                    }
+                } catch (MalformedURLException ex) {
+                    ex.initCause(mal[0]);
+                    mal[0] = ex;
+                }
+            }
+        }
+        if (url == null) {
+            URL res = BrowserBuilder.class.getResource("html4j.txt");
+            LOG.log(Level.FINE, "Found html4j {0}", res);
+            if (res != null) {
+                try {
+                    URLConnection c = res.openConnection();
+                    LOG.log(Level.FINE, "testing : {0}", c);
+                    if (c instanceof JarURLConnection) {
+                        JarURLConnection jc = (JarURLConnection) c;
+                        URL base = jc.getJarFileURL();
+                        for (int i = 0; i < 50; i++) {
+                            URL u = new URL(base, resource);
+                            if (isReal(u)) {
+                                url = u;
+                                break;
+                            }
+                            base = new URL(base, "..");
+                        }
+                    }
+                } catch (IOException ex) {
+                    mal[0] = ex;
+                }
+            }
+        }
+        return url;
+    }
+
+    static URL findLocalizedResourceURL(String resource, Locale l, IOException[] mal, Class<?> relativeTo) {
+        URL url = null;
+        if (l != null) {
+            url = findResourceURL(resource, "_" + l.getLanguage() + "_" + l.getCountry(), mal, relativeTo);
+            if (url != null) {
+                return url;
+            }
+            url = findResourceURL(resource, "_" + l.getLanguage(), mal, relativeTo);
+        }
+        if (url != null) {
+            return url;
+        }
+        return findResourceURL(resource, null, mal, relativeTo);
+    }
+    
+    private static boolean isReal(URL u) {
+        try {
+            URLConnection conn = u.openConnection();
+            if (conn instanceof HttpURLConnection) {
+                HttpURLConnection hc = (HttpURLConnection) conn;
+                hc.setReadTimeout(5000);
+                if (hc.getResponseCode() >= 300) {
+                    throw new IOException("Wrong code: " + hc.getResponseCode());
+                }
+            }
+            InputStream is = conn.getInputStream();
+            is.close();
+            LOG.log(Level.FINE, "found real url: {0}", u);
+            return true;
+        } catch (IOException ignore) {
+            LOG.log(Level.FINE, "Cannot open " + u, ignore);
+            return false;
+        }
     }
 
     private static final class FImpl implements FindResources {
