@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.boot.spi;
+package org.netbeans.html.boot.spi;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public abstract class Fn {
     
     /**
      * @deprecated Ineffective as of 0.6. 
-     * Provide a presenter via {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter)}
+     * Provide a presenter via {@link #Fn(org.netbeans.html.boot.spi.Fn.Presenter)}
      * constructor
      */
     @Deprecated
@@ -84,7 +84,7 @@ public abstract class Fn {
     }
 
     /** True, if currently active presenter is the same as presenter this
-     * function has been created for via {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter)}.
+     * function has been created for via {@link #Fn(org.netbeans.html.boot.spi.Fn.Presenter)}.
      * 
      * @return true, if proper presenter is used
      */
@@ -236,7 +236,7 @@ public abstract class Fn {
     }
     
     /** Provides the function implementation access to the presenter provided
-     * in {@link #Fn(org.apidesign.html.boot.spi.Fn.Presenter) the constructor}.
+     * in {@link #Fn(org.netbeans.html.boot.spi.Fn.Presenter) the constructor}.
      * 
      * @return presenter passed in the constructor (may be, but should not be <code>null</code>)
      * @since 0.7

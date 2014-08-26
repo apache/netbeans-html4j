@@ -224,7 +224,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("import net.java.html.json.*;\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
-                w.append("  private final org.apidesign.html.json.spi.Proto proto;\n");
+                w.append("  private final org.netbeans.html.json.spi.Proto proto;\n");
                 w.append(body.toString());
                 w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
@@ -309,7 +309,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                     w.append("  };\n");
                 }
-                w.append("  private static class Html4JavaType extends org.apidesign.html.json.spi.Proto.Type<").append(className).append("> {\n");
+                w.append("  private static class Html4JavaType extends org.netbeans.html.json.spi.Proto.Type<").append(className).append("> {\n");
                 w.append("    private Html4JavaType() {\n      super(").append(className).append(".class, ").
                     append(inPckName(e)).append(".class, " + propsGetSet.size() + ", "
                     + functionsCount + ");\n");
@@ -383,7 +383,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("      }\n");
                 w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
-                w.append("    @Override public org.apidesign.html.json.spi.Proto protoFor(Object obj) {\n");
+                w.append("    @Override public org.netbeans.html.json.spi.Proto protoFor(Object obj) {\n");
                 w.append("      return ((" + className + ")obj).proto;");
                 w.append("    }\n");
                 w.append("    @Override public void onChange(" + className + " model, int type) {\n");

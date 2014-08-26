@@ -40,45 +40,55 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.spi;
+package org.netbeans.html.sound.spi;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts.Provider;
+import org.netbeans.html.context.spi.Contexts;
 
-/** Interface for providers of WebSocket protocol. Register into a 
- * {@link BrwsrCtx context} in your own {@link Provider}
+/** Basic interface for sound playback providers. Register your implementation
+ * in a way {@link java.util.ServiceLoader} can find it - e.g. use
+ * {@link org.openide.util.lookup.ServiceProvider} annotation. Possibly
+ * one can register the provider into {@link Contexts#newBuilder()}, in
+ * case the implementation is somehow associated 
+ * with the actual {@link BrwsrCtx} (works since version 0.8.3).
  *
- * @author Jaroslav Tulach
- * @param <WebSocket> internal implementation type representing the socket
- * @since 0.5
+ * @author antonepple
+ * @param <Audio> custom type representing the internal audio state
  */
-public interface WSTransfer<WebSocket> {
-    /** Initializes a web socket. The <code>callback</code> object should 
-     * have mostly empty values: {@link JSONCall#isDoOutput()} should be 
-     * <code>false</code> and thus there should be no {@link JSONCall#getMessage()}.
-     * The method of connection {@link JSONCall#getMethod()} is "WebSocket".
-     * Once the connection is open call {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess(null)}.
-     * When the server sends some data then, pass them to 
-     * {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess} method
-     * as well. If there is an error call {@link JSONCall#notifyError(java.lang.Throwable)}.
-     * 
-     * @param url the URL to connect to
-     * @param callback a way to provide results back to the client
-     * @return your object representing the established web socket
+public interface AudioEnvironment<Audio> {
+    /** Checks if the provided URL can be a supported audio stream 
+     * and if so, it create an object to represent it. The created object
+     * will be used in future callbacks to other methods of this interface
+     * (like {@link #play(java.lang.Object)}).
+     * @param src the URL pointing to the media stream
+     * @return an internal representation object or <code>null</code> if this
+     *   environment does not know how to handle such stream
      */
-    public WebSocket open(String url, JSONCall callback);
+    public Audio create(String src);
 
-    /** Sends data to the server. The most important value
-     * of the <code>data</code> parameter is {@link JSONCall#getMessage()},
-     * rest can be ignored.
+    /** Starts playback of the audio.
      * 
-     * @param socket internal representation of the socket
-     * @param data the message to be sent
+     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
      */
-    public void send(WebSocket socket, JSONCall data);
+    public void play(Audio a);
 
-    /** A request to close the socket.
-     * @param socket internal representation of the socket
+    /** Pauses playback of the audio.
+     * 
+     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
      */
-    public void close(WebSocket socket);
+    public void pause(Audio a);
+
+    /** Changes volume for the playback of the audio.
+     * 
+     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
+     * @param volume value between 0.0 and 1.0
+     */
+    public void setVolume(Audio a, double volume);
+
+    /** Checks whether given audio is supported
+     * 
+     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
+     * @return <code>true</code> or <code>false</code>
+     */
+    public boolean isSupported(Audio a);
 }

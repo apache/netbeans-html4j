@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.spi;
+package org.netbeans.html.json.spi;
 
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
@@ -118,10 +118,10 @@ public interface Technology<Data> {
     /** For certain rendering technologies it may be more efficient to register
      * property and function bindings for one instance of the model at once, 
      * rather then doing it incrementally via 
-     * {@link Technology#expose(org.apidesign.html.json.spi.FunctionBinding, java.lang.Object, java.lang.Object) }
+     * {@link Technology#expose(org.netbeans.html.json.spi.FunctionBinding, java.lang.Object, java.lang.Object) }
      * and 
-     * {@link Technology#bind(org.apidesign.html.json.spi.PropertyBinding, java.lang.Object, java.lang.Object) }.
-     * In such case implement the {@link #wrapModel(java.lang.Object, org.apidesign.html.json.spi.PropertyBinding[], org.apidesign.html.json.spi.FunctionBinding[]) }
+     * {@link Technology#bind(org.netbeans.html.json.spi.PropertyBinding, java.lang.Object, java.lang.Object) }.
+     * In such case implement the {@link #wrapModel(java.lang.Object, org.netbeans.html.json.spi.PropertyBinding[], org.netbeans.html.json.spi.FunctionBinding[]) }
      * method of this interface and it will be called instead of the 
      * previous two ones.
      * 

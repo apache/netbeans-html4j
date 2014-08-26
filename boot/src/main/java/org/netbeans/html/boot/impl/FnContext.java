@@ -46,7 +46,7 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.util.logging.Logger;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 
 /**
  *

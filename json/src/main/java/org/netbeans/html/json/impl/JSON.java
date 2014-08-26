@@ -49,14 +49,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.spi.FunctionBinding;
-import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.PropertyBinding;
-import org.apidesign.html.json.spi.Proto;
-import org.apidesign.html.json.spi.Technology;
-import org.apidesign.html.json.spi.Transfer;
-import org.apidesign.html.json.spi.WSTransfer;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.FunctionBinding;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.PropertyBinding;
+import org.netbeans.html.json.spi.Proto;
+import org.netbeans.html.json.spi.Technology;
+import org.netbeans.html.json.spi.Transfer;
+import org.netbeans.html.json.spi.WSTransfer;
 
 /**
  *

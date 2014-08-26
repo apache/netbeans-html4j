@@ -42,7 +42,7 @@
  */
 package org.netbeans.html.boot.fx;
 
-import org.apidesign.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts;
 import org.openide.util.lookup.ServiceProvider;
 import static org.testng.Assert.assertTrue;
 

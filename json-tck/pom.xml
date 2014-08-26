@@ -14,7 +14,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <publicPackages>org.apidesign.html.json.tck</publicPackages>
+    <publicPackages>org.netbeans.html.json.tck</publicPackages>
   </properties>
   <build>
       <plugins>
@@ -30,7 +30,7 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
-                  <subpackages>org.apidesign.html.json.tck,org.apidesign.html.json.spi</subpackages>
+                  <subpackages>org.netbeans.html.json.tck,org.netbeans.html.json.spi</subpackages>
                   <skip>false</skip>
                   <includeDependencySources>true</includeDependencySources>
               </configuration>

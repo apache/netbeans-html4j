@@ -44,7 +44,7 @@ package org.netbeans.html.boot.impl;
 
 import java.io.Closeable;
 import java.io.Reader;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;

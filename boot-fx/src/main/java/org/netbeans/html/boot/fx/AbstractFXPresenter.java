@@ -61,7 +61,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 
 /**
  *

@@ -43,10 +43,10 @@
 package org.netbeans.html.json.impl;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.json.spi.FunctionBinding;
-import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.PropertyBinding;
-import org.apidesign.html.json.spi.Proto;
+import org.netbeans.html.json.spi.FunctionBinding;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.PropertyBinding;
+import org.netbeans.html.json.spi.Proto;
 
 /**
  *

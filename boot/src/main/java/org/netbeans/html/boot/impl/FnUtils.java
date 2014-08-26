@@ -52,7 +52,7 @@ import java.util.Enumeration;
 import java.util.List;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -292,13 +292,13 @@ public final class FnUtils {
                 super.visitFieldInsn(
                         Opcodes.GETSTATIC, FindInClass.this.name,
                         "$$fn$$" + name + "_" + found,
-                        "Lorg/apidesign/html/boot/spi/Fn;"
+                        "Lorg/netbeans/html/boot/spi/Fn;"
                 );
                 super.visitInsn(Opcodes.DUP);
                 super.visitMethodInsn(
                         Opcodes.INVOKESTATIC,
-                        "org/apidesign/html/boot/spi/Fn", "isValid",
-                        "(Lorg/apidesign/html/boot/spi/Fn;)Z"
+                        "org/netbeans/html/boot/spi/Fn", "isValid",
+                        "(Lorg/netbeans/html/boot/spi/Fn;)Z"
                 );
                 Label ifNotNull = new Label();
                 super.visitJumpInsn(Opcodes.IFNE, ifNotNull);
@@ -320,8 +320,8 @@ public final class FnUtils {
                     super.visitInsn(Opcodes.AASTORE);
                 }
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                        "org/apidesign/html/boot/spi/Fn", "define",
-                        "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
+                        "org/netbeans/html/boot/spi/Fn", "define",
+                        "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
                 );
                 Label noPresenter = new Label();
                 if (hasCode) {
@@ -332,15 +332,15 @@ public final class FnUtils {
                     super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
                     super.visitLdcInsn(resource);
                     super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                            "org/apidesign/html/boot/spi/Fn", "preload",
-                            "(Lorg/apidesign/html/boot/spi/Fn;Ljava/lang/Class;Ljava/lang/String;)Lorg/apidesign/html/boot/spi/Fn;"
+                            "org/netbeans/html/boot/spi/Fn", "preload",
+                            "(Lorg/netbeans/html/boot/spi/Fn;Ljava/lang/Class;Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
                     );
                 }
                 super.visitInsn(Opcodes.DUP);
                 super.visitFieldInsn(
                         Opcodes.PUTSTATIC, FindInClass.this.name,
                         "$$fn$$" + name + "_" + found,
-                        "Lorg/apidesign/html/boot/spi/Fn;"
+                        "Lorg/netbeans/html/boot/spi/Fn;"
                 );
                 // end of Fn init
 
@@ -469,7 +469,7 @@ public final class FnUtils {
 
                 if (fia.wait4js) {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                            "org/apidesign/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
+                            "org/netbeans/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
                     );
                     switch (sv.returnType.getSort()) {
                         case Type.VOID:
@@ -496,7 +496,7 @@ public final class FnUtils {
                     }
                 } else {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                            "org/apidesign/html/boot/spi/Fn", "invokeLater", "(Ljava/lang/Object;[Ljava/lang/Object;)V"
+                            "org/netbeans/html/boot/spi/Fn", "invokeLater", "(Ljava/lang/Object;[Ljava/lang/Object;)V"
                     );
                     super.visitInsn(Opcodes.RETURN);
                 }
@@ -518,7 +518,7 @@ public final class FnUtils {
                     FindInClass.this.visitField(
                             Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
                             "$$fn$$" + name + "_" + found,
-                            "Lorg/apidesign/html/boot/spi/Fn;",
+                            "Lorg/netbeans/html/boot/spi/Fn;",
                             null, null
                     );
                 }

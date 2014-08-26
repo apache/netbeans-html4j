@@ -43,7 +43,7 @@
 package org.netbeans.html.context.impl;
 
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts.Builder;
+import org.netbeans.html.context.spi.Contexts.Builder;
 
 /** Internal communication between API (e.g. {@link BrwsrCtx}), SPI
  * (e.g. {@link Builder}) and the implementation package.

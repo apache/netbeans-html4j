@@ -42,7 +42,7 @@
  */
 package org.netbeans.html.boot.fx;
 
-import org.apidesign.html.json.tck.JavaScriptTCK;
+import org.netbeans.html.json.tck.JavaScriptTCK;
 
 /**
  *

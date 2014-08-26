@@ -56,10 +56,10 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import net.java.html.json.OnReceive;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.Transfer;
-import org.apidesign.html.json.spi.WSTransfer;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.Transfer;
+import org.netbeans.html.json.spi.WSTransfer;
 import org.netbeans.html.wstyrus.TyrusContext.Comm;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,7 +78,7 @@ import org.openide.util.lookup.ServiceProvider;
  * There is no need to include this module in your application if you are
  * running on JDK8. JDK8 WebView provides its own implementation of the
  * WebSocket API based on WebSocket object inside a browser. This is included
- * in the <code>org.apidesign.html:ko-fx:0.5</code> module.
+ * in the <code>org.netbeans.html:ko4j:1.0</code> module.
  *
  * @author Jaroslav Tulach
  */

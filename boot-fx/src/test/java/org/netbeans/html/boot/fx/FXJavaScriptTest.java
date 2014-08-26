@@ -48,8 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.json.tck.KOTest;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.json.tck.KOTest;
 import org.testng.Assert;
 import org.testng.annotations.Factory;
 

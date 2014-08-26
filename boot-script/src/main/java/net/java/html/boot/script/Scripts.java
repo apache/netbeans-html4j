@@ -47,8 +47,8 @@ import java.util.concurrent.Executor;
 import javax.script.ScriptEngine;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.boot.spi.Fn.Presenter;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 
 /** Implementations of {@link Presenter}s that delegate
  * to Java {@link ScriptEngine scripting} API. Initialize your presenter
@@ -71,7 +71,7 @@ import org.apidesign.html.boot.spi.Fn.Presenter;
  * <pre>
  * {@code @Test} public void runInASimulatedBrowser() throws Exception {
  *   {@link Presenter Fn.Presenter} <b>p</b> = Scripts.{@link Scripts#createPresenter()};
- *   try ({@link Closeable} c = {@link Fn#activate(org.apidesign.html.boot.spi.Fn.Presenter) Fn.activate}(<b>p</b>)) {
+ *   try ({@link Closeable} c = {@link Fn#activate(org.netbeans.html.boot.spi.Fn.Presenter) Fn.activate}(<b>p</b>)) {
  *     // your code operating in context of <b>p</b>
  *   }
  * }

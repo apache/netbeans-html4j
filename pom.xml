@@ -143,7 +143,7 @@
                   </group>
                   <group>
                     <title>Service Provider APIs (not commonly interesting)</title>
-                    <packages>org.apidesign.html.*</packages>
+                    <packages>org.netbeans.html.*</packages>
                   </group>
                 </groups>   
                 <links>

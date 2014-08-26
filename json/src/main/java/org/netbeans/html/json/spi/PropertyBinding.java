@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.spi;
+package org.netbeans.html.json.spi;
 
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.impl.Bindings;

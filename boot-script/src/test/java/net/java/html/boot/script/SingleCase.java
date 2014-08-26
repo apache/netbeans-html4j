@@ -46,7 +46,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FnContext;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;

@@ -46,7 +46,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import org.netbeans.html.context.impl.CtxAccssr;
 import org.netbeans.html.context.impl.CtxImpl;
-import org.apidesign.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts;
 
 /** Represents context where the <code>net.java.html.json.Model</code>
  * and other objects
@@ -100,7 +100,7 @@ public final class BrwsrCtx implements Executor {
             return brwsr;
         }
         
-        org.apidesign.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
+        org.netbeans.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = Contexts.fillInByProviders(requestor, cb);
         if (!found) {
             LOG.warning("No browser context found. Returning empty technology!");

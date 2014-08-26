@@ -45,7 +45,7 @@ package net.java.html.json;
 import java.io.IOException;
 import java.util.Arrays;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 

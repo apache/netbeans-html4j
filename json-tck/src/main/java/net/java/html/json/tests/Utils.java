@@ -47,7 +47,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.json.tck.KnockoutTCK;
+import org.netbeans.html.json.tck.KnockoutTCK;
 
 /**
  *

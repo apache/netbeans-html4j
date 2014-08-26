@@ -40,55 +40,49 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.sound.spi;
+package org.netbeans.html.json.spi;
 
-import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
+import java.io.IOException;
+import java.io.InputStream;
+import org.netbeans.html.context.spi.Contexts.Builder;
 
-/** Basic interface for sound playback providers. Register your implementation
- * in a way {@link java.util.ServiceLoader} can find it - e.g. use
- * {@link org.openide.util.lookup.ServiceProvider} annotation. Possibly
- * one can register the provider into {@link Contexts#newBuilder()}, in
- * case the implementation is somehow associated 
- * with the actual {@link BrwsrCtx} (works since version 0.8.3).
+/** A {@link Builder service provider interface} responsible for 
+ * conversion of JSON objects to Java ones and vice-versa.
  *
- * @author antonepple
- * @param <Audio> custom type representing the internal audio state
+ * @author Jaroslav Tulach
  */
-public interface AudioEnvironment<Audio> {
-    /** Checks if the provided URL can be a supported audio stream 
-     * and if so, it create an object to represent it. The created object
-     * will be used in future callbacks to other methods of this interface
-     * (like {@link #play(java.lang.Object)}).
-     * @param src the URL pointing to the media stream
-     * @return an internal representation object or <code>null</code> if this
-     *   environment does not know how to handle such stream
+public interface Transfer {
+    /**
+     * Called to inspect properties of an object (usually a JSON or JavaScript
+     * wrapper).
+     *
+     * @param obj the object to inspect
+     * @param props the names of properties to check on the object
+     * <code>obj</code>
+     * @param values array of the same length as <code>props</code> should be
+     * filled by values of properties on the <code>obj</code>. If a property is
+     * not defined, a <code>null</code> value should be stored in the array
      */
-    public Audio create(String src);
-
-    /** Starts playback of the audio.
+    public void extract(Object obj, String[] props, Object[] values);
+    
+    /** Reads content of a stream and creates its JSON representation.
+     * The returned object is implementation dependant. It however needs
+     * to be acceptable as first argument of {@link #extract(java.lang.Object, java.lang.String[], java.lang.Object[]) extract}
+     * method. If the stream contains representation or a JSON array,
+     * an Object[] should be returned - each of its members should, by itself
+     * be acceptable argument to 
+     * the {@link #extract(java.lang.Object, java.lang.String[], java.lang.Object[]) extract} method.
      * 
-     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
+     * @param is input stream to read data from
+     * @return an object representing the JSON data
+     * @throws IOException if something goes wrong
      */
-    public void play(Audio a);
-
-    /** Pauses playback of the audio.
+    public Object toJSON(InputStream is) throws IOException;
+    
+    /** Starts the JSON or JSONP query. 
      * 
-     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
+     * @param call description of the call to make
      */
-    public void pause(Audio a);
-
-    /** Changes volume for the playback of the audio.
-     * 
-     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
-     * @param volume value between 0.0 and 1.0
-     */
-    public void setVolume(Audio a, double volume);
-
-    /** Checks whether given audio is supported
-     * 
-     * @param a the internal representation of the audio as created by {@link #create(java.lang.String)} method.
-     * @return <code>true</code> or <code>false</code>
-     */
-    public boolean isSupported(Audio a);
+    public void loadJSON(JSONCall call);
+    
 }

@@ -55,8 +55,8 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.boot.spi.Fn.Presenter;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 
 /** Implementation of {@link Presenter} that delegates
  * to Java {@link ScriptEngine scripting} API. The presenter runs headless

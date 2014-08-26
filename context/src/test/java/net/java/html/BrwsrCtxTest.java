@@ -42,7 +42,7 @@
  */
 package net.java.html;
 
-import org.apidesign.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts;
 import static org.testng.Assert.*;
 
 /**

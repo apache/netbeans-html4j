@@ -42,7 +42,7 @@
  */
 package net.java.html.boot.script;
 
-import org.apidesign.html.json.tck.JavaScriptTCK;
+import org.netbeans.html.json.tck.JavaScriptTCK;
 
 /**
  *

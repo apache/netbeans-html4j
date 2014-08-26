@@ -353,13 +353,13 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("package ").append(pkgName).append(";\n");
             source.append("public final class $JsCallbacks$ {\n");
             source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
-            source.append("  private final org.apidesign.html.boot.spi.Fn.Presenter p;\n");
+            source.append("  private final org.netbeans.html.boot.spi.Fn.Presenter p;\n");
             source.append("  private $JsCallbacks$ last;\n");
-            source.append("  private $JsCallbacks$(org.apidesign.html.boot.spi.Fn.Presenter p) {\n");
+            source.append("  private $JsCallbacks$(org.netbeans.html.boot.spi.Fn.Presenter p) {\n");
             source.append("    this.p = p;\n");
             source.append("  }\n");
             source.append("  final $JsCallbacks$ current() {\n");
-            source.append("    org.apidesign.html.boot.spi.Fn.Presenter now = org.apidesign.html.boot.spi.Fn.activePresenter();\n");
+            source.append("    org.netbeans.html.boot.spi.Fn.Presenter now = org.netbeans.html.boot.spi.Fn.activePresenter();\n");
             source.append("    if (now == p) return this;\n");
             source.append("    if (last != null && now == last.p) return last;\n");
             source.append("    return last = new $JsCallbacks$(now);\n");
@@ -388,9 +388,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     final TypeMirror t = ve.asType();
                     if (!t.getKind().isPrimitive()) {
                         source.append("Object");
-                        convert.append("    if (p instanceof org.apidesign.html.boot.spi.Fn.FromJavaScript) {\n");
+                        convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
                         convert.append("      arg").append(cnt).
-                            append(" = ((org.apidesign.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
+                            append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
                             append(");\n");
                         convert.append("    }\n");
                     } else {
@@ -402,9 +402,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 source.append(") throws Throwable {\n");
                 source.append(convert);
                 if (useTryResources()) {
-                    source.append("    try (java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p)) { \n");
+                    source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) { \n");
                 } else {
-                    source.append("    java.io.Closeable a = org.apidesign.html.boot.spi.Fn.activate(p); try {\n");
+                    source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {\n");
                 }
                 source.append("    ");
                 if (m.getReturnType().getKind() != TypeKind.VOID) {
@@ -430,8 +430,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 if (m.getReturnType().getKind() == TypeKind.VOID) {
                     source.append("    return null;\n");
                 } else {
-                    source.append("    if (p instanceof org.apidesign.html.boot.spi.Fn.ToJavaScript) {\n");
-                    source.append("      $ret = ((org.apidesign.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
+                    source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
+                    source.append("      $ret = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
                     source.append("    }\n");
                     source.append("    return $ret;\n");
                 }

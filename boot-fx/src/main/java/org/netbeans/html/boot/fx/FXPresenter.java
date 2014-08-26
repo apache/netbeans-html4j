@@ -48,7 +48,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import javafx.scene.web.WebView;
 import net.java.html.boot.BrowserBuilder;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 
 /** This is an implementation class, use {@link BrowserBuilder} API. Just

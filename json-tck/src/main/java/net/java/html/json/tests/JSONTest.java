@@ -51,7 +51,7 @@ import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.apidesign.html.json.tck.KOTest;
+import org.netbeans.html.json.tck.KOTest;
 
 /** Need to verify that models produce reasonable JSON objects.
  *

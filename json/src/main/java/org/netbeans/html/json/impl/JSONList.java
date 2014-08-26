@@ -46,7 +46,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import org.apidesign.html.json.spi.Proto;
+import org.netbeans.html.json.spi.Proto;
 
 /**
  *

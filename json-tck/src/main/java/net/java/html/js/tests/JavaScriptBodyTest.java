@@ -45,8 +45,8 @@ package net.java.html.js.tests;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.json.tck.KOTest;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.json.tck.KOTest;
 
 /**
  *

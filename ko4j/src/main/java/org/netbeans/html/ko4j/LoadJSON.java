@@ -47,9 +47,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.Transfer;
-import org.apidesign.html.json.spi.WSTransfer;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.Transfer;
+import org.netbeans.html.json.spi.WSTransfer;
 
 /**
  *
@@ -144,7 +144,7 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "  delete window[name];\n"
         + "  var el = window.document.getElementById(name);\n"
         + "  el.parentNode.removeChild(el);\n"
-        + "  done.@org.apidesign.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);\n"
+        + "  done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);\n"
         + "};\n"
         + "return true;\n"
     )
@@ -168,7 +168,7 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "  try {\n"
         + "    if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;"
         + "    try { r = eval('(' + r + ')'); } catch (ignore) { }"
-        + "    done.@org.apidesign.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(r);\n"
+        + "    done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(r);\n"
         + "  } catch (error) {;\n"
         + "    @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);\n"
         + "  }\n"

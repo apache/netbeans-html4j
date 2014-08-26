@@ -40,71 +40,33 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.spi;
+package org.netbeans.html.json.tck;
 
-import net.java.html.BrwsrCtx;
-import net.java.html.json.Function;
-import net.java.html.json.Model;
+import net.java.html.js.tests.JavaScriptBodyTest;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 
-/** Describes a function provided by the {@link Model} and 
- * annotated by {@link Function} annotation.
+/** Entry point for those who want to verify that their implementation of
+ * {@link Presenter} is good enough to support existing Java/JavaScript 
+ * communication use-cases. Subclass this class, get list of {@link #testClasses() classes}
+ * find methods annotated by {@link KOTest} annotation and execute them.
+ * <p>
  *
  * @author Jaroslav Tulach
+ * @since 0.7
  */
-public abstract class FunctionBinding {
-    FunctionBinding() {
-    }
-    
-    /** Returns name of the function.
-     * @return function name
+public abstract class JavaScriptTCK {
+    /** Gives you list of classes included in the TCK. Their test methods
+     * are annotated by {@link KOTest} annotation. The methods are public
+     * instance methods that take no arguments. The method should be 
+     * invoke in a presenter context {@link Fn#activate(org.netbeans.html.boot.spi.Fn.Presenter)}.
+     * 
+     * @return classes with methods annotated by {@link KOTest} annotation
      */
-    public abstract String getFunctionName();
-    
-    /**
-     * Calls the function provided data associated with current element, as well
-     * as information about the event that triggered the event.
-     *
-     * @param data data associated with selected element
-     * @param ev event (with additional properties) that triggered the event
-     */
-    public abstract void call(Object data, Object ev);
-
-    static <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
-        return new Impl<M>(name, index, model, access);
+    protected static Class<?>[] testClasses() {
+        return new Class[] { 
+            JavaScriptBodyTest.class
+        };
     }
     
-    private static final class Impl<M> extends FunctionBinding {
-        final String name;
-        private final M model;
-        private final Proto.Type<M> access;
-        private final int index;
-
-        public Impl(String name, int index, M model, Proto.Type<M> access) {
-            this.name = name;
-            this.index = index;
-            this.model = model;
-            this.access = access;
-        }
-
-        @Override
-        public String getFunctionName() {
-            return name;
-        }
-
-        @Override
-        public void call(final Object data, final Object ev) {
-            BrwsrCtx ctx = access.protoFor(model).getContext();
-            class Dispatch implements Runnable {
-                @Override
-                public void run() {
-                    try {
-                        access.call(model, index, data, ev);
-                    } catch (Throwable ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-            ctx.execute(new Dispatch());
-        }
-    }
 }

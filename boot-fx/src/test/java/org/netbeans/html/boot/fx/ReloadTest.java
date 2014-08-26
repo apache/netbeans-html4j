@@ -48,7 +48,7 @@ import javafx.application.Platform;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 

@@ -46,7 +46,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
 import org.netbeans.html.boot.impl.FnContext;
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.annotations.Test;
 

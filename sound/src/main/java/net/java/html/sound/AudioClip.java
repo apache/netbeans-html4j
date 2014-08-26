@@ -44,8 +44,8 @@ package net.java.html.sound;
 
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.sound.spi.AudioEnvironment;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.sound.spi.AudioEnvironment;
 import org.netbeans.html.sound.impl.BrowserAudioEnv;
 
 /** Handle to an audio clip which can be {@link #play() played}, {@link #pause() paused}

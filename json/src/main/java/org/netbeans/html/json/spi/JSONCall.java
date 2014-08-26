@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.spi;
+package org.netbeans.html.json.spi;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,7 +48,7 @@ import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.impl.RcvrJSON;
 
 /** Description of a JSON call request that is supposed to be processed
- * by {@link Transfer#loadJSON(org.apidesign.html.json.spi.JSONCall)} implementors.
+ * by {@link Transfer#loadJSON(org.netbeans.html.json.spi.JSONCall)} implementors.
  *
  * @author Jaroslav Tulach
  */

@@ -42,7 +42,7 @@
  */
 package org.netbeans.html.boot.impl;
 
-import org.apidesign.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -76,7 +76,7 @@ abstract class JsClassLoader extends ClassLoader {
         if (name.startsWith("com.sun")) {
             return Class.forName(name);
         }
-        if (name.startsWith("org.apidesign.html.context.spi")) {
+        if (name.startsWith("org.netbeans.html.context.spi")) {
             return Class.forName(name);
         }
         if (name.startsWith("net.java.html.BrwsrCtx")) {
@@ -101,7 +101,7 @@ abstract class JsClassLoader extends ClassLoader {
             return FnUtils.class;
         }
         if (
-            name.equals("org.apidesign.html.boot.spi.Fn") ||
+            name.equals("org.netbeans.html.boot.spi.Fn") ||
             name.equals("org.netbeans.html.boot.impl.FnUtils") ||
             name.equals("org.netbeans.html.boot.impl.FnContext")
         ) {

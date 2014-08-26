@@ -47,7 +47,7 @@ import java.io.StringWriter;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
-import org.apidesign.html.json.tck.KOTest;
+import org.netbeans.html.json.tck.KOTest;
 
 /**
  *

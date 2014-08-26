@@ -43,7 +43,7 @@
 package net.java.html.json.tests;
 
 import net.java.html.json.Models;
-import org.apidesign.html.json.tck.KOTest;
+import org.netbeans.html.json.tck.KOTest;
 
 /**
  *

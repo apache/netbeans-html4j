@@ -43,7 +43,7 @@
 package org.netbeans.html.ko4j;
 
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.JSONCall;
 
 /** Communication with WebSockets via browser's WebSocket object.
  *

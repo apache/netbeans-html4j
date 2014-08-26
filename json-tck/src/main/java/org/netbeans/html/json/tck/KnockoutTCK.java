@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.json.tck;
+package org.netbeans.html.json.tck;
 
 import java.net.URI;
 import java.util.Map;
@@ -52,7 +52,7 @@ import net.java.html.json.tests.MinesTest;
 import net.java.html.json.tests.OperationsTest;
 import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
-import org.apidesign.html.context.spi.Contexts.Builder;
+import org.netbeans.html.context.spi.Contexts.Builder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Entry point for providers of different HTML binding technologies (like

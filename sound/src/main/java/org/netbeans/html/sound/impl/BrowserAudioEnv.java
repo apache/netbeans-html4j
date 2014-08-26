@@ -43,7 +43,7 @@
 package org.netbeans.html.sound.impl;
 
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.sound.spi.AudioEnvironment;
+import org.netbeans.html.sound.spi.AudioEnvironment;
 
 /** The default audio provider that delegates to HTML5 Audio tag
  * it is used if no other {@link AudioEnvironment} is found.

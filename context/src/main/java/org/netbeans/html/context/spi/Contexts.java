@@ -40,7 +40,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.apidesign.html.context.spi;
+package org.netbeans.html.context.spi;
 
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
@@ -79,7 +79,7 @@ public final class Contexts {
     }
 
     /** Seeks {@link ServiceLoader} for all registered instances of
-     * {@link Provider} and asks them to {@link Provider#fillContext(org.apidesign.html.context.spi.Contexts.Builder, java.lang.Class) fill
+     * {@link Provider} and asks them to {@link Provider#fillContext(org.netbeans.html.context.spi.Contexts.Builder, java.lang.Class) fill
      * the builder}.
      * 
      * @param requestor the application class for which to find the context

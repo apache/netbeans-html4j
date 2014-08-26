@@ -45,8 +45,8 @@ package org.netbeans.html.ko4j;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
-import org.apidesign.html.json.spi.FunctionBinding;
-import org.apidesign.html.json.spi.PropertyBinding;
+import org.netbeans.html.json.spi.FunctionBinding;
+import org.netbeans.html.json.spi.PropertyBinding;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -100,7 +100,7 @@ final class Knockout {
         + "  var trigger = ko.observable().extend({notify:'always'});"
         + "  function realGetter() {\n"
         + "    try {\n"
-        + "      var v = prop.@org.apidesign.html.json.spi.PropertyBinding::getValue()();\n"
+        + "      var v = prop.@org.netbeans.html.json.spi.PropertyBinding::getValue()();\n"
         + "      return v;\n"
         + "    } catch (e) {\n"
         + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);\n"
@@ -120,7 +120,7 @@ final class Knockout {
         + "  if (!readOnly) {\n"
         + "    bnd['write'] = function(val) {\n"
         + "      var model = val['ko-fx.model'];\n"
-        + "      prop.@org.apidesign.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(model ? model : val);\n"
+        + "      prop.@org.netbeans.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(model ? model : val);\n"
         + "    };\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"
@@ -135,7 +135,7 @@ final class Knockout {
         + "}\n"
         + "function koExpose(name, func) {\n"
         + "  ret[name] = function(data, ev) {\n"
-        + "    func.@org.apidesign.html.json.spi.FunctionBinding::call(Ljava/lang/Object;Ljava/lang/Object;)(data, ev);\n"
+        + "    func.@org.netbeans.html.json.spi.FunctionBinding::call(Ljava/lang/Object;Ljava/lang/Object;)(data, ev);\n"
         + "  };\n"
         + "}\n"
         + "for (var i = 0; i < funcNames.length; i++) {\n"

@@ -49,9 +49,9 @@ import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
 import net.java.html.json.Person;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.json.spi.JSONCall;
-import org.apidesign.html.json.spi.Transfer;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.Transfer;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 

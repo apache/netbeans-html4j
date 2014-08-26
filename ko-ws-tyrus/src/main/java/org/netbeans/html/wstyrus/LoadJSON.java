@@ -59,7 +59,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
-import org.apidesign.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.JSONCall;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

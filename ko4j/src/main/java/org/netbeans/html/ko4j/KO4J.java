@@ -43,12 +43,12 @@
 package org.netbeans.html.ko4j;
 
 import net.java.html.json.Model;
-import org.apidesign.html.boot.spi.Fn;
-import org.apidesign.html.context.spi.Contexts;
-import org.apidesign.html.context.spi.Contexts.Provider;
-import org.apidesign.html.json.spi.Technology;
-import org.apidesign.html.json.spi.Transfer;
-import org.apidesign.html.json.spi.WSTransfer;
+import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Provider;
+import org.netbeans.html.json.spi.Technology;
+import org.netbeans.html.json.spi.Transfer;
+import org.netbeans.html.json.spi.WSTransfer;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Support for <a href="http://knockoutjs.com">knockout.js</a>
