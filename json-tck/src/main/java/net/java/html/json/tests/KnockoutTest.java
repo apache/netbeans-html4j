@@ -569,6 +569,38 @@ public final class KnockoutTest {
         assert first.getSex() == Sex.FEMALE : "Transverted to female: " + first.getSex();
     }
     
+    @KOTest public void stringArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: results'>\n"
+                + "  <li data-bind='text: $data'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.getResults().add("Hello");
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 2 : "Two children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "Hi");
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 3 : "Three elements in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            
+            assert m.getResults().size() == 3 : "Three java strings: " + m.getResults();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
     @Function
     static void call(KnockoutModel m, String data) {
         m.setName(data);

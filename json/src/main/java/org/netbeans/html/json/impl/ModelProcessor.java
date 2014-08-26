@@ -316,7 +316,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 {
                     for (int i = 0; i < propsGetSet.size(); i++) {
                         w.append("      registerProperty(\"").append(propsGetSet.get(i).name).append("\", ");
-                        w.append((i) + ", " + (propsGetSet.get(i).setter == null) + ");\n");
+                        w.append((i) + ", " + propsGetSet.get(i).readOnly + ");\n");
                     }
                 }
                 {
@@ -329,17 +329,25 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    @Override public void setValue(" + className + " data, int type, Object value) {\n");
                 w.append("      switch (type) {\n");
                 for (int i = 0; i < propsGetSet.size(); i++) {
-                    final String set = propsGetSet.get(i).setter;
-                    String tn = propsGetSet.get(i).type;
+                    final GetSet pgs = propsGetSet.get(i);
+                    if (pgs.readOnly) {
+                        continue;
+                    }
+                    final String set = pgs.setter;
+                    String tn = pgs.type;
                     String btn = findBoxedType(tn);
                     if (btn != null) {
                         tn = btn;
                     }
-                    if (set != null) {
-                        w.append("        case " + i + ": data." + strip(set) + "(TYPE.extractValue(" + tn + ".class, value)); return;\n");
+                    w.append("        case " + i + ": ");
+                    if (pgs.setter != null) {
+                        w.append("data.").append(strip(pgs.setter)).append("(TYPE.extractValue(" + tn + ".class, value)); return;\n");
+                    } else {
+                        w.append("TYPE.replaceValue(data.").append(strip(pgs.getter)).append("(), " + tn + ".class, value); return;\n");
                     }
                 }
                 w.append("      }\n");
+                w.append("      throw new UnsupportedOperationException();\n");
                 w.append("    }\n");
                 w.append("    @Override public Object getValue(" + className + " data, int type) {\n");
                 w.append("      switch (type) {\n");
@@ -591,7 +599,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 p.name(),
                 gs[2],
                 gs[3],
-                castTo
+                tn,
+                gs[3] == null && !p.array()
             ));
         }
         return ok;
@@ -714,7 +723,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 e.getSimpleName().toString(),
                 gs[2],
                 null,
-                tn
+                tn,
+                true
             ));
         }
         
@@ -1821,11 +1831,13 @@ public final class ModelProcessor extends AbstractProcessor {
         final String getter;
         final String setter;
         final String type;
-        GetSet(String name, String getter, String setter, String type) {
+        final boolean readOnly;
+        GetSet(String name, String getter, String setter, String type, boolean readOnly) {
             this.name = name;
             this.getter = getter;
             this.setter = setter;
             this.type = type;
+            this.readOnly = readOnly;
         }
     }
 

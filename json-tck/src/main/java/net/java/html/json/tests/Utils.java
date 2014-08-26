@@ -139,6 +139,21 @@ public final class Utils {
             , id
         )).intValue();
     }
+
+    static Object addChildren(Class<?> caller, String id, Object value) throws Exception {
+        return executeScript(caller, 
+            "var e = window.document.getElementById(arguments[0]);\n" + 
+            "var v = arguments[1];\n" + 
+            "if (typeof e === 'undefined') return -2;\n " + 
+            "var c = ko.contextFor(e);\n" +
+            "var fn = c.$rawData.results;\n" +
+            "var arr = c.$rawData.results();\n" +
+            "arr.push(v);\n" + 
+            "fn(arr);\n" + 
+            "return arr;\n"
+            , id, value
+        );
+    }
     
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
