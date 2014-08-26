@@ -806,7 +806,7 @@ public final class Proto {
             return type.cast(val);
         }
 
-        /** Special dealing with array & {@link List} values. This method
+        /** Special dealing with array &amp; {@link List} values. This method
          * takes the provided collection, empties it and fills it again
          * with values extracted from <code>value</code> (which is supposed
          * to be an array).
