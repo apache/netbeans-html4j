@@ -76,6 +76,7 @@ import org.netbeans.html.boot.impl.FnUtils;
  *     BrowserBuilder.{@link #newBrowser newBrowser()}.
  *          {@link #loadClass(java.lang.Class) loadClass(YourMain.class)}.
  *          {@link #loadPage(java.lang.String) loadPage("index.html")}.
+ *          {@link #locale(java.util.Locale) locale}({@link Locale#getDefault()}).
  *          {@link #invoke(java.lang.String, java.lang.String[]) invoke("initialized", args)}.
  *          {@link #showAndWait()};
  *     System.exit(0);
