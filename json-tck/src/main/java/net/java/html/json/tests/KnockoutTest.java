@@ -42,6 +42,7 @@
  */
 package net.java.html.json.tests;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -74,6 +75,14 @@ public final class KnockoutTest {
     
     enum Choice {
         A, B;
+    }
+    
+    @ComputedProperty static List<Integer> resultLengths(List<String> results) {
+        Integer[] arr = new Integer[results.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = results.get(i).length();
+        }
+        return Arrays.asList(arr);
     }
     
     @KOTest public void modifyValueAssertChangeInModelOnEnum() throws Throwable {
@@ -601,7 +610,7 @@ public final class KnockoutTest {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
     }
-    
+
     @KOTest public void intArrayModificationVisible() throws Exception {
         Object exp = Utils.exposeHTML(KnockoutTest.class,
                 "<div>\n"
@@ -630,6 +639,39 @@ public final class KnockoutTest {
             
             assert m.getNumbers().size() == 3 : "Three java ints: " + m.getNumbers();
             assert m.getNumbers().get(2) == 42 : "Meaning of world: " + m.getNumbers();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
+    @KOTest public void derivedIntArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: resultLengths'>\n"
+                + "  <li data-bind='text: $data'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.getResults().add("Hello");
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 2 : "Two children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "results", "Hi");
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 3 : "Three elements in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            
+            assert m.getResultLengths().size() == 3 : "Three java ints: " + m.getResultLengths();
+            assert m.getResultLengths().get(2) == 2 : "Size is two: " + m.getResultLengths();
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
