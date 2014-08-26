@@ -646,8 +646,13 @@ public final class ModelProcessor extends AbstractProcessor {
                 } else if (isModel(toCheck)) {
                     // OK
                 } else {
-                    ok = false;
-                    error(sn + " cannot return " + toCheck, e);
+                    try {
+                        tu.unboxedType(toCheck);
+                        // boxed types are OK
+                    } catch (IllegalArgumentException ex) {
+                        ok = false;
+                        error(sn + " cannot return " + toCheck, e);
+                    }
                 }
             }
             
