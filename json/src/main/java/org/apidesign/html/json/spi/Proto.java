@@ -806,5 +806,29 @@ public final class Proto {
             return type.cast(val);
         }
 
+        /** Special dealing with array &amp; {@link List} values. This method
+         * takes the provided collection, empties it and fills it again
+         * with values extracted from <code>value</code> (which is supposed
+         * to be an array).
+         * 
+         * @param <T> the type of list elements
+         * @param arr collection to fill with elements in value
+         * @param type the type of elements in the collection
+         * @param value array of elements to put into the collecition. If
+         *   value is not an array it is wrapped into array with only element
+         * @since 1.0
+         */
+        public final <T> void replaceValue(Collection<? super T> arr, Class<T> type, Object value) {
+            Object[] newArr;
+            if (value instanceof Object[]) {
+                newArr = (Object[]) value;
+            } else {
+                newArr = new Object[] { value };
+            }
+            arr.clear();
+            for (Object e : newArr) {
+                arr.add(extractValue(type, e));
+            }
+        }
     }
 }

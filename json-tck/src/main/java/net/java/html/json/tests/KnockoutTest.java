@@ -42,6 +42,7 @@
  */
 package net.java.html.json.tests;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,6 +61,7 @@ import org.apidesign.html.json.tck.KOTest;
 @Model(className="KnockoutModel", properties={
     @Property(name="name", type=String.class),
     @Property(name="results", type=String.class, array = true),
+    @Property(name="numbers", type=int.class, array = true),
     @Property(name="callbackCount", type=int.class),
     @Property(name="people", type=PersonImpl.class, array = true),
     @Property(name="enabled", type=boolean.class),
@@ -73,6 +75,14 @@ public final class KnockoutTest {
     
     enum Choice {
         A, B;
+    }
+    
+    @ComputedProperty static List<Integer> resultLengths(List<String> results) {
+        Integer[] arr = new Integer[results.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = results.get(i).length();
+        }
+        return Arrays.asList(arr);
     }
     
     @KOTest public void modifyValueAssertChangeInModelOnEnum() throws Throwable {
@@ -569,6 +579,136 @@ public final class KnockoutTest {
         assert first.getSex() == Sex.FEMALE : "Transverted to female: " + first.getSex();
     }
     
+    @KOTest public void stringArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: results'>\n"
+                + "  <li data-bind='text: $data'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.getResults().add("Hello");
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 2 : "Two children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "results", "Hi");
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 3 : "Three elements in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            
+            assert m.getResults().size() == 3 : "Three java strings: " + m.getResults();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
+    @KOTest public void intArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: numbers'>\n"
+                + "  <li data-bind='text: $data'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getNumbers().add(1);
+            m.getNumbers().add(31);
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 2 : "Two children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "numbers", 42);
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 3 : "Three elements in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            
+            assert m.getNumbers().size() == 3 : "Three java ints: " + m.getNumbers();
+            assert m.getNumbers().get(2) == 42 : "Meaning of world: " + m.getNumbers();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
+    @KOTest public void derivedIntArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: resultLengths'>\n"
+                + "  <li data-bind='text: $data'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.getResults().add("Ahoj");
+            m.getResults().add("Hello");
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 2 : "Two children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "results", "Hi");
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 3 : "Three elements in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            
+            assert m.getResultLengths().size() == 3 : "Three java ints: " + m.getResultLengths();
+            assert m.getResultLengths().get(2) == 2 : "Size is two: " + m.getResultLengths();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+    
+    @KOTest public void archetypeArrayModificationVisible() throws Exception {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+                "<div>\n"
+                + "<ul id='ul' data-bind='foreach: archetypes'>\n"
+                + "  <li data-bind='text: artifactId'></li>\n"
+                + "</ul>\n"
+              + "</div>\n"
+        );
+        try {
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.applyBindings();
+            
+            int cnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert cnt == 0 : "No children " + cnt;
+            
+            Object arr = Utils.addChildren(KnockoutTest.class, "ul", "archetypes", new ArchetypeData("aid", "gid", "v", "n", "d", "u"));
+            assert arr instanceof Object[] : "Got back an array: " + arr;
+            final int len = ((Object[])arr).length;
+            
+            assert len == 1 : "One element in the array " + len;
+            
+            int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
+            assert newCnt == 1 : "One child in the DOM: " + newCnt;
+            
+            assert m.getArchetypes().size() == 1 : "One archetype: " + m.getArchetypes();
+            assert m.getArchetypes().get(0) != null : "Not null: " + m.getArchetypes();
+            assert m.getArchetypes().get(0).getArtifactId().equals("aid") : "'aid' == " + m.getArchetypes();
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
     @Function
     static void call(KnockoutModel m, String data) {
         m.setName(data);
