@@ -45,6 +45,8 @@ package org.netbeans.html.geo.spi;
 
 import net.java.html.BrwsrCtx;
 import net.java.html.geo.Position;
+import net.java.html.geo.Position.Handle;
+import net.java.html.geo.Position.Coordinates;
 import org.netbeans.html.context.spi.Contexts;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -102,20 +104,20 @@ import org.openide.util.lookup.ServiceProvider;
  */
 public abstract class GLProvider<Coords,Watch> {
     /** Start obtaining geolocation.
-     * When the client {@link Position.Handle#start() requests location} (and
+     * When the client {@link Handle#start() requests location} (and
      * your provider is found) this method should initialize the request or 
      * return <code>null</code> to give chance to another provider.
      * 
      * @param c the callback to {@link #callback(org.netbeans.html.geo.spi.GLProvider.Callback, long, java.lang.Object, java.lang.Exception) use when location is found} -
      *    keep it, you'll need it later
      * @param oneTime one time request vs. repeated requests
-     *    - mimics value provided in {@link Position.Handle#Handle(boolean) constructor}
+     *    - mimics value provided in {@link Handle#Handle(boolean) constructor}
      * @param enableHighAccuracy mimics value of
-     *    {@link Position.Handle#setHighAccuracy(boolean)}
+     *    {@link Handle#setHighAccuracy(boolean)}
      * @param timeout mimics value of
-     *    {@link Position.Handle#setTimeout(long)}
+     *    {@link Handle#setTimeout(long)}
      * @param maximumAge mimics value of 
-     *    {@link Position.Handle#setMaximumAge(long)}
+     *    {@link Handle#setMaximumAge(long)}
      * 
      * @return an object representing the request (so it can be {@link #stop(java.lang.Object) stopped} later)
      *   or <code>null</code> if this provider was unable to start the request
@@ -137,8 +139,8 @@ public abstract class GLProvider<Coords,Watch> {
      * This single method is used for notification of success (when <code>ex</code>
      * argument is <code>null</code> and <code>position</code> is provided) or 
      * a failure (when <code>ex</code> argument is non-<code>null</code>).
-     * A successful requests leads in call to {@link Position.Handle#onLocation(net.java.html.geo.Position)}
-     * while an error report leads to call to {@link Position.Handle#onError(java.lang.Exception)}.
+     * A successful requests leads in call to {@link Handle#onLocation(net.java.html.geo.Position)}
+     * while an error report leads to call to {@link Handle#onError(java.lang.Exception)}.
      * 
      * @param c the callback as provided when {@link #start(org.netbeans.html.geo.spi.GLProvider.Callback, boolean, boolean, long, long) starting}
      *   the request
@@ -162,19 +164,19 @@ public abstract class GLProvider<Coords,Watch> {
         }
     }
 
-    /** Extracts value for {@link Position.Coordinates#getLatitude()}.
+    /** Extracts value for {@link Coordinates#getLatitude()}.
      * @param coords your own internal representation of coordinates.
      * @return geographic coordinate specified in decimal degrees.
      */
     protected abstract double latitude(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getLatitude()}.
+    /** Extracts value for {@link Coordinates#getLatitude()}.
      * @param coords your own internal representation of coordinates.
      * @return geographic coordinate specified in decimal degrees.
      */
     protected abstract double longitude(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getLatitude()}.
+    /** Extracts value for {@link Coordinates#getLatitude()}.
      * The accuracy attribute denotes the accuracy level of the latitude 
      * and longitude coordinates.
      * 
@@ -183,7 +185,7 @@ public abstract class GLProvider<Coords,Watch> {
      */
     protected abstract double accuracy(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getAltitude()}.
+    /** Extracts value for {@link Coordinates#getAltitude()}.
      * Denotes the height of the position, specified in meters above the ellipsoid.
      * 
      * @param coords your own internal representation of coordinates.
@@ -191,7 +193,7 @@ public abstract class GLProvider<Coords,Watch> {
      */
     protected abstract Double altitude(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getAltitudeAccuracy()} -
+    /** Extracts value for {@link Coordinates#getAltitudeAccuracy()} -
      * the altitude accuracy is specified in meters. 
      * 
      * @param coords your own internal representation of coordinates.
@@ -199,7 +201,7 @@ public abstract class GLProvider<Coords,Watch> {
      */
     protected abstract Double altitudeAccuracy(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getHeading()}.
+    /** Extracts value for {@link Coordinates#getHeading()}.
      * Denotes the magnitude of the horizontal component of the 
      * device's current velocity and is specified in meters per second.
      * 
@@ -208,7 +210,7 @@ public abstract class GLProvider<Coords,Watch> {
      */
     protected abstract Double heading(Coords coords);
     
-    /** Extracts value for {@link Position.Coordinates#getSpeed()}.
+    /** Extracts value for {@link Coordinates#getSpeed()}.
      * Denotes the magnitude of the horizontal component of the 
      * device's current velocity and is specified in meters per second.
      * 
@@ -233,13 +235,13 @@ public abstract class GLProvider<Coords,Watch> {
         /** Initiates a geolocation request. 
          * 
          * @param oneTime one time request vs. repeated requests
-         *    - mimics value provided in {@link Position.Handle#Handle(boolean) constructor}
+         *    - mimics value provided in {@link Handle#Handle(boolean) constructor}
          * @param enableHighAccuracy mimics value of
-         *    {@link Position.Handle#setHighAccuracy(boolean)}
+         *    {@link Handle#setHighAccuracy(boolean)}
          * @param timeout mimics value of
-         *    {@link Position.Handle#setTimeout(long)}
+         *    {@link Handle#setTimeout(long)}
          * @param maximumAge mimics value of 
-         *    {@link Position.Handle#setMaximumAge(long)}
+         *    {@link Handle#setMaximumAge(long)}
          * @return an object representing the request (so it can be {@link #stop(java.lang.Object) stopped} later)
          *   or <code>null</code> if this provider was unable to start the request
          */
