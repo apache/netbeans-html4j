@@ -43,37 +43,32 @@
 package org.netbeans.html.geo.impl;
 
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.geo.spi.GLProvider;
 
 /** Implementation class to deal with browser's <code>navigator.geolocation</code> 
  * object.
  *
  * @author Jaroslav Tulach
  */
-public abstract class JsG {
-    protected JsG() {
-        if (!getClass().getName().equals("net.java.html.geo.Position$Handle$JsH")) {
-            throw new IllegalStateException();
-        }
+public final class JsGLProvider extends GLProvider<Object, Long> {
+    public JsGLProvider() {
     }
     
-    public abstract void onLocation(Object position);
-    public abstract void onError(String message, int code);
-    
     @JavaScriptBody(args = {}, body = "return !!navigator.geolocation;")
-    public static boolean hasGeolocation() {
+    private static boolean hasGeolocation() {
         return false;
     }
 
     @JavaScriptBody(
-        args = { "onlyOnce", "enableHighAccuracy", "timeout", "maximumAge" }, 
+        args = { "c", "onlyOnce", "enableHighAccuracy", "timeout", "maximumAge" }, 
         javacall = true, 
         body = 
         "var self = this;\n" +
         "var ok = function (position) {\n" +
-        "  self.@org.netbeans.html.geo.impl.JsG::onLocation(Ljava/lang/Object;)(position);\n" +
+        "  self.@org.netbeans.html.geo.impl.JsGLProvider::onLocation(Ljava/lang/Object;Ljava/lang/Object;)(c, position);\n" +
         "};\n" +
         "var fail = function (error) {\n" +
-        "  self.@org.netbeans.html.geo.impl.JsG::onError(Ljava/lang/String;I)(error.message, error.code);\n" +
+        "  self.@org.netbeans.html.geo.impl.JsGLProvider::onError(Ljava/lang/Object;Ljava/lang/String;I)(c, error.message, error.code);\n" +
         "};\n" +
         "var options = {};\n" +
         "options.enableHighAccuracy = enableHighAccuracy;\n" +
@@ -86,7 +81,8 @@ public abstract class JsG {
         "  return navigator.geolocation.watchPosition(ok, fail, options);\n" +
         "}\n"
     )
-    protected long start(
+    private long doStart(
+        Callback c,
         boolean onlyOnce, 
         boolean enableHighAccuracy,
         long timeout,
@@ -95,13 +91,64 @@ public abstract class JsG {
         return -1;
     }
     
-    @JavaScriptBody(args = { "watch" }, body = "navigator.geolocation.clearWatch(watch);")
     protected void stop(long watch) {
     }
 
-    @JavaScriptBody(args = { "self", "property" }, body = "return self[property];")
-    public static Object get(Object self, String property) {
-        return null;
+    @Override
+    public Long start(Callback c, boolean oneTime, boolean enableHighAccuracy, long timeout, long maximumAge) {
+        if (!hasGeolocation()) {
+            return null;
+        }
+        return doStart(c, oneTime, enableHighAccuracy, timeout, maximumAge);
     }
+    
+    final void onLocation(Object c, Object p) {
+        callback((Callback)c, timeStamp(p), p, null);
+    }
+    
+    final void onError(Object c, final String msg, int code) {
+        final Exception err = new Exception(msg + " errno: " + code) {
+            @Override
+            public String getLocalizedMessage() {
+                return msg;
+            }
+        };
+        callback((Callback)c, 0L, null, err);
+    }
+
+    @Override
+    @JavaScriptBody(args = {"watch"}, body = "navigator.geolocation.clearWatch(watch);")
+    public native void stop(Long watch);
+
+    @JavaScriptBody(args = { "p" }, body = "return p.timestamp;")
+    private static native long timeStamp(Object position);
+
+    @Override
+    @JavaScriptBody(args = { "coords" }, body = "return coords.coords.latitude;")
+    protected native double latitude(Object coords);
+
+    @Override
+    @JavaScriptBody(args = { "coords" }, body = "return coords.coords.longitude;")
+    protected native double longitude(Object coords);
+
+    @Override
+    @JavaScriptBody(args = { "coords" }, body = "return coords.coords.accuracy;")
+    protected native double accuracy(Object coords);
+
+    @Override
+    @JavaScriptBody(args = {"coords"}, body = "return coords.coords.altitude ? coords.coords.altitude : null;")
+    protected native Double altitude(Object coords);
+
+    @Override
+    @JavaScriptBody(args = {"coords"}, body = "return coords.coords.altitudeAccuracy ? coords.coords.altitudeAccuracy : null;")
+    protected native Double altitudeAccuracy(Object coords);
+
+    @Override
+    @JavaScriptBody(args = {"coords"}, body = "return coords.coords.heading ? coords.coords.heading : null;")
+    protected native Double heading(Object coords);
+
+    @Override
+    @JavaScriptBody(args = {"coords"}, body = "return coords.coords.speed ? coords.coords.speed : null;")
+    protected native Double speed(Object coords);
 
 }
