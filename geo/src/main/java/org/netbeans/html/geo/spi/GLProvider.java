@@ -220,7 +220,7 @@ public abstract class GLProvider<Coords,Watch> {
     /** A callback interface used by {@link GLProvider} to notify back
      * results of its findings.
      */
-    public static abstract class Callback {
+    public abstract class Callback {
         /** Restricted constructor.
          * @throws IllegalStateException most of the time
          */
@@ -232,8 +232,6 @@ public abstract class GLProvider<Coords,Watch> {
 
         /** Initiates a geolocation request. 
          * 
-         * @param <Watch> representation of watch as provided by {@link GLProvider}.
-         * @param p the provider to ask
          * @param oneTime one time request vs. repeated requests
          *    - mimics value provided in {@link Position.Handle#Handle(boolean) constructor}
          * @param enableHighAccuracy mimics value of
@@ -245,18 +243,15 @@ public abstract class GLProvider<Coords,Watch> {
          * @return an object representing the request (so it can be {@link #stop(java.lang.Object) stopped} later)
          *   or <code>null</code> if this provider was unable to start the request
          */
-        protected final <Watch> Watch start(GLProvider<?,Watch> p, boolean oneTime, boolean enableHighAccuracy, long timeout, long maximumAge) {
-            return p.start(this, oneTime, enableHighAccuracy, timeout, maximumAge);
+        protected final Watch start(boolean oneTime, boolean enableHighAccuracy, long timeout, long maximumAge) {
+            return GLProvider.this.start(this, oneTime, enableHighAccuracy, timeout, maximumAge);
         }
   
         /** Stops the watch request.
-         * 
-         * @param <Watch> internal type of the watch
-         * @param p the provider of the watch
          * @param w the watch
          */
-        protected final <Watch> void stop(GLProvider<?,Watch> p, Watch w) {
-            p.stop(w);
+        protected final void stop(Watch w) {
+            GLProvider.this.stop(w);
         }
         
         /** Called when a position is successfully obtained.

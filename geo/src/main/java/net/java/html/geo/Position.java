@@ -320,13 +320,12 @@ public final class Position {
             return temp.watch == null ? null : temp;
         }
 
-        private final class JsH<Watch> extends Callback {
-            private final GLProvider<?, Watch> provider;
+        private final class JsH<Watch> extends GLProvider<?, Watch>.Callback {
             private final Watch watch;
             
             public JsH(GLProvider<?, Watch> p) {
-                this.provider = p;
-                this.watch = start(p, oneTime, enableHighAccuracy, timeout, maximumAge);
+                p.super();
+                this.watch = start(oneTime, enableHighAccuracy, timeout, maximumAge);
             }
             
             @Override
@@ -350,7 +349,7 @@ public final class Position {
                     return;
                 }
                 if (oneTime) {
-                    stop();
+                    stop(watch);
                 }
                 try {
                     Handle.this.onError(err);
@@ -360,7 +359,7 @@ public final class Position {
             }
 
             protected final void stop() {
-                super.stop(provider, watch);
+                stop(watch);
             }
         }
     }
