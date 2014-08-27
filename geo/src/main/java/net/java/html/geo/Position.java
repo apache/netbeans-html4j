@@ -130,10 +130,11 @@ public final class Position {
         public abstract Double getAltitudeAccuracy();
         
         /** Denotes the direction of travel of the device and 
-         * is specified in degrees, where 0° ≤ heading < 360°, 
+         * is specified in degrees 
          * counting clockwise relative to the true north. 
          * 
-         * @return may return null, if the information is not available 
+         * @return value from 0 to 360 - may return <code>null</code>, 
+         *   if the information is not available 
          */
         public abstract Double getHeading();
         
