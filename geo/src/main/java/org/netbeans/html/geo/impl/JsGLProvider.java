@@ -82,7 +82,7 @@ public final class JsGLProvider extends GLProvider<Object, Long> {
         "}\n"
     )
     private long doStart(
-        Callback c,
+        Query c,
         boolean onlyOnce, 
         boolean enableHighAccuracy,
         long timeout,
@@ -95,15 +95,15 @@ public final class JsGLProvider extends GLProvider<Object, Long> {
     }
 
     @Override
-    public Long start(Callback c, boolean oneTime, boolean enableHighAccuracy, long timeout, long maximumAge) {
+    public Long start(Query c) {
         if (!hasGeolocation()) {
             return null;
         }
-        return doStart(c, oneTime, enableHighAccuracy, timeout, maximumAge);
+        return doStart(c, c.isOneTime(), c.isHighAccuracy(), c.getTimeout(), c.getMaximumAge());
     }
     
     final void onLocation(Object c, Object p) {
-        callback((Callback)c, timeStamp(p), p, null);
+        callback((Query)c, timeStamp(p), p, null);
     }
     
     final void onError(Object c, final String msg, int code) {
@@ -113,7 +113,7 @@ public final class JsGLProvider extends GLProvider<Object, Long> {
                 return msg;
             }
         };
-        callback((Callback)c, 0L, null, err);
+        callback((Query)c, 0L, null, err);
     }
 
     @Override

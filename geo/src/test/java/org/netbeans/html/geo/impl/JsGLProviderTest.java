@@ -40,67 +40,36 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
+package org.netbeans.html.geo.impl;
 
-package org.netbeans.html.geo.spi;
-
+import net.java.html.geo.Position;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 /**
  *
- * @author Jaroslav Tulach
+ * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class CoordImplTest extends GLProvider<Double, Object> {
-    
-    public CoordImplTest() {
+public class JsGLProviderTest extends Position.Handle {
+    public JsGLProviderTest() {
+        super(true);
     }
-    @Test public void testGetLatitude() {
-        CoordImpl<Double> c = new CoordImpl<Double>(50.5, this);
-        assertEquals(c.getLatitude(), 50.5, 0.1, "Latitude returned as provided");
+
+    @Test public void checkWhetherWeCanInstantiate() {
+        assertNotNull(new JsGLProvider());
+    }
+
+    @Test public void canCallIsSupported() {
+        assertFalse(isSupported(), "Well, it is not, as we are not in a browser context");
     }
 
     @Override
-    protected Object start(Query c) {
+    protected void onLocation(Position p) throws Throwable {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void stop(Object watch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected double latitude(Double coords) {
-        return coords;
-    }
-
-    @Override
-    protected double longitude(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected double accuracy(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double altitude(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double altitudeAccuracy(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double heading(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double speed(Double coords) {
+    protected void onError(Exception ex) throws Throwable {
         throw new UnsupportedOperationException();
     }
     

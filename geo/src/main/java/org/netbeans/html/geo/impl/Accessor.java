@@ -40,68 +40,37 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
+package org.netbeans.html.geo.impl;
 
-package org.netbeans.html.geo.spi;
+import net.java.html.geo.Position;
+import org.netbeans.html.geo.spi.GLProvider;
 
-import static org.testng.Assert.*;
-import org.testng.annotations.Test;
-
-/**
+/** Connection between API and SPI parts of the module.
  *
- * @author Jaroslav Tulach
+ * @author Jaroslav Tulach <jtulach@netbeans.org>
  */
-public class CoordImplTest extends GLProvider<Double, Object> {
-    
-    public CoordImplTest() {
-    }
-    @Test public void testGetLatitude() {
-        CoordImpl<Double> c = new CoordImpl<Double>(50.5, this);
-        assertEquals(c.getLatitude(), 50.5, 0.1, "Latitude returned as provided");
-    }
-
-    @Override
-    protected Object start(Query c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected void stop(Object watch) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected double latitude(Double coords) {
-        return coords;
-    }
-
-    @Override
-    protected double longitude(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected double accuracy(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double altitude(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double altitudeAccuracy(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double heading(Double coords) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    protected Double speed(Double coords) {
-        throw new UnsupportedOperationException();
+public abstract class Accessor {
+    public static Accessor SPI;
+    static {
+        JsGLProvider initGLProviderClass = new JsGLProvider();
     }
     
+    protected Accessor(boolean api) {
+        if (!api) {
+            assert SPI == null;
+            SPI = this;
+        }
+    }
+    
+    public abstract <Watch> Watch start(
+        GLProvider<?, Watch> p, Accessor peer,
+        boolean oneTime, boolean enableHighAccuracy,
+        long timeout, long maximumAge
+    );
+    
+    public abstract <Watch> void stop(GLProvider<?, Watch> p, Watch w);
+    
+    public abstract void onError(Exception ex);
+
+    public abstract void onLocation(Position position);
 }

@@ -48,9 +48,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.geo.impl.Accessor;
 import org.netbeans.html.geo.impl.JsGLProvider;
 import org.netbeans.html.geo.spi.GLProvider;
-import org.netbeans.html.geo.spi.GLProvider.Callback;
 
 /** Class that represents a geolocation position provided as a callback
  * to {@link Handle#onLocation(net.java.html.geo.Position)} method. The
@@ -320,12 +320,14 @@ public final class Position {
             return temp.watch == null ? null : temp;
         }
 
-        private final class JsH<Watch> extends GLProvider<?, Watch>.Callback {
+        private final class JsH<Watch> extends Accessor {
             private final Watch watch;
+            private final GLProvider<?, Watch> provider;
             
             public JsH(GLProvider<?, Watch> p) {
-                p.super();
-                this.watch = start(oneTime, enableHighAccuracy, timeout, maximumAge);
+                super(true);
+                this.watch = Accessor.SPI.start(p, this, oneTime, enableHighAccuracy, timeout, maximumAge);
+                this.provider = p;
             }
             
             @Override
@@ -349,7 +351,7 @@ public final class Position {
                     return;
                 }
                 if (oneTime) {
-                    stop(watch);
+                    stop();
                 }
                 try {
                     Handle.this.onError(err);
@@ -359,8 +361,23 @@ public final class Position {
             }
 
             protected final void stop() {
-                stop(watch);
+                Accessor.SPI.stop(provider, watch);
             }
-        }
+
+            @Override
+            public <Watch> Watch start(
+                GLProvider<?, Watch> p, Accessor peer,
+                boolean oneTime, boolean enableHighAccuracy,
+                long timeout, long maximumAge
+            ) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <Watch> void stop(GLProvider<?, Watch> p, Watch w) {
+                throw new UnsupportedOperationException();
+            }
+
+        } // end of JsH
     }
 }
