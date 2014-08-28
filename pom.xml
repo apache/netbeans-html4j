@@ -119,7 +119,7 @@
                   <subpackages>${publicPackages}</subpackages>
                   <skip>false</skip>
                   <excludePackageNames>
-org.netbeans.html.boot.impl:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests
+org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests
                   </excludePackageNames>
                 <groups>
                   <group>
