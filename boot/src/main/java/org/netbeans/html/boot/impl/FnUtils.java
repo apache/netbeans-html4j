@@ -324,10 +324,8 @@ public final class FnUtils {
                         "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
                 );
                 Label noPresenter = new Label();
-                if (hasCode) {
-                    super.visitInsn(Opcodes.DUP);
-                    super.visitJumpInsn(Opcodes.IFNULL, noPresenter);
-                }
+                super.visitInsn(Opcodes.DUP);
+                super.visitJumpInsn(Opcodes.IFNULL, noPresenter);
                 if (resource != null) {
                     super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
                     super.visitLdcInsn(resource);
@@ -500,9 +498,17 @@ public final class FnUtils {
                     );
                     super.visitInsn(Opcodes.RETURN);
                 }
+                super.visitLabel(noPresenter);
                 if (hasCode) {
-                    super.visitLabel(noPresenter);
                     super.visitCode();
+                } else {
+                    super.visitTypeInsn(Opcodes.NEW, "java/lang/IllegalStateException");
+                    super.visitInsn(Opcodes.DUP);
+                    super.visitLdcInsn("No presenter active. Use BrwsrCtx.execute!");
+                    super.visitMethodInsn(Opcodes.INVOKESPECIAL, 
+                        "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V"
+                    );
+                    this.visitInsn(Opcodes.ATHROW);
                 }
                 return true;
             }

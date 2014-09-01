@@ -46,7 +46,10 @@ import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
+import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -233,4 +236,21 @@ public class JsClassLoaderBase {
         assertEquals(res.length, 1, "One element");
         assertEquals(res[0], "Ahoj", "The right string");
     }
+    
+   @Test public void checkTheTypeOfThrownException() throws Throwable {
+        FnContext.currentPresenter(null);
+        assertNull(Fn.activePresenter(), "No presenter is activer right now");
+        Object res = null;
+        try {
+            Method st = methodClass.getMethod("plus", int.class, int.class);
+            try {
+                res = st.invoke(null, 40, 2);
+            } catch (InvocationTargetException ex) {
+                throw ex.getTargetException();
+            }
+        } catch (IllegalStateException ex) {
+            assertEquals(ex.getMessage(), "No presenter active. Use BrwsrCtx.execute!");
+        }
+        Assert.fail("Native method should throw IllegalStateException. Was: " + res);
+    }    
 }
