@@ -245,12 +245,12 @@ public class JsClassLoaderBase {
             Method st = methodClass.getMethod("plus", int.class, int.class);
             try {
                 res = st.invoke(null, 40, 2);
+                Assert.fail("Native method should throw IllegalStateException. Was: " + res);
             } catch (InvocationTargetException ex) {
                 throw ex.getTargetException();
             }
         } catch (IllegalStateException ex) {
             assertEquals(ex.getMessage(), "No presenter active. Use BrwsrCtx.execute!");
         }
-        Assert.fail("Native method should throw IllegalStateException. Was: " + res);
     }    
 }

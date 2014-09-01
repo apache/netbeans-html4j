@@ -88,7 +88,12 @@
             {@link org.netbeans.html.context.spi},
             {@link org.netbeans.html.json.spi},
             {@link org.netbeans.html.sound.spi}, and also
-            {@link org.netbeans.html.json.tck}.
+            {@link org.netbeans.html.json.tck}. Methods annotated
+            with {@link net.java.html.js.JavaScriptBody} annotation and
+            without fallback Java code now throw {@link java.lang.IllegalStateException}
+            with a message suggesting to switch to proper
+            {@link net.java.html.BrwsrCtx#execute browser context} to
+            prevent endless debugging when one forgets to do so.
         </p>
         
         <h3>What's New in Version 0.9?</h3>

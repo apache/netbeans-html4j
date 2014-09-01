@@ -54,8 +54,8 @@ public class ReferenceKnockoutTest {
         Object ret = null;
         try {
             ret = Knockout.toModel(null);
-        } catch (NullPointerException ex) {
-            // npe is OK as we don't have any
+        } catch (IllegalStateException ex) {
+            // ISE is OK as we don't have any
             // context for the 
         }
         assertNull(ret, "Either null");
