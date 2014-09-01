@@ -154,6 +154,10 @@ public abstract class GLProvider<Coords,Watch> {
      * a failure (when <code>ex</code> argument is non-<code>null</code>).
      * A successful requests leads in a call to {@link Handle#onLocation(net.java.html.geo.Position)}
      * while an error report leads to a call to {@link Handle#onError(java.lang.Exception)}.
+     * The actual call is sent to {@link BrwsrCtx#execute(java.lang.Runnable)} of
+     * context recorded when the {@link Query} was created to guarantee it
+     * happens on the right browser thread - however it may happen "later"
+     * when this method has already finished.
      * 
      * @param c the query as provided when {@link #start(org.netbeans.html.geo.spi.GLProvider.Query) starting}
      *   the request
@@ -166,15 +170,20 @@ public abstract class GLProvider<Coords,Watch> {
      *   when one notifies the successfully obtained <code>position</code>
      */
     protected final void callback(
-        Query c,
-        long timestamp, Coords position,
-        Exception ex
+        final Query c,
+        final long timestamp, final Coords position,
+        final Exception ex
     ) {
-        if (ex == null) {
-            c.peer.onLocation(new Position(timestamp, new CoordImpl<Coords>(position, this)));
-        } else {
-            c.peer.onError(ex);
-        }
+        c.ctx.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (ex == null) {
+                    c.peer.onLocation(new Position(timestamp, new CoordImpl<Coords>(position, GLProvider.this)));
+                } else {
+                    c.peer.onError(ex);
+                }
+            }
+        });
     }
 
     /** Extracts value for {@link Coordinates#getLatitude()}.
@@ -240,6 +249,7 @@ public abstract class GLProvider<Coords,Watch> {
         private final boolean enableHighAccuracy;
         private final long timeout;
         private final long maximumAge;
+        private final BrwsrCtx ctx;
         final Accessor peer;
 
         Query(Accessor peer, boolean oneTime, boolean enableHighAccuracy, long timeout, long maximumAge) {
@@ -248,6 +258,7 @@ public abstract class GLProvider<Coords,Watch> {
             this.enableHighAccuracy = enableHighAccuracy;
             this.timeout = timeout;
             this.maximumAge = maximumAge;
+            ctx = BrwsrCtx.findDefault(Query.class);
         }
         
         /**
