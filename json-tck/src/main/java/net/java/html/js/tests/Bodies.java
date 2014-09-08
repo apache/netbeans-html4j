@@ -52,13 +52,18 @@ import net.java.html.js.JavaScriptBody;
 final class Bodies {
     @JavaScriptBody(args = { "a", "b" }, body = "return a + b;")
     public static native int sum(int a, int b);
+
+    @JavaScriptBody(args = { "a", "b" }, javacall = true, body = 
+        "return @net.java.html.js.tests.Bodies::sum(II)(a, b);"
+    )
+    public static native int sumJS(int a, int b);
     
     @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void callback(Runnable r);
 
     @JavaScriptBody(args = {"r"}, wait4js = false, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void asyncCallback(Runnable r);
-
+    
     @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
     static native Object callback(Callable<? extends Object> c);
 
@@ -73,6 +78,9 @@ final class Bodies {
     
     @JavaScriptBody(args = "o", body = "o.x++;")
     public static native void incrementX(Object o);
+
+    @JavaScriptBody(args = "o", wait4js = true, body = "o.x++;")
+    static native void incrementXAsync(Object o);
 
     @JavaScriptBody(args = "o", body = "return o.x;")
     public static native int readX(Object o);
@@ -136,4 +144,22 @@ final class Bodies {
         "return sum;\n"
     )
     public static native double sumMatrix(double[][] arr);
+
+    static void incCounter(int howMuch, final Object js) {
+        for (int i = 0; i < howMuch; i++) {
+            asyncCallback(new Runnable() {
+                @Override
+                public void run() {
+                    incrementXAsync(js);
+                }
+            });
+        }
+    }
+    
+    @JavaScriptBody(args = {}, javacall = true, body = 
+        "var v = { x : 0 };\n" +
+        "@net.java.html.js.tests.Bodies::incCounter(ILjava/lang/Object;)(42, v);\n" +
+        "return v.x;\n"
+    )
+    static native int incAsync();
 }

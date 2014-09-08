@@ -57,6 +57,11 @@ public class JavaScriptBodyTest {
         int res = Bodies.sum(5, 3);
         assert res == 8 : "Expecting 8: " + res;
     }
+
+    @KOTest public void sumFromCallback() {
+        int res = Bodies.sumJS(5, 3);
+        assert res == 8 : "Expecting 8: " + res;
+    }
     
     @KOTest public void accessJsObject() {
         Object o = Bodies.instance(10);
@@ -316,6 +321,11 @@ public class JavaScriptBodyTest {
     
     @KOTest public void staticCallback() {
         int r = Bodies.staticCallback();
+        assert r == 42 : "Expecting 42: " + r;
+    }
+    
+    @KOTest public void asyncCallFromAJSCallbackNeedToFinishBeforeReturnToJS() {
+        int r = Bodies.incAsync();
         assert r == 42 : "Expecting 42: " + r;
     }
     
