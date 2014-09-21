@@ -217,9 +217,9 @@ public class JavaScriptBodyTest {
     }
     
     @KOTest public void selectFromStringJavaArray() {
-        String[] arr = { "Ahoj", "World" };
+        String[] arr = { "Ahoj", "Wo\nrld" };
         Object res = Bodies.select(arr, 1);
-        assert "World".equals(res) : "Expecting World, but was: " + res;
+        assert "Wo\nrld".equals(res) : "Expecting World, but was: " + res;
     }
 
     @KOTest public void selectFromObjectJavaArray() {
@@ -241,7 +241,7 @@ public class JavaScriptBodyTest {
     }
 
     @KOTest public void javaArrayInOutIsCopied() {
-        String[] arr = { "Ahoj", "World" };
+        String[] arr = { "Ahoj", "Wo\nrld" };
         Object res = Bodies.id(arr);
         assert res != null : "Non-null is returned";
         assert res instanceof Object[] : "Returned an array: " + res;
@@ -254,10 +254,10 @@ public class JavaScriptBodyTest {
     }
 
     @KOTest public void modifyJavaArrayHasNoEffect() {
-        String[] arr = { "Ahoj", "World" };
-        String value = Bodies.modify(arr, 0, "Hello");
-        assert "Hello".equals(value) : "Inside JS the value is changed: " + value;
-        assert "Ahoj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
+        String[] arr = { "Ah\noj", "World" };
+        String value = Bodies.modify(arr, 0, "H\tello");
+        assert "H\tello".equals(value) : "Inside JS the value is changed: " + value;
+        assert "Ah\noj".equals(arr[0]) : "From a Java point of view it remains: " + arr[0];
     }
 
     @KOTest
@@ -265,17 +265,17 @@ public class JavaScriptBodyTest {
         class A implements Callable<String[]> {
             @Override
             public String[] call() throws Exception {
-                return new String[] { "Hello" };
+                return new String[] { "He\nllo" };
             }
         }
         Callable<String[]> a = new A();
-        Object b = Bodies.callbackAndPush(a, "World!");
+        Object b = Bodies.callbackAndPush(a, "Worl\nd!");
         assert b instanceof Object[] : "Returns an array: " + b;
         Object[] arr = (Object[]) b;
         String str = Arrays.toString(arr);
         assert arr.length == 2 : "Size is two " + str;
-        assert "Hello".equals(arr[0]) : "Hello expected: " + arr[0];
-        assert "World!".equals(arr[1]) : "World! expected: " + arr[1];
+        assert "He\nllo".equals(arr[0]) : "Hello expected: " + arr[0];
+        assert "Worl\nd!".equals(arr[1]) : "World! expected: " + arr[1];
     }
     
     @KOTest public void sumVector() {
@@ -327,6 +327,25 @@ public class JavaScriptBodyTest {
     @KOTest public void asyncCallFromAJSCallbackNeedToFinishBeforeReturnToJS() {
         int r = Bodies.incAsync();
         assert r == 42 : "Expecting 42: " + r;
+    }
+    
+    @KOTest public void problematicString() {
+        String orig = Bodies.problematicString();
+        String js = Bodies.problematicCallback();
+        if (orig.equals(js)) {
+            return;
+        }
+        int len = Math.min(orig.length(), js.length());
+        for (int i = 0; i < len; i++) {
+            if (orig.charAt(i) != js.charAt(i)) {
+                assert false : "Difference at position " + i + 
+                    "\norig: " +
+                    orig.substring(i - 5, Math.min(i + 10, orig.length())) +
+                    "\n  js: " +
+                    js.substring(i - 5, Math.min(i + 10, js.length()));
+            }
+        }
+        assert false : "The JS string is different: " + js;
     }
     
     Later l;

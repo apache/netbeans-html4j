@@ -162,4 +162,19 @@ final class Bodies {
         "return v.x;\n"
     )
     static native int incAsync();
+    
+    @JavaScriptBody(args = {}, javacall = true, body = 
+        "return @net.java.html.js.tests.Bodies::problematicString()();"
+    )
+    public static native String problematicCallback();
+    
+    static String problematicString() {
+        return "{\n" +
+"    MyViewModel: {\n" +
+"//      ViewModel: JavaViewModel,\n" +
+"\n" +
+"    }          \n" +
+"}";
+    }
+    
 }
