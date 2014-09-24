@@ -171,4 +171,18 @@ final class Bodies {
         "return ret;\n"
     )
     static native Object[] forIn(Object[] in);
+
+    @JavaScriptBody(args = {}, javacall = true, body = 
+        "return @net.java.html.js.tests.Bodies::problematicString()();"
+    )
+    public static native String problematicCallback();
+    
+    static String problematicString() {
+        return "{\n" +
+"    MyViewModel: {\n" +
+"//      ViewModel: JavaViewModel,\n" +
+"\n" +
+"    }          \n" +
+"}";
+    }
 }
