@@ -329,6 +329,16 @@ public class JavaScriptBodyTest {
         assert r == 42 : "Expecting 42: " + r;
     }
     
+    @KOTest public void iterateArray() {
+        String[] arr = { "Ahoj", "Hi", "Ciao" };
+        Object[] ret = Bodies.forIn(arr);
+        assert ret.length == 3 : "Three elements returned: " + ret.length;
+        assert ret != arr : "Different arrays";
+        assert ret[0].equals("Ahoj") : "Expecting Ahoj: " + ret[0];
+        assert ret[1].equals("Hi") : "Expecting Hi: " + ret[1];
+        assert ret[2].equals("Ciao") : "Expecting Ciao: " + ret[2];
+    }
+    
     Later l;
     @KOTest public void callLater() throws Exception{
         final Fn.Presenter p = Fn.activePresenter();

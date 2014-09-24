@@ -162,4 +162,13 @@ final class Bodies {
         "return v.x;\n"
     )
     static native int incAsync();
+    
+    @JavaScriptBody(args = { "arr" }, body = 
+        "var ret = [];\n" +
+        "for (var i in arr) {\n" +
+        "  ret.push(arr[i]);\n" +
+        "}\n" +
+        "return ret;\n"
+    )
+    static native Object[] forIn(Object[] in);
 }
