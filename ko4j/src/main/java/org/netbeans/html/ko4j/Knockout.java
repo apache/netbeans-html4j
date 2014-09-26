@@ -78,8 +78,8 @@ final class Knockout {
     );
 
     @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
-        "ko.cleanNode(window.document.body);\n" +
-        "ko.applyBindings(bindings);\n"
+        "ko['cleanNode'](window['document']['body']);\n" +
+        "ko['applyBindings'](bindings);\n"
     )
     native static void applyBindings(Object bindings);
     
@@ -97,7 +97,7 @@ final class Knockout {
         body = 
           "ret['ko-fx.model'] = model;\n"
         + "function koComputed(name, readOnly, value, prop) {\n"
-        + "  var trigger = ko.observable().extend({notify:'always'});"
+        + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
         + "  function realGetter() {\n"
         + "    try {\n"
         + "      var v = prop.@org.netbeans.html.json.spi.PropertyBinding::getValue()();\n"
@@ -126,7 +126,7 @@ final class Knockout {
         + "  var cmpt = ko['computed'](bnd);\n"
         + "  cmpt['valueHasMutated'] = function(val) {\n"
         + "    if (arguments.length === 1) activeGetter = function() { return val; };\n"
-        + "    trigger.valueHasMutated();\n"
+        + "    trigger['valueHasMutated']();\n"
         + "  };\n"
         + "  ret[name] = cmpt;\n"
         + "}\n"
@@ -154,7 +154,7 @@ final class Knockout {
         return toModelImpl(wrapper);
     }
     
-    @JavaScriptBody(args = {}, body = "if (window.WebSocket) return true; else return false;")
+    @JavaScriptBody(args = {}, body = "if (window['WebSocket']) return true; else return false;")
     static final boolean areWebSocketsSupported() {
         return false;
     }
