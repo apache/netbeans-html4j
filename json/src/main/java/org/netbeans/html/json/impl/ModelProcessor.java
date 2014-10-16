@@ -283,7 +283,8 @@ public final class ModelProcessor extends AbstractProcessor {
                         String tn = typeName(e, p);
                         w.write(sep);
                         w.write(tn);
-                        w.write(" " + p.name());
+                        String[] third = toGetSet(p.name(), tn, false);
+                        w.write(" " + third[2]);
                         sep = ", ";
                     }
                     if (firstArray != null) {
@@ -294,7 +295,8 @@ public final class ModelProcessor extends AbstractProcessor {
                         tn = checkType(firstArray, isModel, isEnum, isPrimitive);
                         w.write(sep);
                         w.write(tn);
-                        w.write("... " + firstArray.name());
+                        String[] third = toGetSet(firstArray.name(), tn, true);
+                        w.write("... " + third[2]);
                     }
                     w.append(") {\n");
                     w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
@@ -302,10 +304,12 @@ public final class ModelProcessor extends AbstractProcessor {
                         if (p.array()) {
                             continue;
                         }
-                        w.write("    this.prop_" + p.name() + " = " + p.name() + ";\n");
+                        String[] third = toGetSet(p.name(), null, false);
+                        w.write("    this.prop_" + p.name() + " = " + third[2] + ";\n");
                     }
                     if (firstArray != null) {
-                        w.write("    proto.initTo(this.prop_" + firstArray.name() + ", " + firstArray.name() + ");\n");
+                        String[] third = toGetSet(firstArray.name(), null, true);
+                        w.write("    proto.initTo(this.prop_" + firstArray.name() + ", " + third[2] + ");\n");
                     }
                     w.append("  };\n");
                 }
@@ -597,8 +601,8 @@ public final class ModelProcessor extends AbstractProcessor {
             
             props.add(new GetSet(
                 p.name(),
-                gs[2],
-                gs[3],
+                gs[0],
+                gs[1],
                 tn,
                 gs[3] == null && !p.array()
             ));
@@ -726,7 +730,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
             props.add(new GetSet(
                 e.getSimpleName().toString(),
-                gs[2],
+                gs[0],
                 null,
                 tn,
                 true
@@ -738,32 +742,24 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private static String[] toGetSet(String name, String type, boolean array) {
         String n = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-        String bck2brwsrType = "L" + type.replace('.', '_') + "_2";
-        if ("int".equals(type)) {
-            bck2brwsrType = "I";
-        }
-        if ("double".equals(type)) {
-            bck2brwsrType = "D";
-        }
-        String pref = "get";
-        if ("boolean".equals(type)) {
+        boolean clazz = "class".equals(name);
+        String pref = clazz ? "access" : "get";
+        if ("boolean".equals(type) && !array) {
             pref = "is";
-            bck2brwsrType = "Z";
         }
-        final String nu = n.replace('.', '_');
         if (array) {
             return new String[] { 
-                "get" + n,
+                pref + n,
                 null,
-                "get" + nu + "__Ljava_util_List_2",
+                "a" + n,
                 null
             };
         }
         return new String[]{
             pref + n, 
             "set" + n, 
-            pref + nu + "__" + bck2brwsrType,
-            "set" + nu + "__V" + bck2brwsrType
+            "a" + n,
+            ""
         };
     }
 
