@@ -126,20 +126,28 @@ public class FXBrwsr extends Application {
             return INSTANCE.newView(url, onLoad);
         }
     }
+    
+    static synchronized Stage findStage() throws InterruptedException {
+        while (INSTANCE == null) {
+            FXBrwsr.class.wait();
+        }
+        return INSTANCE.stage;
+    }
+    
     private Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        BorderPane r = new BorderPane();
+        Scene scene = new Scene(r, 800, 600);
+        primaryStage.setScene(scene);
+        this.root = r;
+        this.stage = primaryStage;
         synchronized (FXBrwsr.class) {
             INSTANCE = this;
             FXBrwsr.class.notifyAll();
         }
-        BorderPane r = new BorderPane();
-        Scene scene = new Scene(r, 800, 600);
-        primaryStage.setScene(scene);
         primaryStage.show();
-        this.root = r;
-        this.stage = primaryStage;
     }
 
     private WebView newView(final URL url, final FXPresenter onLoad) {
@@ -265,6 +273,25 @@ public class FXBrwsr extends Application {
             }
             
         });
+        class Title implements ChangeListener<String> {
+
+            private String title;
+
+            public Title() {
+                super();
+            }
+
+            @Override
+            public void changed(ObservableValue<? extends String> ov, String t, String t1) {
+                title = view.getEngine().getTitle();
+                if (title != null) {
+                    stage.setTitle(title);
+                }
+            }
+        }
+        final Title x = new Title();
+        view.getEngine().titleProperty().addListener(x);
+        x.changed(null, null, null);
         return view;
     }
 
