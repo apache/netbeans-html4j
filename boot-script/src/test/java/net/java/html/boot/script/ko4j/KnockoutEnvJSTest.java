@@ -147,6 +147,12 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static String skipMsg(String methodName) {
         final String ver = System.getProperty("java.runtime.version"); // NOI18N
         if (
+            ver.startsWith("1.8.0_25") ||
+            ver.startsWith("1.8.0_40") 
+        ) {
+            return "Broken due to JDK-8047764";
+        }
+        if (
             !"1.8.0_05-b13".equals(ver) &&
             !"1.8.0_11-b12".equals(ver) 
         ) {
