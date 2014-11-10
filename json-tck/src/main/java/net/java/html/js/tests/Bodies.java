@@ -172,6 +172,15 @@ final class Bodies {
     )
     static native Object[] forIn(Object[] in);
 
+    @JavaScriptBody(args = { "max" }, body = 
+        "var arr = [];\n"
+      + "for (var i = 0; i < max; i++) {\n"
+      + "  arr.push(i);\n"
+      + "}\n"
+      + "return arr.length;"
+    )
+    static native int gc(double max);
+
     @JavaScriptBody(args = {}, javacall = true, body = 
         "return @net.java.html.js.tests.Bodies::problematicString()();"
     )

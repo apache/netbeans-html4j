@@ -43,6 +43,8 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
@@ -211,9 +213,13 @@ public class JavaScriptBodyTest {
         assert b == Boolean.TRUE : "Should return true";
     }
     
-    @KOTest public void callbackWithParameters() {
-        int res = Bodies.sumIndirect(new Sum());
+    @KOTest public void callbackWithParameters() throws InterruptedException {
+        Sum s = new Sum();
+        int res = Bodies.sumIndirect(s);
         assert res == 42 : "Expecting 42";
+        Reference<?> ref = new WeakReference<Object>(s);
+        s = null;
+        assertGC(ref, "Can disappear!");
     }
     
     @KOTest public void selectFromStringJavaArray() {
@@ -400,5 +406,21 @@ public class JavaScriptBodyTest {
         public Boolean call() throws Exception {
             return Boolean.TRUE;
         }
+    }
+    
+    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
+        for (int i = 0; i < 100; i++) {
+            if (ref.get() == null) {
+                return;
+            }
+            int size = Bodies.gc(Math.pow(2.0, i));
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                err.printStackTrace();
+            }
+        }
+        throw new OutOfMemoryError(msg);
     }
 }
