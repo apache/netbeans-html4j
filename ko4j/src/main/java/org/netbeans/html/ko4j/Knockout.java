@@ -59,6 +59,26 @@ import org.netbeans.html.json.spi.PropertyBinding;
  */
 @JavaScriptResource("knockout-3.2.0.debug.js")
 final class Knockout {
+    private final PropertyBinding[] props;
+    private final FunctionBinding[] funcs;
+
+    public Knockout(PropertyBinding[] props, FunctionBinding[] funcs) {
+        this.props = props;
+        this.funcs = funcs;
+    }
+    
+    final Object getValue(int index) {
+        return props[index].getValue();
+    }
+    
+    final void setValue(int index, Object v) {
+        props[index].setValue(v);
+    }
+    
+    final void call(int index, Object data, Object ev) {
+        funcs[index].call(data, ev);
+    }
+    
     @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, 
         wait4js = false,
         body =
@@ -93,14 +113,14 @@ final class Knockout {
     @JavaScriptBody(
         javacall = true,
         wait4js = false,
-        args = {"ret", "model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
+        args = { "self", "ret", "model", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 
           "ret['ko-fx.model'] = model;\n"
-        + "function koComputed(name, readOnly, value, prop) {\n"
+        + "function koComputed(index, name, readOnly, value) {\n"
         + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
         + "  function realGetter() {\n"
         + "    try {\n"
-        + "      var v = prop.@org.netbeans.html.json.spi.PropertyBinding::getValue()();\n"
+        + "      var v = self.@org.netbeans.html.ko4j.Knockout::getValue(I)(index);\n"
         + "      return v;\n"
         + "    } catch (e) {\n"
         + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);\n"
@@ -120,7 +140,7 @@ final class Knockout {
         + "  if (!readOnly) {\n"
         + "    bnd['write'] = function(val) {\n"
         + "      var model = val['ko-fx.model'];\n"
-        + "      prop.@org.netbeans.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(model ? model : val);\n"
+        + "      self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);\n"
         + "    };\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"
@@ -131,21 +151,22 @@ final class Knockout {
         + "  ret[name] = cmpt;\n"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
-        + "  koComputed(propNames[i], propReadOnly[i], propValues[i], propArr[i]);\n"
+        + "  koComputed(i, propNames[i], propReadOnly[i], propValues[i]);\n"
         + "}\n"
-        + "function koExpose(name, func) {\n"
+        + "function koExpose(index, name) {\n"
         + "  ret[name] = function(data, ev) {\n"
-        + "    func.@org.netbeans.html.json.spi.FunctionBinding::call(Ljava/lang/Object;Ljava/lang/Object;)(data, ev);\n"
+        + "    self.@org.netbeans.html.ko4j.Knockout::call(ILjava/lang/Object;Ljava/lang/Object;)(index, data, ev);\n"
         + "  };\n"
         + "}\n"
         + "for (var i = 0; i < funcNames.length; i++) {\n"
-        + "  koExpose(funcNames[i], funcArr[i]);\n"
+        + "  koExpose(i, funcNames[i]);\n"
         + "}\n"
         )
     static native void wrapModel(
+        Knockout self,
         Object ret, Object model,
-        String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
-        String[] funcNames, FunctionBinding[] funcArr
+        String[] propNames, boolean[] propReadOnly, Object propValues,
+        String[] funcNames
     );
     
     @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")

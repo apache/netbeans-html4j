@@ -90,9 +90,10 @@ Transfer, WSTransfer<LoadWS> {
             funcNames[i] = funcArr[i].getFunctionName();
         }
         Object ret = getJSObject();
-        Knockout.wrapModel(ret, model, 
-            propNames, propReadOnly, propValues, propArr,
-            funcNames, funcArr
+        Knockout.wrapModel(new Knockout(propArr, funcArr),
+            ret, model, 
+            propNames, propReadOnly, propValues,
+            funcNames
         );
         return ret;
     }
