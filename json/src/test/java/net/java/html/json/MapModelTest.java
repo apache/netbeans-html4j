@@ -47,6 +47,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.FunctionBinding;
@@ -178,6 +180,57 @@ public class MapModelTest {
         one.fb.call("FEMALE", new Object());
         
         assertEquals(p.getSex(), Sex.FEMALE, "Changed");
+    }
+    
+    @Test public void removeViaIterator() {
+        People p = Models.bind(new People(), c);
+        p.getNicknames().add("One");
+        p.getNicknames().add("Two");
+        p.getNicknames().add("Three");
+
+        Map m = (Map)Models.toRaw(p);
+        Object o = m.get("nicknames");
+        assertNotNull(o, "List registered in the model");
+        assertEquals(o.getClass(), One.class);
+        One one = (One)o;
+        
+        
+        assertEquals(one.changes, 0, "No change");
+        
+        Iterator<String> it = p.getNicknames().iterator();
+        assertEquals(it.next(), "One");
+        assertEquals(it.next(), "Two");
+        it.remove();
+        assertEquals(it.next(), "Three");
+        assertFalse(it.hasNext());
+        
+        
+        assertEquals(one.changes, 1, "One change");
+    }
+    
+    @Test public void removeViaListIterator() {
+        People p = Models.bind(new People(), c);
+        p.getNicknames().add("One");
+        p.getNicknames().add("Two");
+        p.getNicknames().add("Three");
+
+        Map m = (Map)Models.toRaw(p);
+        Object o = m.get("nicknames");
+        assertNotNull(o, "List registered in the model");
+        assertEquals(o.getClass(), One.class);
+        One one = (One)o;
+        
+        
+        assertEquals(one.changes, 0, "No change");
+        
+        ListIterator<String> it = p.getNicknames().listIterator(1);
+        assertEquals(it.next(), "Two");
+        it.remove();
+        assertEquals(it.next(), "Three");
+        assertFalse(it.hasNext());
+        
+        
+        assertEquals(one.changes, 1, "One change");
     }
 
     static final class One {
