@@ -83,7 +83,13 @@ final class Bodies {
     static native void incrementXAsync(Object o);
 
     @JavaScriptBody(args = "o", body = "return o.x;")
-    public static native int readX(Object o);
+    public static native int readIntX(Object o);
+    
+    @JavaScriptBody(args = "o", body = "return o.x;")
+    public static native Object readX(Object o);
+    
+    @JavaScriptBody(args = { "o", "x" }, body = "o.x = x;")
+    public static native Object setX(Object o, Object x);
 
     @JavaScriptBody(args = { "c" }, javacall = true, body = 
         "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"

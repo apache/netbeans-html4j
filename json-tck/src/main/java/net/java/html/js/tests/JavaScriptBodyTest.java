@@ -67,14 +67,14 @@ public class JavaScriptBodyTest {
     
     @KOTest public void accessJsObject() {
         Object o = Bodies.instance(10);
-        int ten = Bodies.readX(o);
+        int ten = Bodies.readIntX(o);
         assert ten == 10 : "Expecting ten: " + ten;
     }
 
     @KOTest public void callWithNoReturnType() {
         Object o = Bodies.instance(10);
         Bodies.incrementX(o);
-        int ten = Bodies.readX(o);
+        int ten = Bodies.readIntX(o);
         assert ten == 11 : "Expecting eleven: " + ten;
     }
     
@@ -219,6 +219,20 @@ public class JavaScriptBodyTest {
         assert res == 42 : "Expecting 42";
         Reference<?> ref = new WeakReference<Object>(s);
         s = null;
+        assertGC(ref, "Can disappear!");
+    }
+    
+    @KOTest public void holdObjectAndReleaseObject() throws InterruptedException {
+        Sum s = new Sum();
+        Object obj = Bodies.instance(0);
+        Bodies.setX(obj, s);
+        
+        Reference<?> ref = new WeakReference<Object>(s);
+        s = null;
+        assertNotGC(ref, "Cannot disappear!");
+        
+        Bodies.setX(obj, null);
+        
         assertGC(ref, "Can disappear!");
     }
     
@@ -422,5 +436,20 @@ public class JavaScriptBodyTest {
             }
         }
         throw new OutOfMemoryError(msg);
+    }
+    
+    private static void assertNotGC(Reference<?> ref, String msg) throws InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            if (ref.get() == null) {
+                throw new IllegalStateException(msg);
+            }
+            int size = Bodies.gc(Math.pow(2.0, i));
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                err.printStackTrace();
+            }
+        }
     }
 }
