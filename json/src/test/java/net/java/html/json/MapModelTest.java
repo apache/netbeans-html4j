@@ -231,6 +231,11 @@ public class MapModelTest {
         
         
         assertEquals(one.changes, 1, "One change");
+        
+        it.set("3");
+        assertEquals(p.getNicknames().get(1), "3");
+        
+        assertEquals(one.changes, 2, "Snd change");
     }
 
     static final class One {
