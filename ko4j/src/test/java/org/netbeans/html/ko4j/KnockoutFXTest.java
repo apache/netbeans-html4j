@@ -66,7 +66,6 @@ import org.netbeans.html.json.spi.Transfer;
 import org.netbeans.html.json.spi.WSTransfer;
 import org.netbeans.html.json.tck.KOTest;
 import org.netbeans.html.json.tck.KnockoutTCK;
-import org.netbeans.html.boot.impl.FnContext;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
 import static org.testng.Assert.*;
