@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.lang.ref.WeakReference;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
@@ -58,13 +59,20 @@ import org.netbeans.html.json.spi.PropertyBinding;
  * @author Jaroslav Tulach
  */
 @JavaScriptResource("knockout-3.2.0.debug.js")
-final class Knockout {
+final class Knockout extends WeakReference<Object> {
     private final PropertyBinding[] props;
     private final FunctionBinding[] funcs;
 
-    public Knockout(PropertyBinding[] props, FunctionBinding[] funcs) {
-        this.props = props;
-        this.funcs = funcs;
+    public Knockout(Object model, PropertyBinding[] props, FunctionBinding[] funcs) {
+        super(model);
+        this.props = new PropertyBinding[props.length];
+        for (int i = 0; i < props.length; i++) {
+            this.props[i] = props[i].weak();
+        }
+        this.funcs = new FunctionBinding[funcs.length];
+        for (int i = 0; i < funcs.length; i++) {
+            this.funcs[i] = funcs[i].weak();
+        }
     }
     
     final Object getValue(int index) {
@@ -72,6 +80,9 @@ final class Knockout {
     }
     
     final void setValue(int index, Object v) {
+        if (v instanceof Knockout) {
+            v = ((Knockout)v).get();
+        }
         props[index].setValue(v);
     }
     
@@ -113,9 +124,9 @@ final class Knockout {
     @JavaScriptBody(
         javacall = true,
         wait4js = false,
-        args = { "self", "ret", "model", "propNames", "propReadOnly", "propValues", "funcNames" },
+        args = { "self", "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 
-          "ret['ko-fx.model'] = model;\n"
+          "Object.defineProperty(ret, 'ko4j', { value : self });\n"
         + "function koComputed(index, name, readOnly, value) {\n"
         + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
         + "  function realGetter() {\n"
@@ -123,7 +134,7 @@ final class Knockout {
         + "      var v = self.@org.netbeans.html.ko4j.Knockout::getValue(I)(index);\n"
         + "      return v;\n"
         + "    } catch (e) {\n"
-        + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);\n"
+        + "      alert(\"Cannot call getValue on \" + self + \" prop: \" + name + \" error: \" + e);\n"
         + "    }\n"
         + "  }\n"
         + "  var activeGetter = function() { return value; };\n"
@@ -139,7 +150,7 @@ final class Knockout {
         + "  };\n"
         + "  if (!readOnly) {\n"
         + "    bnd['write'] = function(val) {\n"
-        + "      var model = val['ko-fx.model'];\n"
+        + "      var model = val['ko4j'];\n"
         + "      self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);\n"
         + "    };\n"
         + "  };\n"
@@ -164,15 +175,20 @@ final class Knockout {
         )
     static native void wrapModel(
         Knockout self,
-        Object ret, Object model,
+        Object ret, 
         String[] propNames, boolean[] propReadOnly, Object propValues,
         String[] funcNames
     );
     
-    @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
+    @JavaScriptBody(args = { "o" }, body = "return o['ko4j'] ? o['ko4j'] : o;")
     private static native Object toModelImpl(Object wrapper);
     static Object toModel(Object wrapper) {
-        return toModelImpl(wrapper);
+        Object o = toModelImpl(wrapper);
+        if (o instanceof Knockout) {
+            return ((Knockout)o).get();
+        } else {
+            return o;
+        }
     }
     
     @JavaScriptBody(args = {}, body = "if (window['WebSocket']) return true; else return false;")

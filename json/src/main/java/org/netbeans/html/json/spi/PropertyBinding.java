@@ -42,6 +42,8 @@
  */
 package org.netbeans.html.json.spi;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
@@ -94,7 +96,7 @@ public abstract class PropertyBinding {
                 Proto.Type<M> access, Bindings<?> bindings, String name,
                 int index, M model, boolean readOnly
             ) {
-                return new Impl(bindings, name, index, model, access, readOnly);
+                return new Impl(model, bindings, name, index, access, readOnly);
             }
         };
     }
@@ -124,31 +126,47 @@ public abstract class PropertyBinding {
      * @return true, if this property is read only
      */
     public abstract boolean isReadOnly();
+
+    /** Returns identical version of the binding, but one that holds on the
+     * original model object via weak reference.
+     * 
+     * @return binding that uses weak reference
+     * @since 1.1
+     */
+    public abstract PropertyBinding weak();
     
-    private static final class Impl<M> extends PropertyBinding {
+    private static abstract class AImpl<M> extends PropertyBinding {
         public final String name;
         public final boolean readOnly;
-        private final M model;
-        private final Proto.Type<M> access;
-        private final Bindings<?> bindings;
-        private final int index;
+        final Proto.Type<M> access;
+        final Bindings<?> bindings;
+        final int index;
 
-        public Impl(Bindings<?> bindings, String name, int index, M model, Proto.Type<M> access, boolean readOnly) {
+        public AImpl(Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
             this.bindings = bindings;
             this.name = name;
             this.index = index;
-            this.model = model;
             this.access = access;
             this.readOnly = readOnly;
         }
+        
+        protected abstract M model();
 
         @Override
         public void setValue(Object v) {
+            M model = model();
+            if (model == null) {
+                return;
+            }
             access.setValue(model, index, v);
         }
 
         @Override
         public Object getValue() {
+            M model = model();
+            if (model == null) {
+                return null;
+            }
             Object v = access.getValue(model, index);
             Object r = JSON.find(v, bindings);
             return r == null ? v : r;
@@ -165,4 +183,40 @@ public abstract class PropertyBinding {
         }
     } // end of PBData
     
+    private static final class Impl<M> extends AImpl<M> {
+        private final M model;
+
+        public Impl(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
+            super(bindings, name, index, access, readOnly);
+            this.model = model;
+        }
+
+        @Override
+        protected M model() {
+            return model;
+        }
+
+        @Override
+        public PropertyBinding weak() {
+            return new Weak(model, bindings, name, index, access, readOnly);
+        }
+    }
+    
+    private static final class Weak<M> extends AImpl<M> {
+        private final Reference<M> ref;
+        public Weak(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
+            super(bindings, name, index, access, readOnly);
+            this.ref = new WeakReference<M>(model);
+        }
+
+        @Override
+        protected M model() {
+            return ref.get();
+        }
+
+        @Override
+        public PropertyBinding weak() {
+            return this;
+        }
+    }
 }

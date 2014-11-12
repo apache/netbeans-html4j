@@ -68,27 +68,32 @@ public class GCTest {
             + "  <li data-bind='text: firstName'/>\n"
             + "</ul>\n"
         );
-        GC m = Models.bind(new GC(), ctx);
-        m.getAll().add(new Fullname("Jarda", "Tulach"));
-        m.applyBindings();
+        try {
+            GC m = Models.bind(new GC(), ctx);
+            m.getAll().add(new Fullname("Jarda", "Tulach"));
+            m.applyBindings();
 
-        int cnt = Utils.countChildren(GCTest.class, "ul");
-        assert cnt == 1 : "One child, but was " + cnt;
+            int cnt = Utils.countChildren(GCTest.class, "ul");
+            assert cnt == 1 : "One child, but was " + cnt;
 
-        m.getAll().add(new Fullname("HTML", "Java"));
+            m.getAll().add(new Fullname("HTML", "Java"));
+
+            cnt = Utils.countChildren(GCTest.class, "ul");
+            assert cnt == 2 : "Now two " + cnt;
+
+            Fullname removed = m.getAll().get(0);
+            m.getAll().remove(0);
+
+            cnt = Utils.countChildren(GCTest.class, "ul");
+            assert cnt == 1 : "Again One " + cnt;
+
+            Reference<?> ref = new WeakReference<Object>(removed);
+            removed = null;
+            assertGC(ref, "Can removed object disappear?");
+        } finally {
+            Utils.exposeHTML(GCTest.class, "");
+        }
         
-        cnt = Utils.countChildren(GCTest.class, "ul");
-        assert cnt == 2 : "Now two " + cnt;
-        
-        Fullname removed = m.getAll().get(0);
-        m.getAll().remove(0);
-        
-        cnt = Utils.countChildren(GCTest.class, "ul");
-        assert cnt == 1 : "Again One " + cnt;
-        
-        Reference<?> ref = new WeakReference<Object>(removed);
-        removed = null;
-        assertGC(ref, "Can removed object disappear?");
     }
     
     private void assertGC(Reference<?> ref, String msg) throws Exception {
