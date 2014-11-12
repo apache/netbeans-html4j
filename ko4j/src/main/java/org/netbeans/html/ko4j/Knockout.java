@@ -62,6 +62,7 @@ import org.netbeans.html.json.spi.PropertyBinding;
 final class Knockout extends WeakReference<Object> {
     private final PropertyBinding[] props;
     private final FunctionBinding[] funcs;
+    private Object strong;
 
     public Knockout(Object model, PropertyBinding[] props, FunctionBinding[] funcs) {
         super(model);
@@ -73,6 +74,10 @@ final class Knockout extends WeakReference<Object> {
         for (int i = 0; i < funcs.length; i++) {
             this.funcs[i] = funcs[i].weak();
         }
+    }
+    
+    final void hold() {
+        strong = get();
     }
     
     final Object getValue(int index) {
@@ -108,11 +113,12 @@ final class Knockout extends WeakReference<Object> {
         Object model, String prop, Object oldValue, Object newValue
     );
 
-    @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
+    @JavaScriptBody(args = { "bindings" }, body = 
         "ko['cleanNode'](window['document']['body']);\n" +
-        "ko['applyBindings'](bindings);\n"
+        "ko['applyBindings'](bindings);\n" +
+        "return bindings['ko4j'];\n"
     )
-    native static void applyBindings(Object bindings);
+    native static Object applyBindings(Object bindings);
     
     @JavaScriptBody(args = { "cnt" }, body = 
         "var arr = new Array(cnt);\n" +

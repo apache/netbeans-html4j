@@ -135,7 +135,10 @@ Transfer, WSTransfer<LoadWS> {
 
     @Override
     public void applyBindings(Object data) {
-        Knockout.applyBindings(data);
+        Object ko = Knockout.applyBindings(data);
+        if (ko instanceof Knockout) {
+            ((Knockout)ko).hold();
+        }
     }
 
     @Override

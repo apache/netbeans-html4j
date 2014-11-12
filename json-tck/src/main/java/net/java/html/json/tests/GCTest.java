@@ -90,6 +90,10 @@ public class GCTest {
             Reference<?> ref = new WeakReference<Object>(removed);
             removed = null;
             assertGC(ref, "Can removed object disappear?");
+            
+            ref = new WeakReference<Object>(m);
+            m = null;
+            assertNotGC(ref, "Root model cannot GC");
         } finally {
             Utils.exposeHTML(GCTest.class, "");
         }
@@ -108,11 +112,27 @@ public class GCTest {
                     + "}\n"
                     + "return arr.length;";
             Object cnt = Utils.executeScript(GCTest.class, gc, Math.pow(2.0, i));
-            System.err.println("cnt: " + cnt);
             System.gc();
             System.runFinalization();
         }
         throw new OutOfMemoryError(msg);
+    }
+    
+    private void assertNotGC(Reference<?> ref, String msg) throws Exception {
+        for (int i = 0; i < 10; i++) {
+            if (ref.get() == null) {
+                throw new IllegalStateException(msg);
+            }
+            String gc = "var max = arguments[0];\n"
+                    +  "var arr = [];\n"
+                    + "for (var i = 0; i < max; i++) {\n"
+                    + "  arr.push(i);\n"
+                    + "}\n"
+                    + "return arr.length;";
+            Object cnt = Utils.executeScript(GCTest.class, gc, Math.pow(2.0, i));
+            System.gc();
+            System.runFinalization();
+        }
     }
     
 }
