@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
@@ -210,7 +211,7 @@ public final class BrowserBuilder {
     }
 
     /** Loader to use when searching for classes to initialize. 
-     * If specified, this loader is going to be used to load {@link Fn.Presenter}
+     * If specified, this loader is going to be used to load {@link Presenter}
      * and {@link Contexts#fillInByProviders(java.lang.Class, org.netbeans.html.context.spi.Contexts.Builder) fill} {@link BrwsrCtx} in.
      * Specifying special classloader may be useful in modular systems, 
      * like OSGi, where one needs to load classes from many otherwise independent

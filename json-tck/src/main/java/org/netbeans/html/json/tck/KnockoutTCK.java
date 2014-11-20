@@ -54,6 +54,7 @@ import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
 import org.netbeans.html.context.spi.Contexts.Builder;
 import org.openide.util.lookup.ServiceProvider;
+import org.testng.annotations.Factory;
 
 /** Entry point for providers of different HTML binding technologies (like
  * Knockout.js in JavaFX's WebView). Sample usage:
@@ -66,7 +67,7 @@ public final class MyKnockoutBindingTest extends KnockoutTCK {
         // use {@link Builder}.{@link Builder#build() build}();
     }
 
-    {@code @}{@link org.testng.annotations.Factory} public static Object[] create() {
+    {@code @}{@link Factory} public static Object[] create() {
         return VMTest.newTests().withClasses({@link KnockoutTCK#testClasses}()).build();
     }
 }

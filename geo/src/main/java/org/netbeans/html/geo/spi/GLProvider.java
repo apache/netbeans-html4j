@@ -47,7 +47,7 @@ import net.java.html.BrwsrCtx;
 import net.java.html.geo.Position;
 import net.java.html.geo.Position.Handle;
 import net.java.html.geo.Position.Coordinates;
-import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Builder;
 import org.netbeans.html.geo.impl.Accessor;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -55,7 +55,7 @@ import org.openide.util.lookup.ServiceProvider;
  * Subclass this class, implement its method and register it into the system.
  * You can either use {@link ServiceProvider} to register globally, or 
  * one can register into {@link BrwsrCtx} (via 
- * {@link Contexts.Builder#register(java.lang.Class, java.lang.Object, int) context builder}).
+ * {@link Builder#register(java.lang.Class, java.lang.Object, int) context builder}).
  * <p>
  * There is default system provider (used as a fallback) based on 
  * <a href="http://www.w3.org/TR/geolocation-API/">
@@ -93,11 +93,11 @@ import org.openide.util.lookup.ServiceProvider;
  * </pre>
  *
  * @author Jaroslav Tulach
- * @param <Watch> your choosen type to represent one query (one time) or watch (repeated) request -
+ * @param <Watch> your chosen type to represent one query (one time) or watch (repeated) request -
  *   this type is used in {@link #start(org.netbeans.html.geo.spi.GLProvider.Query) start}
  *   and {@link #stop(java.lang.Object) stop} methods.
  * 
- * @param <Coords> your choosen type to represent geolocation coordinates -
+ * @param <Coords> your chosen type to represent geolocation coordinates -
  *   use in many methods in this class like {@link #latitude(java.lang.Object)} and
  *   {@link #longitude(java.lang.Object)}.
  * 
@@ -263,7 +263,7 @@ public abstract class GLProvider<Coords,Watch> {
         
         /**
          * Is this one time or repeated request? Mimics value provided in
-         * {@link Handle#Handle(boolean) constructor}.
+         * {@link Handle constructor}.
          *
          * @return true if this is one time request, false if the request is
          * permanent (up until {@link Handle#stop() } is called).
