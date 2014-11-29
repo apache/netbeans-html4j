@@ -231,6 +231,7 @@
         calls or changes on it.
         
         <h3>Post Process Classes</h3>
+        <a name="post-process"></a>
 
         Classes with {@link net.java.html.js.JavaScriptBody} annotated methods need to
         be post processed before they can be used - e.g. their <code>native</code>
@@ -290,7 +291,9 @@ $ java -javaagent:jarpath=net.java.html.boot-x.y.jar
         will create a special classloader to that does the processing before
         loading the bytecode into the virtual machine.
         <p></p>
-        The options are rich, however to avoid any troubles, it is recommended
+        The options are rich, however to avoid any troubles (as the runtime
+        processing needs to also include <code>asm-5.0.jar</code> on application
+        classpath), it is recommended
         to perform the <b>compile time</b> processing.
         
         <h3>Getting Started</h3>

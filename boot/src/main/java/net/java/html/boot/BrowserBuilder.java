@@ -273,13 +273,16 @@ public final class BrowserBuilder {
         
         final ClassLoader activeLoader;
         if (loader != null) {
-            if (!FnUtils.isJavaScriptCapable(loader)) {
+            if (!FnContext.isJavaScriptCapable(loader)) {
                 throw new IllegalStateException("Loader cannot resolve @JavaScriptBody: " + loader);
             }
             activeLoader = loader;
-        } else if (FnUtils.isJavaScriptCapable(myCls.getClassLoader())) {
+        } else if (FnContext.isJavaScriptCapable(myCls.getClassLoader())) {
             activeLoader = myCls.getClassLoader();
         } else {
+            if (!FnContext.isAsmPresent()) {
+                throw new IllegalStateException("Cannot find asm-5.0.jar classes!");
+            }
             FImpl impl = new FImpl(myCls.getClassLoader());
             activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }

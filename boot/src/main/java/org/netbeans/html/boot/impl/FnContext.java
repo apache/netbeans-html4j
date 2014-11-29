@@ -45,8 +45,10 @@ package org.netbeans.html.boot.impl;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
+import org.objectweb.asm.Opcodes;
 
 /**
  *
@@ -58,6 +60,33 @@ public final class FnContext implements Closeable {
     static {
         DUMMY = new FnContext(null, null);
         DUMMY.prev = DUMMY;
+    }
+
+    public static boolean isJavaScriptCapable(ClassLoader l) {
+        if (l instanceof JsClassLoader) {
+            return true;
+        }
+        if (l.getResource("META-INF/net.java.html.js.classes") != null) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isAsmPresent() {
+        Throwable t;
+        try {
+            Class.forName(Opcodes.class.getName());
+            return true;
+        } catch (LinkageError ex) {
+            t = ex;
+        } catch (ClassNotFoundException ex) {
+            t = ex;
+        }
+        LOG.log(Level.SEVERE, "When using @JavaScriptBody methods, one needs to either:");
+        LOG.log(Level.SEVERE, " - include asm-5.0.jar on runtime classpath");
+        LOG.log(Level.SEVERE, " - post process classes, see http://bits.netbeans.org/html+java/dev/net/java/html/js/package-summary.html#post-process");
+        LOG.log(Level.SEVERE, "Cannot initialize asm-5.0.jar!", t);
+        return false;
     }
 
     private Object prev;

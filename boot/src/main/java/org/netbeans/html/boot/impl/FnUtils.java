@@ -108,16 +108,6 @@ public final class FnUtils {
         return bytecode;
     }
     
-    public static boolean isJavaScriptCapable(ClassLoader l) {
-        if (l instanceof JsClassLoader) {
-            return true;
-        }
-        if (l.getResource("META-INF/net.java.html.js.classes") != null) {
-            return false;
-        }
-        return true;
-    }
-    
     public static boolean isValid(Fn fn) {
         return fn != null && fn.isValid();
     }
