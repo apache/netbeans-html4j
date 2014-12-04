@@ -141,8 +141,8 @@ public final class FXBrowsers {
     
     /** Enables the Java/JavaScript bridge (that supports {@link JavaScriptBody} and co.)
      * in the provided <code>webView</code>. This method returns 
-     * immediately. Once the support is active, it calls back specified
-     * method in <code>onPageLoad</code>'s run method. 
+     * immediately. Once the support is active, it calls back {@link Runnable#run() run}
+     * method in <code>onPageLoad</code>. 
      * This is more convenient way to initialize the webview, 
      * but it requires one to make sure
      * all {@link JavaScriptBody} methods has been post-processed during
@@ -160,7 +160,37 @@ public final class FXBrowsers {
     public static void load(
         WebView webView, final URL url, Runnable onPageLoad, ClassLoader loader
     ) {
-        BrowserBuilder.newBrowser(new Load(webView)).
+        load(webView, url, onPageLoad, loader, new Object[0]);
+    }
+    
+    /** Enables the Java/JavaScript bridge (that supports {@link JavaScriptBody} and co.)
+     * in the provided <code>webView</code>. This method returns 
+     * immediately. Once the support is active, it calls back {@link Runnable#run() run}
+     * method in <code>onPageLoad</code>. 
+     * This is more convenient way to initialize the webview, 
+     * but it requires one to make sure
+     * all {@link JavaScriptBody} methods has been post-processed during
+     * compilation and there will be no need to instantiate new classloader.
+     * <p>
+     * This method sets {@link WebView#getUserData()} and {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable)}
+     * relies on the value. Please don't alter it.
+     * 
+     * @param webView the instance of Web View to tweak
+     * @param url the URL of the HTML page to load into the view
+     * @param onPageLoad callback to call when the page is ready
+     * @param loader the loader to use when constructing initial {@link BrwsrCtx} or <code>null</code>
+     * @param context additonal configuration to pass to {@link BrowserBuilder#newBrowser(java.lang.Object...)}
+     *   and {@link Contexts#newBuilder(java.lang.Object...)} factory methods 
+     * @since 1.1
+     */
+    public static void load(
+        WebView webView, final URL url, Runnable onPageLoad, ClassLoader loader,
+        Object... context
+    ) {
+        Object[] newCtx = new Object[context.length + 1];
+        System.arraycopy(context, 0, newCtx, 1, context.length);
+        newCtx[0] = new Load(webView);
+        BrowserBuilder.newBrowser(newCtx).
                 loadPage(url.toExternalForm()).
                 loadFinished(onPageLoad).
                 classloader(loader).
