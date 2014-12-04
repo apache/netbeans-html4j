@@ -52,6 +52,8 @@ import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.fx.AbstractFXPresenter;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Id;
 
 /** Utility methods to use {@link WebView} and {@link JavaScriptBody} code
  * in existing <em>JavaFX</em> applications.
@@ -82,6 +84,16 @@ public final class FXBrowsers {
      * <p>
      * This method sets {@link WebView#getUserData()} and {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable)}
      * relies on the value. Please don't alter it.
+     * <p>
+     * Since introduction of {@link Id technology identifiers} the 
+     * provided <code>args</code> strings are also passed to the 
+     * {@link BrwsrCtx context} when it is being 
+     * {@link Contexts#newBuilder(java.lang.Object...) created}
+     * and can influence the selection
+     * of available technologies 
+     * (like {@link org.netbeans.html.json.spi.Technology},
+     * {@link org.netbeans.html.json.spi.Transfer} or
+     * {@link org.netbeans.html.json.spi.WSTransfer}).
      * 
      * @param webView the instance of Web View to tweak
      * @param url the URL of the HTML page to load into the view
@@ -94,7 +106,10 @@ public final class FXBrowsers {
         Class<?> onPageLoad, String methodName,
         String... args
     ) {
-        BrowserBuilder.newBrowser(new Load(webView)).
+        Object[] context = new Object[args.length + 1];
+        System.arraycopy(args, 0, context, 1, args.length);
+        context[0] = new Load(webView);
+        BrowserBuilder.newBrowser(context).
             loadPage(url.toExternalForm()).
             loadClass(onPageLoad).
             invoke(methodName, args).

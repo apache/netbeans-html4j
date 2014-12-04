@@ -82,6 +82,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Jaroslav Tulach
  */
+@Contexts.Id("tyrus")
 @ServiceProvider(service = Contexts.Provider.class)
 public final class TyrusContext 
 implements Contexts.Provider, WSTransfer<Comm>, Transfer {

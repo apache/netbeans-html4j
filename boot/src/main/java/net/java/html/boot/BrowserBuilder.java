@@ -65,6 +65,7 @@ import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Id;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.impl.FnUtils;
@@ -121,6 +122,15 @@ public final class BrowserBuilder {
     /** Entry method to obtain a new browser builder. Follow by calling 
      * its instance methods like {@link #loadClass(java.lang.Class)} and
      * {@link #loadPage(java.lang.String)}.
+     * Since introduction of {@link Id technology identifiers} the 
+     * provided <code>context</code> objects are also passed to the 
+     * {@link BrwsrCtx context} when it is being 
+     * {@link Contexts#newBuilder(java.lang.Object...) created}
+     * and can influence the selection
+     * of available technologies 
+     * (like {@link org.netbeans.html.json.spi.Technology},
+     * {@link org.netbeans.html.json.spi.Transfer} or
+     * {@link org.netbeans.html.json.spi.WSTransfer}) by name.
      * 
      * @param context any instances that should be available to the builder -
      *   implementation dependant
@@ -301,7 +311,7 @@ public final class BrowserBuilder {
                     if (browserClass != null) {
                         browserClass[0] = newClazz;
                     }
-                    Contexts.Builder cb = Contexts.newBuilder();
+                    Contexts.Builder cb = Contexts.newBuilder(context);
                     if (!Contexts.fillInByProviders(newClazz, cb)) {
                         LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
                     }

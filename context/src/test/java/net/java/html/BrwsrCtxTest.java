@@ -44,6 +44,7 @@ package net.java.html;
 
 import org.netbeans.html.context.spi.Contexts;
 import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -70,6 +71,50 @@ public class BrwsrCtxTest {
         });
         assertNotSame(BrwsrCtx.findDefault(BrwsrCtxTest.class), ctx, "Not associated again");
         assertTrue(arr[0], "Runnable was executed");
+    }
+    
+    
+    @Test public void defaultOrderOfRegistrations() {
+        BrwsrCtx ctx = registerRs(Contexts.newBuilder());
+        Class<? extends Runnable> clazz = Contexts.find(ctx, Runnable.class).getClass();
+        assertEquals(clazz, R1.class, "R1 is registered at value 10");
+    }
+    
+    @Test public void preferOne() {
+        BrwsrCtx ctx = registerRs(Contexts.newBuilder("one"));
+        Class<? extends Runnable> clazz = Contexts.find(ctx, Runnable.class).getClass();
+        assertEquals(clazz, R1.class, "R1 is registered at value 10");
+    }
+
+    @Test public void preferTwo() {
+        BrwsrCtx ctx = registerRs(Contexts.newBuilder("two"));
+        Class<? extends Runnable> clazz = Contexts.find(ctx, Runnable.class).getClass();
+        assertEquals(clazz, R2.class, "R2 is preferred");
+    }
+
+    @Test public void preferBoth() {
+        BrwsrCtx ctx = registerRs(Contexts.newBuilder("one", "two"));
+        Class<? extends Runnable> clazz = Contexts.find(ctx, Runnable.class).getClass();
+        assertEquals(clazz, R1.class, "R1 is registered at value 10");
+    }
+    
+    private static BrwsrCtx registerRs(Contexts.Builder b) {
+        b.register(Runnable.class, new R1(), 10);
+        b.register(Runnable.class, new R2(), 20);
+        return b.build();
+    }
+
+    @Contexts.Id("one")
+    static final class R1 implements Runnable {
+        @Override
+        public void run() {
+        }
+    }
+    @Contexts.Id("two")
+    static final class R2 implements Runnable {
+        @Override
+        public void run() {
+        }
     }
     
 }

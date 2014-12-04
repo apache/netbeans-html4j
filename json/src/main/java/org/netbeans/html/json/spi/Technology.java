@@ -45,10 +45,17 @@ package org.netbeans.html.json.spi;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.Models;
+import org.netbeans.html.context.spi.Contexts.Id;
 
 /** An implementation of a binding between model classes (see {@link Model})
  * and particular technology like <a href="http://knockoutjs.com">knockout.js</a>
  * in a browser window, etc.
+ * Since introduction of {@link Id technology identifiers} one can choose between
+ * different background implementations to handle the conversion and
+ * communication requests. The currently known provider is
+ * <code>org.netbeans.html:ko4j</code> module which registers 
+ * a <a href="http://knockoutjs.com" target="_blank">knockout.js</a>
+ * implementation called <b>ko4j</b>.
  *
  * @author Jaroslav Tulach
  */

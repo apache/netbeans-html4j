@@ -40,53 +40,65 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.json.spi;
+package org.netbeans.html.ko4j;
 
-import net.java.html.BrwsrCtx;
-import org.netbeans.html.context.spi.Contexts.Provider;
-import org.netbeans.html.context.spi.Contexts.Id;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.JSONCall;
+import org.netbeans.html.json.spi.Transfer;
 
-/** Interface for providers of WebSocket protocol. Register into a 
- * {@link BrwsrCtx context} in your own {@link Provider}.
- * Since introduction of {@link Id technology identifiers} one can choose between
- * different background implementations to handle the conversion and
- * communication requests. The known providers include
- * <code>org.netbeans.html:ko4j</code> module which registers 
- * a native browser implementation called <b>websocket</b>, and a
- * <code>org.netbeans.html:ko-ws-tyrus</code> module which registers 
- * Java based implementation named <b>tyrus</b>.
+/** This is an implementation package - just
+ * include its JAR on classpath and use official {@link Context} API
+ * to access the functionality.
+ * <p>
  *
  * @author Jaroslav Tulach
- * @param <WebSocket> internal implementation type representing the socket
- * @since 0.5
  */
-public interface WSTransfer<WebSocket> {
-    /** Initializes a web socket. The <code>callback</code> object should 
-     * have mostly empty values: {@link JSONCall#isDoOutput()} should be 
-     * <code>false</code> and thus there should be no {@link JSONCall#getMessage()}.
-     * The method of connection {@link JSONCall#getMethod()} is "WebSocket".
-     * Once the connection is open call {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess(null)}.
-     * When the server sends some data then, pass them to 
-     * {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess} method
-     * as well. If there is an error call {@link JSONCall#notifyError(java.lang.Throwable)}.
-     * 
-     * @param url the URL to connect to
-     * @param callback a way to provide results back to the client
-     * @return your object representing the established web socket
-     */
-    public WebSocket open(String url, JSONCall callback);
+@Contexts.Id("xhr")
+final class KOTransfer
+implements Transfer {
+    KOTransfer() {
+    }
+    
+    @Override
+    public void extract(Object obj, String[] props, Object[] values) {
+        LoadJSON.extractJSON(obj, props, values);
+    }
 
-    /** Sends data to the server. The most important value
-     * of the <code>data</code> parameter is {@link JSONCall#getMessage()},
-     * rest can be ignored.
-     * 
-     * @param socket internal representation of the socket
-     * @param data the message to be sent
-     */
-    public void send(WebSocket socket, JSONCall data);
+    @Override
+    public void loadJSON(final JSONCall call) {
+        if (call.isJSONP()) {
+            String me = LoadJSON.createJSONP(call);
+            LoadJSON.loadJSONP(call.composeURL(me), me);
+        } else {
+            String data = null;
+            if (call.isDoOutput()) {
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    call.writeData(bos);
+                    data = new String(bos.toByteArray(), "UTF-8");
+                } catch (IOException ex) {
+                    call.notifyError(ex);
+                }
+            }
+            LoadJSON.loadJSON(call.composeURL(null), call, call.getMethod(), data);
+        }
+    }
 
-    /** A request to close the socket.
-     * @param socket internal representation of the socket
-     */
-    public void close(WebSocket socket);
+    @Override
+    public Object toJSON(InputStream is) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader r = new InputStreamReader(is);
+        for (;;) {
+            int ch = r.read();
+            if (ch == -1) {
+                break;
+            }
+            sb.append((char)ch);
+        }
+        return LoadJSON.parse(sb.toString());
+    }
 }

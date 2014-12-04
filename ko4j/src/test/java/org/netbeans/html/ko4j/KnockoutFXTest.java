@@ -66,7 +66,6 @@ import org.netbeans.html.json.spi.Transfer;
 import org.netbeans.html.json.spi.WSTransfer;
 import org.netbeans.html.json.tck.KOTest;
 import org.netbeans.html.json.tck.KnockoutTCK;
-import org.netbeans.html.boot.impl.FnContext;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
 import static org.testng.Assert.*;
@@ -154,12 +153,12 @@ public final class KnockoutFXTest extends KnockoutTCK {
     
     @Override
     public BrwsrCtx createContext() {
-        FXContext fx = new FXContext(browserContext);
+        KO4J ko4j = new KO4J();
         Contexts.Builder cb = Contexts.newBuilder().
-            register(Technology.class, fx, 10).
-            register(Transfer.class, fx, 10);
-        if (fx.areWebSocketsSupported()) {
-            cb.register(WSTransfer.class, fx, 10);
+            register(Technology.class, ko4j.knockout(), 10).
+            register(Transfer.class, ko4j.transfer(), 10);
+        if (ko4j.websockets() != null) {
+            cb.register(WSTransfer.class, ko4j.websockets(), 10);
         }
         cb.register(Executor.class, (Executor)browserContext, 10);
         cb.register(Fn.Presenter.class, browserContext, 10);

@@ -45,9 +45,17 @@ package org.netbeans.html.json.spi;
 import java.io.IOException;
 import java.io.InputStream;
 import org.netbeans.html.context.spi.Contexts.Builder;
+import org.netbeans.html.context.spi.Contexts.Id;
 
 /** A {@link Builder service provider interface} responsible for 
  * conversion of JSON objects to Java ones and vice-versa.
+ * Since introduction of {@link Id technology identifiers} one can choose between
+ * different background implementations to handle the conversion and
+ * communication requests. The known providers include
+ * <code>org.netbeans.html:ko4j</code> module which registers 
+ * a native browser implementation called <b>xhr</b>, and a
+ * <code>org.netbeans.html:ko-ws-tyrus</code> module which registers 
+ * Java based implementation named <b>tyrus</b>.
  *
  * @author Jaroslav Tulach
  */

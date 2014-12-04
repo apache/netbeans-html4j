@@ -75,6 +75,27 @@
          yet the application code can be written in Java.
         </p>
         
+        <h3>What's New in Version 1.1?</h3>
+        
+        <p>
+            The content of a {@link net.java.html.BrwsrCtx context}
+            can be selected by registering implementations under specific
+            {@link org.netbeans.html.context.spi.Contexts.Id technology identifiers} 
+            and requesting them during 
+            {@link org.netbeans.html.context.spi.Contexts#newBuilder(java.lang.Object...) construction} 
+            of the context. <code>org.netbeans.html:ko4j</code> module's implementation
+            offers <b>ko4j</b>, <b>xhr</b> and <b>websocket</b> identifiers
+            for its registered services 
+            (e.g. {@link org.netbeans.html.json.spi.Technology},
+            {@link org.netbeans.html.json.spi.Transfer} and
+            {@link org.netbeans.html.json.spi.WSTransfer}).
+            <code>org.netbeans.html:ko-ws-tyrus</code>
+            module registers its 
+            {@link org.netbeans.html.json.spi.Transfer Java based JSON} and 
+            {@link org.netbeans.html.json.spi.WSTransfer WebSocket} implementations
+            under the name <b>tyrus</b>.
+        </p>
+        
         <h3>What's New in Version 1.0?</h3>
         
         <p>

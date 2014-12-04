@@ -42,6 +42,10 @@
  */
 package org.netbeans.html.context.spi;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ServiceLoader;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.impl.CtxImpl;
@@ -59,11 +63,23 @@ public final class Contexts {
 
     /** Creates new, empty builder for creation of {@link BrwsrCtx}. At the
      * end call the {@link Builder#build()} method to generate the context.
-     *
+     * 
+     * @param context instances of various classes or names of {@link Id technologies} 
+     *    to be preferred and used in the built {@link BrwsrCtx context}.
+     * @return new instance of the builder
+     * @since 1.1
+     */
+    public static Builder newBuilder(Object... context) {
+        return new Builder(context);
+    }
+    /** Creates new, empty builder for creation of {@link BrwsrCtx}. At the
+     * end call the {@link Builder#build()} method to generate the context.
+     * Simply calls {@link #newBuilder(java.lang.Object...) newBuilder(new Object[0])}.
+     * 
      * @return new instance of the builder
      */
     public static Builder newBuilder() {
-        return new Builder();
+        return newBuilder(new Object[0]);
     }
 
     /** Seeks for the specified technology in the provided context.
@@ -118,6 +134,23 @@ public final class Contexts {
         }
         return found;
     }
+    
+    /** Identifies the technologies passed to {@link Builder context builder}
+     * by a name. Each implementation of a technology 
+     * {@link Builder#register(java.lang.Class, java.lang.Object, int) registered into a context}
+     * can be annotated with a name (or multiple names). Such implementation
+     * will later be 
+     * {@link Contexts#fillInByProviders(java.lang.Class, org.netbeans.html.context.spi.Contexts.Builder)  preferred during lookup}
+     * if their name(s) has been requested in when 
+     * {@link Contexts#newBuilder(java.lang.Object...)  creating a context}.
+     * @since 1.1
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Id {
+        /** Identifier(s) for the implementation. */
+        public String[] value();
+    }
 
     /** Implementors of various HTML technologies should
      * register their implementation via <code>org.openide.util.lookup.ServiceProvider</code>, so
@@ -152,9 +185,10 @@ public final class Contexts {
      * @author Jaroslav Tulach
      */
     public static final class Builder {
-        private final CtxImpl impl = new CtxImpl();
+        private final CtxImpl impl;
 
-        Builder() {
+        public Builder(Object[] context) {
+            this.impl = new CtxImpl(context);
         }
         
         /** Registers new technology into the context. Each technology is
