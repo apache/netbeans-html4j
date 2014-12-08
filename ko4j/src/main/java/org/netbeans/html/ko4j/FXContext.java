@@ -43,7 +43,6 @@
 package org.netbeans.html.ko4j;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -90,7 +89,7 @@ Transfer, WSTransfer<LoadWS> {
             funcNames[i] = funcArr[i].getFunctionName();
         }
         Object ret = getJSObject();
-        Knockout.wrapModel(new Knockout(model, propArr, funcArr),
+        Knockout.wrapModel(new Knockout(model, ret, propArr, funcArr),
             ret, 
             propNames, propReadOnly, propValues,
             funcNames
@@ -101,11 +100,16 @@ Transfer, WSTransfer<LoadWS> {
     private Object getJSObject() {
         int len = 64;
         if (jsObjects != null && jsIndex < (len = jsObjects.length)) {
-            return jsObjects[jsIndex++];
+            Object ret = jsObjects[jsIndex];
+            jsObjects[jsIndex] = null;
+            jsIndex++;
+            return ret;
         }
         jsObjects = Knockout.allocJS(len * 2);
         jsIndex = 1;
-        return jsObjects[0];
+        Object ret = jsObjects[0];
+        jsObjects[0] = null;
+        return ret;
     }
     
     @Override
@@ -120,11 +124,13 @@ Transfer, WSTransfer<LoadWS> {
 
     @Override
     public void valueHasMutated(Object data, String propertyName) {
+        Knockout.cleanUp();
         Knockout.valueHasMutated(data, propertyName, null, null);
     }
     
     @Override
     public void valueHasMutated(Object data, String propertyName, Object oldValue, Object newValue) {
+        Knockout.cleanUp();
         Knockout.valueHasMutated(data, propertyName, oldValue, newValue);
     }
 
