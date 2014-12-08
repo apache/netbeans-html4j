@@ -42,12 +42,8 @@
  */
 package net.java.html.js.tests;
 
-import java.io.StringReader;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 
 /**
@@ -55,7 +51,13 @@ import org.netbeans.html.json.tck.KOTest;
  * @author Jaroslav Tulach
  */
 public class GCBodyTest {
+    Reference<?> ref;
+    
     @KOTest public void callbackWithParameters() throws InterruptedException {
+        if (ref != null) {
+            assertGC(ref, "Can disappear!");
+            return;
+        }
         Sum s = new Sum();
         int res = Bodies.sumIndirect(s);
         assert res == 42 : "Expecting 42";
@@ -65,11 +67,15 @@ public class GCBodyTest {
     }
     
     @KOTest public void holdObjectAndReleaseObject() throws InterruptedException {
+        if (ref != null) {
+            assertGC(ref, "Can disappear!");
+            return;
+        }
         Sum s = new Sum();
         Object obj = Bodies.instance(0);
         Bodies.setX(obj, s);
         
-        Reference<?> ref = new WeakReference<Object>(s);
+        ref = new WeakReference<Object>(s);
         s = null;
         assertNotGC(ref, "Cannot disappear!");
         
@@ -79,7 +85,7 @@ public class GCBodyTest {
     }
     
     private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 25; i++) {
             if (ref.get() == null) {
                 return;
             }
@@ -91,7 +97,7 @@ public class GCBodyTest {
                 err.printStackTrace();
             }
         }
-        throw new OutOfMemoryError(msg);
+        throw new InterruptedException(msg);
     }
     
     private static void assertNotGC(Reference<?> ref, String msg) throws InterruptedException {
