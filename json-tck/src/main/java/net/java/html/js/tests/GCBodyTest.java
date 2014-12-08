@@ -40,34 +40,72 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.json.tck;
+package net.java.html.js.tests;
 
-import net.java.html.js.tests.GCBodyTest;
-import net.java.html.js.tests.JavaScriptBodyTest;
+import java.io.StringReader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.boot.spi.Fn.Presenter;
+import org.netbeans.html.json.tck.KOTest;
 
-/** Entry point for those who want to verify that their implementation of
- * {@link Presenter} is good enough to support existing Java/JavaScript 
- * communication use-cases. Subclass this class, get list of {@link #testClasses() classes}
- * find methods annotated by {@link KOTest} annotation and execute them.
- * <p>
+/**
  *
  * @author Jaroslav Tulach
- * @since 0.7
  */
-public abstract class JavaScriptTCK {
-    /** Gives you list of classes included in the TCK. Their test methods
-     * are annotated by {@link KOTest} annotation. The methods are public
-     * instance methods that take no arguments. The method should be 
-     * invoke in a presenter context {@link Fn#activate(org.netbeans.html.boot.spi.Fn.Presenter)}.
-     * 
-     * @return classes with methods annotated by {@link KOTest} annotation
-     */
-    protected static Class<?>[] testClasses() {
-        return new Class[] { 
-            JavaScriptBodyTest.class, GCBodyTest.class
-        };
+public class GCBodyTest {
+    @KOTest public void callbackWithParameters() throws InterruptedException {
+        Sum s = new Sum();
+        int res = Bodies.sumIndirect(s);
+        assert res == 42 : "Expecting 42";
+        Reference<?> ref = new WeakReference<Object>(s);
+        s = null;
+        assertGC(ref, "Can disappear!");
     }
     
+    @KOTest public void holdObjectAndReleaseObject() throws InterruptedException {
+        Sum s = new Sum();
+        Object obj = Bodies.instance(0);
+        Bodies.setX(obj, s);
+        
+        Reference<?> ref = new WeakReference<Object>(s);
+        s = null;
+        assertNotGC(ref, "Cannot disappear!");
+        
+        Bodies.setX(obj, null);
+        
+        assertGC(ref, "Can disappear!");
+    }
+    
+    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
+        for (int i = 0; i < 100; i++) {
+            if (ref.get() == null) {
+                return;
+            }
+            int size = Bodies.gc(Math.pow(2.0, i));
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                err.printStackTrace();
+            }
+        }
+        throw new OutOfMemoryError(msg);
+    }
+    
+    private static void assertNotGC(Reference<?> ref, String msg) throws InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            if (ref.get() == null) {
+                throw new IllegalStateException(msg);
+            }
+            int size = Bodies.gc(Math.pow(2.0, i));
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                err.printStackTrace();
+            }
+        }
+    }
 }

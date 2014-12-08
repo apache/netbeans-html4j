@@ -217,23 +217,6 @@ public class JavaScriptBodyTest {
         Sum s = new Sum();
         int res = Bodies.sumIndirect(s);
         assert res == 42 : "Expecting 42";
-        Reference<?> ref = new WeakReference<Object>(s);
-        s = null;
-        assertGC(ref, "Can disappear!");
-    }
-    
-    @KOTest public void holdObjectAndReleaseObject() throws InterruptedException {
-        Sum s = new Sum();
-        Object obj = Bodies.instance(0);
-        Bodies.setX(obj, s);
-        
-        Reference<?> ref = new WeakReference<Object>(s);
-        s = null;
-        assertNotGC(ref, "Cannot disappear!");
-        
-        Bodies.setX(obj, null);
-        
-        assertGC(ref, "Can disappear!");
     }
     
     @KOTest public void selectFromStringJavaArray() {
@@ -419,37 +402,6 @@ public class JavaScriptBodyTest {
         @Override
         public Boolean call() throws Exception {
             return Boolean.TRUE;
-        }
-    }
-    
-    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
-            if (ref.get() == null) {
-                return;
-            }
-            int size = Bodies.gc(Math.pow(2.0, i));
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
-        }
-        throw new OutOfMemoryError(msg);
-    }
-    
-    private static void assertNotGC(Reference<?> ref, String msg) throws InterruptedException {
-        for (int i = 0; i < 10; i++) {
-            if (ref.get() == null) {
-                throw new IllegalStateException(msg);
-            }
-            int size = Bodies.gc(Math.pow(2.0, i));
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
         }
     }
 }

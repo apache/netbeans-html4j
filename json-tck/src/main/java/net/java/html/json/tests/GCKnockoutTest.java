@@ -53,7 +53,7 @@ import org.netbeans.html.json.tck.KOTest;
 @Model(className = "GC", properties = {
     @Property(name = "all", type = Fullname.class, array = true)
 })
-public class GCTest {
+public class GCKnockoutTest {
     @Model(className = "Fullname", properties = {
         @Property(name = "firstName", type = String.class),
         @Property(name = "lastName", type = String.class)
@@ -62,8 +62,8 @@ public class GCTest {
     }
     
     @KOTest public void noLongerNeededArrayElementsCanDisappear() throws Exception {
-        BrwsrCtx ctx = Utils.newContext(GCTest.class);
-        Object exp = Utils.exposeHTML(GCTest.class,
+        BrwsrCtx ctx = Utils.newContext(GCKnockoutTest.class);
+        Object exp = Utils.exposeHTML(GCKnockoutTest.class,
             "<ul id='ul' data-bind='foreach: all'>\n"
             + "  <li data-bind='text: firstName'/>\n"
             + "</ul>\n"
@@ -73,18 +73,18 @@ public class GCTest {
             m.getAll().add(new Fullname("Jarda", "Tulach"));
             m.applyBindings();
 
-            int cnt = Utils.countChildren(GCTest.class, "ul");
+            int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;
 
             m.getAll().add(new Fullname("HTML", "Java"));
 
-            cnt = Utils.countChildren(GCTest.class, "ul");
+            cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assert cnt == 2 : "Now two " + cnt;
 
             Fullname removed = m.getAll().get(0);
             m.getAll().remove(0);
 
-            cnt = Utils.countChildren(GCTest.class, "ul");
+            cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assert cnt == 1 : "Again One " + cnt;
 
             Reference<?> ref = new WeakReference<Object>(removed);
@@ -95,7 +95,7 @@ public class GCTest {
             m = null;
             assertNotGC(ref, "Root model cannot GC");
         } finally {
-            Utils.exposeHTML(GCTest.class, "");
+            Utils.exposeHTML(GCKnockoutTest.class, "");
         }
         
     }
@@ -111,7 +111,7 @@ public class GCTest {
                     + "  arr.push(i);\n"
                     + "}\n"
                     + "return arr.length;";
-            Object cnt = Utils.executeScript(GCTest.class, gc, Math.pow(2.0, i));
+            Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
             System.gc();
             System.runFinalization();
         }
@@ -129,7 +129,7 @@ public class GCTest {
                     + "  arr.push(i);\n"
                     + "}\n"
                     + "return arr.length;";
-            Object cnt = Utils.executeScript(GCTest.class, gc, Math.pow(2.0, i));
+            Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
             System.gc();
             System.runFinalization();
         }
