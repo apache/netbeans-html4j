@@ -80,6 +80,7 @@ public class GCBodyTest {
         assertNotGC(ref, "Cannot disappear!");
         
         Bodies.setX(obj, null);
+        obj = null;
         
         assertGC(ref, "Can disappear!");
     }
