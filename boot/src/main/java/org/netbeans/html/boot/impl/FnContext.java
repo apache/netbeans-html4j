@@ -42,9 +42,14 @@
  */
 package org.netbeans.html.boot.impl;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
@@ -62,17 +67,16 @@ public final class FnContext implements Closeable {
         DUMMY.prev = DUMMY;
     }
 
-    public static boolean isJavaScriptCapable(ClassLoader l) {
+    public static URL isJavaScriptCapable(ClassLoader l) {
         if (l instanceof JsClassLoader) {
-            return true;
+            return null;
         }
-        if (l.getResource("META-INF/net.java.html.js.classes") != null) {
-            return false;
-        }
-        return true;
+        return l.getResource("META-INF/net.java.html.js.classes");
     }
 
-    public static boolean isAsmPresent() {
+    public static boolean isAsmPresent(URL res) {
+        StringWriter w = new StringWriter();
+        PrintWriter pw = new PrintWriter(w);
         Throwable t;
         try {
             Class.forName("org.objectweb.asm.Opcodes"); // NOI18N
@@ -82,10 +86,28 @@ public final class FnContext implements Closeable {
         } catch (ClassNotFoundException ex) {
             t = ex;
         }
-        LOG.log(Level.SEVERE, "When using @JavaScriptBody methods, one needs to either:");
-        LOG.log(Level.SEVERE, " - include asm-5.0.jar on runtime classpath");
-        LOG.log(Level.SEVERE, " - post process classes, see http://bits.netbeans.org/html+java/dev/net/java/html/js/package-summary.html#post-process");
-        LOG.log(Level.SEVERE, "Cannot initialize asm-5.0.jar!", t);
+        pw.println("When using @JavaScriptBody methods, one needs to either:");
+        pw.println(" - include asm-5.0.jar on runtime classpath");
+        pw.println(" - post process classes, see http://bits.netbeans.org/html+java/dev/net/java/html/js/package-summary.html#post-process");
+        pw.append("However following classes has not been processed from ").println(res);
+        
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(res.openStream()));
+            for (;;) {
+                String line = r.readLine();
+                if (line == null) {
+                    break;
+                }
+                pw.append("  ").println(line);
+            }
+            r.close();
+        } catch (IOException io) {
+            pw.append("Cannot read ").println(res);
+            io.printStackTrace(pw);
+        }
+        pw.println("Cannot initialize asm-5.0.jar!");
+        pw.flush();
+        LOG.log(Level.SEVERE, w.toString(), t);
         return false;
     }
 

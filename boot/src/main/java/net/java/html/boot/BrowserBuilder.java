@@ -283,18 +283,24 @@ public final class BrowserBuilder {
         
         final ClassLoader activeLoader;
         if (loader != null) {
-            if (!FnContext.isJavaScriptCapable(loader)) {
-                throw new IllegalStateException("Loader cannot resolve @JavaScriptBody: " + loader);
+            final URL res = FnContext.isJavaScriptCapable(loader);
+            if (res != null) {
+                throw new IllegalStateException("Loader " + loader + 
+                    " cannot resolve @JavaScriptBody, because of " + res
+                );
             }
             activeLoader = loader;
-        } else if (FnContext.isJavaScriptCapable(myCls.getClassLoader())) {
-            activeLoader = myCls.getClassLoader();
         } else {
-            if (!FnContext.isAsmPresent()) {
-                throw new IllegalStateException("Cannot find asm-5.0.jar classes!");
+            final URL res = FnContext.isJavaScriptCapable(myCls.getClassLoader());
+            if (res == null) {
+                activeLoader = myCls.getClassLoader();
+            } else {
+                if (!FnContext.isAsmPresent(res)) {
+                    throw new IllegalStateException("Cannot find asm-5.0.jar classes!");
+                }
+                FImpl impl = new FImpl(myCls.getClassLoader());
+                activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
             }
-            FImpl impl = new FImpl(myCls.getClassLoader());
-            activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }
         
         final Fn.Presenter dP = dfnr;
