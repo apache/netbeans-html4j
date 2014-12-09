@@ -79,7 +79,7 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
             funcNames[i] = funcArr[i].getFunctionName();
         }
         Object ret = getJSObject();
-        Knockout.wrapModel(new Knockout(model, ret, propArr, funcArr),
+        new Knockout(model, ret, propArr, funcArr).wrapModel(
             ret, 
             propNames, propReadOnly, propValues,
             funcNames

@@ -232,7 +232,7 @@ public abstract class Fn {
      * @since 0.7.6
      */
     public void invokeLater(Object thiz, Object... args) throws Exception {
-        invoke(this, args);
+        invoke(thiz, args);
     }
     
     /** Provides the function implementation access to the presenter provided

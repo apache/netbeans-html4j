@@ -148,9 +148,9 @@ final class Knockout extends WeakReference<Object> {
     @JavaScriptBody(
         javacall = true,
         wait4js = false,
-        args = { "thiz", "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
+        args = { "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 
-          "Object.defineProperty(ret, 'ko4j', { value : thiz });\n"
+          "Object.defineProperty(ret, 'ko4j', { value : this });\n"
         + "function koComputed(index, name, readOnly, value) {\n"
         + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
         + "  function realGetter() {\n"
@@ -203,8 +203,7 @@ final class Knockout extends WeakReference<Object> {
         + "  koExpose(i, funcNames[i]);\n"
         + "}\n"
         )
-    static native void wrapModel(
-        Knockout self,
+    native void wrapModel(
         Object ret, 
         String[] propNames, boolean[] propReadOnly, Object propValues,
         String[] funcNames
