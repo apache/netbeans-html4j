@@ -18,6 +18,7 @@
       <license>COPYING</license>
       <publicPackages />
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
+      <netbeans.compile.on.save>none</netbeans.compile.on.save>
   </properties>
   <modules>
     <module>json</module>

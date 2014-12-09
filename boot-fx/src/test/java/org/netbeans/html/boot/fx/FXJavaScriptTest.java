@@ -47,10 +47,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
+import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 import org.testng.Assert;
+import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 import org.testng.annotations.Factory;
 
 /**
@@ -106,6 +109,11 @@ public class FXJavaScriptTest {
     }
     
     public static void initialized() throws Exception {
+        BrwsrCtx b1 = BrwsrCtx.findDefault(FXJavaScriptTest.class);
+        TestingProvider.assertCalled("Our context created");
+        assertNotSame(b1, BrwsrCtx.EMPTY, "Browser context is not empty");
+        BrwsrCtx b2 = BrwsrCtx.findDefault(FXJavaScriptTest.class);
+        assertSame(b1, b2, "Browser context remains stable");
         Assert.assertSame(
             FXJavaScriptTest.class.getClassLoader(),
             ClassLoader.getSystemClassLoader(),

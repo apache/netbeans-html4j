@@ -42,6 +42,8 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
@@ -58,7 +60,59 @@ import org.netbeans.html.json.spi.PropertyBinding;
  * @author Jaroslav Tulach
  */
 @JavaScriptResource("knockout-3.2.0.debug.js")
-final class Knockout {
+final class Knockout extends WeakReference<Object> {
+    private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue();
+    
+    private PropertyBinding[] props;
+    private FunctionBinding[] funcs;
+    private Object js;
+    private Object strong;
+
+    public Knockout(Object model, Object js, PropertyBinding[] props, FunctionBinding[] funcs) {
+        super(model, QUEUE);
+        this.js = js;
+        this.props = new PropertyBinding[props.length];
+        for (int i = 0; i < props.length; i++) {
+            this.props[i] = props[i].weak();
+        }
+        this.funcs = new FunctionBinding[funcs.length];
+        for (int i = 0; i < funcs.length; i++) {
+            this.funcs[i] = funcs[i].weak();
+        }
+    }
+    
+    static void cleanUp() {
+        for (;;) {
+            Knockout ko = (Knockout)QUEUE.poll();
+            if (ko == null) {
+                return;
+            }
+            clean(ko.js);
+            ko.js = null;
+            ko.props = null;
+            ko.funcs = null;
+        }
+    }
+    
+    final void hold() {
+        strong = get();
+    }
+    
+    final Object getValue(int index) {
+        return props[index].getValue();
+    }
+    
+    final void setValue(int index, Object v) {
+        if (v instanceof Knockout) {
+            v = ((Knockout)v).get();
+        }
+        props[index].setValue(v);
+    }
+    
+    final void call(int index, Object data, Object ev) {
+        funcs[index].call(data, ev);
+    }
+    
     @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" }, 
         wait4js = false,
         body =
@@ -77,11 +131,12 @@ final class Knockout {
         Object model, String prop, Object oldValue, Object newValue
     );
 
-    @JavaScriptBody(args = { "bindings" }, wait4js = false, body = 
+    @JavaScriptBody(args = { "bindings" }, body = 
         "ko['cleanNode'](window['document']['body']);\n" +
-        "ko['applyBindings'](bindings);\n"
+        "ko['applyBindings'](bindings);\n" +
+        "return bindings['ko4j'];\n"
     )
-    native static void applyBindings(Object bindings);
+    native static Object applyBindings(Object bindings);
     
     @JavaScriptBody(args = { "cnt" }, body = 
         "var arr = new Array(cnt);\n" +
@@ -93,17 +148,18 @@ final class Knockout {
     @JavaScriptBody(
         javacall = true,
         wait4js = false,
-        args = {"ret", "model", "propNames", "propReadOnly", "propValues", "propArr", "funcNames", "funcArr"},
+        args = { "thiz", "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 
-          "ret['ko-fx.model'] = model;\n"
-        + "function koComputed(name, readOnly, value, prop) {\n"
+          "Object.defineProperty(ret, 'ko4j', { value : thiz });\n"
+        + "function koComputed(index, name, readOnly, value) {\n"
         + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
         + "  function realGetter() {\n"
+        + "    var self = ret['ko4j'];\n"
         + "    try {\n"
-        + "      var v = prop.@org.netbeans.html.json.spi.PropertyBinding::getValue()();\n"
+        + "      var v = self ? self.@org.netbeans.html.ko4j.Knockout::getValue(I)(index) : null;\n"
         + "      return v;\n"
         + "    } catch (e) {\n"
-        + "      alert(\"Cannot call getValue on \" + model + \" prop: \" + name + \" error: \" + e);\n"
+        + "      alert(\"Cannot call getValue on \" + self + \" prop: \" + name + \" error: \" + e);\n"
         + "    }\n"
         + "  }\n"
         + "  var activeGetter = function() { return value; };\n"
@@ -119,8 +175,11 @@ final class Knockout {
         + "  };\n"
         + "  if (!readOnly) {\n"
         + "    bnd['write'] = function(val) {\n"
-        + "      var model = val['ko-fx.model'];\n"
-        + "      prop.@org.netbeans.html.json.spi.PropertyBinding::setValue(Ljava/lang/Object;)(model ? model : val);\n"
+        + "      var self = ret['ko4j'];\n"
+        + "      if (!self) return;\n"
+        + "      var model = val['ko4j'];\n"
+        + "      var s = ret['ko4j'];\n"
+        + "      s.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);\n"
         + "    };\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"
@@ -131,26 +190,43 @@ final class Knockout {
         + "  ret[name] = cmpt;\n"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
-        + "  koComputed(propNames[i], propReadOnly[i], propValues[i], propArr[i]);\n"
+        + "  koComputed(i, propNames[i], propReadOnly[i], propValues[i]);\n"
         + "}\n"
-        + "function koExpose(name, func) {\n"
+        + "function koExpose(index, name) {\n"
         + "  ret[name] = function(data, ev) {\n"
-        + "    func.@org.netbeans.html.json.spi.FunctionBinding::call(Ljava/lang/Object;Ljava/lang/Object;)(data, ev);\n"
+        + "    var self = ret['ko4j'];\n"
+        + "    if (!self) return;\n"
+        + "    self.@org.netbeans.html.ko4j.Knockout::call(ILjava/lang/Object;Ljava/lang/Object;)(index, data, ev);\n"
         + "  };\n"
         + "}\n"
         + "for (var i = 0; i < funcNames.length; i++) {\n"
-        + "  koExpose(funcNames[i], funcArr[i]);\n"
+        + "  koExpose(i, funcNames[i]);\n"
         + "}\n"
         )
     static native void wrapModel(
-        Object ret, Object model,
-        String[] propNames, boolean[] propReadOnly, Object propValues, PropertyBinding[] propArr,
-        String[] funcNames, FunctionBinding[] funcArr
+        Knockout self,
+        Object ret, 
+        String[] propNames, boolean[] propReadOnly, Object propValues,
+        String[] funcNames
     );
     
-    @JavaScriptBody(args = { "o" }, body = "return o['ko-fx.model'] ? o['ko-fx.model'] : o;")
+    @JavaScriptBody(args = { "js" }, wait4js = false, body = 
+        "delete js['ko4j'];\n" +
+        "for (var p in js) {\n" +
+        "  delete js[p];\n" +
+        "};\n" +
+        "\n"
+    )
+    private static native void clean(Object js);
+    
+    @JavaScriptBody(args = { "o" }, body = "return o['ko4j'] ? o['ko4j'] : o;")
     private static native Object toModelImpl(Object wrapper);
     static Object toModel(Object wrapper) {
-        return toModelImpl(wrapper);
+        Object o = toModelImpl(wrapper);
+        if (o instanceof Knockout) {
+            return ((Knockout)o).get();
+        } else {
+            return o;
+        }
     }
 }

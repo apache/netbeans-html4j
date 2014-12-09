@@ -50,7 +50,6 @@ import org.netbeans.html.json.spi.WSTransfer;
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
  * to access the functionality.
- * <p>
  *
  * @author Jaroslav Tulach
  */

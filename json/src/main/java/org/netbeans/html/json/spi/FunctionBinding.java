@@ -42,6 +42,8 @@
  */
 package org.netbeans.html.json.spi;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
@@ -68,23 +70,31 @@ public abstract class FunctionBinding {
      * @param ev event (with additional properties) that triggered the event
      */
     public abstract void call(Object data, Object ev);
+    
+    /** Returns identical version of the binding, but one that holds on the
+     * original model object via weak reference.
+     * 
+     * @return binding that uses weak reference
+     * @since 1.1
+     */
+    public abstract FunctionBinding weak();
 
     static <M> FunctionBinding registerFunction(String name, int index, M model, Proto.Type<M> access) {
-        return new Impl<M>(name, index, model, access);
+        return new Impl<M>(model, name, index, access);
     }
     
-    private static final class Impl<M> extends FunctionBinding {
+    private static abstract class AImpl<M> extends FunctionBinding {
         final String name;
-        private final M model;
-        private final Proto.Type<M> access;
-        private final int index;
+        final Proto.Type<M> access;
+        final int index;
 
-        public Impl(String name, int index, M model, Proto.Type<M> access) {
+        public AImpl(String name, int index, Proto.Type<M> access) {
             this.name = name;
             this.index = index;
-            this.model = model;
             this.access = access;
         }
+        
+        protected abstract M model();
 
         @Override
         public String getFunctionName() {
@@ -93,6 +103,10 @@ public abstract class FunctionBinding {
 
         @Override
         public void call(final Object data, final Object ev) {
+            final M model = model();
+            if (model == null) {
+                return;
+            }
             BrwsrCtx ctx = access.protoFor(model).getContext();
             class Dispatch implements Runnable {
                 @Override
@@ -105,6 +119,44 @@ public abstract class FunctionBinding {
                 }
             }
             ctx.execute(new Dispatch());
+        }
+    }
+    
+    private static final class Impl<M> extends AImpl<M> {
+        private final M model;
+
+        public Impl(M model, String name, int index, Proto.Type<M> access) {
+            super(name, index, access);
+            this.model = model;
+        }
+
+        @Override
+        protected M model() {
+            return model;
+        }
+
+        @Override
+        public FunctionBinding weak() {
+            return new Weak(model, name, index, access);
+        }
+    }
+    
+    private static final class Weak<M> extends AImpl<M> {
+        private final Reference<M> ref;
+        
+        public Weak(M model, String name, int index, Proto.Type<M> access) {
+            super(name, index, access);
+            this.ref = new WeakReference<M>(model);
+        }
+
+        @Override
+        protected M model() {
+            return ref.get();
+        }
+
+        @Override
+        public FunctionBinding weak() {
+            return this;
         }
     }
 }

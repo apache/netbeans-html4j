@@ -79,9 +79,10 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
             funcNames[i] = funcArr[i].getFunctionName();
         }
         Object ret = getJSObject();
-        Knockout.wrapModel(ret, model, 
-            propNames, propReadOnly, propValues, propArr,
-            funcNames, funcArr
+        Knockout.wrapModel(new Knockout(model, ret, propArr, funcArr),
+            ret, 
+            propNames, propReadOnly, propValues,
+            funcNames
         );
         return ret;
     }
@@ -89,11 +90,16 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
     private Object getJSObject() {
         int len = 64;
         if (jsObjects != null && jsIndex < (len = jsObjects.length)) {
-            return jsObjects[jsIndex++];
+            Object ret = jsObjects[jsIndex];
+            jsObjects[jsIndex] = null;
+            jsIndex++;
+            return ret;
         }
         jsObjects = Knockout.allocJS(len * 2);
         jsIndex = 1;
-        return jsObjects[0];
+        Object ret = jsObjects[0];
+        jsObjects[0] = null;
+        return ret;
     }
     
     @Override
@@ -108,11 +114,13 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
 
     @Override
     public void valueHasMutated(Object data, String propertyName) {
+        Knockout.cleanUp();
         Knockout.valueHasMutated(data, propertyName, null, null);
     }
     
     @Override
     public void valueHasMutated(Object data, String propertyName, Object oldValue, Object newValue) {
+        Knockout.cleanUp();
         Knockout.valueHasMutated(data, propertyName, oldValue, newValue);
     }
 
@@ -123,7 +131,10 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
 
     @Override
     public void applyBindings(Object data) {
-        Knockout.applyBindings(data);
+        Object ko = Knockout.applyBindings(data);
+        if (ko instanceof Knockout) {
+            ((Knockout)ko).hold();
+        }
     }
 
     @Override

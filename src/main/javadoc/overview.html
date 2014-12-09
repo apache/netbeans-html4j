@@ -94,6 +94,12 @@
             {@link org.netbeans.html.json.spi.Transfer Java based JSON} and 
             {@link org.netbeans.html.json.spi.WSTransfer WebSocket} implementations
             under the name <b>tyrus</b>.
+            Memory model when using Knockout bindings has been improved
+            (required additions of two new methods:
+            {@link org.netbeans.html.json.spi.PropertyBinding#weak()} and
+            {@link org.netbeans.html.json.spi.FunctionBinding#weak()}) and
+            now the Java {@link net.java.html.json.Model models} can garbage collect,
+            when no longer used.
         </p>
         
         <h3>What's New in Version 1.0?</h3>

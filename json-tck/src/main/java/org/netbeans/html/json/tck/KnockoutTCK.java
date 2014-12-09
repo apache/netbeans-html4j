@@ -46,6 +46,7 @@ import java.net.URI;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
+import net.java.html.json.tests.GCKnockoutTest;
 import net.java.html.json.tests.JSONTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.MinesTest;
@@ -125,7 +126,8 @@ public abstract class KnockoutTCK {
             KnockoutTest.class,
             MinesTest.class,
             OperationsTest.class,
-            WebSocketTest.class
+            WebSocketTest.class,
+            GCKnockoutTest.class
         };
     }
 

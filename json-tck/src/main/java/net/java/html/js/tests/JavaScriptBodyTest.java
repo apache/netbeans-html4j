@@ -43,6 +43,8 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
@@ -65,14 +67,14 @@ public class JavaScriptBodyTest {
     
     @KOTest public void accessJsObject() {
         Object o = Bodies.instance(10);
-        int ten = Bodies.readX(o);
+        int ten = Bodies.readIntX(o);
         assert ten == 10 : "Expecting ten: " + ten;
     }
 
     @KOTest public void callWithNoReturnType() {
         Object o = Bodies.instance(10);
         Bodies.incrementX(o);
-        int ten = Bodies.readX(o);
+        int ten = Bodies.readIntX(o);
         assert ten == 11 : "Expecting eleven: " + ten;
     }
     
@@ -211,8 +213,9 @@ public class JavaScriptBodyTest {
         assert b == Boolean.TRUE : "Should return true";
     }
     
-    @KOTest public void callbackWithParameters() {
-        int res = Bodies.sumIndirect(new Sum());
+    @KOTest public void callbackWithParameters() throws InterruptedException {
+        Sum s = new Sum();
+        int res = Bodies.sumIndirect(s);
         assert res == 42 : "Expecting 42";
     }
     

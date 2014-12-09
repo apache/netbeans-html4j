@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.json.tck;
 
+import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
@@ -65,7 +66,7 @@ public abstract class JavaScriptTCK {
      */
     protected static Class<?>[] testClasses() {
         return new Class[] { 
-            JavaScriptBodyTest.class
+            JavaScriptBodyTest.class, GCBodyTest.class
         };
     }
     
