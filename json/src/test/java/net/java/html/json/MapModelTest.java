@@ -238,6 +238,37 @@ public class MapModelTest {
         assertEquals(one.changes, 2, "Snd change");
     }
 
+    @Test public void functionWithParameters() {
+        People p = Models.bind(new People(), c);
+        p.getNicknames().add("One");
+        p.getNicknames().add("Two");
+        p.getNicknames().add("Three");
+
+        Map m = (Map)Models.toRaw(p);
+        Object o = m.get("inInnerClass");
+        assertNotNull(o, "functiton is available");
+        assertEquals(o.getClass(), One.class);
+        One one = (One)o;
+        
+        Map<String,Object> obj = new HashMap<String, Object>();
+        obj.put("nick", "newNick");
+        obj.put("x", 42);
+        obj.put("y", 7.7f);
+        final Person data = new Person("a", "b", Sex.MALE);
+        
+        one.fb.call(data, obj);
+
+        assertEquals(p.getInfo().size(), 1, "a+b is there: " + p.getInfo());
+        assertEquals(p.getInfo().get(0), data, "Expecting data: " + p.getInfo());
+        
+        assertEquals(p.getNicknames().size(), 4, "One more nickname: " + p.getNicknames());
+        assertEquals(p.getNicknames().get(3), "newNick");
+        
+        assertEquals(p.getAge().size(), 2, "Two new values: " + p.getAge());
+        assertEquals(p.getAge().get(0).intValue(), 42);
+        assertEquals(p.getAge().get(1).intValue(), 7);
+    }
+    
     static final class One {
         int changes;
         final PropertyBinding pb;

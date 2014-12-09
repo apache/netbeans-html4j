@@ -44,6 +44,7 @@ package net.java.html.json;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -102,7 +103,11 @@ final class PersonImpl {
             p.getAge().add(42);
         }
         
-        @Function static void inInnerClass(People p) throws IOException {
+        @Function static void inInnerClass(People p, Person data, int x, double y, String nick) throws IOException {
+            p.getInfo().add(data);
+            p.getAge().add(x);
+            p.getAge().add((int)y);
+            p.getNicknames().add(nick);
         }
     }
 }
