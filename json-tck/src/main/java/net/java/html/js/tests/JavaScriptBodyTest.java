@@ -43,8 +43,6 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
