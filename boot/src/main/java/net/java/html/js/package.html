@@ -197,7 +197,41 @@
         passing of arrays works OK. It is however good to keep it in mind to 
         avoid unwanted surprises.
         
+        <h3>Instance Reference to JavaScript Object</h3>
+        
+        When writing wrappers around existing JavaScript libraries, it may be
+        useful to hold a reference to some JavaScript object from a Java 
+        instance and use it later.
+<pre>
+<b>class</b> WrapperAroundJsObj {
+  <b>private final</b> Object js;
+
+  WrapperAroundJsObj() {
+    js = initValue();
+  }
+
+  <b>public void</b> set(int v) {
+    setValue(js, v);
+  }
+
+  {@link net.java.html.js.JavaScriptBody @JavaScriptBody}(args = {}, body = "return { value : 0 };")
+  <b>private static native</b> Object initValue();
+
+  {@link net.java.html.js.JavaScriptBody @JavaScriptBody}(
+    args = { "js", "v" }, body = "js.value = v;", wait4js = false
+  )
+  <b>private static native void</b> setValue(Object js, int v);
+}            
+</pre>      
+        The type of the Java reference is {@link java.lang.Object}. 
+        From a Java perspective it has no additional methods or fields, however
+        its properties can be manipulated from JavaScript. Send the object back
+        to JavaScript by passing it as a parameter of some method 
+        (like the <code>setValue</code> one) and perform necessary JavaScript
+        calls or changes on it.
+        
         <h3>Post Process Classes</h3>
+        <a name="post-process"></a>
 
         Classes with {@link net.java.html.js.JavaScriptBody} annotated methods need to
         be post processed before they can be used - e.g. their <code>native</code>
@@ -257,7 +291,9 @@ $ java -javaagent:jarpath=net.java.html.boot-x.y.jar
         will create a special classloader to that does the processing before
         loading the bytecode into the virtual machine.
         <p></p>
-        The options are rich, however to avoid any troubles, it is recommended
+        The options are rich, however to avoid any troubles (as the runtime
+        processing needs to also include <code>asm-5.0.jar</code> on application
+        classpath), it is recommended
         to perform the <b>compile time</b> processing.
         
         <h3>Getting Started</h3>

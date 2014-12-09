@@ -44,8 +44,10 @@ package org.netbeans.html.context.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import net.java.html.BrwsrCtx;
+import org.netbeans.html.context.spi.Contexts;
 
 /** Implementation detail. Holds list of technologies for particular
  * {@link BrwsrCtx}.
@@ -54,13 +56,15 @@ import net.java.html.BrwsrCtx;
  */
 public final class CtxImpl {
     private final List<Bind<?>> techs;
+    private final Object[] context;
     
-    public CtxImpl() {
-        techs = new ArrayList<Bind<?>>();
+    public CtxImpl(Object[] context) {
+        this(context, new ArrayList<Bind<?>>());
     }
     
-    private CtxImpl(List<Bind<?>> techs) {
+    private CtxImpl(Object[] context, List<Bind<?>> techs) {
         this.techs = techs;
+        this.context = context;
     }
     
     public static <Tech> Tech find(BrwsrCtx context, Class<Tech> technology) {
@@ -74,9 +78,9 @@ public final class CtxImpl {
     }
 
     public BrwsrCtx build() {
-        Collections.sort(techs);
+        Collections.sort(techs, new BindCompare());
         final List<Bind<?>> arr = Collections.unmodifiableList(techs);
-        CtxImpl impl = new CtxImpl(arr);
+        CtxImpl impl = new CtxImpl(context, arr);
         BrwsrCtx ctx = CtxAccssr.getDefault().newContext(impl);
         return ctx;
     }
@@ -85,7 +89,7 @@ public final class CtxImpl {
         techs.add(new Bind<Tech>(type, impl, priority));
     }
     
-    private static final class Bind<Tech> implements Comparable<Bind<?>> {
+    private static final class Bind<Tech> {
         private final Class<Tech> clazz;
         private final Tech impl;
         private final int priority;
@@ -97,16 +101,39 @@ public final class CtxImpl {
         }
 
         @Override
-        public int compareTo(Bind<?> o) {
-            if (priority != o.priority) {
-                return priority - o.priority;
-            }
-            return clazz.getName().compareTo(o.clazz.getName());
-        }
-
-        @Override
         public String toString() {
             return "Bind{" + "clazz=" + clazz + "@" + clazz.getClassLoader() + ", impl=" + impl + ", priority=" + priority + '}';
         }
     }
+    
+    private final class BindCompare implements Comparator<Bind<?>> {
+        boolean isPrefered(Bind<?> b) {
+            final Class<?> implClazz = b.impl.getClass();
+            Contexts.Id id = implClazz.getAnnotation(Contexts.Id.class);
+            if (id == null) {
+                return false;
+            }
+            for (String v : id.value()) {
+                for (Object c : context) {
+                    if (v.equals(c)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        @Override
+        public int compare(Bind<?> o1, Bind<?> o2) {
+            boolean p1 = isPrefered(o1);
+            boolean p2 = isPrefered(o2);
+            if (p1 != p2) {
+                return p1 ? -1 : 1;
+            }
+            if (o1.priority != o2.priority) {
+                return o1.priority - o2.priority;
+            }
+            return o1.clazz.getName().compareTo(o2.clazz.getName());
+        }
+    } // end of BindCompare
 }

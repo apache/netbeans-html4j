@@ -35,6 +35,7 @@
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
     <module>boot-script</module>
+    <module>boot-agent-test</module>
   </modules>
   <licenses>
       <license>
@@ -246,7 +247,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>4.1</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
           <groupId>org.netbeans.api</groupId>

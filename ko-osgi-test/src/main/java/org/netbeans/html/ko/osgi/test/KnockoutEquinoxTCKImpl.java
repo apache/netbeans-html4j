@@ -46,6 +46,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -135,16 +136,9 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     @Override
     public BrwsrCtx createContext() {
         try {
-            Class<?> fxCls = loadOSGiClass(
-                "org.netbeans.html.ko4j.FXContext",
-                FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class).getBundleContext()
-            );
-            final Constructor<?> cnstr = fxCls.getConstructor(Fn.Presenter.class);
-            cnstr.setAccessible(true);
-            Object fx = cnstr.newInstance(browserContext);
             Contexts.Builder cb = Contexts.newBuilder().
-                register(Technology.class, (Technology)fx, 10).
-                register(Transfer.class, (Transfer)fx, 10).
+                register(Technology.class, (Technology)osgiInstance("KOTech"), 10).
+                register(Transfer.class, (Transfer)osgiInstance("KOTransfer"), 10).
                 register(Executor.class, (Executor)browserContext, 10);
 //        if (fx.areWebSocketsSupported()) {
 //            cb.register(WSTransfer.class, fx, 10);
@@ -153,6 +147,16 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
+    }
+    private Object osgiInstance(String simpleName) throws IllegalAccessException, SecurityException, IllegalArgumentException, Exception, NoSuchMethodException, InstantiationException, InvocationTargetException {
+        Class<?> fxCls = loadOSGiClass(
+                "org.netbeans.html.ko4j." + simpleName,
+                FrameworkUtil.getBundle(KnockoutEquinoxTCKImpl.class).getBundleContext()
+        );
+        final Constructor<?> cnstr = fxCls.getDeclaredConstructor();
+        cnstr.setAccessible(true);
+        Object fx = cnstr.newInstance();
+        return fx;
     }
 
     @Override

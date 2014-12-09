@@ -40,53 +40,86 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.html.json.spi;
+package org.netbeans.html.bootagent;
 
-import net.java.html.BrwsrCtx;
-import org.netbeans.html.context.spi.Contexts.Provider;
-import org.netbeans.html.context.spi.Contexts.Id;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javafx.application.Platform;
+import org.netbeans.html.boot.impl.FnContext;
+import org.netbeans.html.boot.spi.Fn;
+import org.testng.IHookCallBack;
+import org.testng.IHookable;
+import org.testng.ITest;
+import org.testng.ITestResult;
+import org.testng.annotations.Test;
 
-/** Interface for providers of WebSocket protocol. Register into a 
- * {@link BrwsrCtx context} in your own {@link Provider}.
- * Since introduction of {@link Id technology identifiers} one can choose between
- * different background implementations to handle the conversion and
- * communication requests. The known providers include
- * <code>org.netbeans.html:ko4j</code> module which registers 
- * a native browser implementation called <b>websocket</b>, and a
- * <code>org.netbeans.html:ko-ws-tyrus</code> module which registers 
- * Java based implementation named <b>tyrus</b>.
+/**
  *
  * @author Jaroslav Tulach
- * @param <WebSocket> internal implementation type representing the socket
- * @since 0.5
  */
-public interface WSTransfer<WebSocket> {
-    /** Initializes a web socket. The <code>callback</code> object should 
-     * have mostly empty values: {@link JSONCall#isDoOutput()} should be 
-     * <code>false</code> and thus there should be no {@link JSONCall#getMessage()}.
-     * The method of connection {@link JSONCall#getMethod()} is "WebSocket".
-     * Once the connection is open call {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess(null)}.
-     * When the server sends some data then, pass them to 
-     * {@link JSONCall#notifySuccess(java.lang.Object) notifySuccess} method
-     * as well. If there is an error call {@link JSONCall#notifyError(java.lang.Throwable)}.
-     * 
-     * @param url the URL to connect to
-     * @param callback a way to provide results back to the client
-     * @return your object representing the established web socket
-     */
-    public WebSocket open(String url, JSONCall callback);
+public final class KOFx implements ITest, IHookable, Runnable {
+    private final Fn.Presenter p;
+    private final Method m;
+    private Object result;
+    private Object inst;
 
-    /** Sends data to the server. The most important value
-     * of the <code>data</code> parameter is {@link JSONCall#getMessage()},
-     * rest can be ignored.
-     * 
-     * @param socket internal representation of the socket
-     * @param data the message to be sent
-     */
-    public void send(WebSocket socket, JSONCall data);
+    KOFx(Fn.Presenter p, Method m) {
+        this.p = p;
+        this.m = m;
+    }
 
-    /** A request to close the socket.
-     * @param socket internal representation of the socket
-     */
-    public void close(WebSocket socket);
+    @Override
+    public String getTestName() {
+        return m.getName();
+    }
+
+    @Test
+    public synchronized void executeTest() throws Exception {
+        if (result == null) {
+            Platform.runLater(this);
+            wait();
+        }
+        if (result instanceof Exception) {
+            throw (Exception)result;
+        }
+        if (result instanceof Error) {
+            throw (Error)result;
+        }
+    }
+
+    @Override
+    public synchronized void run() {
+        boolean notify = true;
+        try {
+            FnContext.currentPresenter(p);
+            if (inst == null) {
+                inst = m.getDeclaringClass().newInstance();
+            }
+            result = m.invoke(inst);
+            if (result == null) {
+                result = this;
+            }
+        } catch (InvocationTargetException ex) {
+            Throwable r = ex.getTargetException();
+            if (r instanceof InterruptedException) {
+                notify = false;
+                Platform.runLater(this);
+                return;
+            }
+            result = r;
+        } catch (Exception ex) {
+            result = ex;
+        } finally {
+            if (notify) {
+                notifyAll();
+            }
+            FnContext.currentPresenter(null);
+        }
+    }
+
+    @Override
+    public void run(IHookCallBack ihcb, ITestResult itr) {
+        ihcb.runTestMethod(itr);
+    }
+    
 }

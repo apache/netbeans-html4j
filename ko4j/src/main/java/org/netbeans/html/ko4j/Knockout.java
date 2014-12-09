@@ -229,9 +229,4 @@ final class Knockout extends WeakReference<Object> {
             return o;
         }
     }
-    
-    @JavaScriptBody(args = {}, body = "if (window['WebSocket']) return true; else return false;")
-    static final boolean areWebSocketsSupported() {
-        return false;
-    }
 }

@@ -63,7 +63,9 @@ import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Id;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.impl.FnUtils;
@@ -120,6 +122,15 @@ public final class BrowserBuilder {
     /** Entry method to obtain a new browser builder. Follow by calling 
      * its instance methods like {@link #loadClass(java.lang.Class)} and
      * {@link #loadPage(java.lang.String)}.
+     * Since introduction of {@link Id technology identifiers} the 
+     * provided <code>context</code> objects are also passed to the 
+     * {@link BrwsrCtx context} when it is being 
+     * {@link Contexts#newBuilder(java.lang.Object...) created}
+     * and can influence the selection
+     * of available technologies 
+     * (like {@link org.netbeans.html.json.spi.Technology},
+     * {@link org.netbeans.html.json.spi.Transfer} or
+     * {@link org.netbeans.html.json.spi.WSTransfer}) by name.
      * 
      * @param context any instances that should be available to the builder -
      *   implementation dependant
@@ -210,7 +221,7 @@ public final class BrowserBuilder {
     }
 
     /** Loader to use when searching for classes to initialize. 
-     * If specified, this loader is going to be used to load {@link Fn.Presenter}
+     * If specified, this loader is going to be used to load {@link Presenter}
      * and {@link Contexts#fillInByProviders(java.lang.Class, org.netbeans.html.context.spi.Contexts.Builder) fill} {@link BrwsrCtx} in.
      * Specifying special classloader may be useful in modular systems, 
      * like OSGi, where one needs to load classes from many otherwise independent
@@ -272,13 +283,16 @@ public final class BrowserBuilder {
         
         final ClassLoader activeLoader;
         if (loader != null) {
-            if (!FnUtils.isJavaScriptCapable(loader)) {
+            if (!FnContext.isJavaScriptCapable(loader)) {
                 throw new IllegalStateException("Loader cannot resolve @JavaScriptBody: " + loader);
             }
             activeLoader = loader;
-        } else if (FnUtils.isJavaScriptCapable(myCls.getClassLoader())) {
+        } else if (FnContext.isJavaScriptCapable(myCls.getClassLoader())) {
             activeLoader = myCls.getClassLoader();
         } else {
+            if (!FnContext.isAsmPresent()) {
+                throw new IllegalStateException("Cannot find asm-5.0.jar classes!");
+            }
             FImpl impl = new FImpl(myCls.getClassLoader());
             activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
         }
@@ -297,7 +311,7 @@ public final class BrowserBuilder {
                     if (browserClass != null) {
                         browserClass[0] = newClazz;
                     }
-                    Contexts.Builder cb = Contexts.newBuilder();
+                    Contexts.Builder cb = Contexts.newBuilder(context);
                     if (!Contexts.fillInByProviders(newClazz, cb)) {
                         LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
                     }

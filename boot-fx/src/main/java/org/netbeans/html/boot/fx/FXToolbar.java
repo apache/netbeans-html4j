@@ -42,8 +42,6 @@
  */
 package org.netbeans.html.boot.fx;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -55,10 +53,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -69,6 +68,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 final class FXToolbar extends ToolBar {
     private final ArrayList<ResizeBtn> resizeButtons;
@@ -185,21 +187,25 @@ final class FXToolbar extends ToolBar {
 
     }
 
-    private void _resize( final double width, final double height ) {
-        ScrollPane scroll;
-        if (container.getCenter() == webView) {
-            scroll = new ScrollPane();
-            scroll.setContent(webView);
-            container.setCenter(scroll);
-        } else {
-            scroll = (ScrollPane) container.getCenter();
-        }
-        scroll.setPrefViewportWidth( width );
-        scroll.setPrefViewportHeight(height );
-        webView.setMaxWidth( width );
-        webView.setMaxHeight( height );
-        webView.setMinWidth( width );
-        webView.setMinHeight( height );
+    private void _resize(final double width, final double height) {
+        Window window = container.getScene().getWindow();
+        // size difference between root node and window depends on OS and Decorations
+        double diffY = window.getHeight() - container.getHeight();
+        double diffX = window.getWidth() - container.getWidth();
+
+        webView.setMaxWidth(width);
+        webView.setMaxHeight(height);
+        webView.setMinWidth(width);
+        webView.setMinHeight(height);
+        javafx.geometry.Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+        double scaleX = screenBounds.getWidth() / ( width + diffX );
+        double scaleY = screenBounds.getHeight() / ( height + diffY );
+        // calculate scale factor if too big for device, the .1 adds some padding
+        double scale = Math.min(Math.min(scaleX, scaleY), 1.1) - .1;
+        webView.setScaleX(scale);
+        webView.setScaleY(scale);
+        container.getScene().setRoot(new Group());
+        ((Stage)window).setScene(new Scene(container, width * scale, height * scale));
     }
 
     private void _autofit() {

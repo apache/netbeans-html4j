@@ -15,6 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <bundleSymbolicName>org.netbeans.html.ko4j</bundleSymbolicName>
+    <netbeans.compile.on.save>none</netbeans.compile.on.save> 
   </properties>
   <build>
       <plugins>
@@ -92,7 +93,6 @@
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <scope>test</scope>
-        <version>3.1.0</version>
     </dependency>
   </dependencies>
     <description>Binds net.java.html.json APIs together with knockout.js</description>

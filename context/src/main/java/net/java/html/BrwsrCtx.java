@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 import org.netbeans.html.context.impl.CtxAccssr;
 import org.netbeans.html.context.impl.CtxImpl;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Id;
 
 /** Represents context where the <code>net.java.html.json.Model</code>
  * and other objects
@@ -54,7 +55,12 @@ import org.netbeans.html.context.spi.Contexts;
  * The context is also associated with the actual HTML technology
  * in the HTML page - there is likely to be different context for 
  * <a href="http://knockoutjs.com">knockout.js</a> and different one
- * for <a href="http://angularjs.org">angular</a>.
+ * for <a href="http://angularjs.org">angular</a>. Since version 1.1
+ * the content of contexts can be selected by registering
+ * implementations under specific
+ * {@link Id technology identifiers} and requesting them during 
+ * {@link Contexts#newBuilder(java.lang.Object...) construction} of the
+ * context.
  *
  * @author Jaroslav Tulach
  */

@@ -78,6 +78,22 @@
         <h3>What's New in Version 1.1?</h3>
         
         <p>
+            The content of a {@link net.java.html.BrwsrCtx context}
+            can be selected by registering implementations under specific
+            {@link org.netbeans.html.context.spi.Contexts.Id technology identifiers} 
+            and requesting them during 
+            {@link org.netbeans.html.context.spi.Contexts#newBuilder(java.lang.Object...) construction} 
+            of the context. <code>org.netbeans.html:ko4j</code> module's implementation
+            offers <b>ko4j</b>, <b>xhr</b> and <b>websocket</b> identifiers
+            for its registered services 
+            (e.g. {@link org.netbeans.html.json.spi.Technology},
+            {@link org.netbeans.html.json.spi.Transfer} and
+            {@link org.netbeans.html.json.spi.WSTransfer}).
+            <code>org.netbeans.html:ko-ws-tyrus</code>
+            module registers its 
+            {@link org.netbeans.html.json.spi.Transfer Java based JSON} and 
+            {@link org.netbeans.html.json.spi.WSTransfer WebSocket} implementations
+            under the name <b>tyrus</b>.
             Memory model when using Knockout bindings has been improved
             (required additions of two new methods:
             {@link org.netbeans.html.json.spi.PropertyBinding#weak()} and
@@ -107,6 +123,28 @@
             prevent endless debugging when one forgets to do so.
         </p>
         
+        <p>
+        What's new in older versions? Click the 
+        <a href="#" onclick="return showHistoric(true)">link</a> 
+        to view even more 
+        <a href="#" onclick="return showHistoric(true)">historic changes</a> below:
+        </p>
+        
+        <a name="historic.changes"></a>
+        <div id="historic.changes">
+            <script>
+            function showHistoric(show) {
+                var e = document.getElementById("historic.changes");
+                if (show) {
+                    e.style.display="block";
+                } else {
+                    e.style.display="none";
+                }
+                return false;
+            }
+            showHistoric(false);
+            </script>
+            
         <h3>What's New in Version 0.9?</h3>
         
         <p>
@@ -173,7 +211,7 @@
         </p>
         
         
-        <h3>What's New in Older Versions?</h3>
+        <h3>What's New in 0.7.x Versions?</h3>
         
         <p>
             {@link net.java.html.js.JavaScriptBody} annotation has new attribute
@@ -190,6 +228,7 @@
             See example 
             {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable) using Java timer}.
         </p>
+        </div>
         
         <h3>Interesting Entry Points</h3>
         

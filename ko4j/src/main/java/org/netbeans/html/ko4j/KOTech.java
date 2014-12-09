@@ -42,20 +42,11 @@
  */
 package org.netbeans.html.ko4j;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.util.logging.Logger;
-import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.FunctionBinding;
-import org.netbeans.html.json.spi.JSONCall;
 import org.netbeans.html.json.spi.PropertyBinding;
 import org.netbeans.html.json.spi.Technology;
-import org.netbeans.html.json.spi.Transfer;
-import org.netbeans.html.json.spi.WSTransfer;
+import static org.netbeans.html.ko4j.KO4J.LOG;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -64,14 +55,13 @@ import org.netbeans.html.json.spi.WSTransfer;
  *
  * @author Jaroslav Tulach
  */
-final class FXContext
-implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>,
-Transfer, WSTransfer<LoadWS> {
-    static final Logger LOG = Logger.getLogger(FXContext.class.getName());
+@Contexts.Id("ko4j")
+final class KOTech
+implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
     private Object[] jsObjects;
     private int jsIndex;
 
-    public FXContext(Fn.Presenter browserContext) {
+    public KOTech() {
     }
     
     @Override
@@ -151,93 +141,15 @@ Transfer, WSTransfer<LoadWS> {
     public Object wrapArray(Object[] arr) {
         return arr;
     }
-
+    
     @Override
-    public void extract(Object obj, String[] props, Object[] values) {
-        LoadJSON.extractJSON(obj, props, values);
-    }
-
-    @Override
-    public void loadJSON(final JSONCall call) {
-        if (call.isJSONP()) {
-            String me = LoadJSON.createJSONP(call);
-            LoadJSON.loadJSONP(call.composeURL(me), me);
-        } else {
-            String data = null;
-            if (call.isDoOutput()) {
-                try {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    call.writeData(bos);
-                    data = new String(bos.toByteArray(), "UTF-8");
-                } catch (IOException ex) {
-                    call.notifyError(ex);
-                }
-            }
-            LoadJSON.loadJSON(call.composeURL(null), call, call.getMethod(), data);
-        }
-    }
+    public void runSafe(final Runnable r) {
+        LOG.warning("Technology.runSafe has been deprecated. Use BrwsrCtx.execute!");
+        r.run();
+    }    
 
     @Override
     public <M> M toModel(Class<M> modelClass, Object data) {
         return modelClass.cast(Knockout.toModel(data));
     }
-
-    @Override
-    public Object toJSON(InputStream is) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        InputStreamReader r = new InputStreamReader(is);
-        for (;;) {
-            int ch = r.read();
-            if (ch == -1) {
-                break;
-            }
-            sb.append((char)ch);
-        }
-        return LoadJSON.parse(sb.toString());
-    }
-
-    @Override
-    public void runSafe(final Runnable r) {
-        LOG.warning("Technology.runSafe has been deprecated. Use BrwsrCtx.execute!");
-        r.run();
-    }
-
-    @Override
-    public LoadWS open(String url, JSONCall onReply) {
-        return new LoadWS(onReply, url);
-    }
-
-    @Override
-    public void send(LoadWS socket, JSONCall data) {
-        socket.send(data);
-    }
-
-    @Override
-    public void close(LoadWS socket) {
-        socket.close();
-    }
-
-    boolean areWebSocketsSupported() {
-        return Knockout.areWebSocketsSupported();
-    }
-
-    private static final class TrueFn extends Fn implements Fn.Presenter {
-        @Override
-        public Object invoke(Object thiz, Object... args) throws Exception {
-            return true;
-        }
-
-        @Override
-        public Fn defineFn(String code, String... names) {
-            return this;
-        }
-
-        @Override
-        public void displayPage(URL page, Runnable onPageLoad) {
-        }
-
-        @Override
-        public void loadScript(Reader code) throws Exception {
-        }
-    } // end of TrueFn
 }
