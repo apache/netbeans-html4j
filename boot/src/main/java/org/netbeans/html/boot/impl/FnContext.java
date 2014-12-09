@@ -75,7 +75,7 @@ public final class FnContext implements Closeable {
     public static boolean isAsmPresent() {
         Throwable t;
         try {
-            Class.forName(Opcodes.class.getName());
+            Class.forName("org.objectweb.asm.Opcodes"); // NOI18N
             return true;
         } catch (LinkageError ex) {
             t = ex;
