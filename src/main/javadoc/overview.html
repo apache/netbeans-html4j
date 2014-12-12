@@ -99,7 +99,11 @@
             {@link org.netbeans.html.json.spi.PropertyBinding#weak()} and
             {@link org.netbeans.html.json.spi.FunctionBinding#weak()}) and
             now the Java {@link net.java.html.json.Model models} can garbage collect,
-            when no longer used.
+            when no longer used. Library writers that use 
+            {@link net.java.html.js.JavaScriptBody} annotation can also 
+            control garbage collection behavior of method arguments by
+            setting {@link net.java.html.js.JavaScriptBody#keepAlive() keepAlive=false}
+            attribute.
         </p>
         
         <h3>What's New in Version 1.0?</h3>
