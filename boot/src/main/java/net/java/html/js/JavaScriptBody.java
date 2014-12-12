@@ -120,4 +120,33 @@ public @interface JavaScriptBody {
      *   of the JavaScript snippet
      */
     public boolean wait4js() default true;
+    
+    /** Controls garbage collection behavior of method parameters.
+     * In general JavaScript garbage
+     * collection system makes it close to impossible to find out whether
+     * an object is supposed to be still used or not. Some systems have
+     * an external hooks to find that out (like <em>JavaFX</em> <code>WebView</code>),
+     * in some systems this information is not important (like the 
+     * <a href="http://bck2brwsr.apidesign.org">Bck2Brwsr</a> VM running
+     * all in JavaScript), but other execution systems just can't find that
+     * out. To prevent memory leaks on such systems and help them manage
+     * memory more effectively, those who define JavaScript interfacing 
+     * methods may indicate whether the non-primitive parameters passed
+     * in should be hold only for the time of method invocation or 
+     * for the whole application lifetime.
+     * <p>
+     * The default value is <code>true</code> as that is compatible with
+     * previous behavior and also prevents unwanted surprises when something
+     * garbage collects pre-maturaly. Framework developers are however 
+     * encouraged to use <code>keepAlive=false</code> as much as possible.
+     * 
+     * @return whether Java objects passed as parameters of the method
+     *   should be made guaranteed to be available JavaScript
+     *   even after the method invocation is over (e.g. prevent them to be
+     *   garbage collected in Java until it is known they are not needed
+     *   from JavaScript at all).
+     * 
+     * @since 1.1
+     */
+    public boolean keepAlive() default true;
 }

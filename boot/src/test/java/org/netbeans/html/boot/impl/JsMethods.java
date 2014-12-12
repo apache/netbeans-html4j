@@ -134,4 +134,7 @@ public class JsMethods {
     public static int plusOrMul(int x, int y) {
         return x * y;
     }
+    
+    @JavaScriptBody(args = { "x" }, keepAlive = false, body = "throw 'Do not call me!'")
+    public static native boolean checkAllowGC(Object x);
 }

@@ -115,8 +115,39 @@ public abstract class Fn {
      * @since 0.7
      */
     public static Fn define(Class<?> caller, String code, String... names) {
+        return define(caller, false, code, names);
+    }
+
+    /** Helper method to find current presenter and ask it to define new
+     * function.
+     * 
+     * @param caller the class who wishes to define the function
+     * @param keepParametersAlive whether Java parameters should survive in JavaScript
+     *   after the method invocation is over
+     * @param code the body of the function (can reference <code>this</code> and <code>names</code> variables)
+     * @param names names of individual parameters
+     * @return the function object that can be {@link Fn#invoke(java.lang.Object, java.lang.Object...) invoked}
+     *    - can return <code>null</code> if there is {@link #activePresenter() no presenter}
+     * @since 1.1
+     */
+    public static Fn define(Class<?> caller, boolean keepParametersAlive, String code, String... names) {
         final Presenter p = FnContext.currentPresenter(false);
-        return p == null ? null : p.defineFn(code, names);
+        if (p == null) {
+            return null;
+        }
+        if (p instanceof KeepAlive) {
+            boolean[] arr;
+            if (!keepParametersAlive) {
+                arr = new boolean[names.length];
+                for (int i = 0; i < arr.length; i++) {
+                    arr[i] = false;
+                }
+            } else {
+                arr = null;
+            }
+            return ((KeepAlive)p).defineFn(code, names, arr);
+        }
+        return p.defineFn(code, names);
     }
     
     private static final Map<String,Set<Presenter>> LOADED = new HashMap<String, Set<Presenter>>();
@@ -244,7 +275,7 @@ public abstract class Fn {
     protected final Presenter presenter() {
         return presenter;
     }
-
+    
     /** The representation of a <em>presenter</em> - usually a browser window.
      * Should be provided by a library included in the application and registered
      * in <code>META-INF/services</code>, for example with
@@ -328,5 +359,30 @@ public abstract class Fn {
          * @return replacement object for 
          */
         public Object toJava(Object js);
+    }
+
+    /** Additional interface to {@link Presenter} to control more precisely
+     * garbage collection behavior of individual parameters. See 
+     * {@link JavaScriptBody#keepAlive()} attribute for description of the
+     * actual behavior of the interface.
+     * 
+     * @since 1.1
+     */
+    public interface KeepAlive {
+        /** Creates new function with given parameter names and provided body.
+         * 
+         * @param code the body of the function. Can refer to variables named
+         *   as <code>names</code>
+         * @param names names of parameters of the function - these will be 
+         *   available when the <code>code</code> body executes
+         * @param keepAlive array of booleans describing for each parameter
+         *   whether it should be kept alive or not. Length of the array
+         *   must be the same as length of <code>names</code> array. The
+         *   array may be <code>null</code> to signal that all parameters
+         *   should be <em>kept alive</em>.
+         * 
+         * @return function that can be later invoked
+         */
+        public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
 }

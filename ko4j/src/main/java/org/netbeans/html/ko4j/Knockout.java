@@ -147,6 +147,7 @@ final class Knockout extends WeakReference<Object> {
     
     @JavaScriptBody(
         javacall = true,
+        keepAlive = false,
         wait4js = false,
         args = { "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 

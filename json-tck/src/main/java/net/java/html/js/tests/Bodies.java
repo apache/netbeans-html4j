@@ -61,7 +61,7 @@ final class Bodies {
     @JavaScriptBody(args = {"r"}, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void callback(Runnable r);
 
-    @JavaScriptBody(args = {"r"}, wait4js = false, javacall = true, body = "r.@java.lang.Runnable::run()();")
+    @JavaScriptBody(args = {"r"}, wait4js = false, keepAlive = false, javacall = true, body = "r.@java.lang.Runnable::run()();")
     static native void asyncCallback(Runnable r);
     
     @JavaScriptBody(args = {"c"}, javacall = true, body = "return c.@java.util.concurrent.Callable::call()();")
@@ -88,10 +88,10 @@ final class Bodies {
     @JavaScriptBody(args = "o", body = "return o.x;")
     public static native Object readX(Object o);
     
-    @JavaScriptBody(args = { "o", "x" }, body = "o.x = x;")
+    @JavaScriptBody(args = { "o", "x" }, keepAlive = false, body = "o.x = x;")
     public static native Object setX(Object o, Object x);
 
-    @JavaScriptBody(args = { "c" }, javacall = true, body = 
+    @JavaScriptBody(args = { "c" }, keepAlive = false, javacall = true, body = 
         "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"
     )
     public static native int sumIndirect(Sum c);

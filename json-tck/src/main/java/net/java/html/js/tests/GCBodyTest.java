@@ -52,8 +52,9 @@ import org.netbeans.html.json.tck.KOTest;
  */
 public class GCBodyTest {
     Reference<?> ref;
+    int[] arr;
     
-    @KOTest public void callbackWithParameters() throws InterruptedException {
+    @KOTest public void callbackInterfaceCanDisappear() throws InterruptedException {
         if (ref != null) {
             assertGC(ref, "Can disappear!");
             return;
@@ -66,23 +67,59 @@ public class GCBodyTest {
         assertGC(ref, "Can disappear!");
     }
     
+    private Object assignInst() {
+        Object obj = Bodies.instance(0);
+        Object s = new EmptyInstance();
+        Bodies.setX(obj, s);
+        assert s == Bodies.readX(obj);
+        ref = new WeakReference<Object>(s);
+        return obj;
+}
+    
     @KOTest public void holdObjectAndReleaseObject() throws InterruptedException {
         if (ref != null) {
             assertGC(ref, "Can disappear!");
             return;
         }
-        Sum s = new Sum();
-        Object obj = Bodies.instance(0);
-        Bodies.setX(obj, s);
         
-        ref = new WeakReference<Object>(s);
-        s = null;
-        assertNotGC(ref, "Cannot disappear!");
+        Object obj = assignInst();
+        assert ref != null;
         
         Bodies.setX(obj, null);
         obj = null;
         
         assertGC(ref, "Can disappear!");
+    }
+
+    private static Reference<?> sendRunnable(final int[] arr) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                arr[0]++;
+            }
+        };
+        Bodies.asyncCallback(r);
+        return new WeakReference<Object>(r);
+    }
+    
+    private static class EmptyInstance {
+    }
+    
+    @KOTest public void parametersNeedToRemainInAsyncMode() throws InterruptedException {
+        if (ref != null) {
+            if (arr[0] != 1) {
+                throw new InterruptedException();
+            }
+            assertGC(ref, "Now the runnable can disappear");
+            return;
+        }
+        arr = new int[] { 0 };
+        ref = sendRunnable(arr);
+        if (arr[0] == 1) {
+            return;
+        }
+        assertNotGC(ref, false, "The runnable should not be GCed");
+        throw new InterruptedException();
     }
     
     private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
@@ -109,12 +146,14 @@ public class GCBodyTest {
         return ref.get() == null;
     }
     
-    private static void assertNotGC(Reference<?> ref, String msg) throws InterruptedException {
+    private static void assertNotGC(Reference<?> ref, boolean clearJS, String msg) throws InterruptedException {
         for (int i = 0; i < 10; i++) {
             if (ref.get() == null) {
                 throw new IllegalStateException(msg);
             }
-            int size = Bodies.gc(Math.pow(2.0, i));
+            if (clearJS) {
+                Bodies.gc(Math.pow(2.0, i));
+            }
             try {
                 System.gc();
                 System.runFinalization();
