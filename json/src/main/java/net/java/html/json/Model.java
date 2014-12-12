@@ -126,6 +126,7 @@ import java.util.List;
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> bindings to reference your
  * model and create dynamic connection between your model in Java and 
  * live DOM structure in the browser:
+ * </p>
  * <pre>
  * Name: &lt;span data-bind="text: fullName"&gt;
  * &lt;div data-bind="foreach: addresses"&gt;
@@ -133,9 +134,9 @@ import java.util.List;
  * &lt;/div&gt;
  * </pre>
  * 
- * <h4>Access Raw <a target="_blank" href="http://knockoutjs.com/">Knockout</a> Observables</h4>
+ * <h3>Access Raw <a target="_blank" href="http://knockoutjs.com/">Knockout</a> Observables</h3>
  * 
- * One can obtain <quote>raw</quote> JavaScript object representing the 
+ * One can obtain <em>raw</em> JavaScript object representing the 
  * instance of {@link Model model class} (with appropriate
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> <b>observable</b> properties)
  * by calling {@link Models#toRaw(java.lang.Object) Models.toRaw(p)}. For 

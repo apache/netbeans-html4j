@@ -148,7 +148,10 @@ public final class Contexts {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface Id {
-        /** Identifier(s) for the implementation. */
+        /** Identifier(s) for the implementation. 
+         * 
+         * @return one of more identifiers giving this implementation name(s)
+         */
         public String[] value();
     }
 
