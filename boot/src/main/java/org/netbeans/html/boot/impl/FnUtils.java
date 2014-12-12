@@ -296,6 +296,7 @@ public final class FnUtils {
                 // init Fn
                 super.visitInsn(Opcodes.POP);
                 super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
+                super.visitInsn(fia.keepAlive ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
                 super.visitLdcInsn(body);
                 super.visitIntInsn(Opcodes.SIPUSH, args.size());
                 super.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
@@ -311,7 +312,7 @@ public final class FnUtils {
                 }
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                         "org/netbeans/html/boot/spi/Fn", "define",
-                        "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
+                        "(Ljava/lang/Class;ZLjava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
                 );
                 Label noPresenter = new Label();
                 super.visitInsn(Opcodes.DUP);
@@ -526,6 +527,7 @@ public final class FnUtils {
                 String body;
                 boolean javacall = false;
                 boolean wait4js = true;
+                boolean keepAlive = false;
 
                 public FindInAnno() {
                     super(Opcodes.ASM4);
@@ -545,7 +547,11 @@ public final class FnUtils {
                         wait4js = (Boolean) value;
                         return;
                     }
-                    assert name.equals("body");
+                    if (name.equals("keepAlive")) { // NOI18N
+                        keepAlive = (Boolean) value;
+                        return;
+                    }
+                    assert name.equals("body"); // NOI18N
                     body = (String) value;
                 }
 
