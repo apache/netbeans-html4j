@@ -46,10 +46,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
-import org.netbeans.html.boot.spi.Fn;
 import org.testng.ITest;
 import org.testng.annotations.Test;
 
@@ -106,6 +103,11 @@ public final class KOFx implements ITest, Runnable {
             if (r instanceof InterruptedException) {
                 if (count++ < 10000) {
                     notify = false;
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception ex1) {
+                        // ignore and continue
+                    }
                     Platform.runLater(this);
                     return;
                 }

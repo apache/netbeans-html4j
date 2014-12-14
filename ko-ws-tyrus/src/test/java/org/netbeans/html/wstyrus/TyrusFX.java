@@ -102,6 +102,11 @@ public final class TyrusFX implements ITest, Runnable {
             if (r instanceof InterruptedException) {
                 if (count++ < 10000) {
                     notify = false;
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception ex1) {
+                        // ignore and continue
+                    }
                     Platform.runLater(this);
                     return;
                 }
