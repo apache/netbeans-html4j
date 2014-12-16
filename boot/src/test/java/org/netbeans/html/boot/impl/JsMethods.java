@@ -136,5 +136,5 @@ public class JsMethods {
     }
     
     @JavaScriptBody(args = { "x" }, keepAlive = false, body = "throw 'Do not call me!'")
-    public static native boolean checkAllowGC(Object x);
+    public static native int checkAllowGC(Object x);
 }

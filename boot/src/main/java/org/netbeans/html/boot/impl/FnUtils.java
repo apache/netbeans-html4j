@@ -527,7 +527,7 @@ public final class FnUtils {
                 String body;
                 boolean javacall = false;
                 boolean wait4js = true;
-                boolean keepAlive = false;
+                boolean keepAlive = true;
 
                 public FindInAnno() {
                     super(Opcodes.ASM4);

@@ -47,6 +47,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Collection;
 import org.netbeans.html.boot.spi.Fn;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
@@ -56,16 +57,16 @@ public class KeepAliveTest implements Fn.Presenter, Fn.KeepAlive, FindResources 
     private Class<?> jsMethods;
     @Test public void keepAliveIsSetToFalse() throws Exception {
         Closeable c = Fn.activate(this);
-        boolean ret = (Boolean)jsMethods.getMethod("checkAllowGC", Object.class).invoke(null, this);
+        Number ret = (Number)jsMethods.getMethod("checkAllowGC", Object.class).invoke(null, this);
         c.close();
-        assertFalse(ret, "keepAlive returns false when the presenter is invoked");
+        assertEquals(ret.intValue(), 0, "keepAlive is set to false");
     }    
 
-    @Test public void keepAliveIsPropagated() throws Exception {
+    @Test public void keepAliveIsTheDefault() throws Exception {
         Closeable c = Fn.activate(this);
-        boolean ret = (Boolean)jsMethods.getMethod("truth").invoke(null);
+        Number ret = (Number)jsMethods.getMethod("plus", int.class, int.class).invoke(null, 40, 2);
         c.close();
-        assertTrue(ret, "keepAlive returns true when the presenter is invoked");
+        assertEquals(ret.intValue(), 1, "keepAlive returns true when the presenter is invoked");
     }    
 
     @BeforeMethod
@@ -85,7 +86,7 @@ public class KeepAliveTest implements Fn.Presenter, Fn.KeepAlive, FindResources 
                         res &= keepAlive[i];
                     }
                 }
-                return res;
+                return res ? 1 : 0;
             }
         };
     }
