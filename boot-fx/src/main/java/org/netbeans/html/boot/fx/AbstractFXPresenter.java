@@ -343,7 +343,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                             conv = ((AbstractFXPresenter)presenter()).convertArrays(arr);
                         }
                         if (conv != null && keepAlive != null && 
-                            !keepAlive[i] && !(conv instanceof JSObject) &&
+                            !keepAlive[i] && !isJSReady(conv) &&
                             !conv.getClass().getSimpleName().equals("$JsCallbacks$") // NOI18N
                         ) {
                             conv = new Weak(conv);
@@ -370,6 +370,25 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 throw t;
             }
         }
+    }
+    
+    private static boolean isJSReady(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        if (obj instanceof String) {
+            return true;
+        }
+        if (obj instanceof Number) {
+            return true;
+        }
+        if (obj instanceof JSObject) {
+            return true;
+        }
+        if (obj instanceof Character) {
+            return true;
+        }
+        return false;
     }
     
     private static final class Weak extends WeakReference<Object> {

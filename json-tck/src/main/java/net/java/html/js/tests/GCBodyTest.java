@@ -60,7 +60,7 @@ public class GCBodyTest {
             return;
         }
         Sum s = new Sum();
-        int res = Bodies.sumIndirect(s);
+        int res = Bodies.sumIndirect(s, 22, 20);
         assert res == 42 : "Expecting 42";
         Reference<?> ref = new WeakReference<Object>(s);
         s = null;

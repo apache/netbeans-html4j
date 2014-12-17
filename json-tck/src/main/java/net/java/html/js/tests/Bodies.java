@@ -91,10 +91,10 @@ final class Bodies {
     @JavaScriptBody(args = { "o", "x" }, keepAlive = false, body = "o.x = x;")
     public static native Object setX(Object o, Object x);
 
-    @JavaScriptBody(args = { "c" }, keepAlive = false, javacall = true, body = 
-        "return c.@net.java.html.js.tests.Sum::sum(II)(40, 2);"
+    @JavaScriptBody(args = { "c", "a", "b" }, keepAlive = false, javacall = true, body = 
+        "return c.@net.java.html.js.tests.Sum::sum(II)(a, b);"
     )
-    public static native int sumIndirect(Sum c);
+    public static native int sumIndirect(Sum c, int a, int b);
     
     @JavaScriptBody(args = { "arr", "index" }, body = "return arr[index];")
     public static native Object select(Object[] arr, int index);

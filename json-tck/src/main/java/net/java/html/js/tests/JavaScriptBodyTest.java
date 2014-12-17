@@ -213,7 +213,7 @@ public class JavaScriptBodyTest {
     
     @KOTest public void callbackWithParameters() throws InterruptedException {
         Sum s = new Sum();
-        int res = Bodies.sumIndirect(s);
+        int res = Bodies.sumIndirect(s, 40, 2);
         assert res == 42 : "Expecting 42";
     }
     
