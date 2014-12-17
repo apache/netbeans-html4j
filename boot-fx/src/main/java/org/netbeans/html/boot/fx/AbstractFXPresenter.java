@@ -260,9 +260,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
 
     @Override
     public Object toJava(Object jsArray) {
-        assert !(jsArray instanceof String);
-        assert !(jsArray instanceof Boolean);
-        assert !(jsArray instanceof Number);
         if (jsArray instanceof Weak) {
             jsArray = ((Weak)jsArray).get();
         }
