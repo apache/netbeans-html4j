@@ -342,7 +342,7 @@ public class JavaScriptBodyTest {
     
     @KOTest public void primitiveTypes() {
         String all = Bodies.primitiveTypes(new Sum());
-        assert "All:1 34567.08.0".equals(all) : "Valid return type: " + all;
+        assert "Ahojfalse12356.07.0 TheEND".equals(all) : "Valid return type: " + all;
     }
     
     @KOTest public void problematicString() {

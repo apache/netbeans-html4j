@@ -392,7 +392,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             return;
         }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
-        final TypeMirror stringType = processingEnv.getElementUtils().getTypeElement("java.lang.String").asType();
         
         
         source.append("\n  public java.lang.Object ")
@@ -421,7 +420,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append(sep);
             ++cnt;
             final TypeMirror t = ve.asType();
-            if (!t.getKind().isPrimitive() && !processingEnv.getTypeUtils().isSameType(t, stringType)) {
+            if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
                 source.append("Object");
                 convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
                 convert.append("      arg").append(cnt).
