@@ -85,10 +85,8 @@ public class GCBodyTest {
         Object obj = assignInst();
         assert ref != null;
         
-        Bodies.setX(obj, null);
-        obj = null;
-        
-        assertGC(ref, "Can disappear!");
+        assertGC(ref, "Can disappear as it is keepAlive false!");
+        assert obj != null : "Object is still present";
     }
 
     private static Reference<?> sendRunnable(final int[] arr) {
