@@ -191,6 +191,11 @@ final class Bodies {
         "return @net.java.html.js.tests.Bodies::problematicString()();"
     )
     public static native String problematicCallback();
+
+    @JavaScriptBody(args = { "sum" }, javacall = true, body = 
+        "return sum.@net.java.html.js.tests.Sum::all(ZBSIJFDCLjava/lang/String;)(false, 1, 2, 3, 5, 6, 7, 'A', 'TheEND');\n"
+    )
+    static native String primitiveTypes(Sum sum);
     
     static String problematicString() {
         return "{\n" +

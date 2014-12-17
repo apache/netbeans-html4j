@@ -60,4 +60,8 @@ public final class Sum {
         }
         return s;
     }
+    
+    public String all(boolean z, byte b, short s, int i, long l, float f, double d, char ch, String str) {
+        return "Ahoj" + z + b + s + i + l + f + d + ch + str;
+    }
 }

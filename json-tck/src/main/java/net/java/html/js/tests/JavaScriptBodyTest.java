@@ -340,6 +340,11 @@ public class JavaScriptBodyTest {
         assert ret[2].equals("Ciao") : "Expecting Ciao: " + ret[2];
     }
     
+    @KOTest public void primitiveTypes() {
+        String all = Bodies.primitiveTypes(new Sum());
+        assert "All:1 34567.08.0".equals(all) : "Valid return type: " + all;
+    }
+    
     @KOTest public void problematicString() {
         String orig = Bodies.problematicString();
         String js = Bodies.problematicCallback();
