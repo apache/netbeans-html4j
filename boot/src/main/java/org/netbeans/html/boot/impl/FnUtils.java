@@ -150,7 +150,12 @@ public final class FnUtils {
                 String ident, String fqn, String method, String params
             ) {
                 StringBuilder sb = new StringBuilder();
-                sb.append("vm.").append(mangle(fqn, method, params));
+                if (ident != null) {
+                    sb.append("vm.raw$");
+                } else {
+                    sb.append("vm.");
+                }
+                sb.append(mangle(fqn, method, params));
                 sb.append("(");
                 if (ident != null) {
                     sb.append(ident);

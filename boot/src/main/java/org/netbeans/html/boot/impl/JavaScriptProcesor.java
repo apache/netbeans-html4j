@@ -367,83 +367,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();
-                final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
-                
-                source.append("\n  public java.lang.Object ")
-                    .append(mangled)
-                    .append("(");
-                
-                String sep = "";
-                if (!isStatic) {
-                    source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
-                    source.append(" self");
-                    sep = ", ";
-                }
-                
-                int cnt = 0;
-                StringBuilder convert = new StringBuilder();
-                for (VariableElement ve : m.getParameters()) {
-                    source.append(sep);
-                    ++cnt;
-                    final TypeMirror t = ve.asType();
-                    if (!t.getKind().isPrimitive()) {
-                        source.append("Object");
-                        convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
-                        convert.append("      arg").append(cnt).
-                            append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
-                            append(");\n");
-                        convert.append("    }\n");
-                    } else {
-                        source.append(t);
-                    }
-                    source.append(" arg").append(cnt);
-                    sep = ", ";
-                }
-                source.append(") throws Throwable {\n");
-                source.append(convert);
-                if (useTryResources()) {
-                    source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) { \n");
-                } else {
-                    source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {\n");
-                }
-                source.append("    ");
-                if (m.getReturnType().getKind() != TypeKind.VOID) {
-                    source.append("Object $ret = ");
-                }
-                if (isStatic) {
-                    source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
-                    source.append('.');
-                } else {
-                    source.append("self.");
-                }
-                source.append(m.getSimpleName());
-                source.append("(");
-                cnt = 0;
-                sep = "";
-                for (VariableElement ve : m.getParameters()) {
-                    source.append(sep);
-                    source.append("(").append(ve.asType());
-                    source.append(")arg").append(++cnt);
-                    sep = ", ";
-                }
-                source.append(");\n");
-                if (m.getReturnType().getKind() == TypeKind.VOID) {
-                    source.append("    return null;\n");
-                } else {
-                    source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
-                    source.append("      $ret = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
-                    source.append("    }\n");
-                    source.append("    return $ret;\n");
-                }
-                if (useTryResources()) {
-                    source.append("    }\n");
-                } else {
-                    
-                    source.append("    } finally {\n");
-                    source.append("      a.close();\n");
-                    source.append("    }\n");
-                }
-                source.append("  }\n");
+                generateMethod(false, m, source, mangled);
+                generateMethod(true, m, source, "raw$" + mangled);
             }
             source.append("}\n");
             final String srcName = pkgName + ".$JsCallbacks$";
@@ -459,6 +384,105 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 );
             }
         }
+    }
+
+    private void generateMethod(boolean selfObj, final ExecutableElement m, StringBuilder source, final String mangled) {
+        final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
+        if (isStatic && selfObj) {
+            return;
+        }
+        final TypeElement selfType = (TypeElement)m.getEnclosingElement();
+        
+        source.append("\n  public java.lang.Object ")
+                .append(mangled)
+                .append("(");
+        
+        String sep = "";
+        StringBuilder convert = new StringBuilder();
+        if (!isStatic) {
+            if (selfObj) {
+                source.append("Object self");
+                convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
+                convert.append("      self").
+                        append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(self").
+                        append(");\n");
+                convert.append("    }\n");
+            } else {
+                source.append(selfType.getQualifiedName());
+                source.append(" self");
+            }
+            sep = ", ";
+        }
+        
+        int cnt = 0;
+        for (VariableElement ve : m.getParameters()) {
+            source.append(sep);
+            ++cnt;
+            final TypeMirror t = ve.asType();
+            if (!t.getKind().isPrimitive()) {
+                source.append("Object");
+                convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
+                convert.append("      arg").append(cnt).
+                        append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
+                        append(");\n");
+                convert.append("    }\n");
+            } else {
+                source.append(t);
+            }
+            source.append(" arg").append(cnt);
+            sep = ", ";
+        }
+        source.append(") throws Throwable {\n");
+        source.append(convert);
+        if (useTryResources()) {
+            source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) { \n");
+        } else {
+            source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {\n");
+        }
+        source.append("    ");
+        if (m.getReturnType().getKind() != TypeKind.VOID) {
+            source.append("Object $ret = ");
+        }
+        if (isStatic) {
+            source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
+            source.append('.');
+        } else {
+            if (selfObj) {
+                source.append("((");
+                source.append(selfType.getQualifiedName());
+                source.append(")self).");
+            } else {
+                source.append("self.");
+            }
+        }
+        source.append(m.getSimpleName());
+        source.append("(");
+        cnt = 0;
+        sep = "";
+        for (VariableElement ve : m.getParameters()) {
+            source.append(sep);
+            source.append("(").append(ve.asType());
+            source.append(")arg").append(++cnt);
+            sep = ", ";
+        }
+        source.append(");\n");
+        if (m.getReturnType().getKind() == TypeKind.VOID) {
+            source.append("    return null;\n");
+        } else {
+            source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
+            source.append("      $ret = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
+            source.append("    }\n");
+            source.append("    return $ret;\n");
+        }
+        if (useTryResources()) {
+            source.append("    }\n");
+        } else {
+            
+            source.append("    } finally {\n");
+            source.append("      a.close();\n");
+            source.append("    }\n");
+        }
+        source.append("  }\n");
     }
 
     private boolean useTryResources() {
