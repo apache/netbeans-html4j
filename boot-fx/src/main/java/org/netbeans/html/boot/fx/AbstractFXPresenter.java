@@ -46,6 +46,7 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,8 +55,6 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
@@ -67,8 +66,8 @@ import org.netbeans.html.boot.spi.Fn;
  *
  * @author Jaroslav Tulach
  */
-public abstract class AbstractFXPresenter 
-implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
+public abstract class AbstractFXPresenter implements Fn.Presenter,
+Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected Runnable onLoad;
@@ -92,15 +91,22 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
     
     @Override
     public Fn defineFn(String code, String... names) {
-        return defineJSFn(code, names);
+        return defineJSFn(code, names, null);
+    }
+
+    @Override
+    public Fn defineFn(String code, String[] names, boolean[] keepAlive) {
+        return defineJSFn(code, names, keepAlive);
     }
     
-    final JSFn defineJSFn(String code, String... names) {
+    
+    
+    final JSFn defineJSFn(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
         sb.append("(function() {");
         sb.append("  return function(");
         String sep = "";
-        for (String n : names) {
+        if (names != null) for (String n : names) {
             sb.append(sep).append(n);
             sep = ",";
         }
@@ -115,7 +121,7 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
             );
         }
         JSObject x = (JSObject) engine.executeScript(sb.toString());
-        return new JSFn(this, x, cnt);
+        return new JSFn(this, x, cnt, keepAlive);
     }
 
     @Override
@@ -208,7 +214,7 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
                     + "  k.array= function() {"
                     + "    return Array.prototype.slice.call(arguments);"
                     + "  };"
-                    + "  return k;"
+                    + "  return k;", null, null
                 ).invokeImpl(null, false);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
@@ -218,6 +224,9 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
     }
 
     final Object checkArray(Object val) {
+        if (!(val instanceof JSObject)) {
+            return val;
+        }
         int length = ((Number) arraySizeFn().call("array", val, null)).intValue();
         if (length == -1) {
             return val;
@@ -240,7 +249,7 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
                     + "      return l;"
                     + "    }"
                     + "  };"
-                    + "  return k;"
+                    + "  return k;", null, null
                 ).invokeImpl(null, false);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
@@ -251,6 +260,9 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
 
     @Override
     public Object toJava(Object jsArray) {
+        if (jsArray instanceof Weak) {
+            jsArray = ((Weak)jsArray).get();
+        }
         return checkArray(jsArray);
     }
     
@@ -300,11 +312,13 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
         private final JSObject fn;
         private static int call;
         private final int id;
+        private final boolean[] keepAlive;
 
-        public JSFn(AbstractFXPresenter p, JSObject fn, int id) {
+        public JSFn(AbstractFXPresenter p, JSObject fn, int id, boolean[] keepAlive) {
             super(p);
             this.fn = fn;
             this.id = id;
+            this.keepAlive = keepAlive;
         }
 
         @Override
@@ -322,14 +336,25 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
                 List<Object> all = new ArrayList<Object>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
                 for (int i = 0; i < args.length; i++) {
-                    if (arrayChecks && args[i] instanceof Object[]) {
-                        Object[] arr = (Object[]) args[i];
-                        Object conv = ((AbstractFXPresenter)presenter()).convertArrays(arr);
-                        args[i] = conv;
+                    Object conv = args[i];
+                    if (arrayChecks) {
+                        if (args[i] instanceof Object[]) {
+                            Object[] arr = (Object[]) args[i];
+                            conv = ((AbstractFXPresenter)presenter()).convertArrays(arr);
+                        }
+                        if (conv != null && keepAlive != null && 
+                            !keepAlive[i] && !isJSReady(conv) &&
+                            !conv.getClass().getSimpleName().equals("$JsCallbacks$") // NOI18N
+                        ) {
+                            conv = new Weak(conv);
+                        }
                     }
-                    all.add(args[i]);
+                    all.add(conv);
                 }
                 Object ret = fn.call("call", all.toArray()); // NOI18N
+                if (ret instanceof Weak) {
+                    ret = ((Weak)ret).get();
+                }
                 if (ret == fn) {
                     return null;
                 }
@@ -347,4 +372,29 @@ implements Fn.Presenter, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable
         }
     }
     
+    private static boolean isJSReady(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        if (obj instanceof String) {
+            return true;
+        }
+        if (obj instanceof Number) {
+            return true;
+        }
+        if (obj instanceof JSObject) {
+            return true;
+        }
+        if (obj instanceof Character) {
+            return true;
+        }
+        return false;
+    }
+    
+    private static final class Weak extends WeakReference<Object> {
+        public Weak(Object referent) {
+            super(referent);
+            assert !(referent instanceof Weak);
+        }
+    } // end of Weak
 }

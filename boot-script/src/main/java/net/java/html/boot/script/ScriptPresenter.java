@@ -45,6 +45,7 @@ package net.java.html.boot.script;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +71,8 @@ import org.netbeans.html.boot.spi.Fn.Presenter;
  *
  * @author Jaroslav Tulach
  */
-final class ScriptPresenter 
-implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
+final class ScriptPresenter implements Fn.KeepAlive,
+Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private static final Logger LOG = Logger.getLogger(ScriptPresenter.class.getName());
     private final ScriptEngine eng;
     private final Executor exc;
@@ -90,9 +91,14 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
 
     @Override
     public Fn defineFn(String code, String... names) {
-        return defineImpl(code, names);
+        return defineImpl(code, names, null);
     }
-    private FnImpl defineImpl(String code, String... names) {
+
+    @Override
+    public Fn defineFn(String code, String[] names, boolean[] keepAlive) {
+        return defineImpl(code, names, keepAlive);
+    }    
+    private FnImpl defineImpl(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
         sb.append("(function() {");
         sb.append("  return function(");
@@ -112,7 +118,7 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
         }
-        return new FnImpl(this, fn);
+        return new FnImpl(this, fn, keepAlive);
     }
 
     @Override
@@ -150,7 +156,7 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private FnImpl wrapArrFn() {
         if (wrapArrImpl == null) {
             try {
-                wrapArrImpl = defineImpl("return Array.prototype.slice.call(arguments);");
+                wrapArrImpl = defineImpl("return Array.prototype.slice.call(arguments);", null, null);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
             }
@@ -181,7 +187,7 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
                     + "  var l = arr.length;\n"
                     + "  for (var i = 0; i < l; i++) to[i] = arr[i];\n"
                     + "  return l;\n"
-                    + "}", "arr", "to"
+                    + "}", new String[] { "arr", "to" }, null
                 );
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
@@ -192,6 +198,9 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
 
     @Override
     public Object toJava(Object jsArray) {
+        if (jsArray instanceof Weak) {
+            jsArray = ((Weak)jsArray).get();
+        }
         try {
             return checkArray(jsArray);
         } catch (Exception ex) {
@@ -239,10 +248,12 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private class FnImpl extends Fn {
 
         private final Object fn;
+        private final boolean[] keepAlive;
 
-        public FnImpl(Presenter presenter, Object fn) {
+        public FnImpl(Presenter presenter, Object fn, boolean[] keepAlive) {
             super(presenter);
             this.fn = fn;
+            this.keepAlive = keepAlive;
         }
 
         @Override
@@ -254,19 +265,28 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
                 List<Object> all = new ArrayList<>(args.length + 1);
                 all.add(thiz == null ? fn : thiz);
                 for (int i = 0; i < args.length; i++) {
+                    Object conv = args[i];
                     if (arrayChecks) {
                         if (args[i] instanceof Object[]) {
                             Object[] arr = (Object[]) args[i];
-                            Object conv = ((ScriptPresenter)presenter()).convertArrays(arr);
-                            args[i] = conv;
+                            conv = ((ScriptPresenter) presenter()).convertArrays(arr);
                         }
-                        if (args[i] instanceof Character) {
-                            args[i] = (int)((Character)args[i]);
+                        if (conv != null && keepAlive != null
+                            && !keepAlive[i] && !isJSReady(conv)
+                            && !conv.getClass().getSimpleName().equals("$JsCallbacks$") // NOI18N
+                            ) {
+                            conv = new Weak(conv);
+                        }
+                        if (conv instanceof Character) {
+                            conv = (int)(Character)conv;
                         }
                     }
-                    all.add(args[i]);
+                    all.add(conv);
                 }
                 Object ret = ((Invocable)eng).invokeMethod(fn, "call", all.toArray()); // NOI18N
+                if (ret instanceof Weak) {
+                    ret = ((Weak)ret).get();
+                }
                 if (ret == fn) {
                     return null;
                 }
@@ -277,4 +297,31 @@ implements Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             }
     }
     
+    private static boolean isJSReady(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        if (obj instanceof String) {
+            return true;
+        }
+        if (obj instanceof Number) {
+            return true;
+        }
+        final String cn = obj.getClass().getName();
+        if (cn.startsWith("jdk.nashorn") || ( // NOI18N
+            cn.contains(".mozilla.") && cn.contains(".Native") // NOI18N
+        )) {
+            return true;
+        }
+        if (obj instanceof Character) {
+            return true;
+        }
+        return false;
+    }    
+    
+    private static final class Weak extends WeakReference<Object> {
+        public Weak(Object referent) {
+            super(referent);
+        }
+    }
 }

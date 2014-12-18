@@ -213,7 +213,7 @@ public class JavaScriptBodyTest {
     
     @KOTest public void callbackWithParameters() throws InterruptedException {
         Sum s = new Sum();
-        int res = Bodies.sumIndirect(s);
+        int res = Bodies.sumIndirect(s, 40, 2);
         assert res == 42 : "Expecting 42";
     }
     
@@ -338,6 +338,11 @@ public class JavaScriptBodyTest {
         assert ret[0].equals("Ahoj") : "Expecting Ahoj: " + ret[0];
         assert ret[1].equals("Hi") : "Expecting Hi: " + ret[1];
         assert ret[2].equals("Ciao") : "Expecting Ciao: " + ret[2];
+    }
+    
+    @KOTest public void primitiveTypes() {
+        String all = Bodies.primitiveTypes(new Sum());
+        assert "Ahojfalse12356.07.0 TheEND".equals(all) : "Valid return type: " + all;
     }
     
     @KOTest public void problematicString() {

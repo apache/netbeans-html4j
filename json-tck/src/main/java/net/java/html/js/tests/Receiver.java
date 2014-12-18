@@ -42,26 +42,39 @@
  */
 package net.java.html.js.tests;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import net.java.html.js.JavaScriptBody;
+
 /**
- *
- * @author Jaroslav Tulach
  */
-public final class Sum {
-    public int sum(int a, int b) {
-        return a + b;
+public final class Receiver {
+    private final Object fn;
+    Object value;
+    final Reference<Object> ref;
+
+    public Receiver(Object v) {
+        this.fn = initFn(v);
+        this.ref = new WeakReference<Object>(v);
+        this.value = this;
     }
     
-    public int sum(Object[] arr) {
-        int s = 0;
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] instanceof Number) {
-                s += ((Number)arr[i]).intValue();
-            }
-        }
-        return s;
+    public void apply() {
+        fnApply(fn, this);
     }
     
-    public String all(boolean z, byte b, short s, int i, long l, float f, double d, char ch, String str) {
-        return "Ahoj" + z + b + s + i + l + f + d + ch + str;
+    void set(Object v) {
+        value = v;
     }
+    
+    @JavaScriptBody(args = { "v" }, keepAlive = false, javacall = true, 
+        body = "return function(rec) {\n"
+        + "  rec.@net.java.html.js.tests.Receiver::set(Ljava/lang/Object;)(v);\n"
+        + "};\n")
+    private static native Object initFn(Object v);
+    
+    @JavaScriptBody(args = { "fn", "thiz" }, body =
+        "fn(thiz);"
+    )
+    private static native void fnApply(Object fn, Receiver thiz);
 }

@@ -137,7 +137,7 @@ public abstract class Fn {
         }
         if (p instanceof KeepAlive) {
             boolean[] arr;
-            if (!keepParametersAlive) {
+            if (!keepParametersAlive && names.length > 0) {
                 arr = new boolean[names.length];
                 for (int i = 0; i < arr.length; i++) {
                     arr[i] = false;

@@ -97,6 +97,7 @@
                   <excludes>
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
+                       <exclude>*/nb-configuration.xml</exclude>
                        <exclude>boot-script/src/test/resources/net/java/html/boot/script/ko4j/env.nashorn.1.2-debug.js</exclude>
                        <exclude>src/main/javadoc/resources/teavm.js</exclude>
                   </excludes>

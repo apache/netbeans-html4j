@@ -60,7 +60,7 @@ public class GCBodyTest {
             return;
         }
         Sum s = new Sum();
-        int res = Bodies.sumIndirect(s);
+        int res = Bodies.sumIndirect(s, 22, 20);
         assert res == 42 : "Expecting 42";
         Reference<?> ref = new WeakReference<Object>(s);
         s = null;
@@ -85,10 +85,22 @@ public class GCBodyTest {
         Object obj = assignInst();
         assert ref != null;
         
-        Bodies.setX(obj, null);
-        obj = null;
-        
-        assertGC(ref, "Can disappear!");
+        assertGC(ref, "Can disappear as it is keepAlive false!");
+        assert obj != null : "Object is still present";
+    }
+
+    @KOTest public void strongReceiverBehavior() {
+        Object v = new EmptyInstance();
+        Receiver r = new Receiver(v);
+        r.apply();
+        assert v == r.value : "Value is as expected";
+    }
+    
+    @KOTest public void gcReceiverBehavior() throws InterruptedException {
+        Receiver r = new Receiver(new EmptyInstance());
+        assertGC(r.ref, "The empty instance can be GCed even when referenced from JS");
+        r.apply();
+        assert r.value == null : "Setter called with null value";
     }
 
     private static Reference<?> sendRunnable(final int[] arr) {
