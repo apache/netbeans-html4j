@@ -126,6 +126,14 @@ final class Bodies {
         "return @net.java.html.js.tests.Bodies::fourtyTwo()();"
     )
     public static native int staticCallback();
+
+    @JavaScriptBody(args = {}, javacall = true, body = 
+        "return function() { return @net.java.html.js.tests.Bodies::fourtyTwo()(); }"
+    )
+    public static native Object delayCallback();
+    
+    @JavaScriptBody(args = { "fn" }, body = "return fn();")
+    public static native Object invokeFn(Object fn);
     
     static int fourtyTwo() {
         return 42;
