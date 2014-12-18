@@ -166,6 +166,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             case "connectUsingWebSocket":
             case "selectWorksOnModels":
             case "archetypeArrayModificationVisible":
+            case "noLongerNeededArrayElementsCanDisappear":
                 return "Does not work on JDK8, due to JDK-8046013";
         }
         return null;
