@@ -329,8 +329,8 @@ public class JavaScriptBodyTest {
         Object fn = Bodies.delayCallback();
         Object r = Bodies.invokeFn(fn);
         assert r != null : "Is not null";
-        assert r instanceof Integer : "Is integer " + r;
-        assert ((Integer)r) == 42 : "Expecting 42: " + r;
+        assert r instanceof Number : "Is number " + r;
+        assert ((Number)r).intValue() == 42 : "Expecting 42: " + r;
     }
     
     @KOTest public void asyncCallFromAJSCallbackNeedToFinishBeforeReturnToJS() {
