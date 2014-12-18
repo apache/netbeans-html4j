@@ -89,6 +89,20 @@ public class GCBodyTest {
         assert obj != null : "Object is still present";
     }
 
+    @KOTest public void strongReceiverBehavior() {
+        Object v = new EmptyInstance();
+        Receiver r = new Receiver(v);
+        r.apply();
+        assert v == r.value : "Value is as expected";
+    }
+    
+    @KOTest public void gcReceiverBehavior() throws InterruptedException {
+        Receiver r = new Receiver(new EmptyInstance());
+        assertGC(r.ref, "The empty instance can be GCed even when referenced from JS");
+        r.apply();
+        assert r.value == null : "Setter called with null value";
+    }
+
     private static Reference<?> sendRunnable(final int[] arr) {
         Runnable r = new Runnable() {
             @Override
