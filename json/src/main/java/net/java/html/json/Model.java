@@ -123,7 +123,8 @@ import org.netbeans.html.json.spi.Technology;
  * <p>
  * In case you are using <a target="_blank" href="http://knockoutjs.com/">Knockout technology</a>
  * for Java then you can associate such model object with surrounding HTML page by
- * calling: <code>p.applyBindings();</code> (in case you specify {@link #tar. The page can then use regular
+ * calling: <code>p.applyBindings();</code> (in case you specify {@link #targetId()}. 
+ * The page can then use regular
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> bindings to reference your
  * model and create dynamic connection between your model in Java and 
  * live DOM structure in the browser:
