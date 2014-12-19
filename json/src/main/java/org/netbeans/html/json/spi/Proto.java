@@ -193,7 +193,21 @@ public final class Proto {
      * of the current model to the <em>body</em> element of the page.
      */
     public void applyBindings() {
-        initBindings().applyBindings();
+        initBindings().applyBindings(null);
+    }
+    
+    /** Initializes the associated model to the specified element's subtree.
+     * The technology is taken from the current {@link #getContext() context} and
+     * in case of <em>knockout.js</em> applies given bindings 
+     * of the current model to the element of the page with 'id' attribute
+     * set to the specified <code>id</code> value.
+     * 
+     * @param id the id of element to apply the binding to
+     * @since 1.1
+     * @see Technology.ApplyId
+     */
+    public void applyBindings(String id) {
+        initBindings().applyBindings(id);
     }
     
     /** Invokes the provided runnable in the {@link #getContext() context}

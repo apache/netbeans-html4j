@@ -60,6 +60,6 @@ public class EmployerTest {
     @Test public void preLoadsTheClass() {
         Employer em = Models.fromRaw(BrwsrCtx.EMPTY, Employer.class, this);
         Assert.assertNotNull(em, "Class loaded");
-        em.applyBindings();
+        Models.applyBindings(em);
     }
 }

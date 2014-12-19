@@ -48,6 +48,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URL;
 import java.util.List;
+import org.netbeans.html.json.spi.Technology;
 
 /** Defines a model class that represents a single 
  * <a target="_blank" href="http://en.wikipedia.org/wiki/JSON">JSON</a>-like object
@@ -122,7 +123,7 @@ import java.util.List;
  * <p>
  * In case you are using <a target="_blank" href="http://knockoutjs.com/">Knockout technology</a>
  * for Java then you can associate such model object with surrounding HTML page by
- * calling: <code>p.applyBindings();</code>. The page can then use regular
+ * calling: <code>p.applyBindings();</code> (in case you specify {@link #tar. The page can then use regular
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> bindings to reference your
  * model and create dynamic connection between your model in Java and 
  * live DOM structure in the browser:
@@ -202,4 +203,22 @@ public @interface Model {
      * @return array of property definitions
      */
     Property[] properties();
+    
+    /** The id of an element to bind this model too. If this
+     * property is specified an <code>applyBindings</code> method
+     * in the model class is going to be generated which later calls
+     * {@link Models#applyBindings(java.lang.Object, java.lang.String)}
+     * with appropriate <code>targetId</code>. If the <code>targetId</code>
+     * is specified as empty string, <code>null</code> value is passed
+     * to {@link Models#applyBindings(java.lang.Object, java.lang.String)} method.
+     * If the <code>targetId</code> is not specified at all, no public
+     * <code>applyBindings</code> method is generated at all (a change compared
+     * to previous versions of this API).
+     * 
+     * @return an empty string (means apply globally), or ID of a (usually DOM)
+     *    element to apply this model after calling its generated
+     *    <code>applyBindings()</code> method to
+     * @since 1.1
+     */
+    String targetId() default "";
 }

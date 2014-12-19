@@ -57,7 +57,7 @@ import static org.netbeans.html.ko4j.KO4J.LOG;
  */
 @Contexts.Id("ko4j")
 final class KOTech
-implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
+implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Technology.ApplyId<Object> {
     private Object[] jsObjects;
     private int jsIndex;
 
@@ -131,7 +131,11 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object> {
 
     @Override
     public void applyBindings(Object data) {
-        Object ko = Knockout.applyBindings(data);
+        applyBindings(null, data);
+    }
+    @Override
+    public void applyBindings(String id, Object data) {
+        Object ko = Knockout.applyBindings(id, data);
         if (ko instanceof Knockout) {
             ((Knockout)ko).hold();
         }

@@ -92,7 +92,7 @@ final class PersonImpl {
         }
     }
     
-    @Model(className = "People", properties = {
+    @Model(className = "People", targetId="myPeople", properties = {
         @Property(array = true, name = "info", type = Person.class),
         @Property(array = true, name = "nicknames", type = String.class),
         @Property(array = true, name = "age", type = int.class),

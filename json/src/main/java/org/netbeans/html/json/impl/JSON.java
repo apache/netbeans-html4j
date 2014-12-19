@@ -296,12 +296,12 @@ public final class JSON {
         return find(object, null);
     }
     
-    public static void applyBindings(Object object) {
+    public static void applyBindings(Object object, String id) {
         final Proto proto = findProto(object);
         if (proto == null) {
             throw new IllegalArgumentException("Not a model: " + object.getClass());
         }
-        proto.applyBindings();
+        proto.applyBindings(id);
     }
     
     public static void loadJSON(

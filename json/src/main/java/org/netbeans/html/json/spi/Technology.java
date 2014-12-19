@@ -173,4 +173,22 @@ public interface Technology<Data> {
          */
         public void valueHasMutated(D data, String propertyName, Object oldValue, Object newValue);
     }
+    
+    /** Apply technology bindings at selected subtree of the HTML page.
+     * Can be accessed via {@link Proto#applyBindings(java.lang.String)} or
+     * via method <code>applyBindings(String)</code> generated when one
+     * is using the {@link Model} annotation.
+     * 
+     * @param <D> the internal data for the technology
+     * @since 1.1
+     */
+    public static interface ApplyId<D> extends Technology<D> {
+        /** Applies given data to current context (usually an element on an 
+         * HTML page).
+         * 
+         * @param id the id of an element to apply the data to
+         * @param data the data to apply
+         */
+        public void applyBindings(String id, D data);
+    }
 }

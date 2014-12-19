@@ -131,12 +131,14 @@ final class Knockout extends WeakReference<Object> {
         Object model, String prop, Object oldValue, Object newValue
     );
 
-    @JavaScriptBody(args = { "bindings" }, body = 
-        "ko['cleanNode'](window['document']['body']);\n" +
-        "ko['applyBindings'](bindings);\n" +
+    @JavaScriptBody(args = { "id", "bindings" }, body = 
+        "var d = window['document'];\n" +
+        "var e = id ? d['getElementById'](id) : d['body'];\n" +
+        "ko['cleanNode'](e);\n" +
+        "ko['applyBindings'](bindings, e);\n" +
         "return bindings['ko4j'];\n"
     )
-    native static Object applyBindings(Object bindings);
+    native static Object applyBindings(String id, Object bindings);
     
     @JavaScriptBody(args = { "cnt" }, body = 
         "var arr = new Array(cnt);\n" +

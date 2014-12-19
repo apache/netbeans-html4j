@@ -58,7 +58,7 @@ import org.netbeans.html.json.tck.KOTest;
  *
  * @author Jaroslav Tulach
  */
-@Model(className="KnockoutModel", properties={
+@Model(className="KnockoutModel", targetId = "", properties={
     @Property(name="name", type=String.class),
     @Property(name="results", type=String.class, array = true),
     @Property(name="numbers", type=int.class, array = true),

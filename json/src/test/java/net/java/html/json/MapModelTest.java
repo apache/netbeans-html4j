@@ -74,8 +74,20 @@ public class MapModelTest {
             register(Transfer.class, t, 1).build();
     }
     
+    @Test public void isThereNoApplyBinding() throws Exception {
+        try {
+            Person.class.getMethod("applyBindings");
+        } catch (NoSuchMethodException ex) {
+            // OK
+            return;
+        }
+        fail("There should be no applyBindings() method");
+    }
+    
     @Test public void isThereABinding() throws Exception {
-        Person p = Models.bind(new Person(), c).applyBindings();
+        Person p = Models.bind(new Person(), c);
+        Models.applyBindings(p);
+        assertNull(t.appliedId, "Applied globally");
         p.setFirstName("Jarda");
         
         Map m = (Map)Models.toRaw(p);
@@ -94,6 +106,11 @@ public class MapModelTest {
         assertEquals(o.changes, 2, "Snd change");
     }
     
+    @Test public void applyLocally() throws Exception {
+        Person p = Models.bind(new Person(), c);
+        Models.applyBindings(p, "local");
+        assertEquals(t.appliedId, "local", "Applied locally");
+    }
     
     @Test public void dontNotifySameProperty() throws Exception {
         Person p = Models.bind(new Person(), c);
@@ -293,7 +310,9 @@ public class MapModelTest {
     }
     
     static final class MapTechnology 
-    implements Technology<Map<String,One>>, Transfer {
+    implements Technology.ApplyId<Map<String,One>>, Transfer {
+        private Map<String, One> appliedData;
+        private String appliedId;
 
         @Override
         public Map<String, One> wrapModel(Object model) {
@@ -329,6 +348,7 @@ public class MapModelTest {
 
         @Override
         public void applyBindings(Map<String, One> data) {
+            throw new UnsupportedOperationException("Never called!");
         }
 
         @Override
@@ -369,6 +389,12 @@ public class MapModelTest {
         @Override
         public void runSafe(Runnable r) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void applyBindings(String id, Map<String, One> data) {
+            this.appliedId = id;
+            this.appliedData = data;
         }
     }
 }

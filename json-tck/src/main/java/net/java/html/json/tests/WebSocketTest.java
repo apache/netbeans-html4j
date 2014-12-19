@@ -53,7 +53,7 @@ import org.netbeans.html.json.tck.KOTest;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "WebSocketik", properties = {
+@Model(className = "WebSocketik", targetId="", properties = {
     @Property(name = "fetched", type = Person.class),
     @Property(name = "fetchedCount", type = int.class),
     @Property(name = "open", type = int.class),

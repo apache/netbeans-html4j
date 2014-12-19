@@ -54,7 +54,7 @@ import net.java.html.json.Property;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "Pair", properties = {
+@Model(className = "Pair", targetId = "", properties = {
     @Property(name = "firstName", type = String.class),
     @Property(name = "lastName", type = String.class),
     @Property(name = "next", type = Pair.class)

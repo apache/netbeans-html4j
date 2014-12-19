@@ -57,7 +57,7 @@ import org.netbeans.html.json.tck.KOTest;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "JSONik", properties = {
+@Model(className = "JSONik", targetId = "", properties = {
     @Property(name = "fetched", type = Person.class),
     @Property(name = "fetchedCount", type = int.class),
     @Property(name = "fetchedResponse", type = String.class),

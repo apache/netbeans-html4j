@@ -179,7 +179,7 @@ public final class JSONList<T> extends ArrayList<T> {
             public void run() {
                 Bindings m = PropertyBindingAccessor.getBindings(proto, false);
                 if (m != null) {
-                    m.valueHasMutated(name, null, null);
+                    m.valueHasMutated(name, null, JSONList.this);
                     for (String dependant : deps) {
                         m.valueHasMutated(dependant, null, null);
                     }

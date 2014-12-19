@@ -57,7 +57,7 @@ import org.netbeans.html.json.tck.KOTest;
 
 /** Tests model of a mine field and its behavior in the browser.
  */
-@Model(className = "Mines", properties = {
+@Model(className = "Mines", targetId = "", properties = {
     @Property(name = "state", type = MinesTest.GameState.class),
     @Property(name = "rows", type = Row.class, array = true),
 })

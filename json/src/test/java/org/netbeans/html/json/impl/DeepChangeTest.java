@@ -77,7 +77,7 @@ public class DeepChangeTest {
             register(Transfer.class, t, 1).build();
     }
     
-    @Model(className = "MyX", properties = {
+    @Model(className = "MyX", targetId = "anythingX", properties = {
         @Property(name = "one", type = MyY.class),
         @Property(name = "all", type = MyY.class, array = true)
     })
@@ -253,7 +253,8 @@ public class DeepChangeTest {
     @Test public void firstChangeInArrayNotifiedTransitively() throws Exception {
         MyOverall p = Models.bind(
             new MyOverall(new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999))
-        ), c).applyBindings();
+        ), c);
+        Models.applyBindings(p);
         
         Map m = (Map)Models.toRaw(p);
         Object v = m.get("valueAccross");

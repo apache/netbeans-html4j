@@ -94,6 +94,27 @@
             {@link org.netbeans.html.json.spi.Transfer Java based JSON} and 
             {@link org.netbeans.html.json.spi.WSTransfer WebSocket} implementations
             under the name <b>tyrus</b>.
+        </p>
+        <p>
+            A particular DOM subtree
+            that a <a target="_blank" href="http://knockoutjs.com">knockout.js</a> model gets
+            applied to can be selected by using 
+            {@link net.java.html.json.Models#applyBindings(java.lang.Object,%20java.lang.String)
+            Models.applyBindings(m, id)} with an id of an HTML element.
+            There is new {@link net.java.html.json.Model#targetId()} attribute 
+            which controls behavior of the generated <code>applyBindings</code> method. 
+            If <em>specified and non-empty</em>, then the generated method
+            will call {@link net.java.html.json.Models#applyBindings(java.lang.Object,java.lang.String)}
+            with <code>this</code> and the provided {@link net.java.html.json.Model#targetId() target id}.
+            If <em>specified, but left empty</em>, then the generated method
+            calls {@link net.java.html.json.Models#applyBindings(java.lang.Object)}.
+            <em>If unspecified</em>, the method will <b>not</b> be generated at all
+            (a change with respect to older versions). However one can
+            still use {@link net.java.html.json.Models#applyBindings(java.lang.Object)}
+            or {@link net.java.html.json.Models#applyBindings(java.lang.Object,java.lang.String)}
+            to perform the association of any model with the page element.
+        </ul>
+        <p>
             Memory model when using Knockout bindings has been improved
             (required additions of two new methods:
             {@link org.netbeans.html.json.spi.PropertyBinding#weak()} and

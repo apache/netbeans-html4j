@@ -105,7 +105,8 @@ public class ToDoTest {
                     new Todo("First", false),
                     new Todo("2nd", true),
                     new Todo("Third", false)
-                ), c).applyBindings();
+                ), c);
+        Models.applyBindings(ui);
 
         Map m = (Map) Models.toRaw(ui);
         Object v = m.get("remaining");

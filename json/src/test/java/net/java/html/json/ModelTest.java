@@ -60,7 +60,7 @@ import org.testng.annotations.Test;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "Modelik", properties = {
+@Model(className = "Modelik", targetId = "", properties = {
     @Property(name = "value", type = int.class),
     @Property(name = "count", type = int.class),
     @Property(name = "unrelated", type = long.class),

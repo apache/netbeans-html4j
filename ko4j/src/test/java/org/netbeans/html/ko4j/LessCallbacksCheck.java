@@ -53,7 +53,7 @@ import org.netbeans.html.json.tck.KOTest;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "LessCalls", properties = {
+@Model(className = "LessCalls", targetId = "", properties = {
     @Property(name = "value", type = int.class)
 })
 public class LessCallbacksCheck {

@@ -71,7 +71,7 @@ public class GCKnockoutTest {
         try {
             GC m = Models.bind(new GC(), ctx);
             m.getAll().add(new Fullname("Jarda", "Tulach"));
-            m.applyBindings();
+            Models.applyBindings(m);
 
             int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assert cnt == 1 : "One child, but was " + cnt;

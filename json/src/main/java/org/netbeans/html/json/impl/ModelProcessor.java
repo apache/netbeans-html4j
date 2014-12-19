@@ -499,17 +499,31 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("  }\n");
                 writeToString(props, w);
                 writeClone(className, props, w);
-                w.write("  /** Activates this model instance in the current {@link \n"
-                    + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. \n"
-                    + "In case of using Knockout technology, this means to \n"
-                    + "bind JSON like data in this model instance with Knockout tags in \n"
-                    + "the surrounding HTML page.\n"
-                    + "*/\n"
-                );
-                w.write("  public " + className + " applyBindings() {\n");
-                w.write("    proto.applyBindings();\n");
-                w.write("    return this;\n");
-                w.write("  }\n");
+                String targetId = findTargetId(e);
+                if (targetId != null) {
+                    w.write("  /** Activates this model instance in the current {@link \n"
+                        + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. \n"
+                        + "In case of using Knockout technology, this means to \n"
+                        + "bind JSON like data in this model instance with Knockout tags in \n"
+                        + "the surrounding HTML page.\n"
+                    );
+                    if (targetId != null) {
+                        w.write("This method binds to element '" + targetId + "' on the page\n");
+                    }
+                    w.write(""
+                        + "@return <code>this</code> object\n"
+                        + "*/\n"
+                    );
+                    w.write("  public " + className + " applyBindings() {\n");
+                    w.write("    proto.applyBindings();\n");
+    //                w.write("    proto.applyBindings(id);\n");
+                    w.write("    return this;\n");
+                    w.write("  }\n");
+                } else {
+                    w.write("  private " + className + " applyBindings() {\n");
+                    w.write("    throw new IllegalStateException(\"Please specify targetId=\\\"\\\" in your @Model annotation\");\n");
+                    w.write("  }\n");
+                }
                 w.write("  public boolean equals(Object o) {\n");
                 w.write("    if (o == this) return true;\n");
                 w.write("    if (!(o instanceof " + className + ")) return false;\n");
@@ -1755,6 +1769,21 @@ public final class ModelProcessor extends AbstractProcessor {
         } catch (Exception ex) {
             return Collections.emptyList();
         }
+    }
+
+    private static String findTargetId(Element e) {
+        for (AnnotationMirror m : e.getAnnotationMirrors()) {
+            if (m.getAnnotationType().toString().equals(Model.class.getName())) {
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entrySet : m.getElementValues().entrySet()) {
+                    ExecutableElement key = entrySet.getKey();
+                    AnnotationValue value = entrySet.getValue();
+                    if ("targetId()".equals(key.toString())) {
+                        return value.toString();
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private static class Prprt {
