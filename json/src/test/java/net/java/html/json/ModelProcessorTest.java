@@ -82,6 +82,36 @@ public class ModelProcessorTest {
         }
     }
     
+    @Test public void verifyWrongTypeInInnerClass() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "class X {\n"
+            + "  @Model(className=\"XModel\", properties={\n"
+            + "    @Property(name=\"prop\", type=Runnable.class)\n"
+            + "  })\n"
+            + "  static class Inner {\n"
+            + "  }\n"
+            + "}\n";
+        
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        boolean ok = false;
+        StringBuilder msgs = new StringBuilder();
+        for (Diagnostic<? extends JavaFileObject> e : c.getErrors()) {
+            String msg = e.getMessage(Locale.ENGLISH);
+            if (msg.contains("Runnable")) {
+                ok = true;
+            }
+            msgs.append("\n").append(msg);
+        }
+        if (!ok) {
+            fail("Should contain warning about Runnable:" + msgs);
+        }
+    }
+    
     @Test public void warnOnNonStatic() throws IOException {
         String html = "<html><body>"
             + "</body></html>";

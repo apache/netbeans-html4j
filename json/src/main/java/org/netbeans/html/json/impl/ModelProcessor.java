@@ -131,7 +131,7 @@ public final class ModelProcessor extends AbstractProcessor {
             models.clear();
             for (Map.Entry<Element, Prprt[]> entry : verify.entrySet()) {
                 TypeElement te = (TypeElement)entry.getKey();
-                String fqn = processingEnv.getElementUtils().getBinaryName(te).toString();
+                String fqn = te.getQualifiedName().toString();
                 Element finalElem = processingEnv.getElementUtils().getTypeElement(fqn);
                 if (finalElem == null) {
                     continue;
