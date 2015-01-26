@@ -33,8 +33,13 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.8.1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-util-lookup</artifactId>
+      <scope>test</scope>
+      <type>jar</type>
     </dependency>
   </dependencies>
     <description>Representation of an HTML page context a Java program operates in.</description>

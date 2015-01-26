@@ -46,7 +46,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashSet;
 import java.util.ServiceLoader;
+import java.util.Set;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.impl.CtxImpl;
 
@@ -112,12 +114,19 @@ public final class Contexts {
         } catch (SecurityException ex) {
             l = null;
         }
+        Set<Class<?>> classes = new HashSet<Class<?>>();
         for (Provider cp : ServiceLoader.load(Provider.class, l)) {
+            if (!classes.add(cp.getClass())) {
+                continue;
+            }
             cp.fillContext(cb, requestor);
             found = true;
         }
         try {
             for (Provider cp : ServiceLoader.load(Provider.class, Provider.class.getClassLoader())) {
+                if (!classes.add(cp.getClass())) {
+                    continue;
+                }
                 cp.fillContext(cb, requestor);
                 found = true;
             }
@@ -128,6 +137,9 @@ public final class Contexts {
         }
         if (!found) {
             for (Provider cp : ServiceLoader.load(Provider.class)) {
+                if (!classes.add(cp.getClass())) {
+                    continue;
+                }
                 cp.fillContext(cb, requestor);
                 found = true;
             }
