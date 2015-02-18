@@ -160,6 +160,12 @@ public final class JSONTest {
         onCallback = BrwsrCtx.findDefault(model.getClass());
     }
 
+    @OnReceive(url="{url}")
+    static void fetchPlain(JSONik model, String p) {
+        onCallback = BrwsrCtx.findDefault(model.getClass());
+        model.setFetchedResponse(p);
+    }
+
     @OnReceive(url="{url}", onError = "setMessage")
     static void fetchArray(JSONik model, Person[] p) {
         model.setFetchedCount(p.length);
@@ -207,6 +213,64 @@ public final class JSONTest {
         if (p == null) {
             throw new InterruptedException();
         }
+        
+        assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar: " + p.getFirstName();
+        assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
+        
+        assert ctx == onCallback;
+    }
+    
+    @KOTest public void loadAndParsePlainText() throws Exception {
+        if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
+                "text/plain"
+            );
+            js = Models.bind(new JSONik(), ctx = newContext());
+            js.applyBindings();
+
+            js.setFetched(null);
+            js.fetchPlain(url);
+        }
+    
+        String s = js.getFetchedResponse();
+        if (s == null) {
+            throw new InterruptedException();
+        }
+        
+        assert s.contains("Sitar") : "The text contains Sitar value: " + s;
+        assert s.contains("MALE") : "The text contains MALE value: " + s;
+        
+        Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
+        
+        assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar: " + p.getFirstName();
+        assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
+        
+        assert ctx == onCallback;
+    }
+    
+    @KOTest public void loadAndParsePlainTextOnArray() throws Exception {
+        if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "[ {'firstName': 'Sitar', 'sex': 'MALE'} ]",
+                "text/plain"
+            );
+            js = Models.bind(new JSONik(), ctx = newContext());
+            js.applyBindings();
+
+            js.setFetched(null);
+            js.fetchPlain(url);
+        }
+    
+        String s = js.getFetchedResponse();
+        if (s == null) {
+            throw new InterruptedException();
+        }
+        
+        assert s.contains("Sitar") : "The text contains Sitar value: " + s;
+        assert s.contains("MALE") : "The text contains MALE value: " + s;
+        
+        Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
         
         assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar: " + p.getFirstName();
         assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();

@@ -65,6 +65,9 @@ implements Transfer {
     
     @Override
     public void extract(Object obj, String[] props, Object[] values) {
+        if (obj instanceof JSObjToStr) {
+            obj = ((JSObjToStr)obj).obj;
+        }
         LoadJSON.extractJSON(obj, props, values);
     }
 
@@ -100,5 +103,38 @@ implements Transfer {
             sb.append((char)ch);
         }
         return LoadJSON.parse(sb.toString());
+    }
+    
+    static void notifySuccess(Object done, Object str, Object data) {
+        Object notifyObj;
+        if (data instanceof Object[]) {
+            Object[] arr = (Object[]) data;
+            for (int i = 0; i < arr.length; i++) {
+                arr[i] = new JSObjToStr(str, arr[i]);
+            }
+            notifyObj = arr;
+        } else {
+            notifyObj = new JSObjToStr(str, data);
+        }
+        ((JSONCall)done).notifySuccess(notifyObj);
+    }
+    
+    static void notifyError(Object done, Object msg) {
+        ((JSONCall)done).notifyError(new Exception(msg.toString()));
+    }
+    
+    private static final class JSObjToStr {
+        final String str;
+        final Object obj;
+
+        public JSObjToStr(Object str, Object obj) {
+            this.str = str == null ? "" : str.toString();
+            this.obj = obj;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
     }
 }

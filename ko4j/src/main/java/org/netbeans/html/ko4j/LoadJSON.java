@@ -166,17 +166,17 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "  if (request.readyState !== 4) return;\n"
         + "  var r = request.response || request.responseText;\n"
         + "  try {\n"
+        + "    var str = r;\n"
         + "    if (request.status !== 0)\n"
         + "      if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;"
         + "    try { r = eval('(' + r + ')'); } catch (ignore) { }"
-        + "    done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(r);\n"
+        + "    @org.netbeans.html.ko4j.KOTransfer::notifySuccess(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)(done, str, r);\n"
         + "  } catch (error) {;\n"
-        + "    @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);\n"
+        + "    @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);\n"
         + "  }\n"
         + "};\n"
         + "request.onerror = function (e) {\n"
-        + "  console.log('error loading :' + url + ' props: ' + Object.getOwnPropertyNames(e));\n"
-        + "  @org.netbeans.html.ko4j.LoadJSON::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e);\n"
+        + "  @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e.type + ' status ' + request.status);\n"
         + "}\n"
         + "if (data) request.send(data);"
         + "else request.send();"
@@ -186,10 +186,6 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
     ) {
     }
     
-    static void notifyError(Object done, Object msg) {
-        ((JSONCall)done).notifyError(new Exception(msg.toString()));
-    }
-
     @JavaScriptBody(args = {"url", "jsonp"}, body
         = "var scrpt = window.document.createElement('script');\n "
         + "scrpt.setAttribute('src', url);\n "
