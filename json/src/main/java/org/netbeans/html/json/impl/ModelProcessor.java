@@ -1386,8 +1386,32 @@ public final class ModelProcessor extends AbstractProcessor {
                 toCall = classRef + ".proto.toNumber(";
                 toFinish = ".doubleValue()";
             }
+            if (ve.asType().getKind() == TypeKind.FLOAT) {
+                toCall = classRef + ".proto.toNumber(";
+                toFinish = ".floatValue()";
+            }
             if (ve.asType().getKind() == TypeKind.INT) {
                 toCall = classRef + ".proto.toNumber(";
+                toFinish = ".intValue()";
+            }
+            if (ve.asType().getKind() == TypeKind.BYTE) {
+                toCall = classRef + ".proto.toNumber(";
+                toFinish = ".byteValue()";
+            }
+            if (ve.asType().getKind() == TypeKind.SHORT) {
+                toCall = classRef + ".proto.toNumber(";
+                toFinish = ".shortValue()";
+            }
+            if (ve.asType().getKind() == TypeKind.LONG) {
+                toCall = classRef + ".proto.toNumber(";
+                toFinish = ".longValue()";
+            }
+            if (ve.asType().getKind() == TypeKind.BOOLEAN) {
+                toCall = "\"true\".equals(" + classRef + ".proto.toString(";
+                toFinish = ")";
+            }
+            if (ve.asType().getKind() == TypeKind.CHAR) {
+                toCall = "(char)" + classRef + ".proto.toNumber(";
                 toFinish = ".intValue()";
             }
             if (dataName != null && ve.getSimpleName().contentEquals(dataName) && isModel(ve.asType())) {
@@ -1431,10 +1455,17 @@ public final class ModelProcessor extends AbstractProcessor {
                 params.append(classRef);
                 continue;
             }
-            error(
-                "The annotated method can only accept " + className + " argument or argument named 'data'",
-                ee
-            );
+            StringBuilder err = new StringBuilder();
+            err.append("Argument ").
+                append(ve.getSimpleName()).
+                append(" is not valid. The annotated method can only accept ").
+                append(className).
+                append(" argument");
+            if (dataName != null) {
+                err.append(" or argument named '").append(dataName).append("'");
+            }
+            err.append(".");
+            error(err.toString(), ee);
         }
         return params;
     }

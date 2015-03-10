@@ -48,7 +48,6 @@ import net.java.html.json.MapModelTest.One;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
 import org.netbeans.html.json.spi.Transfer;
-import org.netbeans.html.json.impl.JSON;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -66,6 +65,7 @@ import static org.testng.Assert.*;
     @Property(name = "doubleX", type = double.class),
     @Property(name = "charX", type = char.class),
     @Property(name = "StringX", type = String.class),
+    @Property(name = "boolX", type = boolean.class),
 })
 public class TypesTest {
     private MapModelTest.MapTechnology t;
@@ -77,11 +77,10 @@ public class TypesTest {
             register(Transfer.class, t, 1).build();
     }
     @Function static void readFromEvent(int intX, 
-        /*
         byte byteX, 
         short shortX, long longX, float floatX, 
-        char charX
-        */
+        boolean boolX,
+        char charX,
         double doubleX,
         String StringX, Types myModel) {
         
@@ -89,12 +88,12 @@ public class TypesTest {
         myModel.setDoubleX(doubleX);
         myModel.setStringX(StringX);
         
-        /*
-        myModel.setByte(byteX);
-        myModel.setShort(shortX);
-        myModel.setLong(longX);
-        myModel.setFloat(floatX);
-        */
+        myModel.setByteX(byteX);
+        myModel.setShortX(shortX);
+        myModel.setLongX(longX);
+        myModel.setFloatX(floatX);
+        myModel.setBoolX(boolX);
+        myModel.setCharX(charX);
     }
     
     @Test public void canParseEventAttributes() {
@@ -102,14 +101,12 @@ public class TypesTest {
         t.setIntX(33);
         t.setDoubleX(180.5);
         t.setStringX("Ahoj");
-        
-        /*
         t.setCharX('A');
         t.setByteX((byte)3);
         t.setShortX((short)10);
         t.setLongX(66);
         t.setFloatX(99f);
-        */
+        t.setBoolX(true);
         
         Object json = Models.toRaw(t);
         
@@ -121,6 +118,11 @@ public class TypesTest {
         assertEquals(copy.getIntX(), 33);
         assertEquals(copy.getDoubleX(), 180.5);
         assertEquals(copy.getStringX(), "Ahoj");
-//        assertEquals(copy.getCharX(), 'A');
+        assertEquals(copy.getByteX(), (byte)3);
+        assertEquals(copy.getShortX(), (short)10);
+        assertEquals(copy.getLongX(), 66L);
+        assertEquals(copy.getFloatX(), 99f);
+        assertTrue(copy.isBoolX());
+        assertEquals(copy.getCharX(), 'A');
     }
 }

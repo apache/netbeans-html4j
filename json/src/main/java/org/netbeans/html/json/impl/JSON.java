@@ -126,10 +126,13 @@ public final class JSON {
 
     public static String toString(BrwsrCtx c, Object obj, String prop) {
         obj = getProperty(c, obj, prop);
-        return obj instanceof String ? (String)obj : null;
+        return obj == null ? null : obj.toString();
     }
     public static Number toNumber(BrwsrCtx c, Object obj, String prop) {
         obj = getProperty(c, obj, prop);
+        if (obj instanceof Character) {
+            obj = (int)(Character)obj;
+        }
         if (!(obj instanceof Number)) {
             obj = Double.NaN;
         }
