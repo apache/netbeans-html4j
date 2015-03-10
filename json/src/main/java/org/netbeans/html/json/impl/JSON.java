@@ -102,6 +102,9 @@ public final class JSON {
         if (value instanceof Enum) {
             value = value.toString();
         }
+        if (value instanceof Character) {
+            value = Character.toString((Character)value);
+        }
         if (value instanceof String) {
             String s = (String)value;
             int len = s.length();

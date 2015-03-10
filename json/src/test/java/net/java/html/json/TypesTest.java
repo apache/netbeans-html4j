@@ -44,6 +44,11 @@ package net.java.html.json;
 
 import net.java.html.BrwsrCtx;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import net.java.html.json.MapModelTest.One;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
@@ -108,6 +113,8 @@ public class TypesTest {
         t.setFloatX(99f);
         t.setBoolX(true);
         
+        assertValidJSON(t.toString());
+        
         Object json = Models.toRaw(t);
         
         Types copy = Models.bind(new Types(), c);
@@ -124,5 +131,15 @@ public class TypesTest {
         assertEquals(copy.getFloatX(), 99f);
         assertTrue(copy.isBoolX());
         assertEquals(copy.getCharX(), 'A');
+    }
+    
+    private static void assertValidJSON(String text) {
+        ScriptEngineManager sem = new ScriptEngineManager();
+        ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
+        try {
+            eng.eval("var obj = " + text + ";");
+        } catch (ScriptException ex) {
+            fail("Cannot parse " + text, ex);
+        }
     }
 }
