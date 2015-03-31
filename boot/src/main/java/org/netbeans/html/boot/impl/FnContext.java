@@ -49,11 +49,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
-import org.objectweb.asm.Opcodes;
 
 /**
  *
@@ -74,16 +74,17 @@ public final class FnContext implements Closeable {
         return l.getResource("META-INF/net.java.html.js.classes");
     }
 
-    public static boolean isAsmPresent(URL res) {
+    public static ClassLoader newLoader(URL res, FindResources impl, Fn.Presenter p, ClassLoader parent) {
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
         Throwable t;
         try {
-            Class.forName("org.objectweb.asm.Opcodes"); // NOI18N
-            return true;
+            Method newLoader = Class.forName("org.netbeans.html.boot.impl.FnUtils") // NOI18N
+                .getMethod("newLoader", FindResources.class, Fn.Presenter.class, ClassLoader.class);
+            return (ClassLoader) newLoader.invoke(null, impl, p, parent);
         } catch (LinkageError ex) {
             t = ex;
-        } catch (ClassNotFoundException ex) {
+        } catch (Exception ex) {
             t = ex;
         }
         pw.println("When using @JavaScriptBody methods, one needs to either:");
@@ -108,7 +109,7 @@ public final class FnContext implements Closeable {
         pw.println("Cannot initialize asm-5.0.jar!");
         pw.flush();
         LOG.log(Level.SEVERE, w.toString(), t);
-        return false;
+        return null;
     }
 
     private Object prev;

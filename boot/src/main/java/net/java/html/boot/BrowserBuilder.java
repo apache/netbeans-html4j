@@ -68,7 +68,6 @@ import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.context.spi.Contexts.Id;
 import org.netbeans.html.boot.impl.FindResources;
 import org.netbeans.html.boot.impl.FnContext;
-import org.netbeans.html.boot.impl.FnUtils;
 
 /** Use this builder to launch your Java/HTML based application. Typical
  * usage in a main method of your application looks like this: 
@@ -295,11 +294,11 @@ public final class BrowserBuilder {
             if (res == null) {
                 activeLoader = myCls.getClassLoader();
             } else {
-                if (!FnContext.isAsmPresent(res)) {
+                FImpl impl = new FImpl(myCls.getClassLoader());
+                activeLoader = FnContext.newLoader(res, impl, dfnr, myCls.getClassLoader().getParent());
+                if (activeLoader == null) {
                     throw new IllegalStateException("Cannot find asm-5.0.jar classes!");
                 }
-                FImpl impl = new FImpl(myCls.getClassLoader());
-                activeLoader = FnUtils.newLoader(impl, dfnr, myCls.getClassLoader().getParent());
             }
         }
         

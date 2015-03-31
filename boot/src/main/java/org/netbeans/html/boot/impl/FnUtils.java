@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.boot.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -65,7 +66,9 @@ import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
 import org.objectweb.asm.signature.SignatureWriter;
 
-/**
+/** Utilities related to bytecode transformations. Depend on asm.jar which
+ * needs to be added to be provided to classpath to make methods in this 
+ * class useful.
  *
  * @author Jaroslav Tulach
  */
@@ -108,39 +111,8 @@ public final class FnUtils {
         return bytecode;
     }
     
-    public static boolean isValid(Fn fn) {
-        return fn != null && fn.isValid();
-    }
-
     public static ClassLoader newLoader(final FindResources f, final Fn.Presenter d, ClassLoader parent) {
-        return new JsClassLoader(parent) {
-            @Override
-            protected URL findResource(String name) {
-                List<URL> l = res(name, true);
-                return l.isEmpty() ? null : l.get(0);
-            }
-            
-            @Override
-            protected Enumeration<URL> findResources(String name) {
-                return Collections.enumeration(res(name, false));
-            }
-            
-            private List<URL> res(String name, boolean oneIsEnough) {
-                List<URL> l = new ArrayList<URL>();
-                f.findResources(name, l, oneIsEnough);
-                return l;
-            }
-            
-            @Override
-            protected Fn defineFn(String code, String... names) {
-                return d.defineFn(code, names);
-            }
-
-            @Override
-            protected void loadScript(Reader code) throws Exception {
-                d.loadScript(code);
-            }
-        };
+        return new JsClassLoaderImpl(parent, f, d);
     }
 
     static String callback(final String body) {
@@ -166,36 +138,13 @@ public final class FnUtils {
         }.parse(body);
     }
 
-    static void loadScript(ClassLoader jcl, String resource) {
-        final InputStream script = jcl.getResourceAsStream(resource);
-        if (script == null) {
-            throw new NullPointerException("Can't find " + resource);
-        }
-        try {
-            Reader isr = null;
-            try {
-                isr = new InputStreamReader(script, "UTF-8");
-                FnContext.currentPresenter(false).loadScript(isr);
-            } finally {
-                if (isr != null) {
-                    isr.close();
-                }
-            }
-        } catch (Exception ex) {
-            throw new IllegalStateException("Can't execute " + resource, ex);
-        } 
-    }
-    
-    
     private static final class FindInClass extends ClassVisitor {
         private String name;
         private int found;
-        private ClassLoader loader;
         private String resource;
 
         public FindInClass(ClassLoader l, ClassVisitor cv) {
             super(Opcodes.ASM4, cv);
-            this.loader = l;
         }
 
         @Override
@@ -596,7 +545,7 @@ public final class FnUtils {
 
     private static class ClassWriterEx extends ClassWriter {
 
-        private ClassLoader loader;
+        private final ClassLoader loader;
 
         public ClassWriterEx(ClassLoader l, ClassReader classReader, int flags) {
             super(classReader, flags);
@@ -626,6 +575,119 @@ public final class FnUtils {
                 } while (!c.isAssignableFrom(d));
                 return c.getName().replace('.', '/');
             }
+        }
+    }
+
+    static class JsClassLoaderImpl extends JsClassLoader {
+
+        private final FindResources f;
+        private final Fn.Presenter d;
+
+        public JsClassLoaderImpl(ClassLoader parent, FindResources f, Fn.Presenter d) {
+            super(parent);
+            setDefaultAssertionStatus(JsClassLoader.class.desiredAssertionStatus());
+            this.f = f;
+            this.d = d;
+        }
+
+        @Override
+        protected URL findResource(String name) {
+            List<URL> l = res(name, true);
+            return l.isEmpty() ? null : l.get(0);
+        }
+
+        @Override
+        protected Enumeration<URL> findResources(String name) {
+            return Collections.enumeration(res(name, false));
+        }
+        
+        private List<URL> res(String name, boolean oneIsEnough) {
+            List<URL> l = new ArrayList<URL>();
+            f.findResources(name, l, oneIsEnough);
+            return l;
+        }
+    
+        @Override
+        protected Class<?> findClass(String name) throws ClassNotFoundException {
+            if (name.startsWith("javafx")) {
+                return Class.forName(name);
+            }
+            if (name.startsWith("netscape")) {
+                return Class.forName(name);
+            }
+            if (name.startsWith("com.sun")) {
+                return Class.forName(name);
+            }
+            if (name.startsWith("org.netbeans.html.context.spi")) {
+                return Class.forName(name);
+            }
+            if (name.startsWith("net.java.html.BrwsrCtx")) {
+                return Class.forName(name);
+            }
+            if (name.equals(JsClassLoader.class.getName())) {
+                return JsClassLoader.class;
+            }
+            if (name.equals(Fn.class.getName())) {
+                return Fn.class;
+            }
+            if (name.equals(Fn.Presenter.class.getName())) {
+                return Fn.Presenter.class;
+            }
+            if (name.equals(Fn.ToJavaScript.class.getName())) {
+                return Fn.ToJavaScript.class;
+            }
+            if (name.equals(Fn.FromJavaScript.class.getName())) {
+                return Fn.FromJavaScript.class;
+            }
+            if (name.equals(FnUtils.class.getName())) {
+                return FnUtils.class;
+            }
+            if (
+                name.equals("org.netbeans.html.boot.spi.Fn") ||
+                name.equals("org.netbeans.html.boot.impl.FnUtils") ||
+                name.equals("org.netbeans.html.boot.impl.FnContext")
+            ) {
+                return Class.forName(name);
+            }
+            URL u = findResource(name.replace('.', '/') + ".class");
+            if (u != null) {
+                InputStream is = null;
+                try {
+                    is = u.openStream();
+                    byte[] arr = new byte[is.available()];
+                    int len = 0;
+                    while (len < arr.length) {
+                        int read = is.read(arr, len, arr.length - len);
+                        if (read == -1) {
+                            throw new IOException("Can't read " + u);
+                        }
+                        len += read;
+                    }
+                    is.close();
+                    is = null;
+                    if (JsPkgCache.process(this, name)) {
+                        arr = FnUtils.transform(arr, this);
+                    }
+                    return defineClass(name, arr, 0, arr.length);
+                } catch (IOException ex) {
+                    throw new ClassNotFoundException("Can't load " + name, ex);
+                } finally {
+                    try {
+                        if (is != null) is.close();
+                    } catch (IOException ex) {
+                        throw new ClassNotFoundException(null, ex);
+                    }
+                }
+            }
+            return super.findClass(name);
+        }
+    
+        protected Fn defineFn(String code, String... names) {
+            return d.defineFn(code, names);
+        }
+        
+        protected void loadScript(Reader code) throws Exception {
+            d.loadScript(code);
         }
     }
 }

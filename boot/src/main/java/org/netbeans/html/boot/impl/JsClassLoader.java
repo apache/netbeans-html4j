@@ -42,14 +42,10 @@
  */
 package org.netbeans.html.boot.impl;
 
-import org.netbeans.html.boot.spi.Fn;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.net.URL;
-import java.util.Enumeration;
+import net.java.html.js.JavaScriptBody;
 
-/** 
+/** Marker class to help us recognize we assigned classloader is
+ * capable to handle {@link JavaScriptBody} annotated methods.
  *
  * @author Jaroslav Tulach
  */
@@ -58,88 +54,4 @@ abstract class JsClassLoader extends ClassLoader {
         super(parent);
         setDefaultAssertionStatus(JsClassLoader.class.desiredAssertionStatus());
     }
-    
-    @Override
-    protected abstract URL findResource(String name);
-    
-    @Override
-    protected abstract Enumeration<URL> findResources(String name);
-
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (name.startsWith("javafx")) {
-            return Class.forName(name);
-        }
-        if (name.startsWith("netscape")) {
-            return Class.forName(name);
-        }
-        if (name.startsWith("com.sun")) {
-            return Class.forName(name);
-        }
-        if (name.startsWith("org.netbeans.html.context.spi")) {
-            return Class.forName(name);
-        }
-        if (name.startsWith("net.java.html.BrwsrCtx")) {
-            return Class.forName(name);
-        }
-        if (name.equals(JsClassLoader.class.getName())) {
-            return JsClassLoader.class;
-        }
-        if (name.equals(Fn.class.getName())) {
-            return Fn.class;
-        }
-        if (name.equals(Fn.Presenter.class.getName())) {
-            return Fn.Presenter.class;
-        }
-        if (name.equals(Fn.ToJavaScript.class.getName())) {
-            return Fn.ToJavaScript.class;
-        }
-        if (name.equals(Fn.FromJavaScript.class.getName())) {
-            return Fn.FromJavaScript.class;
-        }
-        if (name.equals(FnUtils.class.getName())) {
-            return FnUtils.class;
-        }
-        if (
-            name.equals("org.netbeans.html.boot.spi.Fn") ||
-            name.equals("org.netbeans.html.boot.impl.FnUtils") ||
-            name.equals("org.netbeans.html.boot.impl.FnContext")
-        ) {
-            return Class.forName(name);
-        }
-        URL u = findResource(name.replace('.', '/') + ".class");
-        if (u != null) {
-            InputStream is = null;
-            try {
-                is = u.openStream();
-                byte[] arr = new byte[is.available()];
-                int len = 0;
-                while (len < arr.length) {
-                    int read = is.read(arr, len, arr.length - len);
-                    if (read == -1) {
-                        throw new IOException("Can't read " + u);
-                    }
-                    len += read;
-                }
-                is.close();
-                is = null;
-                if (JsPkgCache.process(this, name)) {
-                    arr = FnUtils.transform(arr, JsClassLoader.this);
-                }
-                return defineClass(name, arr, 0, arr.length);
-            } catch (IOException ex) {
-                throw new ClassNotFoundException("Can't load " + name, ex);
-            } finally {
-                try {
-                    if (is != null) is.close();
-                } catch (IOException ex) {
-                    throw new ClassNotFoundException(null, ex);
-                }
-            }
-        }
-        return super.findClass(name);
-    }
-    
-    protected abstract Fn defineFn(String code, String... names);
-    protected abstract void loadScript(Reader code) throws Exception;
 }

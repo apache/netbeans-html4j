@@ -75,10 +75,10 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
         final URL my = JsClassLoaderTest.class.getProtectionDomain().getCodeSource().getLocation();
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
-        class MyCL extends JsClassLoader implements Fn.Presenter {
+        class MyCL extends FnUtils.JsClassLoaderImpl implements Fn.Presenter {
 
             public MyCL(ClassLoader parent) {
-                super(parent);
+                super(parent, null, null);
             }
             
             @Override
