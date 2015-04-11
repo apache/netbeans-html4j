@@ -183,6 +183,16 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("parseInt", String.class);
         assertEquals(st.invoke(null, "42"), 42, "Meaning of JavaScript?");
     }
+
+    @Test public void passEnum() throws Throwable {
+        Class<?> enmClazz = methodClass.getDeclaredClasses()[0];
+        assertTrue(Enum.class.isAssignableFrom(enmClazz), "It is an enum: " + enmClazz);
+        Class<? extends Enum> enmClazz2 = enmClazz.asSubclass(Enum.class);
+        Method st = methodClass.getMethod("fromEnum", enmClazz);
+        
+        Object valueB = Enum.valueOf(enmClazz2, "B");
+        assertEquals(st.invoke(null, valueB), "B", "Converts to string");
+    }
     
     @Test public void firstLong() throws Throwable {
         Method st = methodClass.getMethod("chooseLong", boolean.class, boolean.class, long.class, long.class);

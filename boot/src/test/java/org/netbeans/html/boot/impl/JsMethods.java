@@ -106,6 +106,9 @@ public class JsMethods {
     @JavaScriptBody(args = { "v" }, javacall = true, body = "return @java.lang.Integer::parseInt(Ljava/lang/String;)(v);")
     public static native int parseInt(String v);
     
+    @JavaScriptBody(args = { "v" }, body = "return v.toString();")
+    public static native String fromEnum(Enm v);
+    
     @JavaScriptBody(args = "arr", body = "return arr;")
     public static native Object[] arr(Object[] arr);
     
@@ -137,4 +140,8 @@ public class JsMethods {
     
     @JavaScriptBody(args = { "x" }, keepAlive = false, body = "throw 'Do not call me!'")
     public static native int checkAllowGC(Object x);
+    
+    enum Enm {
+        A, B;
+    }
 }

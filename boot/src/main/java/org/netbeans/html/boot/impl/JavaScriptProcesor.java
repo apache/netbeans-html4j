@@ -71,6 +71,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -295,13 +296,28 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                         tm = ((ArrayType)tm).getComponentType();
                     }
                     sb.append('L');
-                    sb.append(tm.toString().replace('.', '/'));
-                    sb.append(';');
+                    Element elm = processingEnv.getTypeUtils().asElement(tm);
+                    dumpElems(sb, elm, ';');
                 }
             }
             sb.append(')');
             return sb.toString();
         }
+    }
+    
+    private static void dumpElems(StringBuilder sb, Element e, char after) {
+        if (e == null) {
+            return;
+        }
+        if (e.getKind() == ElementKind.PACKAGE) {
+            PackageElement pe = (PackageElement) e;
+            sb.append(pe.getQualifiedName().toString().replace('.', '/')).append('/');
+            return;
+        }
+        Element p = e.getEnclosingElement();
+        dumpElems(sb, p, '$');
+        sb.append(e.getSimpleName());
+        sb.append(after);
     }
     
     private void generateJavaScriptBodyList(Map<String,Set<TypeElement>> bodies) {
