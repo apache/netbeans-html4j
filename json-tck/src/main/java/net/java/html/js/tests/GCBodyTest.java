@@ -45,6 +45,7 @@ package net.java.html.js.tests;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.js.tests.JavaScriptBodyTest.*;
 
 /**
  *
@@ -61,7 +62,7 @@ public class GCBodyTest {
         }
         Sum s = new Sum();
         int res = Bodies.sumIndirect(s, 22, 20);
-        assert res == 42 : "Expecting 42";
+        assertEquals(res, 42, "Expecting 42");
         Reference<?> ref = new WeakReference<Object>(s);
         s = null;
         assertGC(ref, "Can disappear!");
@@ -71,7 +72,7 @@ public class GCBodyTest {
         Object obj = Bodies.instance(0);
         Object s = new EmptyInstance();
         Bodies.setX(obj, s);
-        assert s == Bodies.readX(obj);
+        assertEquals(s, Bodies.readX(obj));
         ref = new WeakReference<Object>(s);
         return obj;
 }
@@ -83,24 +84,24 @@ public class GCBodyTest {
         }
         
         Object obj = assignInst();
-        assert ref != null;
+        assertNotNull(ref, "Reference assigned");
         
         assertGC(ref, "Can disappear as it is keepAlive false!");
-        assert obj != null : "Object is still present";
+        assertNotNull(obj, "Object is still present");
     }
 
     @KOTest public void strongReceiverBehavior() {
         Object v = new EmptyInstance();
         Receiver r = new Receiver(v);
         r.apply();
-        assert v == r.value : "Value is as expected";
+        assertEquals(v, r.value, "Value is as expected");
     }
     
     @KOTest public void gcReceiverBehavior() throws InterruptedException {
         Receiver r = new Receiver(new EmptyInstance());
         assertGC(r.ref, "The empty instance can be GCed even when referenced from JS");
         r.apply();
-        assert r.value == null : "Setter called with null value";
+        assertEquals(r.value, null, "Setter called with null value");
     }
 
     private static Reference<?> sendRunnable(final int[] arr) {

@@ -44,6 +44,7 @@ package net.java.html.json.tests;
 
 import net.java.html.json.Models;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
 
 /**
  *
@@ -59,8 +60,8 @@ public class OperationsTest {
         js.applyBindings();
         js.setFetched(p);
         Person p = js.getFetched();
-        assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar immediately: " + p.getFirstName();
-        assert Sex.MALE.equals(p.getSex()) : "Expecting MALE immediately: " + p.getSex();
+        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar immediately: " + p.getFirstName());
+        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE immediately: " + p.getSex());
     }
     
     
@@ -89,7 +90,7 @@ public class OperationsTest {
             throw new InterruptedException();
         }
         
-        assert "Sitar".equals(p.getFirstName()) : "Expecting Sitar: " + p.getFirstName();
-        assert Sex.MALE.equals(p.getSex()) : "Expecting MALE: " + p.getSex();
+        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
+        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
     }
 }

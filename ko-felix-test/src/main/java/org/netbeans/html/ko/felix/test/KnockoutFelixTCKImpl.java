@@ -68,8 +68,6 @@ import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
 import org.netbeans.html.json.spi.Transfer;
 import org.netbeans.html.json.tck.KnockoutTCK;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.openide.util.lookup.ServiceProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -167,16 +165,17 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
 
     @Override
     public Object createJSON(Map<String, Object> values) {
-        JSONObject json = new JSONObject();
+        Object json = createObj();
         for (Map.Entry<String, Object> entry : values.entrySet()) {
-            try {
-                json.put(entry.getKey(), entry.getValue());
-            } catch (JSONException ex) {
-                throw new IllegalStateException(ex);
-            }
+            putObj(json, entry.getKey(), entry.getValue());
         }
         return json;
     }
+    
+    @JavaScriptBody(args = {  }, body = "return {};")
+    private static native Object createObj();
+    @JavaScriptBody(args = { "obj", "prop", "val" }, body = "obj[prop] = val;")
+    private static native void putObj(Object obj, String prop, Object val);
 
     @Override
     @JavaScriptBody(args = { "s", "args" }, body = ""

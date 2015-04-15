@@ -54,6 +54,7 @@ import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
 
 /** Tests model of a mine field and its behavior in the browser.
  */
@@ -86,7 +87,7 @@ public final class MinesTest {
             m = Models.bind(new Mines(), ctx);
             m.applyBindings();
             int cnt = Utils.countChildren(MinesTest.class, "table");
-            assert cnt == 0 : "Table is empty: " + cnt;
+            assertEquals(cnt, 0, "Table is empty: " + cnt);
             scheduleClick("init", 100);
         }
 
@@ -95,7 +96,7 @@ public final class MinesTest {
         if (cnt == 0) {
             throw new InterruptedException();
         }
-        assert cnt == 10 : "There is ten rows in the table now: " + cnt;
+        assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
         
         Utils.exposeHTML(MinesTest.class, "");
     }
@@ -108,7 +109,7 @@ public final class MinesTest {
         mines.getRows().get(0).getColumns().get(1).setMine(true);
         
         int cnt = around(mines, 1, 1);
-        assert cnt == 3 : "There are three mines around. Was: " + cnt;
+        assertEquals(cnt, 3, "There are three mines around. Was: " + cnt);
     }
     
     private static void scheduleClick(String id, int delay) throws Exception {

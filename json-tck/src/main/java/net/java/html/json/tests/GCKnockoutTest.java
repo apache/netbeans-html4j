@@ -49,6 +49,7 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
 
 @Model(className = "GC", properties = {
     @Property(name = "all", type = Fullname.class, array = true)
@@ -74,18 +75,18 @@ public class GCKnockoutTest {
             Models.applyBindings(m);
 
             int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
-            assert cnt == 1 : "One child, but was " + cnt;
+            assertEquals(cnt, 1, "One child, but was " + cnt);
 
             m.getAll().add(new Fullname("HTML", "Java"));
 
             cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
-            assert cnt == 2 : "Now two " + cnt;
+            assertEquals(cnt, 2, "Now two " + cnt);
 
             Fullname removed = m.getAll().get(0);
             m.getAll().remove(0);
 
             cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
-            assert cnt == 1 : "Again One " + cnt;
+            assertEquals(cnt, 1, "Again One " + cnt);
 
             Reference<?> ref = new WeakReference<Object>(removed);
             removed = null;

@@ -53,6 +53,10 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
+import static net.java.html.json.tests.Utils.assertNotNull;
+import static net.java.html.json.tests.Utils.assertTrue;
+import static net.java.html.json.tests.Utils.assertFalse;
 
 /**
  *
@@ -96,12 +100,12 @@ public final class KnockoutTest {
             m.applyBindings();
 
             String v = getSetInput(null);
-            assert "A".equals(v) : "Value is really A: " + v;
+            assertEquals("A", v, "Value is really A: " + v);
 
             getSetInput("B");
             triggerEvent("input", "change");
 
-            assert Choice.B == m.getChoice(): "Enum property updated: " + m.getChoice();
+            assertEquals(Choice.B, m.getChoice(), "Enum property updated: " + m.getChoice());
         } catch (Throwable t) {
             throw t;
         } finally {
@@ -120,12 +124,12 @@ public final class KnockoutTest {
             m.applyBindings();
 
             String v = getSetInput(null);
-            assert "50.5".equals(v) : "Value is really 50.5: " + v;
+            assertEquals("50.5", v, "Value is really 50.5: " + v);
 
             getSetInput("49.5");
             triggerEvent("input", "change");
 
-            assert 49.5 == m.getLatitude() : "Double property updated: " + m.getLatitude();
+            assertEquals(49.5, m.getLatitude(), "Double property updated: " + m.getLatitude());
         } catch (Throwable t) {
             throw t;
         } finally {
@@ -144,12 +148,12 @@ public final class KnockoutTest {
             m.applyBindings();
 
             String v = getSetInput(null);
-            assert "true".equals(v) : "Value is really true: " + v;
+            assertEquals("true", v, "Value is really true: " + v);
 
             getSetInput("false");
             triggerEvent("input", "change");
 
-            assert false == m.isEnabled(): "Boolean property updated: " + m.isEnabled();
+            assertFalse(m.isEnabled(), "Boolean property updated: " + m.isEnabled());
         } catch (Throwable t) {
             throw t;
         } finally {
@@ -170,12 +174,12 @@ public final class KnockoutTest {
             m.applyBindings();
 
             String v = getSetInput(null);
-            assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
+            assertEquals("Kukuc", v, "Value is really kukuc: " + v);
 
             getSetInput("Jardo");
             triggerEvent("input", "change");
 
-            assert "Jardo".equals(m.getName()) : "Name property updated: " + m.getName();
+            assertEquals("Jardo", m.getName(), "Name property updated: " + m.getName());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -228,10 +232,10 @@ public final class KnockoutTest {
             js.applyBindings();
             
             String v = getSetSelected(0, null);
-            assert "crud".equals(v) : "Second index (e.g. crud) is selected: " + v;
+            assertEquals("crud", v, "Second index (e.g. crud) is selected: " + v);
             
             String sel = getSetSelected(2, Models.toRaw(js.getArchetypes().get(2)));
-            assert "3rd".equals(sel) : "3rd is selected now: " + sel;
+            assertEquals("3rd", sel, "3rd is selected now: " + sel);
         }
         
         if (js.getArchetype() != js.getArchetypes().get(2)) {
@@ -254,7 +258,7 @@ public final class KnockoutTest {
             js.applyBindings();
             
             String v = getSetInput(null);
-            assert "Kukuc".equals(v) : "Value is really kukuc: " + v;
+            assertEquals("Kukuc", v, "Value is really kukuc: " + v);
             
             Timer t = new Timer("Set to Jardo");
             t.schedule(new TimerTask() {
@@ -305,17 +309,17 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 1 : "One child, but was " + cnt;
+            assertEquals(cnt, 1, "One child, but was " + cnt);
 
             m.getResults().add("Hi");
 
             cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
 
             triggerChildClick("ul", 1);
 
-            assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
-            assert "Hi".equals(m.getName()) : "We got callback from 2nd child " + m.getName();
+            assertEquals(1, m.getCallbackCount(), "One callback " + m.getCallbackCount());
+            assertEquals("Hi", m.getName(), "We got callback from 2nd child " + m.getName());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -333,7 +337,7 @@ public final class KnockoutTest {
             js.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 1 : "One child, but was " + cnt;
+            assertEquals(cnt, 1, "One child, but was " + cnt);
             
             Timer t = new Timer("add to array");
             t.schedule(new TimerTask() {
@@ -353,8 +357,8 @@ public final class KnockoutTest {
         try {
             triggerChildClick("ul", 1);
 
-            assert 1 == js.getCallbackCount() : "One callback " + js.getCallbackCount();
-            assert "Hi".equals(js.getName()) : "We got callback from 2nd child " + js.getName();
+            assertEquals(1, js.getCallbackCount(), "One callback " + js.getCallbackCount());
+            assertEquals("Hi", js.getName(), "We got callback from 2nd child " + js.getName());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -371,20 +375,20 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
 
             triggerChildClick("ul", 1);
 
-            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            assertEquals("Last", m.getFirstName(), "We got callback from 2nd child " + m.getFirstName());
             
             m.setLastName("Verylast");
 
             cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
             
             triggerChildClick("ul", 1);
 
-            assert "Verylast".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            assertEquals("Verylast", m.getFirstName(), "We got callback from 2nd child " + m.getFirstName());
             
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
@@ -405,13 +409,13 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
 
             triggerChildClick("ul", 1);
             
-            assert PairModel.ctx == ctx : "Context remains the same";
+            assertEquals(PairModel.ctx, ctx, "Context remains the same");
 
-            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            assertEquals("Last", m.getFirstName(), "We got callback from 2nd child " + m.getFirstName());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -430,11 +434,11 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
 
             triggerChildClick("ul", 1);
 
-            assert "Last".equals(m.getFirstName()) : "We got callback from 2nd child " + m.getFirstName();
+            assertEquals("Last", m.getFirstName(), "We got callback from 2nd child " + m.getFirstName());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -448,11 +452,11 @@ public final class KnockoutTest {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.applyBindings();
 
-            assert !m.isEnabled() : "Is disabled";
+            assertFalse(m.isEnabled(), "Is disabled");
 
             triggerClick("b");
 
-            assert m.isEnabled() : "Now the model is enabled";
+            assertTrue(m.isEnabled(), "Now the model is enabled");
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -472,12 +476,12 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 1 : "One child, but was " + cnt;
+            assertEquals(cnt, 1, "One child, but was " + cnt);
 
             m.getResults().add("hello");
 
             cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -500,29 +504,29 @@ public final class KnockoutTest {
             m.applyBindings();
 
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 1 : "One child, but was " + cnt;
+            assertEquals(cnt, 1, "One child, but was " + cnt);
 
             final Person second = Models.bind(new Person(), c);
             second.setFirstName("second");
             m.getPeople().add(second);
 
             cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children now, but was " + cnt;
+            assertEquals(cnt, 2, "Two children now, but was " + cnt);
 
             triggerChildClick("ul", 1);
 
-            assert 1 == m.getCallbackCount() : "One callback " + m.getCallbackCount();
+            assertEquals(1, m.getCallbackCount(), "One callback " + m.getCallbackCount());
 
             cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 1 : "Again one child, but was " + cnt;
+            assertEquals(cnt , 1, "Again one child, but was " + cnt);
 
             String txt = childText("ul", 0);
-            assert "first".equals(txt) : "Expecting 'first': " + txt;
+            assertEquals("first", txt, "Expecting 'first': " + txt);
 
             first.setFirstName("changed");
 
             txt = childText("ul", 0);
-            assert "changed".equals(txt) : "Expecting 'changed': " + txt;
+            assertEquals("changed", txt, "Expecting 'changed': " + txt);
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -571,12 +575,12 @@ public final class KnockoutTest {
         m.applyBindings();
 
         int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-        assert cnt == 1 : "One child, but was " + cnt;
+        assertEquals(cnt, 1, "One child, but was " + cnt);
 
 
         triggerChildClick("ul", 0);
 
-        assert first.getSex() == Sex.FEMALE : "Transverted to female: " + first.getSex();
+        assertEquals(first.getSex(), Sex.FEMALE, "Transverted to female: " + first.getSex());
     }
     
     @KOTest public void stringArrayModificationVisible() throws Exception {
@@ -594,18 +598,18 @@ public final class KnockoutTest {
             m.applyBindings();
             
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children " + cnt;
+            assertEquals(cnt, 2, "Two children " + cnt);
             
             Object arr = Utils.addChildren(KnockoutTest.class, "ul", "results", "Hi");
-            assert arr instanceof Object[] : "Got back an array: " + arr;
+            assertTrue(arr instanceof Object[], "Got back an array: " + arr);
             final int len = ((Object[])arr).length;
             
-            assert len == 3 : "Three elements in the array " + len;
+            assertEquals(len, 3, "Three elements in the array " + len);
             
             int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            assertEquals(newCnt, 3, "Three children in the DOM: " + newCnt);
             
-            assert m.getResults().size() == 3 : "Three java strings: " + m.getResults();
+            assertEquals(m.getResults().size(), 3, "Three java strings: " + m.getResults());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -626,19 +630,19 @@ public final class KnockoutTest {
             m.applyBindings();
             
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children " + cnt;
+            assertEquals(cnt, 2, "Two children " + cnt);
             
             Object arr = Utils.addChildren(KnockoutTest.class, "ul", "numbers", 42);
-            assert arr instanceof Object[] : "Got back an array: " + arr;
+            assertTrue(arr instanceof Object[], "Got back an array: " + arr);
             final int len = ((Object[])arr).length;
             
-            assert len == 3 : "Three elements in the array " + len;
+            assertEquals(len, 3, "Three elements in the array " + len);
             
             int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            assertEquals(newCnt, 3, "Three children in the DOM: " + newCnt);
             
-            assert m.getNumbers().size() == 3 : "Three java ints: " + m.getNumbers();
-            assert m.getNumbers().get(2) == 42 : "Meaning of world: " + m.getNumbers();
+            assertEquals(m.getNumbers().size(), 3, "Three java ints: " + m.getNumbers());
+            assertEquals(m.getNumbers().get(2), 42, "Meaning of world: " + m.getNumbers());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -659,19 +663,19 @@ public final class KnockoutTest {
             m.applyBindings();
             
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 2 : "Two children " + cnt;
+            assertEquals(cnt, 2, "Two children " + cnt);
             
             Object arr = Utils.addChildren(KnockoutTest.class, "ul", "results", "Hi");
-            assert arr instanceof Object[] : "Got back an array: " + arr;
+            assertTrue(arr instanceof Object[], "Got back an array: " + arr);
             final int len = ((Object[])arr).length;
             
-            assert len == 3 : "Three elements in the array " + len;
+            assertEquals(len, 3, "Three elements in the array " + len);
             
             int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert newCnt == 3 : "Three children in the DOM: " + newCnt;
+            assertEquals(newCnt, 3, "Three children in the DOM: " + newCnt);
             
-            assert m.getResultLengths().size() == 3 : "Three java ints: " + m.getResultLengths();
-            assert m.getResultLengths().get(2) == 2 : "Size is two: " + m.getResultLengths();
+            assertEquals(m.getResultLengths().size(), 3, "Three java ints: " + m.getResultLengths());
+            assertEquals(m.getResultLengths().get(2), 2, "Size is two: " + m.getResultLengths());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
@@ -690,20 +694,20 @@ public final class KnockoutTest {
             m.applyBindings();
             
             int cnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert cnt == 0 : "No children " + cnt;
+            assertEquals(cnt, 0, "No children " + cnt);
             
             Object arr = Utils.addChildren(KnockoutTest.class, "ul", "archetypes", new ArchetypeData("aid", "gid", "v", "n", "d", "u"));
-            assert arr instanceof Object[] : "Got back an array: " + arr;
+            assertTrue(arr instanceof Object[], "Got back an array: " + arr);
             final int len = ((Object[])arr).length;
             
-            assert len == 1 : "One element in the array " + len;
+            assertEquals(len, 1, "One element in the array " + len);
             
             int newCnt = Utils.countChildren(KnockoutTest.class, "ul");
-            assert newCnt == 1 : "One child in the DOM: " + newCnt;
+            assertEquals(newCnt, 1, "One child in the DOM: " + newCnt);
             
-            assert m.getArchetypes().size() == 1 : "One archetype: " + m.getArchetypes();
-            assert m.getArchetypes().get(0) != null : "Not null: " + m.getArchetypes();
-            assert m.getArchetypes().get(0).getArtifactId().equals("aid") : "'aid' == " + m.getArchetypes();
+            assertEquals(m.getArchetypes().size(), 1, "One archetype: " + m.getArchetypes());
+            assertNotNull(m.getArchetypes().get(0), "Not null: " + m.getArchetypes());
+            assertEquals(m.getArchetypes().get(0).getArtifactId(), "aid", "'aid' == " + m.getArchetypes());
         } finally {
             Utils.exposeHTML(KnockoutTest.class, "");
         }

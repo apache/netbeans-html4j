@@ -53,6 +53,9 @@ import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Models;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
+import static net.java.html.json.tests.Utils.assertNull;
+import static net.java.html.json.tests.Utils.assertNotNull;
 
 /**
  *
@@ -105,9 +108,9 @@ public final class ConvertTypesTest {
         
         Person p = Models.fromRaw(newContext(), Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertEquals(Sex.MALE, p.getSex(), "Sex: " + p.getSex());
     }
 
     @KOTest
@@ -117,9 +120,9 @@ public final class ConvertTypesTest {
         
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertEquals(Sex.MALE, p.getSex(), "Sex: " + p.getSex());
     }
     
     @KOTest
@@ -129,11 +132,11 @@ public final class ConvertTypesTest {
         
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
-        assert p.getAddress() != null : "Some address provided";
-        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertEquals(Sex.MALE, p.getSex(), "Sex: " + p.getSex());
+        assertNotNull(p.getAddress(), "Some address provided");
+        assertEquals(p.getAddress().getStreet(), "Schnirchova", "Is Schnirchova: " + p.getAddress());
     }
 
     @KOTest
@@ -144,14 +147,14 @@ public final class ConvertTypesTest {
         List<Person> arr = new ArrayList<Person>();
         Models.parse(c, Person.class, o, arr);
         
-        assert arr.size() == 1 : "There is one item in " + arr;
+        assertEquals(arr.size(), 1, "There is one item in " + arr);
         
         Person p = arr.get(0);
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
-        assert p.getAddress() != null : "Some address provided";
-        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertEquals(Sex.MALE, p.getSex(), "Sex: " + p.getSex());
+        assertNotNull(p.getAddress() , "Some address provided");
+        assertEquals(p.getAddress().getStreet(), "Schnirchova", "Is Schnirchova: " + p.getAddress());
     }
     
     @KOTest 
@@ -165,8 +168,8 @@ public final class ConvertTypesTest {
         final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
         Person p = Models.parse(c, Person.class, is);
 
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert null == p.getLastName() : "Last name: " + p.getLastName();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertNull(p.getLastName(), "Last name: " + p.getLastName());
     }
 
     @KOTest 
@@ -181,12 +184,12 @@ public final class ConvertTypesTest {
         List<Person> arr = new ArrayList<Person>();
         Models.parse(c, Person.class, is, arr);
         
-        assert arr.size() == 2 : "There are two items in " + arr;
-        assert arr.get(0) == null : "first is null " + arr;
+        assertEquals(arr.size(), 2, "There are two items in " + arr);
+        assertNull(arr.get(0), "first is null " + arr);
         
         Person p = arr.get(1);
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert null == p.getLastName() : "Last name: " + p.getLastName();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertNull(p.getLastName(), "Last name: " + p.getLastName());
     }
 
     @KOTest
@@ -195,9 +198,9 @@ public final class ConvertTypesTest {
         
         Person p = Models.fromRaw(newContext(), Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert p.getSex() == null : "No sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertNull(p.getSex(), "No sex: " + p.getSex());
     }
     
     @KOTest
@@ -206,9 +209,9 @@ public final class ConvertTypesTest {
         final InputStream o = createIS(false, false, -1);
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert p.getSex() == null : "No sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertNull(p.getSex(), "No sex: " + p.getSex());
     }
     
     @KOTest
@@ -218,11 +221,11 @@ public final class ConvertTypesTest {
         
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert Sex.MALE.equals(p.getSex()) : "Sex: " + p.getSex();
-        assert p.getAddress() != null : "Some address provided";
-        assert p.getAddress().getStreet().equals("Schnirchova") : "Is Schnirchova: " + p.getAddress();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertEquals(Sex.MALE, p.getSex(), "Sex: " + p.getSex());
+        assertNotNull(p.getAddress(), "Some address provided");
+        assertEquals(p.getAddress().getStreet(), "Schnirchova", "Is Schnirchova: " + p.getAddress());
     }
 
     @KOTest
@@ -231,9 +234,9 @@ public final class ConvertTypesTest {
         final InputStream o = createIS(false, false, 1);
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert p.getSex() == null : "No sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertNull(p.getSex(), "No sex: " + p.getSex());
     }
 
     @KOTest
@@ -242,9 +245,9 @@ public final class ConvertTypesTest {
         final InputStream o = createIS(false, false, 5);
         Person p = Models.parse(c, Person.class, o);
         
-        assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-        assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-        assert p.getSex() == null : "No sex: " + p.getSex();
+        assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+        assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+        assertNull(p.getSex(), "No sex: " + p.getSex());
     }
 
     @KOTest
@@ -255,12 +258,12 @@ public final class ConvertTypesTest {
         List<Person> res = new ArrayList<Person>();
         Models.parse(c, Person.class, o, res);
         
-        assert res.size() == 5 : "Five elements found" + res;
+        assertEquals(res.size(), 5, "Five elements found" + res);
         
         for (Person p : res) {
-            assert "son".equals(p.getFirstName()) : "First name: " + p.getFirstName();
-            assert "dj".equals(p.getLastName()) : "Last name: " + p.getLastName();
-            assert p.getSex() == null : "No sex: " + p.getSex();
+            assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+            assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+            assertNull(p.getSex(), "No sex: " + p.getSex());
         }
     }
     

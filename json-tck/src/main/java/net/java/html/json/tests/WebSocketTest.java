@@ -48,6 +48,10 @@ import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
 import org.netbeans.html.json.tck.KOTest;
+import static net.java.html.json.tests.Utils.assertEquals;
+import static net.java.html.json.tests.Utils.assertNotNull;
+import static net.java.html.json.tests.Utils.assertTrue;
+import static net.java.html.json.tests.Utils.fail;
 
 /** Testing support of WebSocket communication.
  *
@@ -108,8 +112,8 @@ public final class WebSocketTest {
             throw new InterruptedException();
         }
         
-        assert "Mitar".equals(p.getFirstName()) : "Unexpected: " + p.getFirstName();
-        assert Sex.FEMALE.equals(p.getSex()) : "Expecting FEMALE: " + p.getSex();
+        assertEquals("Mitar", p.getFirstName(), "Unexpected: " + p.getFirstName());
+        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
 
         if (js.getOpen() == 2) {
             // close the socket
@@ -120,7 +124,7 @@ public final class WebSocketTest {
         if (js.getFetchedResponse() == null) {
             throw new InterruptedException();
         }
-        assert "null".equals(js.getFetchedResponse()) : "Should be null: " + js.getFetchedResponse();
+        assertEquals("null", js.getFetchedResponse(), "Should be null: " + js.getFetchedResponse());
     }
     
     @KOTest public void errorUsingWebSocket() throws Throwable {
@@ -136,7 +140,7 @@ public final class WebSocketTest {
             throw new InterruptedException();
         }
 
-        assert js.getFetchedResponse() != null : "Error reported";
+        assertNotNull(js.getFetchedResponse(), "Error reported");
     }
 
     @KOTest public void haveToOpenTheWebSocket() throws Throwable {
@@ -146,9 +150,9 @@ public final class WebSocketTest {
         js.setFetched(null);
         try {
             js.querySex("http://wrong.protocol", Sex.MALE);
-            assert false : "Should throw an exception";
+            fail("Should throw an exception");
         } catch (IllegalStateException ex) {
-            assert ex.getMessage().contains("not open") : "Expecting 'not open' msg: " + ex.getMessage();
+            assertTrue(ex.getMessage().contains("not open"), "Expecting 'not open' msg: " + ex.getMessage());
         }
     }
     

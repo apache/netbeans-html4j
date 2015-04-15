@@ -184,4 +184,42 @@ public final class Utils {
             return null;
         }
     }
+    
+    static void fail(String msg) {
+        throw new AssertionError(msg);
+    }
+    
+    static void assertTrue(boolean c, String msg) {
+        if (!c) {
+            throw new AssertionError(msg);
+        }
+    }
+
+    static void assertFalse(boolean c, String msg) {
+        if (c) {
+            throw new AssertionError(msg);
+        }
+    }
+    
+    static void assertNull(Object o, String msg) {
+        if (o != null) {
+            throw new AssertionError(msg);
+        }
+    }
+
+    static void assertNotNull(Object o, String msg) {
+        if (o == null) {
+            throw new AssertionError(msg);
+        }
+    }
+    
+    static void assertEquals(Object a, Object b, String msg) {
+        if (a == b) {
+            return;
+        }
+        if (a != null && a.equals(b)) {
+            return;
+        }
+        throw new AssertionError(msg);
+    }
 }
