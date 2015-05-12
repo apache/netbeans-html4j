@@ -103,17 +103,17 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     
     final JSFn defineJSFn(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
-        sb.append("(function() {");
-        sb.append("  return function(");
+        sb.append("(function() {\n");
+        sb.append("  return function(\n    ");
         String sep = "";
         if (names != null) for (String n : names) {
             sb.append(sep).append(n);
             sep = ",";
         }
-        sb.append(") {\n");
+        sb.append("  \n) {\n");
         sb.append(code);
-        sb.append("};");
-        sb.append("})()");
+        sb.append("};\n");
+        sb.append("})();\n");
         if (LOG.isLoggable(Level.FINE)) {
             LOG.log(Level.FINE, 
                 "defining function #{0}:\n{1}\n", 
