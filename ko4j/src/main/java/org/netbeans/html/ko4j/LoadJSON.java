@@ -177,9 +177,9 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "};\n"
         + "request.onerror = function (e) {\n"
         + "  @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e.type + ' status ' + request.status);\n"
-        + "}\n"
-        + "if (data) request.send(data);"
-        + "else request.send();"
+        + "};\n"
+        + "if (data) request.send(data);\n"
+        + "else request.send();\n"
     )
     static void loadJSON(
         String url, JSONCall done, String method, String data
