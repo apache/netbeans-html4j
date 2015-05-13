@@ -160,6 +160,43 @@
         compilation fails. Thus don't despair seeing the syntax, you'll get early
         warnings when there is a typo.
         
+        <h3>Overloaded Methods</h3>
+        
+        Specifying the actual callback signature is important in case of 
+        overloaded methods. Imagine a class:
+<pre>
+<b>package</b> x.y.z;
+<b>class</b> Handler {
+  <b>int</b> pulse() {
+    <b>return</b> 1;
+  }
+  <b>int</b> pulse(<b>int</b> howMuch) {
+    <b>return</b> howMuch;
+  }
+  <b>int</b> pulse(<b>long</b> evenMore) {
+    <b>return</b> (<b>int</b>) (5 + evenMore);
+  }
+}</pre>        
+        you then need to choose in {@link net.java.html.js.JavaScriptBody} 
+        the appropriate method to call:
+<pre>
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = { "h" }, javacall = <b>true</b>, <em>// you want to process the @ syntax</em>
+  body = "<b>return</b> h.@x.y.z.Handler::pulse()() +" + <em>// the call to no argument method</em>
+    "h.@x.y.z.Handler::pulse(I)(10) +" + <em>// the call to method with integer argument</em>
+    "h.@x.y.z.Handler::pulse(J)(10);" <em>// the call to method with long argument</em>
+  )
+  <b>static native void</b> threePulsesFromJavaScript(Handler h);
+  <b>static</b> {
+    <b>assert</b> 26 == threePulsesFromJavaScript(<b>new</b> Handler());
+  }
+</pre>
+        <p>
+        To avoid ambiguity, the specification of the correct signature is 
+        required on every call. However, to simplify the development,
+        there is an annotation processor to
+        verify the signature really refers to an existing method.
+        </p>
+        
         <h3>Arrays by Copy</h3>
         
         It is possible to exchange arrays between Java and JavaScript. Some
