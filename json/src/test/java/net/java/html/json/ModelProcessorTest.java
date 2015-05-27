@@ -65,7 +65,7 @@ public class ModelProcessorTest {
             + "})\n"
             + "class X {\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         boolean ok = false;
@@ -81,7 +81,7 @@ public class ModelProcessorTest {
             fail("Should contain warning about Runnable:" + msgs);
         }
     }
-    
+
     @Test public void verifyWrongTypeInInnerClass() throws IOException {
         String html = "<html><body>"
             + "</body></html>";
@@ -95,7 +95,7 @@ public class ModelProcessorTest {
             + "  static class Inner {\n"
             + "  }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         boolean ok = false;
@@ -111,7 +111,7 @@ public class ModelProcessorTest {
             fail("Should contain warning about Runnable:" + msgs);
         }
     }
-    
+
     @Test public void warnOnNonStatic() throws IOException {
         String html = "<html><body>"
             + "</body></html>";
@@ -127,7 +127,7 @@ public class ModelProcessorTest {
             + "        return prop;\n"
             + "    }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         boolean ok = false;
@@ -143,7 +143,7 @@ public class ModelProcessorTest {
             fail("Should contain warning about non-static method:" + msgs);
         }
     }
-    
+
     @Test public void computedCantReturnVoid() throws IOException {
         String html = "<html><body>"
             + "</body></html>";
@@ -158,7 +158,7 @@ public class ModelProcessorTest {
             + "    @ComputedProperty static void y(int prop) {\n"
             + "    }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         boolean ok = false;
@@ -174,7 +174,7 @@ public class ModelProcessorTest {
             fail("Should contain warning about non-static method:" + msgs);
         }
     }
-    
+
     @Test public void computedCantReturnRunnable() throws IOException {
         String html = "<html><body>"
             + "</body></html>";
@@ -190,7 +190,7 @@ public class ModelProcessorTest {
             + "       return null;\n"
             + "    }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         boolean ok = false;
@@ -206,7 +206,7 @@ public class ModelProcessorTest {
             fail("Should contain warning about non-static method:" + msgs);
         }
     }
-    
+
     @Test public void canWeCompileWithJDK1_5SourceLevel() throws IOException {
         String html = "<html><body>"
             + "</body></html>";
@@ -220,11 +220,11 @@ public class ModelProcessorTest {
             + "class X {\n"
             + "  @ComputedProperty static double derived(long prop) { return prop; }"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code, "1.5");
         assertTrue(c.getErrors().isEmpty(), "No errors: " + c.getErrors());
     }
-    
+
     @Test public void putNeedsDataArgument() throws Exception {
         needsAnArg("PUT");
     }
@@ -232,7 +232,7 @@ public class ModelProcessorTest {
     @Test public void postNeedsDataArgument() throws Exception {
         needsAnArg("POST");
     }
-    
+
     private void needsAnArg(String method) throws Exception {
         String html = "<html><body>"
             + "</body></html>";
@@ -250,7 +250,7 @@ public class ModelProcessorTest {
             + "  @OnReceive(method=\"" + method + "\", url=\"whereever\")\n"
             + "  static void obtained(XModel m, PQ p) { }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
@@ -260,10 +260,10 @@ public class ModelProcessorTest {
             }
         }
         fail("Needs an error message about missing data():\n" + c.getErrors());
-        
+
     }
-    
-    
+
+
     @Test public void jsonNeedsToUseGet () throws Exception {
         String html = "<html><body>"
             + "</body></html>";
@@ -281,7 +281,7 @@ public class ModelProcessorTest {
             + "  @OnReceive(method=\"POST\", jsonp=\"callback\", url=\"whereever\")\n"
             + "  static void obtained(XModel m, PQ p) { }\n"
             + "}\n";
-        
+
         Compile c = Compile.create(html, code);
         assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
         for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
@@ -291,9 +291,99 @@ public class ModelProcessorTest {
             }
         }
         fail("Needs an error message about wrong method:\n" + c.getErrors());
-        
+
     }
-    
+
+    @Test public void noHeadersForWebSockets() throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(method=\"WebSocket\", data = PQ.class, headers=\"SomeHeader: {some}\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("WebSocket spec does not support headers")) {
+                return;
+            }
+        }
+        fail("Needs an error message about headers:\n" + c.getErrors());
+
+    }
+
+    @Test public void noNewLinesInHeaderLines() throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(headers=\"SomeHeader\\n: {some}\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("Header line cannot contain line separator")) {
+                return;
+            }
+        }
+        fail("Needs an error message about headers:\n" + c.getErrors());
+
+    }
+
+    @Test public void noReturnInHeaderLines() throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(headers=\"Some\\rHeader: {some}\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("Header line cannot contain line separator")) {
+                return;
+            }
+        }
+        fail("Needs an error message about headers:\n" + c.getErrors());
+
+    }
+
     @Test public void onErrorHasToExist() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
@@ -308,7 +398,7 @@ public class ModelProcessorTest {
         res.assertErrors();
         res.assertError("not find doesNotExist");
     }
-    
+
     @Test public void usingListIsOK() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
@@ -370,7 +460,7 @@ public class ModelProcessorTest {
         res.assertErrors();
         res.assertError("Cannot have the name");
     }
-    
+
     @Test public void onWebSocketJustTwoArgs() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"
@@ -385,7 +475,7 @@ public class ModelProcessorTest {
         res.assertErrors();
         res.assertError("only have two arg");
     }
-    
+
     @Test public void onErrorWouldHaveToBeStatic() throws IOException {
         Compile res = Compile.create("", "package x;\n"
             + "@net.java.html.json.Model(className=\"MyModel\", properties= {\n"

@@ -83,10 +83,10 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
     private static URI baseUri;
-    
+
     public KnockoutEnvJSTest() {
     }
-    
+
     @Factory public static Object[] compatibilityTests() throws Exception {
         try {
             Class.forName("java.lang.FunctionalInterface");
@@ -94,8 +94,8 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             // only runs on JDK8
             return new Object[0];
         }
-        
-        
+
+
         Class[] arr = testClasses();
         for (int i = 0; i < arr.length; i++) {
             assertEquals(
@@ -104,9 +104,9 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
                 "All classes loaded by the same classloader"
             );
         }
-        
+
         baseUri = DynamicHTTP.initServer();
-        
+
         final Fn.Presenter p = Scripts.createPresenter(KOCase.JS);
         InputStream is = KnockoutEnvJSTest.class.getResourceAsStream("env.nashorn.1.2-debug.js");
         p.loadScript(new InputStreamReader(is));
@@ -116,14 +116,14 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             loadClass(KnockoutEnvJSTest.class).
             loadPage(baseUri.toString()).
             invoke("initialized");
-        
+
         Executors.newSingleThreadExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 bb.showAndWait();
             }
         });
-        
+
         ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
@@ -143,20 +143,20 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             }
         }
     }
-    
+
     private static String skipMsg(String methodName) {
         final String ver = System.getProperty("java.runtime.version"); // NOI18N
         if (
             ver.startsWith("1.8.0_25") ||
-            ver.startsWith("1.8.0_40") 
+            ver.startsWith("1.8.0_40")
         ) {
             return "Broken due to JDK-8047764";
         }
         if (
             !"1.8.0_05-b13".equals(ver) &&
-            !"1.8.0_11-b12".equals(ver) 
+            !"1.8.0_11-b12".equals(ver)
         ) {
-            // we know that 1.8.0_05 and 1.8.0_11 are broken, 
+            // we know that 1.8.0_05 and 1.8.0_11 are broken,
             // let's not speculate about anything else
             return null;
         }
@@ -178,13 +178,13 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = Fn.activePresenter();
         KnockoutEnvJSTest.class.notifyAll();
     }
-    
+
     public static void initialized() throws Exception {
         Assert.assertSame(
             KnockoutEnvJSTest.class.getClassLoader(),
@@ -194,7 +194,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         KnockoutEnvJSTest.initialized(KnockoutEnvJSTest.class);
         browserContext = Fn.activePresenter();
     }
-    
+
     @Override
     public BrwsrCtx createContext() {
         KO4J fx = new KO4J(browserContext);
@@ -216,7 +216,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         }
         return json;
     }
-    
+
     @JavaScriptBody(args = {}, body = "return new Object();")
     private static native Object createJSON();
     @JavaScriptBody(args = { "json", "key", "value" }, body = "json[key] = value;")
@@ -232,7 +232,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static String findBaseURL() {
         return baseUri.toString();
     }
-    
+
     @Override
     public URI prepareURL(String content, String mimeType, String[] parameters) {
         try {

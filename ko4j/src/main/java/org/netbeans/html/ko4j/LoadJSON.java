@@ -42,80 +42,16 @@
  */
 package org.netbeans.html.ko4j;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.json.spi.JSONCall;
-import org.netbeans.html.json.spi.Transfer;
-import org.netbeans.html.json.spi.WSTransfer;
 
 /**
  *
  * @author Jaroslav Tulach
  */
-final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
+final class LoadJSON {
     private LoadJSON() {}
-    
-    @Override
-    public void extract(Object obj, String[] props, Object[] values) {
-        extractJSON(obj, props, values);
-    }
 
-    @Override
-    public void loadJSON(final JSONCall call) {
-        if (call.isJSONP()) {
-            String me = createJSONP(call);
-            loadJSONP(call.composeURL(me), me);
-        } else {
-            String data = null;
-            if (call.isDoOutput()) {
-                try {
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    call.writeData(bos);
-                    data = new String(bos.toByteArray(), "UTF-8");
-                } catch (IOException ex) {
-                    call.notifyError(ex);
-                }
-            }
-            loadJSON(call.composeURL(null), call, call.getMethod(), data);
-        }
-    }
-
-    @Override
-    public Object toJSON(InputStream is) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        InputStreamReader r = new InputStreamReader(is);
-        for (;;) {
-            int ch = r.read();
-            if (ch == -1) {
-                break;
-            }
-            sb.append((char)ch);
-        }
-        return parse(sb.toString());
-    }
-
-    @Override
-    public LoadWS open(String url, JSONCall callback) {
-        return new LoadWS(callback, url);
-    }
-
-    @Override
-    public void send(LoadWS socket, JSONCall data) {
-        socket.send(data);
-    }
-
-    @Override
-    public void close(LoadWS socket) {
-        socket.close();
-    }
-    
-    //
-    // implementations
-    //
-    
     @JavaScriptBody(args = {"object", "property"},
         body
         = "if (property === null) return object;\n"
@@ -157,11 +93,16 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         return s;
     }
 
-    @JavaScriptBody(args = {"url", "done", "method", "data"}, javacall = true, body = ""
+    @JavaScriptBody(args = {"url", "done", "method", "data", "hp"}, javacall = true, body = ""
         + "var request = new XMLHttpRequest();\n"
         + "if (!method) method = 'GET';\n"
         + "request.open(method, url, true);\n"
         + "request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');\n"
+        + "for (var i = 0; i < hp.length; i += 2) {\n"
+        + "  var h = hp[i];\n"
+        + "  var v = hp[i + 1];\n"
+        + "  request.setRequestHeader(h, v);\n"
+        + "}\n"
         + "request.onreadystatechange = function() {\n"
         + "  if (request.readyState !== 4) return;\n"
         + "  var r = request.response || request.responseText;\n"
@@ -182,10 +123,10 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
         + "else request.send();\n"
     )
     static void loadJSON(
-        String url, JSONCall done, String method, String data
+        String url, JSONCall done, String method, String data, Object[] headerPairs
     ) {
     }
-    
+
     @JavaScriptBody(args = {"url", "jsonp"}, body
         = "var scrpt = window.document.createElement('script');\n "
         + "scrpt.setAttribute('src', url);\n "
@@ -203,5 +144,5 @@ final class LoadJSON implements Transfer, WSTransfer<LoadWS> {
             values[i] = getProperty(jsonObject, props[i]);
         }
     }
-    
+
 }

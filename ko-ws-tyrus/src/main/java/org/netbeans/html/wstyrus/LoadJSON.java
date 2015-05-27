@@ -59,11 +59,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.json.spi.JSONCall;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.netbeans.html.json.spi.JSONCall;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -101,7 +101,7 @@ final class LoadJSON implements Runnable {
         final String url;
         Throwable error = null;
         Object json = null;
-        
+
         if (call.isJSONP()) {
             url = call.composeURL("dummy");
         } else {
@@ -112,6 +112,28 @@ final class LoadJSON implements Runnable {
             URLConnection conn = u.openConnection();
             if (call.isDoOutput()) {
                 conn.setDoOutput(true);
+            }
+            String h = call.getHeaders();
+            if (h != null) {
+                int pos = 0;
+                while (pos < h.length()) {
+                    int tagEnd = h.indexOf(':', pos);
+                    if (tagEnd == -1) {
+                        break;
+                    }
+                    int r = h.indexOf('\r', tagEnd);
+                    int n = h.indexOf('\n', tagEnd);
+                    if (r == -1) {
+                        r = h.length();
+                    }
+                    if (n == -1) {
+                        n = h.length();
+                    }
+                    String key = h.substring(pos, tagEnd).trim();
+                    String val = h.substring(tagEnd + 1, Math.min(r, n)).trim();
+                    conn.setRequestProperty(key, val);;
+                    pos = Math.max(r, n);
+                }
             }
             if (call.getMethod() != null && conn instanceof HttpURLConnection) {
                 ((HttpURLConnection) conn).setRequestMethod(call.getMethod());
@@ -235,7 +257,7 @@ final class LoadJSON implements Runnable {
             return o;
         }
     }
-    
+
     public static void extractJSON(Object jsonObject, String[] props, Object[] values) {
         if (jsonObject instanceof JSONObject) {
             JSONObject obj = (JSONObject)jsonObject;
@@ -252,7 +274,7 @@ final class LoadJSON implements Runnable {
             values[i] = getProperty(jsonObject, props[i]);
         }
     }
-    
+
     @JavaScriptBody(args = {"object", "property"},
             body
             = "if (property === null) return object;\n"
@@ -262,7 +284,7 @@ final class LoadJSON implements Runnable {
     private static Object getProperty(Object object, String property) {
         return null;
     }
-    
+
     public static Object parse(InputStream is) throws IOException {
         try {
             PushbackInputStream push = new PushbackInputStream(is, 1);

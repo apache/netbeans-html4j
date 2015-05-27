@@ -1132,15 +1132,31 @@ public final class ModelProcessor extends AbstractProcessor {
                 body.append("  * to open the connection (even if not required). Call with non-null data to\n");
                 body.append("  * send messages to server. Call again with <code>null</code> data to close the socket.\n");
                 body.append("  */\n");
+                if (onR.headers().length > 0) {
+                    error("WebSocket spec does not support headers", e);
+                }
             }
             body.append("  public void ").append(n).append("(");
             StringBuilder urlBefore = new StringBuilder();
             StringBuilder urlAfter = new StringBuilder();
+            StringBuilder headers = new StringBuilder();
             String jsonpVarName = null;
             {
                 String sep = "";
                 boolean skipJSONP = onR.jsonp().isEmpty();
-                for (String p : findParamNames(e, onR.url(), onR.jsonp(), urlBefore, urlAfter)) {
+                Set<String> receiveParams = new LinkedHashSet<String>();
+                findParamNames(receiveParams, e, onR.url(), onR.jsonp(), urlBefore, urlAfter);
+                for (String headerLine : onR.headers()) {
+                    if (headerLine.contains("\r") || headerLine.contains("\n")) {
+                        error("Header line cannot contain line separator", e);
+                    }
+                    findParamNames(receiveParams, e, headerLine, null, headers);
+                    headers.append("+ \"\\r\\n\" +\n");
+                }
+                if (headers.length() > 0) {
+                    headers.append("\"\"");
+                }
+                for (String p : receiveParams) {
                     if (!skipJSONP && p.equals(onR.jsonp())) {
                         skipJSONP = true;
                         jsonpVarName = p;
@@ -1180,13 +1196,13 @@ public final class ModelProcessor extends AbstractProcessor {
             body.append(") {\n");
             boolean webSocket = onR.method().equals("WebSocket");
             if (webSocket) {
-                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateWSReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror, headers)) {
                     return false;
                 }
                 body.append("  }\n");
                 body.append("  private Object ws_" + e.getSimpleName() + ";\n");
             } else {
-                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror)) {
+                if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror, headers)) {
                     return false;
                 }
                 body.append("  }\n");
@@ -1198,7 +1214,7 @@ public final class ModelProcessor extends AbstractProcessor {
         return true;
     }
 
-    private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror, StringBuilder headers) {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 2) { /* on error */\n" +
@@ -1247,7 +1263,8 @@ public final class ModelProcessor extends AbstractProcessor {
             "      }\n" +
             "    }\n"
             );
-        method.append("    proto.loadJSON(" + index + ",\n        ");
+        method.append("    proto.loadJSONWithHeaders(" + index + ",\n        ");
+        method.append(headers.length() == 0 ? "null" : headers).append(",\n        ");
         method.append(urlBefore).append(", ");
         if (jsonpVarName != null) {
             method.append(urlAfter);
@@ -1271,7 +1288,7 @@ public final class ModelProcessor extends AbstractProcessor {
         return false;
     }
 
-    private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror) {
+    private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror, StringBuilder headers) {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 0) { /* on open */\n" +
@@ -1655,37 +1672,35 @@ public final class ModelProcessor extends AbstractProcessor {
         return false;
     }
 
-    private Iterable<String> findParamNames(
-        Element e, String url, String jsonParam, StringBuilder... both
+    private void findParamNames(
+        Set<String> params, Element e, String url, String jsonParam, StringBuilder... both
     ) {
-        Set<String> params = new LinkedHashSet<String>();
         int wasJSON = 0;
 
         for (int pos = 0; ;) {
             int next = url.indexOf('{', pos);
             if (next == -1) {
                 both[wasJSON].append('"')
-                    .append(url.substring(pos))
+                    .append(url.substring(pos).replace("\"", "\\\""))
                     .append('"');
-                return params;
+                return;
             }
             int close = url.indexOf('}', next);
             if (close == -1) {
                 error("Unbalanced '{' and '}' in " + url, e);
-                return params;
+                return;
             }
             final String paramName = url.substring(next + 1, close);
-            if (params.add(paramName)) {
-                if (paramName.equals(jsonParam) && !jsonParam.isEmpty()) {
-                    both[wasJSON].append('"')
-                        .append(url.substring(pos, next))
-                        .append('"');
-                    wasJSON = 1;
-                } else {
-                    both[wasJSON].append('"')
-                        .append(url.substring(pos, next))
-                        .append("\" + ").append(paramName).append(" + ");
-                }
+            params.add(paramName);
+            if (paramName.equals(jsonParam) && !jsonParam.isEmpty()) {
+                both[wasJSON].append('"')
+                    .append(url.substring(pos, next).replace("\"", "\\\""))
+                    .append('"');
+                wasJSON = 1;
+            } else {
+                both[wasJSON].append('"')
+                    .append(url.substring(pos, next).replace("\"", "\\\""))
+                    .append("\" + ").append(paramName).append(" + ");
             }
             pos = close + 1;
         }

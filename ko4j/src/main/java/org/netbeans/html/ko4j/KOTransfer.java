@@ -46,6 +46,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.JSONCall;
 import org.netbeans.html.json.spi.Transfer;
@@ -62,7 +64,7 @@ final class KOTransfer
 implements Transfer {
     KOTransfer() {
     }
-    
+
     @Override
     public void extract(Object obj, String[] props, Object[] values) {
         if (obj instanceof JSObjToStr) {
@@ -87,7 +89,29 @@ implements Transfer {
                     call.notifyError(ex);
                 }
             }
-            LoadJSON.loadJSON(call.composeURL(null), call, call.getMethod(), data);
+            List<String> headerPairs = new ArrayList<String>();
+            String h = call.getHeaders();
+            if (h != null) {
+                int pos = 0;
+                while (pos < h.length()) {
+                    int tagEnd = h.indexOf(':', pos);
+                    if (tagEnd == -1) {
+                        break;
+                    }
+                    int r = h.indexOf('\r', tagEnd);
+                    int n = h.indexOf('\n', tagEnd);
+                    if (r == -1) {
+                        r = h.length();
+                    }
+                    if (n == -1) {
+                        n = h.length();
+                    }
+                    headerPairs.add(h.substring(pos, tagEnd).trim());
+                    headerPairs.add(h.substring(tagEnd + 1, Math.min(r, n)).trim());
+                    pos = Math.max(r, n);
+                }
+            }
+            LoadJSON.loadJSON(call.composeURL(null), call, call.getMethod(), data, headerPairs.toArray());
         }
     }
 
@@ -104,7 +128,7 @@ implements Transfer {
         }
         return LoadJSON.parse(sb.toString());
     }
-    
+
     static void notifySuccess(Object done, Object str, Object data) {
         Object notifyObj;
         if (data instanceof Object[]) {
@@ -118,11 +142,11 @@ implements Transfer {
         }
         ((JSONCall)done).notifySuccess(notifyObj);
     }
-    
+
     static void notifyError(Object done, Object msg) {
         ((JSONCall)done).notifyError(new Exception(msg.toString()));
     }
-    
+
     private static final class JSObjToStr {
         final String str;
         final Object obj;

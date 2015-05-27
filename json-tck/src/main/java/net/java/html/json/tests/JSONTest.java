@@ -51,11 +51,11 @@ import net.java.html.json.ModelOperation;
 import net.java.html.json.Models;
 import net.java.html.json.OnReceive;
 import net.java.html.json.Property;
-import org.netbeans.html.json.tck.KOTest;
 import static net.java.html.json.tests.Utils.assertEquals;
-import static net.java.html.json.tests.Utils.assertNull;
 import static net.java.html.json.tests.Utils.assertNotNull;
+import static net.java.html.json.tests.Utils.assertNull;
 import static net.java.html.json.tests.Utils.assertTrue;
+import org.netbeans.html.json.tck.KOTest;
 
 /** Need to verify that models produce reasonable JSON objects.
  *
@@ -71,12 +71,12 @@ public final class JSONTest {
     private JSONik js;
     private Integer orig;
     private String url;
-    
+
     @ModelOperation static void assignFetched(JSONik m, Person p) {
         m.setFetched(p);
     }
     private BrwsrCtx ctx;
-    
+
     @KOTest public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
@@ -89,19 +89,19 @@ public final class JSONTest {
         } catch (Throwable ex) {
             throw new IllegalStateException("Can't parse " + p).initCause(ex);
         }
-        
+
         Person p2 = Models.fromRaw(newContext(), Person.class, json);
-        
-        assertEquals(p2.getFirstName(), p.getFirstName(), 
+
+        assertEquals(p2.getFirstName(), p.getFirstName(),
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
     }
-    
+
     @KOTest public void toJSONWithEscapeCharactersInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("/*\n * Copyright (c) 2013");
 
-        
+
         final String txt = p.toString();
         Object json;
         try {
@@ -109,19 +109,19 @@ public final class JSONTest {
         } catch (Throwable ex) {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
-        
+
         Person p2 = Models.fromRaw(newContext(), Person.class, json);
-        
+
         assertEquals(p2.getFirstName(), p.getFirstName(),
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
     }
-    
+
     @KOTest public void toJSONWithDoubleSlashInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("/*\\n * Copyright (c) 2013");
 
-        
+
         final String txt = p.toString();
         Object json;
         try {
@@ -129,19 +129,19 @@ public final class JSONTest {
         } catch (Throwable ex) {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
-        
+
         Person p2 = Models.fromRaw(newContext(), Person.class, json);
-        
+
         assertEquals(p2.getFirstName(), p.getFirstName(),
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
     }
-    
+
     @KOTest public void toJSONWithApostrophInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jimmy 'Jim' Rambo");
 
-        
+
         final String txt = p.toString();
         Object json;
         try {
@@ -149,15 +149,15 @@ public final class JSONTest {
         } catch (Throwable ex) {
             throw new IllegalStateException("Can't parse " + txt).initCause(ex);
         }
-        
+
         Person p2 = Models.fromRaw(newContext(), Person.class, json);
-        
+
         assertEquals(p2.getFirstName(), p.getFirstName(),
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
     }
 
     private static BrwsrCtx onCallback;
-    
+
     @OnReceive(url="{url}")
     static void fetch(JSONik model, Person p) {
         model.setFetched(p);
@@ -176,12 +176,12 @@ public final class JSONTest {
         model.setFetched(p[0]);
         onCallback = BrwsrCtx.findDefault(model.getClass());
     }
-    
+
     static void setMessage(JSONik m, Exception t) {
         assertNotNull(t, "Exception provided");
         m.setFetchedResponse("Exception");
     }
-    
+
     @OnReceive(url="{url}")
     static void fetchPeople(JSONik model, People p) {
         final int size = p.getInfo().size();
@@ -199,7 +199,7 @@ public final class JSONTest {
         }
         model.setFetchedCount(sum);
     }
-    
+
     @KOTest public void loadAndParseJSON() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
@@ -212,18 +212,18 @@ public final class JSONTest {
             js.setFetched(null);
             js.fetch(url);
         }
-    
+
         Person p = js.getFetched();
         if (p == null) {
             throw new InterruptedException();
         }
-        
+
         assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
         assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-        
+
         assertEquals(ctx, onCallback, "Context is the same");
     }
-    
+
     @KOTest public void loadAndParsePlainText() throws Exception {
         if (js == null) {
             url = Utils.prepareURL(
@@ -236,23 +236,23 @@ public final class JSONTest {
             js.setFetched(null);
             js.fetchPlain(url);
         }
-    
+
         String s = js.getFetchedResponse();
         if (s == null) {
             throw new InterruptedException();
         }
-        
+
         assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
         assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
-        
+
         Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
-        
+
         assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
         assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-        
+
         assertEquals(ctx, onCallback, "Same context");
     }
-    
+
     @KOTest public void loadAndParsePlainTextOnArray() throws Exception {
         if (js == null) {
             url = Utils.prepareURL(
@@ -265,60 +265,60 @@ public final class JSONTest {
             js.setFetched(null);
             js.fetchPlain(url);
         }
-    
+
         String s = js.getFetchedResponse();
         if (s == null) {
             throw new InterruptedException();
         }
-        
+
         assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
         assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
-        
+
         Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
-        
+
         assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
         assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-        
+
         assertEquals(ctx, onCallback, "Same context");
     }
-    
+
     @OnReceive(url="{url}?callme={me}", jsonp = "me")
     static void fetchViaJSONP(JSONik model, Person p) {
         model.setFetched(p);
     }
-    
+
     @KOTest public void loadAndParseJSONP() throws InterruptedException, Exception {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "$0({'firstName': 'Mitar', 'sex': 'MALE'})", 
+                JSONTest.class, "$0({'firstName': 'Mitar', 'sex': 'MALE'})",
                 "application/javascript",
                 "callme"
             );
             orig = scriptElements();
             assertTrue(orig > 0, "There should be some scripts on the page");
-            
+
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchViaJSONP(url);
         }
-    
+
         Person p = js.getFetched();
         if (p == null) {
             throw new InterruptedException();
         }
-        
+
         assertEquals("Mitar", p.getFirstName(), "Unexpected: " + p.getFirstName());
         assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-        
+
         int now = scriptElements();
-        
+
         assertEquals(orig, now, "The set of elements is unchanged. Delta: " + (now - orig));
     }
-    
-    
-    
+
+
+
     @OnReceive(url="{url}", method = "PUT", data = Person.class)
     static void putPerson(JSONik model, String reply) {
         model.setFetchedCount(1);
@@ -328,13 +328,13 @@ public final class JSONTest {
     @KOTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "$0\n$1", 
+                JSONTest.class, "$0\n$1",
                 "text/plain",
                 "http.method", "http.requestBody"
             );
             orig = scriptElements();
             assertTrue(orig > 0, "There should be some scripts on the page");
-            
+
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
@@ -342,7 +342,7 @@ public final class JSONTest {
             p.setFirstName("Jarda");
             js.putPerson(url, p);
         }
-    
+
         int cnt = js.getFetchedCount();
         if (cnt == 0) {
             throw new InterruptedException();
@@ -356,186 +356,231 @@ public final class JSONTest {
         } else {
             msg = res;
         }
-        
+
         assertEquals("PUT", res, "Server was queried with PUT method: " + js.getFetchedResponse());
-        
+
         assertTrue(msg.contains("Jarda"), "Data transferred to the server: " + msg);
     }
-    
+
     private static int scriptElements() throws Exception {
         return ((Number)Utils.executeScript(
-            JSONTest.class, 
+            JSONTest.class,
             "return window.document.getElementsByTagName('script').length;")).intValue();
     }
 
     private static Object parseJSON(String s) throws Exception {
         return Utils.executeScript(
-            JSONTest.class, 
+            JSONTest.class,
             "return window.JSON.parse(arguments[0]);", s);
     }
-    
+
     @KOTest public void loadAndParseJSONSentToArray() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}", 
+                JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
                 "application/json"
             );
-            
+
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchArray(url);
         }
-        
+
         Person p = js.getFetched();
         if (p == null) {
             throw new InterruptedException();
         }
-        
+
         assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
         assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
     }
-    
+
     @KOTest public void loadAndParseJSONArraySingle() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'}]", 
+                JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'}]",
                 "application/json"
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
-        
+
             js.setFetched(null);
             js.fetch(url);
         }
-        
+
         Person p = js.getFetched();
         if (p == null) {
             throw new InterruptedException();
         }
-        
+
         assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
         assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
     }
-    
+
     @KOTest public void loadAndParseArrayInPeople() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "{'info':[{'firstName': 'Gitar', 'sex': 'FEMALE'}]}", 
+                JSONTest.class, "{'info':[{'firstName': 'Gitar', 'sex': 'FEMALE'}]}",
                 "application/json"
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
-        
+
             js.fetchPeople(url);
         }
-        
+
         if (0 == js.getFetchedCount()) {
             throw new InterruptedException();
         }
 
         assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
-        
+
         Person p = js.getFetched();
-        
+
         assertNotNull(p, "We should get our person back: " + p);
         assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
         assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
     }
-    
+
+    @KOTest public void loadAndParseArrayInPeopleWithHeaders() throws InterruptedException {
+        if (js == null) {
+            url = Utils.prepareURL(
+                JSONTest.class, "{'info':[{'firstName': '$0$1$2$3$4', 'sex': 'FEMALE'}]}",
+                "application/json",
+                "http.header.Easy",
+                "http.header.H-a!r*d^e.r",
+                "http.header.Repeat-ed",
+                "http.header.Repeat*ed",
+                "http.header.Same-URL"
+            );
+            js = Models.bind(new JSONik(), newContext());
+            js.applyBindings();
+
+            js.fetchPeopleWithHeaders(url, "easy", "harder", "rep");
+        }
+
+        if (0 == js.getFetchedCount()) {
+            throw new InterruptedException();
+        }
+
+        assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
+
+        Person p = js.getFetched();
+
+        assertNotNull(p, "We should get our person back: " + p);
+        assertEquals("easyharderreprep" + url, p.getFirstName(), "Expecting header mess: " + p.getFirstName());
+        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+    }
+
+    @OnReceive(url="{url}", headers={
+        "Easy: {easy}",
+        "H-a!r*d^e.r: {harder}",
+        "Repeat-ed: {rep}",
+        "Repeat*ed: {rep}",
+        "Same-URL: {url}"
+    })
+    static void fetchPeopleWithHeaders(JSONik model, People p) {
+        final int size = p.getInfo().size();
+        if (size > 0) {
+            model.setFetched(p.getInfo().get(0));
+        }
+        model.setFetchedCount(size);
+    }
+
     @KOTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "{'age':[1, 2, 3]}", 
+                JSONTest.class, "{'age':[1, 2, 3]}",
                 "application/json"
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
-        
+
             js.fetchPeopleAge(url);
         }
-        
+
         if (0 == js.getFetchedCount()) {
             throw new InterruptedException();
         }
 
         assertEquals(js.getFetchedCount(), 6, "1 + 2 + 3 is " + js.getFetchedCount());
     }
-    
+
     @OnReceive(url="{url}")
     static void fetchPeopleSex(JSONik model, People p) {
         model.setFetchedCount(1);
         model.getFetchedSex().addAll(p.getSex());
     }
-    
+
     @KOTest public void loadAndParseArrayOfEnums() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
-                JSONTest.class, "{'sex':['FEMALE', 'MALE', 'MALE']}", 
+                JSONTest.class, "{'sex':['FEMALE', 'MALE', 'MALE']}",
                 "application/json"
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
-        
+
             js.fetchPeopleSex(url);
         }
-        
+
         if (0 == js.getFetchedCount()) {
             throw new InterruptedException();
         }
 
         assertEquals(js.getFetchedCount(), 1, "Loaded");
-        
+
         assertEquals(js.getFetchedSex().size(), 3, "Three values " + js.getFetchedSex());
         assertEquals(js.getFetchedSex().get(0), Sex.FEMALE, "Female first " + js.getFetchedSex());
         assertEquals(js.getFetchedSex().get(1), Sex.MALE, "male 2nd " + js.getFetchedSex());
         assertEquals(js.getFetchedSex().get(2), Sex.MALE, "male 3rd " + js.getFetchedSex());
     }
-    
+
     @KOTest public void loadAndParseJSONArray() throws InterruptedException {
         if (js == null) {
             url = Utils.prepareURL(
                 JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'},"
                 + "{'firstName': 'Peter', 'sex': 'MALE'}"
-                + "]", 
+                + "]",
                 "application/json"
             );
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
             js.setFetched(null);
-            
+
             js.fetchArray(url);
         }
-        
-        
+
+
         Person p = js.getFetched();
         if (p == null) {
             throw new InterruptedException();
         }
-        
+
         assertEquals(js.getFetchedCount(), 2, "We got two values: " + js.getFetchedCount());
         assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
         assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
     }
-    
+
     @KOTest public void loadError() throws InterruptedException {
         if (js == null) {
             js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
             js.setFetched(null);
-            
+
             js.fetchArray("http://127.0.0.1:54253/does/not/exist.txt");
         }
-        
-        
+
+
         if (js.getFetchedResponse() == null) {
             throw new InterruptedException();
         }
 
         assertEquals("Exception", js.getFetchedResponse(), "Response " + js.getFetchedResponse());
     }
-    
+
     @Model(className = "NameAndValue", properties = {
         @Property(name = "name", type = String.class),
         @Property(name = "value", type = long.class),
@@ -543,7 +588,7 @@ public final class JSONTest {
     })
     static class NandV {
     }
-    
+
     @KOTest public void parseNullNumber() throws Exception {
         String txt = "{ \"name\":\"M\" }";
         ByteArrayInputStream is = new ByteArrayInputStream(txt.getBytes("UTF-8"));
@@ -566,12 +611,12 @@ public final class JSONTest {
             err = null;
             prev = null;
         }
-        
+
         String str = "{ \"sex\" : \"unknown\" }";
         ByteArrayInputStream is = new ByteArrayInputStream(str.getBytes("UTF-8"));
         Person p = Models.parse(newContext(), Person.class, is);
         assertNull(p.getSex(), "Wrong sex means null, but was: " + p.getSex());
-        
+
         if (err != null) {
             assertTrue(err.toString().contains("unknown") && err.toString().contains("Sex"), "Expecting error: " + err.toString());
         }
@@ -584,9 +629,9 @@ public final class JSONTest {
         }
     }
 
-    
+
     private static BrwsrCtx newContext() {
         return Utils.newContext(JSONTest.class);
     }
-    
+
 }

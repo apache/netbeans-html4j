@@ -50,8 +50,8 @@ import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.PropertyBindingAccessor;
 import org.netbeans.html.json.impl.RcvrJSON;
 
-/** Describes a property when one is asked to 
- * bind it 
+/** Describes a property when one is asked to
+ * bind it
  *
  * @author Jaroslav Tulach
  */
@@ -62,8 +62,8 @@ public abstract class PropertyBinding {
     static {
         new PropertyBindingAccessor() {
             @Override
-            protected JSONCall newCall(BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, String method, Object data) {
-                return new JSONCall(ctx, callback, urlBefore, urlAfter, method, data);
+            protected JSONCall newCall(BrwsrCtx ctx, RcvrJSON callback, String headers, String urlBefore, String urlAfter, String method, Object data) {
+                return new JSONCall(ctx, callback, headers, urlBefore, urlAfter, method, data);
             }
 
             @Override
@@ -108,33 +108,33 @@ public abstract class PropertyBinding {
 
     /** Changes value of the property. Can be called only on dedicated
      * thread. See {@link Technology#runSafe(java.lang.Runnable)}.
-     * 
+     *
      * @param v new value of the property
      */
     public abstract void setValue(Object v);
-    
+
     /** Obtains current value of the property this binding represents.
      * Can be called only on dedicated
      * thread. See {@link Technology#runSafe(java.lang.Runnable)}.
-     * 
+     *
      * @return the value or <code>null</code>
      */
     public abstract Object getValue();
-    
+
     /** Is this property read only? Or can one call {@link #setValue(java.lang.Object)}?
-     * 
+     *
      * @return true, if this property is read only
      */
     public abstract boolean isReadOnly();
 
     /** Returns identical version of the binding, but one that holds on the
      * original model object via weak reference.
-     * 
+     *
      * @return binding that uses weak reference
      * @since 1.1
      */
     public abstract PropertyBinding weak();
-    
+
     private static abstract class AImpl<M> extends PropertyBinding {
         public final String name;
         public final boolean readOnly;
@@ -149,7 +149,7 @@ public abstract class PropertyBinding {
             this.access = access;
             this.readOnly = readOnly;
         }
-        
+
         protected abstract M model();
 
         @Override
@@ -182,7 +182,7 @@ public abstract class PropertyBinding {
             return name;
         }
     } // end of PBData
-    
+
     private static final class Impl<M> extends AImpl<M> {
         private final M model;
 
@@ -201,7 +201,7 @@ public abstract class PropertyBinding {
             return new Weak(model, bindings, name, index, access, readOnly);
         }
     }
-    
+
     private static final class Weak<M> extends AImpl<M> {
         private final Reference<M> ref;
         public Weak(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {

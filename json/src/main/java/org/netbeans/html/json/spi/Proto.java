@@ -49,7 +49,9 @@ import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
+import org.netbeans.html.json.impl.JSON.WS;
 import org.netbeans.html.json.impl.JSONList;
+import org.netbeans.html.json.impl.PropertyBindingAccessor;
 import org.netbeans.html.json.impl.RcvrJSON;
 import org.netbeans.html.json.impl.RcvrJSON.MsgEvnt;
 
@@ -57,8 +59,8 @@ import org.netbeans.html.json.impl.RcvrJSON.MsgEvnt;
  * {@link Model} annotation. Contains methods the generated class can
  * use to communicate with behind the scene associated {@link Technology}.
  * Each {@link Proto} object is associated with <a href="http://wiki.apidesign.org/wiki/Singletonizer">
- * singletonizer</a>-like interface {@link Type} which provides the 
- * associated {@link Technology} the necessary information about the 
+ * singletonizer</a>-like interface {@link Type} which provides the
+ * associated {@link Technology} the necessary information about the
  * generated {@link Model} class.
  *
  * @author Jaroslav Tulach
@@ -79,8 +81,8 @@ public final class Proto {
 
     /** Browser context this proto object and its associated model
      * are operating-in.
-     * 
-     * @return the associated context 
+     *
+     * @return the associated context
      */
     public BrwsrCtx getContext() {
         return context;
@@ -89,19 +91,19 @@ public final class Proto {
     /** Acquires global lock to compute a {@link ComputedProperty derived property}
      * on this proto object. This proto object must not be locked yet. No
      * dependency tracking is performed.
-     * 
+     *
      * @throws IllegalStateException if already locked
      */
     public void acquireLock() throws IllegalStateException {
         acquireLock(null);
     }
-    
+
     /** Acquires global lock to compute a {@link ComputedProperty derived property}
      * on this proto object. This proto object must not be locked yet. The
      * name of the property is used to track dependencies on own
      * properties of other proto objects - when they are changed, this
      * {@link #valueHasMutated(java.lang.String) property is changed too}.
-     * 
+     *
      * @param propName name of property we are about to compute
      * @throws IllegalStateException thrown when there is a cyclic
      *   call is detected
@@ -110,14 +112,14 @@ public final class Proto {
     public void acquireLock(String propName) throws IllegalStateException {
         Observers.beginComputing(this, propName);
     }
-    
+
     /** A property on this proto object is about to be accessed. Verifies
      * whether this proto object is accessible - e.g. it has not been
      * {@link #acquireLock() locked yet}. If everything is OK, the
      * <code>propName</code> is recorded in the chain of dependencies
      * tracked by {@link #acquireLock(java.lang.String)} and watched by
      * {@link #valueHasMutated(java.lang.String)}.
-     * 
+     *
      * @param propName name of the property that is requested
      * @throws IllegalStateException if the model is locked
      * @since 0.9
@@ -125,27 +127,27 @@ public final class Proto {
     public void accessProperty(String propName) throws IllegalStateException {
         Observers.accessingValue(this, propName);
     }
-    
+
     /** Verifies the model is not locked otherwise throws an exception.
      * @throws IllegalStateException if the model is locked
      */
     public void verifyUnlocked() throws IllegalStateException {
         Observers.verifyUnlocked(this);
     }
-    
-    /** When modifications are over, the model is switched into 
+
+    /** When modifications are over, the model is switched into
      * unlocked state by calling this method.
      */
     public void releaseLock() {
         Observers.finishComputing(this);
     }
-    
+
     /** Whenever model changes a property. It should notify the
-     * associated technology by calling this method. 
+     * associated technology by calling this method.
      * Since 0.8.3: This method may be called by any thread - it reschedules
      * its actual execution into appropriate one by using
      * {@link BrwsrCtx#execute(java.lang.Runnable)}.
-     * 
+     *
      * @param propName name of the changed property
      */
     public void valueHasMutated(final String propName) {
@@ -168,7 +170,7 @@ public final class Proto {
      * Since 0.8.3: This method may be called by any thread - it reschedules
      * its actual execution into appropriate one by using
      * {@link BrwsrCtx#execute(java.lang.Runnable)}.
-     * 
+     *
      * @param propName name of the changed property
      * @param oldValue provides previous value of the property
      * @param newValue provides new value of the property
@@ -187,21 +189,21 @@ public final class Proto {
             }
         });
     }
-    
+
     /** Initializes the associated model in the current {@link #getContext() context}.
-     * In case of <em>knockout.js</em> technology, applies given bindings 
+     * In case of <em>knockout.js</em> technology, applies given bindings
      * of the current model to the <em>body</em> element of the page.
      */
     public void applyBindings() {
         initBindings().applyBindings(null);
     }
-    
+
     /** Initializes the associated model to the specified element's subtree.
      * The technology is taken from the current {@link #getContext() context} and
-     * in case of <em>knockout.js</em> applies given bindings 
+     * in case of <em>knockout.js</em> applies given bindings
      * of the current model to the element of the page with 'id' attribute
      * set to the specified <code>id</code> value.
-     * 
+     *
      * @param id the id of element to apply the binding to
      * @since 1.1
      * @see Technology.ApplyId
@@ -209,13 +211,13 @@ public final class Proto {
     public void applyBindings(String id) {
         initBindings().applyBindings(id);
     }
-    
+
     /** Invokes the provided runnable in the {@link #getContext() context}
      * of the browser. If the caller is already on the right thread, the
-     * <code>run.run()</code> is invoked immediately and synchronously. 
+     * <code>run.run()</code> is invoked immediately and synchronously.
      * Otherwise the method returns immediately and the <code>run()</code>
      * method is performed later
-     * 
+     *
      * @param run the action to execute
      */
     public void runInBrowser(Runnable run) {
@@ -224,10 +226,10 @@ public final class Proto {
 
     /** Invokes the specified function index in the {@link #getContext() context}
      * of the browser. If the caller is already on the right thread, the
-     * index-th function is invoked immediately and synchronously. 
+     * index-th function is invoked immediately and synchronously.
      * Otherwise the method returns immediately and the function is invoked
      * later.
-     * 
+     *
      * @param index the index of the function as will be passed to
      *   {@link Type#call(java.lang.Object, int, java.lang.Object, java.lang.Object)}
      *   method
@@ -247,11 +249,11 @@ public final class Proto {
             }
         });
     }
-    
+
     /** Initializes the provided collection with a content of the <code>array</code>.
-     * The initialization can only be done soon after the the collection 
+     * The initialization can only be done soon after the the collection
      * is created, otherwise an exception is throw
-     * 
+     *
      * @param to the collection to initialize (assumed to be empty)
      * @param array the array to add to the collection
      * @throws IllegalStateException if the system has already been initialized
@@ -270,7 +272,7 @@ public final class Proto {
     /** Takes an object representing JSON result and extract some of its
      * properties. It is assumed that the <code>props</code> and
      * <code>values</code> arrays have the same length.
-     * 
+     *
      * @param json the JSON object (actual type depends on the associated
      *   {@link Technology})
      * @param props list of properties to extract
@@ -281,7 +283,7 @@ public final class Proto {
     }
 
     /** Converts raw JSON <code>data</code> into a Java {@link Model} class.
-     * 
+     *
      * @param <T> type of the model class
      * @param modelClass the type of the class to create
      * @param data the raw JSON data
@@ -294,29 +296,29 @@ public final class Proto {
     /** Initializes asynchronous JSON connection to specified URL. Delegates
      * to {@link #loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...) }
      * with no extra parameters.
-     * 
+     *
      * @param index the callback index to be used when a reply is received
      *   to call {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}.
-     * 
+     *
      * @param urlBefore the part of the URL before JSON-P callback parameter
      * @param urlAfter the rest of the URL or <code>null</code> if no JSON-P is used
      * @param method method to use for connection to the server
      * @param data string, number or a {@link Model} generated class to send to
      *    the server when doing a query
      */
-    public void loadJSON(final int index, 
+    public void loadJSON(final int index,
         String urlBefore, String urlAfter, String method,
         final Object data
     ) {
         loadJSON(index, urlBefore, urlAfter, method, data, new Object[0]);
     }
-    
-    /** Initializes asynchronous JSON connection to specified URL. The 
+
+    /** Initializes asynchronous JSON connection to specified URL. The
      * method returns immediately and later does callback later.
-     * 
+     *
      * @param index the callback index to be used when a reply is received
      *   to call {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}.
-     * 
+     *
      * @param urlBefore the part of the URL before JSON-P callback parameter
      * @param urlAfter the rest of the URL or <code>null</code> if no JSON-P is used
      * @param method method to use for connection to the server
@@ -326,7 +328,31 @@ public final class Proto {
      *   {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object, java.lang.Object[])}
      * @since 0.8.1
      */
-    public void loadJSON(final int index, 
+    public void loadJSON(final int index,
+        String urlBefore, String urlAfter, String method,
+        final Object data, final Object... params
+    ) {
+        loadJSONWithHeaders(index, null, urlBefore, urlAfter, method, data, params);
+    }
+
+    /** Initializes asynchronous JSON connection to specified URL. The
+     * method returns immediately and later does callback later.
+     *
+     * @param index the callback index to be used when a reply is received
+     *   to call {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}.
+     *
+     * @param headers headers to use for the request or <code>null</code> to use default ones
+     * @param urlBefore the part of the URL before JSON-P callback parameter
+     * @param urlAfter the rest of the URL or <code>null</code> if no JSON-P is used
+     * @param method method to use for connection to the server
+     * @param data string, number or a {@link Model} generated class to send to
+     *    the server when doing a query
+     * @param params extra params to pass back when calling
+     *   {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object, java.lang.Object[])}
+     * @since 1.2
+     */
+    public void loadJSONWithHeaders(final int index,
+        String headers,
         String urlBefore, String urlAfter, String method,
         final Object data, final Object... params
     ) {
@@ -341,12 +367,16 @@ public final class Proto {
                 type.onMessage(obj, index, 2, msg.getException(), params);
             }
         }
-        JSON.loadJSON(context, new Rcvr(), urlBefore, urlAfter, method, data);
+        JSONCall call = PropertyBindingAccessor.createCall(
+            context, new Rcvr(), headers, urlBefore, urlAfter, method, data
+        );
+        Transfer t = JSON.findTransfer(context);
+        t.loadJSON(call);
     }
-    
-    /** Opens new WebSocket connection to the specified URL. 
-     * 
-     * @param index the index to use later during callbacks to 
+
+    /** Opens new WebSocket connection to the specified URL.
+     *
+     * @param index the index to use later during callbacks to
      *   {@link Type#onMessage(java.lang.Object, int, int, java.lang.Object)}
      * @param url the <code>ws://</code> or <code>wss://</code> URL to connect to
      * @param data data to send to server (usually <code>null</code>)
@@ -359,12 +389,12 @@ public final class Proto {
             protected void onError(MsgEvnt msg) {
                 type.onMessage(obj, index, 2, msg.getException());
             }
-            
+
             @Override
             protected void onMessage(MsgEvnt msg) {
                 type.onMessage(obj, index, 1, msg.getValues());
             }
-            
+
             @Override
             protected void onClose(MsgEvnt msg) {
                 type.onMessage(obj, index, 3, null);
@@ -375,24 +405,26 @@ public final class Proto {
                 type.onMessage(obj, index, 0, null);
             }
         }
-        return JSON.openWS(context, new WSrcvr(), url, data);
+        WS ws = WS.create(JSON.findWSTransfer(context), new WSrcvr());
+        ws.send(context, null, url, data);
+        return ws;
     }
-    
+
     /** Sends a message to existing socket.
-     * 
+     *
      * @param webSocket the socket to send message to
      * @param url the <code>ws://</code> or <code>wss://</code> URL to connect to,
-     *    preferably the same as the one used when the socket was 
+     *    preferably the same as the one used when the socket was
      *    {@link #wsOpen(int, java.lang.String, java.lang.Object) opened}
      * @param data the data to send or <code>null</code> if the socket is
      *    supposed to be closed
      */
     public void wsSend(Object webSocket, String url, Object data) {
-        ((JSON.WS)webSocket).send(context, url, data);
+        ((JSON.WS)webSocket).send(context, null, url, data);
     }
 
     /** Converts raw data (one of its properties) to string representation.
-     * 
+     *
      * @param data the object
      * @param propName the name of object property or <code>null</code>
      *   if the whole object should be converted
@@ -401,9 +433,9 @@ public final class Proto {
     public String toString(Object data, String propName) {
         return JSON.toString(context, data, propName);
     }
-    
+
     /** Converts raw data (one of its properties) to a number representation.
-     * 
+     *
      * @param data the object
      * @param propName the name of object property or <code>null</code>
      *   if the whole object should be converted
@@ -414,7 +446,7 @@ public final class Proto {
     }
 
     /** Converts raw JSON data into a {@link Model} class representation.
-     * 
+     *
      * @param <T> type of the model to create
      * @param type class of the model to create
      * @param data raw JSON data (depends on associated {@link Technology})
@@ -426,7 +458,7 @@ public final class Proto {
     }
 
     /** Creates new JSON like observable list.
-     * 
+     *
      * @param <T> the type of the list elements
      * @param propName name of a property this list is associated with
      * @param onChange index of the property to use when the list is modified
@@ -441,7 +473,7 @@ public final class Proto {
 
     /** Copies content of one collection to another, re-assigning all its
      * elements from their current context to the new <code>ctx</code>.
-     * 
+     *
      * @param <T> type of the collections
      * @param to the target collection to be filled with cloned values
      * @param ctx context for the new collection
@@ -460,15 +492,15 @@ public final class Proto {
             }
         }
     }
-    
+
     //
     // internal state
     //
-    
+
     final String toStr() {
         return "Proto[" + obj + "]@" + Integer.toHexString(System.identityHashCode(this));
     }
-    
+
     final Bindings initBindings() {
         if (ko == null) {
             Bindings b = Bindings.apply(context, obj);
@@ -507,7 +539,7 @@ public final class Proto {
 
     /** Functionality used by the code generated by annotation
      * processor for the {@link net.java.html.json.Model} annotation.
-     * 
+     *
      * @param <Model> the generated class
      * @since 0.7
      */
@@ -519,7 +551,7 @@ public final class Proto {
 
         /** Constructor for subclasses generated by the annotation processor
          * associated with {@link net.java.html.json.Model} annotation.
-         * 
+         *
          * @param clazz the generated model class
          * @param modelFor the original class annotated by the {@link net.java.html.json.Model} annotation.
          * @param properties number of properties the class has
@@ -543,7 +575,7 @@ public final class Proto {
 
         /** Registers property for the type. It is expected each index
          * is initialized only once.
-         * 
+         *
          * @param name name of the property
          * @param index index of the property
          * @param readOnly is the property read only?
@@ -555,7 +587,7 @@ public final class Proto {
         }
 
         /** Registers function of given name at given index.
-         * 
+         *
          * @param name name of the function
          * @param index name of the type
          */
@@ -563,10 +595,10 @@ public final class Proto {
             assert functions[index] == null;
             functions[index] = name;
         }
-        
+
         /** Creates new proto-object for given {@link Model} class bound to
          * provided context.
-         * 
+         *
          * @param obj instance of appropriate {@link Model} class
          * @param context the browser context
          * @return new proto-object that the generated class can use for
@@ -575,32 +607,32 @@ public final class Proto {
         public Proto createProto(Object obj, BrwsrCtx context) {
             return new Proto(obj, this, context);
         }
-        
+
         //
         // Implemented by subclasses
         //
-        
+
         /** Sets value of a {@link #registerProperty(java.lang.String, int, boolean) registered property}
          * to new value.
-         * 
+         *
          * @param model the instance of {@link Model model class}
          * @param index index of the property used during registration
          * @param value the value to set the property to
          */
         protected abstract void setValue(Model model, int index, Object value);
-        
-        /** Obtains and returns value of a 
+
+        /** Obtains and returns value of a
          * {@link #registerProperty(java.lang.String, int, boolean) registered property}.
-         * 
+         *
          * @param model the instance of {@link Model model class}
          * @param index index of the property used during registration
          * @return current value of the property
          */
         protected abstract Object getValue(Model model, int index);
-        
+
         /** Invokes a {@link #registerFunction(java.lang.String, int)} registered function
          * on given object.
-         * 
+         *
          * @param model the instance of {@link Model model class}
          * @param index index of the property used during registration
          * @param data the currently selected object the function is about to operate on
@@ -609,43 +641,43 @@ public final class Proto {
          */
         protected abstract void call(Model model, int index, Object data, Object event)
         throws Exception;
-        
+
         /** Re-binds the model object to new browser context.
-         * 
+         *
          * @param model the instance of {@link Model model class}
          * @param ctx browser context to clone the object to
          * @return new instance of the model suitable for new context
          */
         protected abstract Model cloneTo(Model model, BrwsrCtx ctx);
-        
+
         /** Reads raw JSON data and converts them to our model class.
-         * 
+         *
          * @param c the browser context to work in
          * @param json raw JSON data to get values from
          * @return new instance of model class filled by the data
          */
         protected abstract Model read(BrwsrCtx c, Object json);
-        
+
         /** Called when a {@link #registerProperty(java.lang.String, int, boolean) registered property}
          * changes its value.
-         * 
+         *
          * @param model the object that has the property
          * @param index the index of the property during registration
          */
         protected abstract void onChange(Model model, int index);
-        
+
         /** Finds out if there is an associated proto-object for given
          * object.
-         * 
+         *
          * @param object an object, presumably (but not necessarily) instance of Model class
          * @return associated proto-object or <code>null</code>
          */
         protected abstract Proto protoFor(Object object);
 
-        /** Called to report results of asynchronous over-the-wire 
+        /** Called to report results of asynchronous over-the-wire
          * communication. Result of calling {@link Proto#wsOpen(int, java.lang.String, java.lang.Object)}
          * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...)}.
-         * 
+         *
          * @param model the instance of the model class
          * @param index index used during initiating the communication (via <code>loadJSON</code> or <code>wsOpen</code> calls)
          * @param type type of the message: 0 - onOpen, 1 - onMessage, 2 - onError, 3 - onClose -
@@ -656,11 +688,11 @@ public final class Proto {
         protected void onMessage(Model model, int index, int type, Object data) {
             onMessage(model, index, type, data, new Object[0]);
         }
-        
-        /** Called to report results of asynchronous over-the-wire 
+
+        /** Called to report results of asynchronous over-the-wire
          * communication. Result of calling {@link Proto#wsOpen(int, java.lang.String, java.lang.Object)}
          * or {@link Proto#loadJSON(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Object...)}.
-         * 
+         *
          * @param model the instance of the model class
          * @param index index used during initiating the communication (via <code>loadJSON</code> or <code>wsOpen</code> calls)
          * @param type type of the message: 0 - onOpen, 1 - onMessage, 2 - onError, 3 - onClose -
@@ -682,7 +714,7 @@ public final class Proto {
 
         /** Converts and array of raw JSON objects into an array of typed
          * Java {@link Model} classes.
-         * 
+         *
          * @param <T> the type of the destination array
          * @param context browser context to use
          * @param src array of raw JSON objects
@@ -694,7 +726,7 @@ public final class Proto {
                 dest[i] = org.netbeans.html.json.impl.JSON.read(context, destType, src[i]);
             }
         }
-        
+
         /** Compares two objects that can be converted to integers.
          * @param a first value
          * @param b second value
@@ -719,7 +751,7 @@ public final class Proto {
          * @param a first value
          * @param b second value
          * @return true if they are equals
-         */ 
+         */
         public final boolean isSame(Object a, Object b) {
             if (a == b) {
                 return true;
@@ -739,18 +771,18 @@ public final class Proto {
         public final int hashPlus(Object o, int h) {
             return o == null ? h : h ^ o.hashCode();
         }
-        
+
         /** Converts an object to its JSON value.
-         * 
+         *
          * @param obj the object to convert
          * @return JSON representation of the object
          */
         public final String toJSON(Object obj) {
             return JSON.toJSON(obj);
         }
-        
+
         /** Converts the value to string.
-         * 
+         *
          * @param val the value
          * @return the converted value
          */
@@ -759,7 +791,7 @@ public final class Proto {
         }
 
         /** Converts the value to number.
-         * 
+         *
          * @param val the value
          * @return the converted value
          */
@@ -768,7 +800,7 @@ public final class Proto {
         }
 
         /** Converts the value to character.
-         * 
+         *
          * @param val the value
          * @return the converted value
          */
@@ -777,16 +809,16 @@ public final class Proto {
         }
 
         /** Converts the value to boolean.
-         * 
+         *
          * @param val the value
          * @return the converted value
          */
         public final Boolean boolValue(Object val) {
             return JSON.boolValue(val);
         }
-        
+
         /** Extracts value of specific type from given object.
-         * 
+         *
          * @param <T> the type of object one is interested in
          * @param type the type
          * @param val the object to convert to type
@@ -833,7 +865,7 @@ public final class Proto {
          * takes the provided collection, empties it and fills it again
          * with values extracted from <code>value</code> (which is supposed
          * to be an array).
-         * 
+         *
          * @param <T> the type of list elements
          * @param arr collection to fill with elements in value
          * @param type the type of elements in the collection

@@ -76,28 +76,28 @@ final class DynamicHTTP extends HttpHandler {
     private static List<Resource> resources;
     private static ServerConfiguration conf;
     private static HttpServer server;
-    
+
     private DynamicHTTP() {
     }
-    
+
     static URI initServer() throws Exception {
         server = HttpServer.createSimpleServer(null, new PortRange(8080, 65535));
         final WebSocketAddOn addon = new WebSocketAddOn();
         for (NetworkListener listener : server.getListeners()) {
             listener.registerAddOn(addon);
-        }        
+        }
         resources = new ArrayList<Resource>();
 
         conf = server.getServerConfiguration();
         final DynamicHTTP dh = new DynamicHTTP();
 
         conf.addHttpHandler(dh, "/");
-        
+
         server.start();
 
         return pageURL("http", server, "/test.html");
     }
-    
+
     @Override
     public void service(Request request, Response response) throws Exception {
         if ("/test.html".equals(request.getRequestURI())) {
@@ -159,6 +159,8 @@ final class DynamicHTTP extends HttpHandler {
                                     sb.append((char) ch);
                                 }
                                 params[i] = sb.toString();
+                            } else if (r.parameters[i].startsWith("http.header.")) {
+                                params[i] = request.getHeader(r.parameters[i].substring(12));
                             }
                         }
                         if (params[i] == null) {
@@ -171,7 +173,7 @@ final class DynamicHTTP extends HttpHandler {
             }
         }
     }
-    
+
     private URI registerWebSocket(Resource r) {
         WebSocketEngine.getEngine().register("", r.httpPath, new WS(r));
         return pageURL("ws", server, r.httpPath);
@@ -184,7 +186,7 @@ final class DynamicHTTP extends HttpHandler {
         }
         return pageURL("http", server, r.httpPath);
     }
-    
+
     private static URI pageURL(String proto, HttpServer server, final String page) {
         NetworkListener listener = server.getListeners().iterator().next();
         int port = listener.getPort();
@@ -194,7 +196,7 @@ final class DynamicHTTP extends HttpHandler {
             throw new IllegalStateException(ex);
         }
     }
-    
+
     static final class Resource {
 
         final InputStream httpContent;
@@ -235,7 +237,7 @@ final class DynamicHTTP extends HttpHandler {
             }
         }
     }
-    
+
     private static class WS extends WebSocketApplication {
         private final Resource r;
 

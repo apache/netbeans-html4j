@@ -227,6 +227,18 @@ public class ModelTest {
 
     }
 
+    @OnReceive(url="{url}", headers={
+        "Easy: {easy}",
+        "H-a+r!d?e.r: {harder}",
+        "H-a+r!d?e's\"t: {harder}",
+        "Repeat-ed: {rep}",
+        "Repeat+ed: {rep}",
+        "Same-URL: {url}"
+    })
+    static void fetchPeopleWithHeaders(Modelik model, People p) {
+        model.fetchPeopleWithHeaders("url", "easy", "harder", "rep");
+    }
+
     @OnReceive(url = "{protocol}://{host}?callback={back}&query={query}", jsonp = "back")
     static void loadPeopleViaJSONP(Modelik thiz, People p) {
         Modelik m = null;

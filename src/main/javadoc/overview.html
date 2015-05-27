@@ -51,62 +51,65 @@
     </head>
     <body>
         <p>
-         Use Java to write application logic; Use HTML5 to render the UI; 
+         Use Java to write application logic; Use HTML5 to render the UI;
          {@link net.java.html.json.Model Animate an HTML page from Java}
          (see <a target="_blank" href="http://dew.apidesign.org/dew/#7212206">Duke being rotated</a> by CSS);
          Use {@link net.java.html.json.OnReceive REST} or
          <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>;
          interact with <a href="net/java/html/js/package-summary.html">JavaScript</a>;
          Get the best of both worlds!
-         
-         The goal of these APIs is to use full featured Java runtime 
-         (like real <a href="http://wiki.apidesign.org/wiki/HotSpot">HotSpot VM</a>), 
-         but still rely on a very lightweight rendering technology 
-         (so it can potentially fit 
+
+         The goal of these APIs is to use full featured Java runtime
+         (like real <a href="http://wiki.apidesign.org/wiki/HotSpot">HotSpot VM</a>),
+         but still rely on a very lightweight rendering technology
+         (so it can potentially fit
          <a href="http://bck2brwsr.apidesign.org">Bck2Brwsr</a> and definitely
-         to various types of phones). What can be more lightweight 
-         (from a browser perspective) than 
+         to various types of phones). What can be more lightweight
+         (from a browser perspective) than
          <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>!?
-         By default we use {@link net.java.html.boot.fx JavaFX's WebView} 
-         component to display the <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>. 
-         We eliminate the need to manipulate the DOM directly, 
-         there is a special {@link net.java.html.json Java to Knockout.js binding}. 
-         As a result the <a href="http://knockoutjs.com">HTML uses Knockout.js syntax</a>, 
+         By default we use {@link net.java.html.boot.fx JavaFX's WebView}
+         component to display the <a href="http://wiki.apidesign.org/wiki/HTML">HTML</a>.
+         We eliminate the need to manipulate the DOM directly,
+         there is a special {@link net.java.html.json Java to Knockout.js binding}.
+         As a result the <a href="http://knockoutjs.com">HTML uses Knockout.js syntax</a>,
          yet the application code can be written in Java.
         </p>
-        
+
         <h3>What's Been Improved in Version 1.2?</h3>
-        
+
+        One can control {@link net.java.html.json.OnReceive#headers() HTTP request headers}
+        when connecting to server using the {@link net.java.html.json.OnReceive}
+        annotation.
         Bugfix of issue <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=250503'>250503</a>.
-        
+
         <h3>What's New in Version 1.1?</h3>
-        
+
         <p>
             The content of a {@link net.java.html.BrwsrCtx context}
             can be selected by registering implementations under specific
-            {@link org.netbeans.html.context.spi.Contexts.Id technology identifiers} 
-            and requesting them during 
-            {@link org.netbeans.html.context.spi.Contexts#newBuilder(java.lang.Object...) construction} 
+            {@link org.netbeans.html.context.spi.Contexts.Id technology identifiers}
+            and requesting them during
+            {@link org.netbeans.html.context.spi.Contexts#newBuilder(java.lang.Object...) construction}
             of the context. <code>org.netbeans.html:ko4j</code> module's implementation
             offers <b>ko4j</b>, <b>xhr</b> and <b>websocket</b> identifiers
-            for its registered services 
+            for its registered services
             (e.g. {@link org.netbeans.html.json.spi.Technology},
             {@link org.netbeans.html.json.spi.Transfer} and
             {@link org.netbeans.html.json.spi.WSTransfer}).
             <code>org.netbeans.html:ko-ws-tyrus</code>
-            module registers its 
-            {@link org.netbeans.html.json.spi.Transfer Java based JSON} and 
+            module registers its
+            {@link org.netbeans.html.json.spi.Transfer Java based JSON} and
             {@link org.netbeans.html.json.spi.WSTransfer WebSocket} implementations
             under the name <b>tyrus</b>.
         </p>
         <p>
             A particular DOM subtree
             that a <a target="_blank" href="http://knockoutjs.com">knockout.js</a> model gets
-            applied to can be selected by using 
+            applied to can be selected by using
             {@link net.java.html.json.Models#applyBindings(java.lang.Object,java.lang.String)
             Models.applyBindings(m, id)} with an id of an HTML element.
-            There is new {@link net.java.html.json.Model#targetId()} attribute 
-            which controls behavior of the generated <code>applyBindings</code> method. 
+            There is new {@link net.java.html.json.Model#targetId()} attribute
+            which controls behavior of the generated <code>applyBindings</code> method.
             If <em>specified and non-empty</em>, then the generated method
             will call {@link net.java.html.json.Models#applyBindings(java.lang.Object,java.lang.String)}
             with <code>this</code> and the provided {@link net.java.html.json.Model#targetId() target id}.
@@ -124,15 +127,15 @@
             {@link org.netbeans.html.json.spi.PropertyBinding#weak()} and
             {@link org.netbeans.html.json.spi.FunctionBinding#weak()}) and
             now the Java {@link net.java.html.json.Model models} can garbage collect,
-            when no longer used. Library writers that use 
-            {@link net.java.html.js.JavaScriptBody} annotation can also 
+            when no longer used. Library writers that use
+            {@link net.java.html.js.JavaScriptBody} annotation can also
             control garbage collection behavior of method arguments by
             setting {@link net.java.html.js.JavaScriptBody#keepAlive() keepAlive=false}
             attribute.
         </p>
-        
+
         <h3>What's New in Version 1.0?</h3>
-        
+
         <p>
             {@link net.java.html.json.Property#array() Array properties} are now
             mutable from the <a href="http://knockoutjs.com">knockout.js</a>
@@ -151,14 +154,14 @@
             {@link net.java.html.BrwsrCtx#execute browser context} to
             prevent endless debugging when one forgets to do so.
         </p>
-        
+
         <p>
-        What's new in older versions? Click the 
-        <a href="#" onclick="return showHistoric(true)">link</a> 
-        to view even more 
+        What's new in older versions? Click the
+        <a href="#" onclick="return showHistoric(true)">link</a>
+        to view even more
         <a href="#" onclick="return showHistoric(true)">historic changes</a> below:
         </p>
-        
+
         <a name="historic.changes"></a>
         <div id="historic.changes">
             <script>
@@ -173,9 +176,9 @@
             }
             showHistoric(false);
             </script>
-            
+
         <h3>What's New in Version 0.9?</h3>
-        
+
         <p>
             System can run in {@link net.java.html.boot.BrowserBuilder#classloader(java.lang.ClassLoader) Felix OSGi container} (originally only Equinox).
             {@link net.java.html.json.ComputedProperty Derived properties}
@@ -184,32 +187,32 @@
             <a target="_blank" href="http://knockoutjs.com">Knockout.js</a> library has been updated
             to version 3.2.0.
         </p>
-        
+
         <h3>What's New in 0.8.x Versions?</h3>
-        
+
         <p>
             Setters or array properties on classes generated by {@link net.java.html.json.Model}
             annotation can be accessed from any thread. {@link org.netbeans.html.sound.spi.AudioEnvironment}
             can be registered into {@link net.java.html.BrwsrCtx}. There is
             a {@link net.java.html.json.Models#parse(net.java.html.BrwsrCtx, java.lang.Class, java.io.InputStream, java.util.Collection)  method}
-            to parse a JSON array and convert it into 
+            to parse a JSON array and convert it into
             {@link net.java.html.json.Model model classes}.
-            Improved behavior of <code>enum</code> values in 
+            Improved behavior of <code>enum</code> values in
             {@link net.java.html.json.Model knockout bindings}.
         </p>
-        
+
         <p>
-            Few bugfixes for better portability. 
+            Few bugfixes for better portability.
             New API for {@link net.java.html.boot.script.Scripts headless execution}
             on top of <em>Nashorn</em> - does not run <em>knockout for Java</em>
-            fully yet 
+            fully yet
             (reported as <a href="https://bugs.openjdk.java.net/browse/JDK-8046013">JDK-8046013</a>),
-            however even in current state it is quite 
+            however even in current state it is quite
             {@link net.java.html.boot.script.Scripts useful for testing}
-            of 
+            of
             {@link net.java.html.js Java/JavaScript interactions}.
         </p>
-        
+
         <p>
             {@link net.java.html.boot.fx.FXBrowsers} has been extended
             with new helper methods to make it easier to use HTML+Java
@@ -226,22 +229,22 @@
             extended to work on systems that don't support
             {@link java.lang.Class#getProtectionDomain}.
         </p>
-        
+
         <p>
             The first argument of method annotated by
             {@link net.java.html.json.OnReceive} annotation has to
             be the associated {@link net.java.html.json.Model model class}.
         </p>
-        
+
         <p>
             {@link net.java.html.json.OnReceive} annotation now accepts
             {@link java.util.List} of data values as second argument
             (previously required an array).
         </p>
-        
-        
+
+
         <h3>What's New in 0.7.x Versions?</h3>
-        
+
         <p>
             {@link net.java.html.js.JavaScriptBody} annotation has new attribute
             {@link net.java.html.js.JavaScriptBody#wait4js()} which allows
@@ -250,17 +253,17 @@
             new attribute as much as possible, as it can speed up execution
             in certain environments.
         </p>
-        
+
         <p>
             Use {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable)} in
             multi-threaded environment to execute your code on the browser thread.
-            See example 
+            See example
             {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable) using Java timer}.
         </p>
         </div>
-        
+
         <h3>Interesting Entry Points</h3>
-        
+
         <p>Learn how to {@link net.java.html.json.Model animate an HTML page from Java}
             without referencing single HTML element from the Java code.
         </p>
@@ -276,51 +279,51 @@
 
         <h3>Getting Started</h3>
 
-        There are <a href="http://wiki.apidesign.org/wiki/DukeScriptInNetBeans">many ways</a> 
-        to start developing 
-        <a href="http://html.java.net">Html for Java</a> application. 
+        There are <a href="http://wiki.apidesign.org/wiki/DukeScriptInNetBeans">many ways</a>
+        to start developing
+        <a href="http://html.java.net">Html for Java</a> application.
         However to be sure one chooses the most recent setup, it is recommended
-        to switch to good old command line and use a 
+        to switch to good old command line and use a
         <a href="http://wiki.apidesign.org/wiki/Knockout4Java">Maven archetype</a>
-        associated with every version of this project. Make sure at least 
+        associated with every version of this project. Make sure at least
         <em>JDK7</em> is your installed Java and type:
-        <pre>      
+        <pre>
 $ mvn archetype:generate \
  -DarchetypeGroupId=org.apidesign.html \
  -DarchetypeArtifactId=knockout4j-archetype \
  -DarchetypeVersion=0.8 <em># or newer version, if available</em>
         </pre>
-        Answer few questions (for example choose myfirstbrwsrpage as artifactId) 
+        Answer few questions (for example choose myfirstbrwsrpage as artifactId)
         and then you can:
         <pre>
 $ cd myfirstbrwsrpage
 $ mvn process-classes exec:java
         </pre>
-        In a few seconds (or minutes if 
+        In a few seconds (or minutes if
         <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
-        decides to download the whole Internet of dependencies) you should 
-        see a sample Hello World application rendered in a 
+        decides to download the whole Internet of dependencies) you should
+        see a sample Hello World application rendered in a
         <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
         web view component (that of course requires your JDK to come
-        with <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>; 
-        <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7 
-            and JDK8 from Oracle</a> contain everything that is needed). 
-        The generated application is built around one 
+        with <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>;
+        <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7
+            and JDK8 from Oracle</a> contain everything that is needed).
+        The generated application is built around one
         Java source (uses the {@link net.java.html.json.Model} annotation to
         auto-generate another <code>Data.java</code> class during compilation)
         and one HTML file (uses the <a href="http://knockoutjs.com">Knockout</a>
-        syntax to <code>data-bind</code> the HTML elements to the 
+        syntax to <code>data-bind</code> the HTML elements to the
         generated <code>Data</code> model):
         <pre>
 $ ls src/main/java/**/DataModel.java
 $ ls src/main/webapp/pages/index.html
         </pre>
-        That is all you need to get started. Play with the sources, 
+        That is all you need to get started. Play with the sources,
         modify them and enjoy
         <a href="http://html.java.net">Html for Java</a>!
-        
+
         <h2>IDE Support</h2>
-        
+
         <p>
             This API is part of <a target="_blank"
             href="http://netbeans.org">NetBeans.org</a> project and as such
@@ -330,77 +333,77 @@ $ ls src/main/webapp/pages/index.html
             it builds on standard Java6 APIs and as such it shall work fine
             in any IDE.
         </p>
-        
+
         <p>
-            A lot of work is done by 
+            A lot of work is done by
             <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">
             annotation processors</a>
             that generate various boiler plate code during compilation. This
             is a standard part of Java since JDK6, but for example Eclipse
             is known not to deal with processors well and developers using
             it need to be careful. IntelliJ users hasn't reported any issues
-            and of course, NetBeans IDE support for 
+            and of course, NetBeans IDE support for
             <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">processors</a>
             is outstanding.
         </p>
-        
+
         <p>
             When using {@link net.java.html.js.JavaScriptBody} annotation, it is
             useful to do a bit of post processing of classes. There is a
-            <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a> 
+            <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
             plugin for that.
-            NetBeans IDE will invoke it when doing a build. Other IDEs may 
-            need some hint to do so. 
+            NetBeans IDE will invoke it when doing a build. Other IDEs may
+            need some hint to do so.
             Anyway: If one does not see all (generated) sources or is getting
-            {@link java.lang.LinkageError}s when executing the application, 
+            {@link java.lang.LinkageError}s when executing the application,
             switch to command line and do clean build
             from there:
         </p>
         <pre>$ mvn clean install</pre>
         <p>
             If that succeeds, your IDE of choice will hopefully
-            pick the generated sources up and present the result of the build 
-            properly. If not, 
-            <a href="https://netbeans.org/downloads/">download NetBeans</a>, 
-            you will be pleasantly 
-            surprised - for example with our excellent 
-            <a href="net/java/html/js/package-summary.html#debugging">Java/JavaScript 
+            pick the generated sources up and present the result of the build
+            properly. If not,
+            <a href="https://netbeans.org/downloads/">download NetBeans</a>,
+            you will be pleasantly
+            surprised - for example with our excellent
+            <a href="net/java/html/js/package-summary.html#debugging">Java/JavaScript
             debugging</a> support.
         </p>
-        
+
         <a name="deploy">
         <h2>Deploy Your Application</h2>
         </a>
-        
+
         <p>
         It is not goal of this documentation to list all possible ways
-        to package and deploy applications which use this API. However it is 
+        to package and deploy applications which use this API. However it is
         important for new comers to see the benefits of using the
         <a href="http://html.java.net">HTML for Java</a> API and as such
-        let's list at least few bundling options, known to work at the time of writing 
+        let's list at least few bundling options, known to work at the time of writing
         this documentation.
         </p>
-        
+
         <p>
         First of all, this is a <em>client technology</em>. You write client applications
         with it which may, but need not connect to a server. You don't need
-        Tomcat or WebLogic to deploy 
+        Tomcat or WebLogic to deploy
         <a href="http://html.java.net">HTML for Java</a> applications.
         </p>
-        
+
         <p>
             <img src='resources/javafx_logo.jpg' width="64"
                  height="64" align="left"/>
             The sample project generated by
             <code>org.apidesign.html knockout4j-archetype</code> is configured
             to use <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
-            as the rendering technology. This setup is primarily suitable for 
+            as the rendering technology. This setup is primarily suitable for
             development - it needs no special packaging, starts quickly and
-            allows you to use classical HotSpot VM debuggers. A final 
+            allows you to use classical HotSpot VM debuggers. A final
             artifact from the build is also a ZIP file which you can use
             and distribute to your users. Good for desktop applications.
         </p>
-        
+
         <p>
             <img src='resources/netbeans_logo.jpg' width="64"
                  height="64" align="right"/>
@@ -409,17 +412,17 @@ $ ls src/main/webapp/pages/index.html
             All the <a href="http://html.java.net">HTML for Java</a> libraries
             are packaged as <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
             bundles and as such they can easily be run in NetBeans as well as
-            in Eclipse. As a result one can use 
+            in Eclipse. As a result one can use
             <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
-            and have a common module system for both platforms. In addition to that 
+            and have a common module system for both platforms. In addition to that
             one can render using
             HTML and have a common UI in both platforms. In such case
             your application would be packaged as a set of
             <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a> bundles.
-            Read 
+            Read
             <a href="http://wiki.apidesign.org/wiki/HTML">more</a>...
         </p>
-        
+
         <p>
             <img src='resources/chrome_logo.png' width="64"
                  height="64" align="left"/>
@@ -429,7 +432,7 @@ $ ls src/main/webapp/pages/index.html
                  height="64" align="left"/>
             <img src='resources/firefox_logo.png' width="64"
                  height="64" align="left"/>
-            
+
             There is more and more attempts to execute Java bytecode
             in a browser, without any special Java plugin installed.
             The <a href="http://html.java.net">HTML for Java</a> is
@@ -437,16 +440,16 @@ $ ls src/main/webapp/pages/index.html
             applications even on such restricted environments. It uses
             no reflection calls and that allows to statically pre-compile
             the applications into JavaScript. One of such environments
-            is called <a href="http://wiki.apidesign.org/wiki/Bck2Brwsr">Bck2Brwsr</a>, 
+            is called <a href="http://wiki.apidesign.org/wiki/Bck2Brwsr">Bck2Brwsr</a>,
             another <a href="http://wiki.apidesign.org/wiki/TeaVM">TeaVM</a>. Both support the
-            {@link net.java.html.js.JavaScriptBody} annotation. Read 
+            {@link net.java.html.js.JavaScriptBody} annotation. Read
             <a href="http://wiki.apidesign.org/wiki/Bck2BrwsrViaCLI">more</a> or play
-            a minesweeper game packaged for your browser 
+            a minesweeper game packaged for your browser
             (of course <a target="_blank"
                 href="http://source.apidesign.org/hg/html~demo/file/ea79b73d590a/minesweeper/src/main/java/org/apidesign/demo/minesweeper/MinesModel.java">
                 written</a> in Java):
         </p>
-        
+
         <script type="text/html" id="field">
             <table class="field">
                 <tbody>
@@ -477,52 +480,53 @@ $ ls src/main/webapp/pages/index.html
                  height="64" align="right"/>
             <img src='resources/android_logo.jpg' width="64"
                  height="64" align="right"/>
-            
-            Now when we have seen that the 
-            <a href="http://html.java.net">HTML for Java</a> applications 
+
+            Now when we have seen that the
+            <a href="http://html.java.net">HTML for Java</a> applications
             can run on any modern browser, we can ask whether they can also
-            fit into a phone!? Yes, they can and especially to phones 
+            fit into a phone!? Yes, they can and especially to phones
             that can execute Java code already! Just by changing your
             packaging you can create an APK file and deploy it to your
-            Android phone. 
+            Android phone.
             Read <a target="_blank" href="http://wiki.apidesign.org/wiki/DlvkBrwsr">more</a>...
             In case you'd like your application to reach out to second biggest
-            group of smartphone users, don't despair: It 
+            group of smartphone users, don't despair: It
             seems the set of devices that can execute
-            <a href="http://html.java.net">HTML for Java</a> applications 
-            has been extended to <em>iPads</em> and <em>iPhones</em>. Get the 
+            <a href="http://html.java.net">HTML for Java</a> applications
+            has been extended to <em>iPads</em> and <em>iPhones</em>. Get the
             <a target="_blank" href="http://wiki.apidesign.org/wiki/IBrwsr">details here</a>
             and deploy everywhere!
         </p>
         <p>
-            Convinced it makes sense to use 
+            Convinced it makes sense to use
             <a href="http://html.java.net">HTML for Java</a>
-            APIs for writing applications that are 
+            APIs for writing applications that are
             <em>written once, displayed anywhere</em>? Or do you have an
             environment which is not supported? In such case you can bring
             <a href="http://html.java.net">HTML for Java</a>
             to your environment yourself. Just implement your own
             {@link org.netbeans.html.boot.spi.Fn.Presenter}!
         </p>
-        
+
         <h2>Other Resources</h2>
-        
+
         <img src="net/java/html/json/doc-files/DukeHTML.png" width="256" height="184" alt="Duke and HTML5. Together at last!" align="right"/>
-        
+
         The javadoc for latest and previous versions is also available
         online:
         <ul>
             <li>Current <a target="_blank" href="http://bits.netbeans.org/html+java/dev/">development</a> version
+            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.1">1.1</a>
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.0">1.0</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.9">0.9</a> 
+            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.9">0.9</a>
                 and historic ones (<a target="_blank" href="http://bits.netbeans.org/html+java/0.8.3">0.8.3</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.2">0.8.2</a>, 
+                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.2">0.8.2</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.1">0.8.1</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8">0.8</a>, and
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>)
             </li>
         </ul>
-        
+
 <style type="text/css">
 table.field td {
     padding: 4px;
@@ -541,6 +545,6 @@ table.field td.EXPLOSION {
 table.field td.DISCOVERED {
     background-color: #9DB2B1;
 }
-</style>        
+</style>
     </body>
 </html>

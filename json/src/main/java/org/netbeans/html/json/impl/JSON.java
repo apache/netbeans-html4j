@@ -71,24 +71,24 @@ public final class JSON {
         return t == null ? EmptyTech.EMPTY : t;
     }
 
-    static Transfer findTransfer(BrwsrCtx c) {
+    public static Transfer findTransfer(BrwsrCtx c) {
         Transfer t = Contexts.find(c, Transfer.class);
         return t == null ? EmptyTech.EMPTY : t;
     }
 
-    static WSTransfer<?> findWSTransfer(BrwsrCtx c) {
+    public static WSTransfer<?> findWSTransfer(BrwsrCtx c) {
         WSTransfer<?> t = Contexts.find(c, WSTransfer.class);
         return t == null ? EmptyTech.EMPTY : t;
     }
-    
+
     public static void extract(BrwsrCtx c, Object value, String[] props, Object[] values) {
         Transfer t = findTransfer(c);
         t.extract(value, props, values);
     }
-    
+
     private static Object getProperty(BrwsrCtx c, Object obj, String prop) {
         if (prop == null) return obj;
-        
+
         String[] arr = { prop };
         Object[] val = { null };
         extract(c, obj, arr, val);
@@ -146,15 +146,15 @@ public final class JSON {
         Object o = t.toModel(aClass, data);
         return aClass.cast(o);
     }
-    
+
     public static boolean isSame(int a, int b) {
         return a == b;
     }
-    
+
     public static boolean isSame(double a, double b) {
         return a == b;
     }
-    
+
     public static boolean isSame(Object a, Object b) {
         if (a == b) {
             return true;
@@ -164,7 +164,7 @@ public final class JSON {
         }
         return a.equals(b);
     }
-    
+
     public static int hashPlus(Object o, int h) {
         return o == null ? h : h ^ o.hashCode();
     }
@@ -193,7 +193,7 @@ public final class JSON {
         }
         if (Byte.class == type) {
             val = val instanceof Number ? ((Number)val).byteValue() : 0;
-        }        
+        }
         if (Double.class == type) {
             val = val instanceof Number ? ((Number)val).doubleValue() : Double.NaN;
         }
@@ -202,11 +202,11 @@ public final class JSON {
         }
         return type.cast(val);
     }
-    
+
     static boolean isNumeric(Object val) {
         return ((val instanceof Integer) || (val instanceof Long) || (val instanceof Short) || (val instanceof Byte));
     }
-    
+
     public static String stringValue(Object val) {
         if (val instanceof Boolean) {
             return ((Boolean)val ? "true" : "false");
@@ -222,7 +222,7 @@ public final class JSON {
         }
         return (String)val;
     }
-    
+
     public static Number numberValue(Object val) {
         if (val instanceof String) {
             try {
@@ -250,7 +250,7 @@ public final class JSON {
         }
         return (Character)val;
     }
-    
+
     public static Boolean boolValue(Object val) {
         if (val instanceof String) {
             return Boolean.parseBoolean((String)val);
@@ -258,10 +258,10 @@ public final class JSON {
         if (val instanceof Number) {
             return numberValue(val).doubleValue() != 0.0;
         }
-    
+
         return Boolean.TRUE.equals(val);
     }
-    
+
     public static Object find(Object object, Bindings model) {
         if (object == null) {
             return null;
@@ -288,7 +288,7 @@ public final class JSON {
         final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
         return b == null ? null : b.koData();
     }
-    
+
     private static Proto findProto(Object object) {
         Proto.Type<?> type = JSON.findType(object.getClass());
         if (type == null) {
@@ -301,7 +301,7 @@ public final class JSON {
     public static Object find(Object object) {
         return find(object, null);
     }
-    
+
     public static void applyBindings(Object object, String id) {
         final Proto proto = findProto(object);
         if (proto == null) {
@@ -309,31 +309,17 @@ public final class JSON {
         }
         proto.applyBindings(id);
     }
-    
-    public static void loadJSON(
-        BrwsrCtx c, RcvrJSON callback,
-        String urlBefore, String urlAfter, String method,
-        Object data
-    ) {
-        JSONCall call = PropertyBindingAccessor.createCall(c, callback, urlBefore, urlAfter, method, data);
-        Transfer t = findTransfer(c);
-        t.loadJSON(call);
-    }
-    public static WS openWS(
-        BrwsrCtx c, RcvrJSON r, String url, Object data
-    ) {
-        WS ws = WSImpl.create(findWSTransfer(c), r);
-        ws.send(c, url, data);
-        return ws;
-    }
-    
+
     public static abstract class WS {
         private WS() {
         }
-        
-        public abstract void send(BrwsrCtx ctx, String url, Object model);
+
+        public abstract void send(BrwsrCtx ctx, String headers, String url, Object model);
+        public static <Socket> WS create(WSTransfer<Socket> t, RcvrJSON r) {
+            return new WSImpl<Socket>(t, r);
+        }
     }
-    
+
     private static final class WSImpl<Socket> extends WS {
 
         private final WSTransfer<Socket> trans;
@@ -345,19 +331,15 @@ public final class JSON {
             this.trans = trans;
             this.rcvr = rcvr;
         }
-        
-        static <Socket> WS create(WSTransfer<Socket> t, RcvrJSON r) {
-            return new WSImpl<Socket>(t, r);
-        }
 
         @Override
-        public void send(BrwsrCtx ctx, String url, Object data) {
+        public void send(BrwsrCtx ctx, String headers, String url, Object data) {
             Socket s = socket;
             if (s == null) {
                 if (data != null) {
                     throw new IllegalStateException("WebSocket is not opened yet. Call with null data, was: " + data);
                 }
-                JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, url, null, "WebSocket", null);
+                JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, headers, url, null, "WebSocket", null);
                 socket = trans.open(url, call);
                 prevURL = url;
                 return;
@@ -373,12 +355,12 @@ public final class JSON {
                     + " Close the socket by calling it will null data first!"
                 );
             }
-            JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, prevURL, null, "WebSocket", data);
+            JSONCall call = PropertyBindingAccessor.createCall(ctx, rcvr, headers, prevURL, null, "WebSocket", data);
             trans.send(s, call);
         }
-        
+
     }
-    
+
     private static final Map<Class,Proto.Type<?>> modelTypes;
     static {
         modelTypes = new HashMap<Class, Proto.Type<?>>();
@@ -386,11 +368,11 @@ public final class JSON {
     public static void register(Class c, Proto.Type<?> type) {
         modelTypes.put(c, type);
     }
-    
+
     public static boolean isModel(Class<?> clazz) {
-        return findType(clazz) != null; 
+        return findType(clazz) != null;
     }
-    
+
     static Proto.Type<?> findType(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
             Proto.Type<?> from = modelTypes.get(clazz);
@@ -402,7 +384,7 @@ public final class JSON {
         }
         return null;
     }
-    
+
     public static <Model> Model bindTo(Model model, BrwsrCtx c) {
         Proto.Type<Model> from = (Proto.Type<Model>) findType(model.getClass());
         if (from == null) {
@@ -410,8 +392,8 @@ public final class JSON {
         }
         return PropertyBindingAccessor.clone(from, model, c);
     }
-    
-    public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data, Collection<? super T> collectTo) 
+
+    public static <T> T readStream(BrwsrCtx c, Class<T> modelClazz, InputStream data, Collection<? super T> collectTo)
     throws IOException {
         Transfer tr = findTransfer(c);
         Object rawJSON = tr.toJSON((InputStream)data);
@@ -468,7 +450,7 @@ public final class JSON {
             // ignore and try again
         }
     }
-    
+
     private static final class EmptyTech
     implements Technology<Object>, Transfer, WSTransfer<Void> {
         private static final EmptyTech EMPTY = new EmptyTech();
@@ -540,5 +522,5 @@ public final class JSON {
         public void close(Void socket) {
         }
     }
-    
+
 }

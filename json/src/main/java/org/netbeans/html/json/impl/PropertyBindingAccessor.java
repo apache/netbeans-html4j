@@ -43,7 +43,6 @@
 package org.netbeans.html.json.impl;
 
 import net.java.html.BrwsrCtx;
-import org.netbeans.html.json.spi.FunctionBinding;
 import org.netbeans.html.json.spi.JSONCall;
 import org.netbeans.html.json.spi.PropertyBinding;
 import org.netbeans.html.json.spi.Proto;
@@ -59,7 +58,7 @@ public abstract class PropertyBindingAccessor {
         if (DEFAULT != null) throw new IllegalStateException();
         DEFAULT = this;
     }
-    
+
     static {
         JSON.initClass(PropertyBinding.class);
     }
@@ -68,34 +67,36 @@ public abstract class PropertyBindingAccessor {
         Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model, boolean readOnly
     );
     protected abstract JSONCall newCall(
-        BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter,
+        BrwsrCtx ctx, RcvrJSON callback,
+        String headers, String urlBefore, String urlAfter,
         String method, Object data
     );
-    
+
     protected abstract Bindings bindings(Proto proto, boolean initialize);
     protected abstract void notifyChange(Proto proto, int propIndex);
     protected abstract Proto findProto(Proto.Type<?> type, Object object);
     protected abstract <Model> Model cloneTo(Proto.Type<Model> type, Model model, BrwsrCtx c);
     protected abstract Object read(Proto.Type<?> from, BrwsrCtx c, Object data);
-    
+
     static Bindings getBindings(Proto proto, boolean initialize) {
         return DEFAULT.bindings(proto, initialize);
     }
-    
+
     static void notifyProtoChange(Proto proto, int propIndex) {
         DEFAULT.notifyChange(proto, propIndex);
     }
-    
+
     static <M> PropertyBinding create(
         Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model , boolean readOnly
     ) {
         return DEFAULT.newBinding(access, bindings, name, index, model, readOnly);
     }
-    static JSONCall createCall(
-        BrwsrCtx ctx, RcvrJSON callback, String urlBefore, String urlAfter, 
+    public static JSONCall createCall(
+        BrwsrCtx ctx, RcvrJSON callback,
+        String headers, String urlBefore, String urlAfter,
         String method, Object data
     ) {
-        return DEFAULT.newCall(ctx, callback, urlBefore, urlAfter, method, data);
+        return DEFAULT.newCall(ctx, callback, headers, urlBefore, urlAfter, method, data);
     }
     static Proto protoFor(Proto.Type<?> type, Object object) {
         return DEFAULT.findProto(type, object);

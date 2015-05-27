@@ -54,30 +54,36 @@ import org.netbeans.html.json.impl.RcvrJSON;
  */
 public final class JSONCall {
     private final RcvrJSON whenDone;
+    private final String headers;
     private final String urlBefore;
     private final String urlAfter;
     private final String method;
     private final Object data;
     private final BrwsrCtx ctx;
 
-    JSONCall(BrwsrCtx ctx, RcvrJSON whenDone, String urlBefore, String urlAfter, String method, Object data) {
+    JSONCall(
+        BrwsrCtx ctx, RcvrJSON whenDone,
+        String headers, String urlBefore, String urlAfter,
+        String method, Object data
+    ) {
         this.ctx = ctx;
         this.whenDone = whenDone;
+        this.headers = headers;
         this.urlBefore = urlBefore;
         this.urlAfter = urlAfter;
         this.method = method;
         this.data = data;
     }
-    
-    /** Do we have some data to send? Can the {@link #writeData(java.io.OutputStream)} method be 
+
+    /** Do we have some data to send? Can the {@link #writeData(java.io.OutputStream)} method be
      * called?
-     * 
+     *
      * @return true, if the call has some data to send
      */
     public boolean isDoOutput() {
         return this.data != null;
     }
-    
+
     public void writeData(OutputStream os) throws IOException {
         if (this.data == null) {
             throw new IOException("No data!");
@@ -85,15 +91,25 @@ public final class JSONCall {
         os.write(this.data.toString().getBytes("UTF-8"));
         os.flush();
     }
-    
+
+    /** Additional headers to be included in the request.
+     * Usually multiline string to be appended into the header.
+     *
+     * @return <code>null</code> or string with prepared (HTTP) request headers
+     * @since 1.2
+     */
+    public String getHeaders() {
+        return headers;
+    }
+
     public String getMethod() {
         return method;
     }
-    
+
     public boolean isJSONP() {
         return urlAfter != null;
     }
-    
+
     public String composeURL(String jsonpCallback) {
         if ((urlAfter == null) != (jsonpCallback == null)) {
             throw new IllegalStateException();
@@ -112,7 +128,7 @@ public final class JSONCall {
             dispatch(RcvrJSON.MsgEvnt.createMessage(result));
         }
     }
-    
+
     public void notifyError(Throwable error) {
         if (error == null) {
             dispatch(RcvrJSON.MsgEvnt.createClose());
@@ -120,7 +136,7 @@ public final class JSONCall {
             dispatch(RcvrJSON.MsgEvnt.createError(error));
         }
     }
-    
+
     private void dispatch(final RcvrJSON.MsgEvnt ev) {
         ctx.execute(new Runnable() {
             @Override
