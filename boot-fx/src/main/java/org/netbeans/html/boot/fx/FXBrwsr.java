@@ -57,6 +57,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -68,6 +69,7 @@ import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -139,7 +141,8 @@ public class FXBrwsr extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         BorderPane r = new BorderPane();
-        Scene scene = new Scene(r, 800, 600);
+        Rectangle2D screen = Screen.getPrimary().getBounds();
+        Scene scene = new Scene(r, screen.getWidth() * 0.9, screen.getHeight() * 0.9);
         primaryStage.setScene(scene);
         this.root = r;
         this.stage = primaryStage;
@@ -147,6 +150,8 @@ public class FXBrwsr extends Application {
             INSTANCE = this;
             FXBrwsr.class.notifyAll();
         }
+        primaryStage.setX(scene.getWidth() * 0.05);
+        primaryStage.setY(scene.getHeight()* 0.05);
         primaryStage.show();
     }
 
