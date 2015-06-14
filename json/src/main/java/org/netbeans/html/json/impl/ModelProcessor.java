@@ -443,10 +443,9 @@ public final class ModelProcessor extends AbstractProcessor {
                     boolean isPrimitive[] = { false };
                     String type = checkType(props[prop++], isModel, isEnum, isPrimitive);
                     if (p.array()) {
-                        w.append("    if (ret[" + cnt + "] instanceof Object[]) {\n");
-                        w.append("      for (Object e : ((Object[])ret[" + cnt + "])) {\n");
+                        w.append("    for (Object e : useAsArray(ret[" + cnt + "])) {\n");
                         if (isModel[0]) {
-                            w.append("        this.prop_").append(pn).append(".add(proto.read");
+                            w.append("      this.prop_").append(pn).append(".add(proto.read");
                             w.append("(" + type + ".class, e));\n");
                         } else if (isEnum[0]) {
                             w.append("        this.prop_").append(pn);
@@ -461,7 +460,6 @@ public final class ModelProcessor extends AbstractProcessor {
                                 w.append(type).append(")e);\n");
                             }
                         }
-                        w.append("      }\n");
                         w.append("    }\n");
                     } else {
                         if (isEnum[0]) {
@@ -496,6 +494,9 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                     cnt++;
                 }
+                w.append("  }\n");
+                w.append("  private static Object[] useAsArray(Object o) {\n");
+                w.append("    return o instanceof Object[] ? ((Object[])o) : o == null ? new Object[0] : new Object[] { o };\n");
                 w.append("  }\n");
                 writeToString(props, w);
                 writeClone(className, props, w);

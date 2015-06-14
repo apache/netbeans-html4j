@@ -270,8 +270,16 @@ public final class ConvertTypesTest {
 
     @KOTest
     public void parseFiveElementsAsAnArray() throws Exception {
+        doParseInnerArray(5, 5);
+    }
+
+    @KOTest
+    public void parseInnerElementAsAnArray() throws Exception {
+        doParseInnerArray(-1, 1);
+    }
+    private void doParseInnerArray(int array, int expect) throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, 5);
+        final InputStream o = createIS(false, false, array);
         SequenceInputStream is = new SequenceInputStream(
             new ByteArrayInputStream("{ \"info\" : ".getBytes("UTF-8")),
             new SequenceInputStream(
@@ -293,7 +301,7 @@ public final class ConvertTypesTest {
             cnt++;
         }
 
-        assertEquals(cnt, 5, "Fives people found in info");
+        assertEquals(cnt, expect, "Person found in info");
     }
     
     @KOTest
