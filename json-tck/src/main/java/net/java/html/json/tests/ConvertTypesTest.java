@@ -45,6 +45,7 @@ package net.java.html.json.tests;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -265,6 +266,34 @@ public final class ConvertTypesTest {
             assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
             assertNull(p.getSex(), "No sex: " + p.getSex());
         }
+    }
+
+    @KOTest
+    public void parseFiveElementsAsAnArray() throws Exception {
+        final BrwsrCtx c = newContext();
+        final InputStream o = createIS(false, false, 5);
+        SequenceInputStream is = new SequenceInputStream(
+            new ByteArrayInputStream("{ \"info\" : ".getBytes("UTF-8")),
+            new SequenceInputStream(
+                o,
+                new ByteArrayInputStream("}".getBytes("UTF-8"))
+            )
+        );
+
+        List<People> res = new ArrayList<People>();
+        Models.parse(c, People.class, is, res);
+
+        assertEquals(res.size(), 1, "One people" + res);
+
+        int cnt = 0;
+        for (Person p : res.get(0).getInfo()) {
+            assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
+            assertEquals("dj", p.getLastName(), "Last name: " + p.getLastName());
+            assertNull(p.getSex(), "No sex: " + p.getSex());
+            cnt++;
+        }
+
+        assertEquals(cnt, 5, "Fives people found in info");
     }
     
     @KOTest
