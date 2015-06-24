@@ -45,7 +45,6 @@ package net.java.html.json.tests;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,9 +62,12 @@ import static net.java.html.json.tests.Utils.assertNotNull;
  * @author Jaroslav Tulach
  */
 public final class ConvertTypesTest {
-    private static InputStream createIS(boolean includeSex, boolean includeAddress, int array) 
+    private static InputStream createIS(String prefix, boolean includeSex, boolean includeAddress, int array, String suffix)
     throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
+        if (prefix != null) {
+            sb.append(prefix);
+        }
         int repeat;
         if (array != -1) {
             sb.append("[\n");
@@ -89,6 +91,9 @@ public final class ConvertTypesTest {
         }
         if (array != -1) {
             sb.append(']');
+        }
+        if (suffix != null) {
+            sb.append(suffix);
         }
         return new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
     }
@@ -117,7 +122,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeople() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, false, -1);
+        final InputStream o = createIS(null, true, false, -1, null);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -129,7 +134,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithAddress() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, true, -1);
+        final InputStream o = createIS(null, true, true, -1, null);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -143,7 +148,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithAddressIntoAnArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, true, -1);
+        final InputStream o = createIS(null, true, true, -1, null);
         
         List<Person> arr = new ArrayList<Person>();
         Models.parse(c, Person.class, o, arr);
@@ -207,7 +212,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithoutSex() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, -1);
+        final InputStream o = createIS(null, false, false, -1, null);
         Person p = Models.parse(c, Person.class, o);
         
         assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
@@ -218,7 +223,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithAddressOnArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(true, true, 1);
+        final InputStream o = createIS(null, true, true, 1, null);
         
         Person p = Models.parse(c, Person.class, o);
         
@@ -232,7 +237,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseConvertToPeopleWithoutSexOnArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, 1);
+        final InputStream o = createIS(null, false, false, 1, null);
         Person p = Models.parse(c, Person.class, o);
         
         assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
@@ -243,7 +248,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseFirstElementFromAbiggerArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, 5);
+        final InputStream o = createIS(null, false, false, 5, null);
         Person p = Models.parse(c, Person.class, o);
         
         assertEquals("son", p.getFirstName(), "First name: " + p.getFirstName());
@@ -254,7 +259,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseAllElementFromAbiggerArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, 5);
+        final InputStream o = createIS(null, false, false, 5, null);
         
         List<Person> res = new ArrayList<Person>();
         Models.parse(c, Person.class, o, res);
@@ -279,17 +284,10 @@ public final class ConvertTypesTest {
     }
     private void doParseInnerArray(int array, int expect) throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, array);
-        SequenceInputStream is = new SequenceInputStream(
-            new ByteArrayInputStream("{ \"info\" : ".getBytes("UTF-8")),
-            new SequenceInputStream(
-                o,
-                new ByteArrayInputStream("}".getBytes("UTF-8"))
-            )
-        );
+        final InputStream o = createIS("{ \"info\" : ", false, false, array, "}");
 
         List<People> res = new ArrayList<People>();
-        Models.parse(c, People.class, is, res);
+        Models.parse(c, People.class, o, res);
 
         assertEquals(res.size(), 1, "One people" + res);
 
@@ -307,7 +305,7 @@ public final class ConvertTypesTest {
     @KOTest
     public void parseOnEmptyArray() throws Exception {
         final BrwsrCtx c = newContext();
-        final InputStream o = createIS(false, false, 0);
+        final InputStream o = createIS(null, false, false, 0, null);
         
         try {
             Models.parse(c, Person.class, o);
