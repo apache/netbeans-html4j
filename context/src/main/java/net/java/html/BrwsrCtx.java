@@ -70,6 +70,8 @@ public final class BrwsrCtx implements Executor {
     private BrwsrCtx(CtxImpl impl) {
         this.impl = impl;
     }
+    /** currently {@link #execute(java.lang.Runnable) activated context} */
+    private static final ThreadLocal<BrwsrCtx> CURRENT = new ThreadLocal<BrwsrCtx>();
     static {
         new CtxAccssr() {
             @Override
@@ -89,8 +91,6 @@ public final class BrwsrCtx implements Executor {
      */
     public static final BrwsrCtx EMPTY = Contexts.newBuilder().build();
     
-    /** currently {@link #execute(java.lang.Runnable) activated context} */
-    private static final ThreadLocal<BrwsrCtx> CURRENT = new ThreadLocal<BrwsrCtx>();
     
     /** Seeks for the default context that is associated with the requesting
      * class. If no suitable context is found, a warning message is
@@ -101,6 +101,9 @@ public final class BrwsrCtx implements Executor {
      * @return appropriate context for the request
      */
     public static BrwsrCtx findDefault(Class<?> requestor) {
+        if (requestor == CtxAccssr.class) {
+            return EMPTY;
+        }
         BrwsrCtx brwsr = CURRENT.get();
         if (brwsr != null) {
             return brwsr;

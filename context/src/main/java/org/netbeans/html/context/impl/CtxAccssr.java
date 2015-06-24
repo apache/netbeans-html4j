@@ -54,11 +54,7 @@ public abstract class CtxAccssr {
     private static CtxAccssr DEFAULT;
     static {
         // run initializers
-        try {
-            BrwsrCtx.EMPTY.getClass();
-        } catch (NullPointerException ex) {
-            // ignore
-        }
+        BrwsrCtx.findDefault(CtxAccssr.class);
     }
     
     protected CtxAccssr() {
