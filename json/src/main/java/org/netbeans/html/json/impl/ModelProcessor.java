@@ -1293,7 +1293,7 @@ public final class ModelProcessor extends AbstractProcessor {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 0) { /* on open */\n" +
-            "        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            "        ").append(inPckName(clazz)).append(".").append(n).append("(");
         {
             String sep = "";
             for (String arg : args) {
@@ -1320,7 +1320,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
                 return true;
             }
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz)).append(".").append(onR.onError()).append("(");
             body.append("model, value);\n");
         }
         body.append(
@@ -1341,7 +1341,7 @@ public final class ModelProcessor extends AbstractProcessor {
             "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
         );
         {
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("        ").append(inPckName(clazz)).append(".").append(n).append("(");
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
@@ -1356,7 +1356,7 @@ public final class ModelProcessor extends AbstractProcessor {
         );
         if (!onR.onError().isEmpty()) {
             body.append(" else if (type == 3) { /* on close */\n");
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz)).append(".").append(onR.onError()).append("(");
             body.append("model, null);\n");
             body.append(
                 "        return;" +

@@ -44,7 +44,6 @@ package net.java.html.json;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -101,6 +100,10 @@ final class PersonImpl {
     public static class PeopleImpl {
         @ModelOperation static void addAge42(People p) {
             p.getAge().add(42);
+        }
+
+        @OnReceive(url = "url", method = "WebSocket", data = String.class)
+        static void innerClass(People p, String d) {
         }
         
         @Function static void inInnerClass(People p, Person data, int x, double y, String nick) throws IOException {

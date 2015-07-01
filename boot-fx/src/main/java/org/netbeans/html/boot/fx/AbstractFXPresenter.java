@@ -152,9 +152,24 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         }
     }
 
+    private static String findCalleeClassName() {
+        for (StackTraceElement e : new Exception().getStackTrace()) {
+            String cn = e.getClassName();
+            if (cn.startsWith("org.netbeans.html")) {
+                continue;
+            }
+            if (cn.startsWith("net.java.html")) {
+                continue;
+            }
+            return cn;
+        }
+        return "org.netbeans.html";
+    }
+
     @Override
     public void displayPage(final URL resource, final Runnable onLoad) {
         this.onLoad = onLoad;
+        System.err.println("className: " + findCalleeClassName());
         final WebView view = findView(resource);
         this.engine = view.getEngine();
         boolean inspectOn = false;
