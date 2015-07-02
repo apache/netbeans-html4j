@@ -1033,9 +1033,20 @@ public final class ModelProcessor extends AbstractProcessor {
         Element clazz, StringWriter body, String className,
         List<? extends Element> enclosedElements, StringBuilder inType
     ) {
+        boolean ret = generateReceiveImpl(clazz, body, className, enclosedElements, inType);
+        if (!ret) {
+            inType.setLength(0);
+        }
+        return ret;
+    }
+    private boolean generateReceiveImpl(
+        Element clazz, StringWriter body, String className,
+        List<? extends Element> enclosedElements, StringBuilder inType
+    ) {
         inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data, Object[] params) {\n");
         inType.append("    switch (index) {\n");
         int index = 0;
+        boolean ok = true;
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -1072,6 +1083,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.getParameters().size() < 2) {
                 error("@OnReceive method needs at least two parameters", e);
             }
+            final boolean isWebSocket = "WebSocket".equals(onR.method());
             int expectsList = 0;
             List<String> args = new ArrayList<String>();
             List<String> params = new ArrayList<String>();
@@ -1127,7 +1139,6 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             String n = e.getSimpleName().toString();
-            final boolean isWebSocket = "WebSocket".equals(onR.method());
             if (isWebSocket) {
                 body.append("  /** Performs WebSocket communication. Call with <code>null</code> data parameter\n");
                 body.append("  * to open the connection (even if not required). Call with non-null data to\n");
@@ -1204,7 +1215,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 body.append("  private Object ws_" + e.getSimpleName() + ";\n");
             } else {
                 if (generateJSONReceiveBody(index++, body, inType, onR, e, clazz, className, expectsList != 0, modelClass, n, args, params, urlBefore, jsonpVarName, urlAfter, dataMirror, headers)) {
-                    return false;
+                    ok = false;
                 }
                 body.append("  }\n");
             }
@@ -1212,10 +1223,11 @@ public final class ModelProcessor extends AbstractProcessor {
         inType.append("    }\n");
         inType.append("    throw new UnsupportedOperationException(\"index: \" + index + \" type: \" + type);\n");
         inType.append("  }\n");
-        return true;
+        return ok;
     }
 
     private boolean generateJSONReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror, StringBuilder headers) {
+        boolean error = false;
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 2) { /* on error */\n" +
@@ -1226,9 +1238,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 "        ex.printStackTrace();\n"
                 );
         } else {
-            if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
-                return true;
-            }
+            error = !findOnError(e, ((TypeElement)clazz), onR.onError(), className);
             body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
             body.append("model, ex);\n");
         }
@@ -1286,7 +1296,7 @@ public final class ModelProcessor extends AbstractProcessor {
             method.append(", ").append(a);
         }
         method.append(");\n");
-        return false;
+        return error;
     }
 
     private boolean generateWSReceiveBody(int index, StringWriter method, StringBuilder body, OnReceive onR, ExecutableElement e, Element clazz, String className, boolean expectsList, String modelClass, String n, List<String> args, List<String> params, StringBuilder urlBefore, String jsonpVarName, StringBuilder urlAfter, String dataMirror, StringBuilder headers) {

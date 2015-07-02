@@ -206,7 +206,30 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                     super(uri, kind);
                     this.n = n;
                 }
-                private final ByteArrayOutputStream data = new ByteArrayOutputStream();
+                private final ByteArrayOutputStream data = new ByteArrayOutputStream() {
+
+                    @Override
+                    public void close() throws IOException {
+                        super.close();
+
+                        int opening = count(toString(), '{');
+                        int closing = count(toString(), '}');
+
+                        assertEquals(opening, closing, "There should be pair number of { and } in\n" + toString());
+                    }
+                };
+
+                int count(String where, char what) {
+                    int at = -1;
+                    int cnt = 0;
+                    for (;;) {
+                        at = where.indexOf(what, at + 1);
+                        if (at == -1) {
+                            return cnt;
+                        }
+                        cnt++;
+                    }
+                }
 
                 @Override
                 public OutputStream openOutputStream() throws IOException {
