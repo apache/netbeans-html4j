@@ -1084,6 +1084,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 error("@OnReceive method needs at least two parameters", e);
             }
             final boolean isWebSocket = "WebSocket".equals(onR.method());
+            if (isWebSocket && dataMirror == null) {
+                error("WebSocket method needs to specify a data() class", e);
+            }
             int expectsList = 0;
             List<String> args = new ArrayList<String>();
             List<String> params = new ArrayList<String>();
@@ -1190,7 +1193,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (int i = 2; i < e.getParameters().size(); i++) {
                     if (isWebSocket) {
                         error("@OnReceive(method=\"WebSocket\") can only have two arguments", e);
-                        return false;
+                        ok = false;
                     }
 
                     VariableElement ve = e.getParameters().get(i);

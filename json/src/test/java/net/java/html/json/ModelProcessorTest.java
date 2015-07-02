@@ -324,6 +324,35 @@ public class ModelProcessorTest {
 
     }
 
+    @Test public void webSocketsWithoutDataIsError() throws Exception {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.OnReceive;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  @Model(className=\"PQ\", properties={})\n"
+            + "  class PImpl {\n"
+            + "  }\n"
+            + "  @OnReceive(method=\"WebSocket\", url=\"whereever\")\n"
+            + "  static void obtained(XModel m, PQ p) { }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        for (Diagnostic<? extends JavaFileObject> diagnostic : c.getErrors()) {
+            String msg = diagnostic.getMessage(Locale.ENGLISH);
+            if (msg.contains("eeds to specify a data()")) {
+                return;
+            }
+        }
+        fail("Needs data attribute :\n" + c.getErrors());
+    }
+
     @Test public void noNewLinesInHeaderLines() throws Exception {
         String html = "<html><body>"
             + "</body></html>";
@@ -467,7 +496,7 @@ public class ModelProcessorTest {
             + "  @net.java.html.json.Property(name=\"x\", type=String.class)\n"
             + "})\n"
             + "class UseOnReceive {\n"
-            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", method=\"WebSocket\")\n"
+            + "  @net.java.html.json.OnReceive(url=\"http://nowhere.com\", method=\"WebSocket\", data=String.class)\n"
             + "  static void onMessage(MyModel model, String value, int arg) {\n"
             + "  }\n"
             + "}\n"
