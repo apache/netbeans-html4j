@@ -82,6 +82,10 @@ public class DeepChangeTest {
         @Property(name = "all", type = MyY.class, array = true)
     })
     static class X {
+        @ComputedProperty @Transitive(deep = true)
+        static MyY oneCopy(MyY one) {
+            return Models.bind(one, BrwsrCtx.findDefault(X.class));
+        }
         @ComputedProperty @Transitive(deep = true) 
         static String oneName(MyY one) {
             return one.getValue();
@@ -387,6 +391,45 @@ public class DeepChangeTest {
         assertEquals(o.changes, 1, "One change so far");
         assertEquals(o2.changes, 0, "This change is not noticed");
         assertEquals(o2.get(), "NAZDAR", "but property value changes when computed");
+    }
+
+    @Test
+    public void mixingContextsIsOK() throws Exception {
+        BrwsrCtx ctx = Contexts.newBuilder().build();
+        final MyY one = Models.bind(new MyY("Ahoj", 0), ctx);
+        MyX p = Models.bind(
+            new MyX(one, new MyY("Hi", 333), new MyY("Hello", 999)), c
+        ).applyBindings();
+
+        Map m = (Map) Models.toRaw(p);
+        Object v = m.get("oneName");
+        assertNotNull(v, "Value should be in the map");
+        One o = (One) v;
+        assertEquals(o.get(), "Ahoj");
+
+        p.getOne().setValue("Nazdar");
+
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+    }
+
+    @Test
+    public void mixingWithCloneIsOK() throws Exception {
+        BrwsrCtx ctx = Contexts.newBuilder().build();
+        final MyY one = Models.bind(new MyY("Ahoj", 0), ctx);
+        MyX p = Models.bind(new MyX(one, new MyY("Hi", 333), new MyY("Hello", 999)
+        ), c).applyBindings();
+
+        Map m = (Map) Models.toRaw(p);
+        Object v = m.get("oneCopy");
+        assertNotNull(v, "Value should be in the map");
+        One o = (One) v;
+        assertEquals(((MyY)o.get()).getValue(), "Ahoj");
+
+        p.getOne().setValue("Nazdar");
+
+        assertEquals(((MyY)o.get()).getValue(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
     }
 
     static final class One {

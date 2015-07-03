@@ -231,7 +231,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.append("    this.proto = TYPE.createProto(this, context);\n");
                 for (Prprt p : props) {
                     if (p.array()) {
-                        final String tn = typeName(e, p);
+                        final String tn = typeName(p);
                         String[] gs = toGetSet(p.name(), tn, p.array());
                         w.write("    this.prop_" + p.name() + " = proto.createList(\""
                             + p.name() + "\"");
@@ -280,7 +280,7 @@ public final class ModelProcessor extends AbstractProcessor {
                             }
                             continue;
                         }
-                        String tn = typeName(e, p);
+                        String tn = typeName(p);
                         w.write(sep);
                         w.write(tn);
                         String[] third = toGetSet(p.name(), tn, false);
@@ -562,7 +562,7 @@ public final class ModelProcessor extends AbstractProcessor {
         boolean ok = true;
         for (Prprt p : properties) {
             final String tn;
-            tn = typeName(where, p);
+            tn = typeName(p);
             String[] gs = toGetSet(p.name(), tn, p.array());
             String castTo;
 
@@ -778,7 +778,7 @@ public final class ModelProcessor extends AbstractProcessor {
         };
     }
 
-    private String typeName(Element where, Prprt p) {
+    private String typeName(Prprt p) {
         String ret;
         boolean[] isModel = { false };
         boolean[] isEnum = { false };
@@ -1580,18 +1580,20 @@ public final class ModelProcessor extends AbstractProcessor {
         w.write("  private " + className + " clone(net.java.html.BrwsrCtx ctx) {\n");
         w.write("    " + className + " ret = new " + className + "(ctx);\n");
         for (Prprt p : props) {
+            String tn = typeName(p);
+            String[] gs = toGetSet(p.name(), tn, p.array());
             if (!p.array()) {
                 boolean isModel[] = { false };
                 boolean isEnum[] = { false };
                 boolean isPrimitive[] = { false };
                 checkType(p, isModel, isEnum, isPrimitive);
                 if (!isModel[0]) {
-                    w.write("    ret.prop_" + p.name() + " = prop_" + p.name() + ";\n");
+                    w.write("    ret.prop_" + p.name() + " = " + gs[0] + "();\n");
                     continue;
                 }
-                w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + "  == null ? null : prop_" + p.name() + ".clone();\n");
+                w.write("    ret.prop_" + p.name() + " =  " + gs[0] + "()  == null ? null : prop_" + p.name() + ".clone();\n");
             } else {
-                w.write("    proto.cloneList(ret.prop_" + p.name() + ", ctx, prop_" + p.name() + ");\n");
+                w.write("    proto.cloneList(ret." + gs[0] + "(), ctx, prop_" + p.name() + ");\n");
             }
         }
 
