@@ -576,6 +576,10 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
             } else {
                 castTo = tn;
+                boolean isModel[] = { false };
+                boolean isEnum[] = { false };
+                boolean isPrimitive[] = { false };
+                checkType(p, isModel, isEnum, isPrimitive);
                 w.write("  private " + tn + " prop_" + p.name() + ";\n");
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
                 w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
@@ -583,9 +587,14 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
                 w.write("    proto.verifyUnlocked();\n");
-                w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
                 w.write("    Object o = prop_" + p.name() + ";\n");
-                w.write("    prop_" + p.name() + " = v;\n");
+                if (isModel[0]) {
+                    w.write("    prop_" + p.name() + " = v;\n");
+                    w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
+                } else {
+                    w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
+                    w.write("    prop_" + p.name() + " = v;\n");
+                }
                 w.write("    proto.valueHasMutated(\"" + p.name() + "\", o, v);\n");
                 {
                     Collection<String[]> dependants = deps.get(p.name());

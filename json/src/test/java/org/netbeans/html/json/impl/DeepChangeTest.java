@@ -412,6 +412,17 @@ public class DeepChangeTest {
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
     }
+    
+    @Test
+    public void rebindReplacesTheInstance() throws Exception {
+        BrwsrCtx ctx = Contexts.newBuilder().build();
+        MyX x = new MyX();
+        
+        MyY y = Models.bind(new MyY(), ctx);
+        x.setOne(y);
+        
+        assertSame(x.getOne(), y);
+    }
 
     @Test
     public void mixingWithCloneIsOK() throws Exception {
