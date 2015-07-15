@@ -173,6 +173,17 @@ public class ModelTest {
         assertTrue(my.mutated.contains("count"), "Count is in there: " + my.mutated);
     }
 
+    @Test public void derivedArrayPropChange() {
+        model.applyBindings();
+        model.setCount(5);
+
+        List<String> arr = model.getRepeat();
+        assertEquals(arr.size(), 5, "Five items: " + arr);
+
+        model.setRepeat(10);
+        assertEquals(model.getCount(), 10, "Changing repeat changes count");
+    }
+
     @Test public void derivedPropertiesAreNotified() {
         model.applyBindings();
 
@@ -255,9 +266,13 @@ public class ModelTest {
     static void doSomething() {
     }
 
-    @ComputedProperty
+    @ComputedProperty(write = "setPowerValue")
     static int powerValue(int value) {
         return value * value;
+    }
+
+    static void setPowerValue(Modelik m, int value) {
+        m.setValue((int)Math.sqrt(value));
     }
 
     @OnPropertyChange({ "powerValue", "unrelated" })
@@ -277,6 +292,13 @@ public class ModelTest {
     @Test public void changeValue() {
         model.setValue(33);
         assertEquals(model.getChangedProperty(), "powerValue", "power property changed");
+    }
+    @Test public void changePowerValue() {
+        model.setValue(3);
+        assertEquals(model.getPowerValue(), 9, "Square");
+        model.setPowerValue(16);
+        assertEquals(model.getValue(), 4, "Square root");
+        assertEquals(model.getPowerValue(), 16, "Square changed");
     }
     @Test public void changeUnrelated() {
         model.setUnrelated(333);
@@ -302,9 +324,12 @@ public class ModelTest {
         return "Not allowed callback!";
     }
 
-    @ComputedProperty
+    @ComputedProperty(write="parseRepeat")
     static List<String> repeat(int count) {
         return Collections.nCopies(count, "Hello");
+    }
+    static void parseRepeat(Modelik m, Object v) {
+        m.setCount((Integer)v);
     }
 
     public @Test void hasPersonPropertyAndComputedFullName() {

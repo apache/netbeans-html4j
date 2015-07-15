@@ -144,6 +144,72 @@ public class ModelProcessorTest {
         }
     }
 
+    @Test public void writeableComputedPropertyMissingWrite() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.ComputedProperty;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=int.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "    static @ComputedProperty(write=\"setY\") int y(int prop) {\n"
+            + "        return prop;\n"
+            + "    }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        boolean ok = false;
+        StringBuilder msgs = new StringBuilder();
+        for (Diagnostic<? extends JavaFileObject> e : c.getErrors()) {
+            String msg = e.getMessage(Locale.ENGLISH);
+            if (msg.contains("Cannot find setY")) {
+                ok = true;
+            }
+            msgs.append("\n").append(msg);
+        }
+        if (!ok) {
+            fail("Should contain warning about non-static method:" + msgs);
+        }
+    }
+
+    @Test public void writeableComputedPropertyWrongWriteType() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.ComputedProperty;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+            + "  @Property(name=\"prop\", type=int.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "    static @ComputedProperty(write=\"setY\") int y(int prop) {\n"
+            + "        return prop;\n"
+            + "    }\n"
+            + "    static void setY(String prop) {\n"
+            + "    }\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        assertFalse(c.getErrors().isEmpty(), "One error: " + c.getErrors());
+        boolean ok = false;
+        StringBuilder msgs = new StringBuilder();
+        for (Diagnostic<? extends JavaFileObject> e : c.getErrors()) {
+            String msg = e.getMessage(Locale.ENGLISH);
+            if (msg.contains("Write method first argument needs to be XModel and second int or Object")) {
+                ok = true;
+            }
+            msgs.append("\n").append(msg);
+        }
+        if (!ok) {
+            fail("Should contain warning about non-static method:" + msgs);
+        }
+    }
+
     @Test public void computedCantReturnVoid() throws IOException {
         String html = "<html><body>"
             + "</body></html>";

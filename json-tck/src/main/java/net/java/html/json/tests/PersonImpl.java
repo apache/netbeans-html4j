@@ -58,9 +58,15 @@ import net.java.html.json.Property;
     @Property(name = "address", type = Address.class)
 })
 final class PersonImpl {
-    @ComputedProperty 
+    @ComputedProperty(write = "parseNames")
     public static String fullName(String firstName, String lastName) {
         return firstName + " " + lastName;
+    }
+
+    static void parseNames(Person p, String fullName) {
+        String[] arr = fullName.split(" ");
+        p.setFirstName(arr[0]);
+        p.setLastName(arr[1]);
     }
     
     @ComputedProperty

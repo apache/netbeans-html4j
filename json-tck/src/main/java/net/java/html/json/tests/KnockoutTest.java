@@ -136,6 +136,36 @@ public final class KnockoutTest {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
     }
+
+    @KOTest public void modifyComputedProperty() throws Throwable {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+            "Full name: <div data-bind='with:firstPerson'>\n"
+                + "<input id='input' data-bind=\"value: fullName\"></input>\n"
+                + "</div>\n"
+        );
+        try {
+            KnockoutModel m = new KnockoutModel();
+            m.getPeople().add(new Person());
+
+            m = Models.bind(m, newContext());
+            m.getFirstPerson().setFirstName("Jarda");
+            m.getFirstPerson().setLastName("Tulach");
+            m.applyBindings();
+
+            String v = getSetInput(null);
+            assertEquals("Jarda Tulach", v, "Value: " + v);
+
+            getSetInput("Mickey Mouse");
+            triggerEvent("input", "change");
+
+            assertEquals("Mickey", m.getFirstPerson().getFirstName(), "First name updated");
+            assertEquals("Mouse", m.getFirstPerson().getLastName(), "Last name updated");
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
     
     @KOTest public void modifyValueAssertChangeInModelOnBoolean() throws Throwable {
         Object exp = Utils.exposeHTML(KnockoutTest.class, 

@@ -75,4 +75,31 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 public @interface ComputedProperty {
+    /** Name of a method to handle changes to the computed property.
+     * By default the computed properties are read-only, however one can
+     * make them mutable by defining a static method that takes
+     * two parameters:
+     * <ol>
+     * <li>the model class</li>
+     * <li>the value - either exactly the return the method annotated
+     *   by this property or a superclass (like {@link Object})</li>
+     * </ol>
+     * Sample code snippet using the <b>write</b> feature of {@link ComputedProperty}
+     * could look like this (assuming the {@link Model model class} named
+     * <em>DataModel</em> has <b>int</b> property <em>value</em>):
+     * <pre>
+     * {@link ComputedProperty @ComputedProperty}(write="setPowerValue")
+     * <b>static int</b> powerValue(<b>int</b> value) {
+     *   <b>return</b> value * value;
+     * }
+     * <b>static void</b> setPowerValue(DataModel m, <b>int</b> value) {
+     *   m.setValue((<b>int</b>){@link Math}.sqrt(value));
+     * }
+     * </pre>
+     * 
+     * @return the name of a method to handle changes to the computed
+     *   property
+     * @since 1.2
+     */
+    public String write() default "";
 }

@@ -198,6 +198,24 @@ public class MapModelTest {
         
         assertEquals(p.getSex(), Sex.FEMALE, "Changed");
     }
+
+    @Test public void changeComputedProperty() {
+        Modelik p = Models.bind(new Modelik(), c);
+        p.setValue(5);
+
+        Map m = (Map)Models.toRaw(p);
+        Object o = m.get("powerValue");
+        assertNotNull(o, "Value is there");
+        assertEquals(o.getClass(), One.class);
+
+        One one = (One)o;
+        assertNotNull(one.pb, "Prop binding specified");
+
+        assertEquals(one.pb.getValue(), 25, "Power of 5");
+
+        one.pb.setValue(16);
+        assertEquals(p.getValue(), 4, "Square root of 16");
+    }
     
     @Test public void removeViaIterator() {
         People p = Models.bind(new People(), c);

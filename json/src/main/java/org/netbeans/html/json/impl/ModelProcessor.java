@@ -190,7 +190,7 @@ public final class ModelProcessor extends AbstractProcessor {
             Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
             Prprt[] props = createProps(e, m.properties());
 
-            if (!generateComputedProperties(body, props, e.getEnclosedElements(), propsGetSet, propsDeps)) {
+            if (!generateComputedProperties(className, body, props, e.getEnclosedElements(), propsGetSet, propsDeps)) {
                 ok = false;
             }
             if (!generateOnChange(e, propsDeps, props, className, functionDeps)) {
@@ -635,6 +635,7 @@ public final class ModelProcessor extends AbstractProcessor {
     }
 
     private boolean generateComputedProperties(
+        String className,
         Writer w, Prprt[] fixedProps,
         Collection<? extends Element> arr, Collection<GetSet> props,
         Map<String,Collection<String[]>> deps
@@ -655,6 +656,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             ExecutableElement ee = (ExecutableElement)e;
+            ExecutableElement write = null;
+            if (!cp.write().isEmpty()) {
+                write = findWrite(ee, (TypeElement)e.getEnclosingElement(), cp.write(), className);
+                ok = write != null;
+            }
             final TypeMirror rt = ee.getReturnType();
             final Types tu = processingEnv.getTypeUtils();
             TypeMirror ert = tu.erasure(rt);
@@ -752,13 +758,28 @@ public final class ModelProcessor extends AbstractProcessor {
             w.write("    }\n");
             w.write("  }\n");
 
-            props.add(new GetSet(
-                e.getSimpleName().toString(),
-                gs[0],
-                null,
-                tn,
-                true
-            ));
+            if (write == null) {
+                props.add(new GetSet(
+                    e.getSimpleName().toString(),
+                    gs[0],
+                    null,
+                    tn,
+                    true
+                ));
+            } else {
+                w.write("  public void " + gs[4] + "(" + write.getParameters().get(1).asType());
+                w.write(" value) {\n");
+                w.write("    " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + write.getSimpleName() + "(this, value);\n");
+                w.write("  }\n");
+
+                props.add(new GetSet(
+                    e.getSimpleName().toString(),
+                    gs[0],
+                    gs[4],
+                    tn,
+                    false
+                ));
+            }
         }
 
         return ok;
@@ -776,14 +797,16 @@ public final class ModelProcessor extends AbstractProcessor {
                 pref + n,
                 null,
                 "a" + n,
-                null
+                null,
+                "set" + n
             };
         }
         return new String[]{
             pref + n,
             "set" + n,
             "a" + n,
-            ""
+            "",
+            "set" + n
         };
     }
 
@@ -2018,6 +2041,57 @@ public final class ModelProcessor extends AbstractProcessor {
         }
         error(err, errElem);
         return false;
+    }
+
+    private ExecutableElement findWrite(ExecutableElement computedPropElem, TypeElement te, String name, String className) {
+        String err = null;
+        METHODS:
+        for (Element e : te.getEnclosedElements()) {
+            if (e.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            if (!e.getSimpleName().contentEquals(name)) {
+                continue;
+            }
+            if (e.equals(computedPropElem)) {
+                continue;
+            }
+            if (!e.getModifiers().contains(Modifier.STATIC)) {
+                computedPropElem = (ExecutableElement) e;
+                err = "Would have to be static";
+                continue;
+            }
+            ExecutableElement ee = (ExecutableElement) e;
+            TypeMirror retType = computedPropElem.getReturnType();
+            final List<? extends VariableElement> params = ee.getParameters();
+            boolean error = false;
+            if (params.size() != 2) {
+                error = true;
+            } else {
+                String firstType = params.get(0).asType().toString();
+                int lastDot = firstType.lastIndexOf('.');
+                if (lastDot != -1) {
+                    firstType = firstType.substring(lastDot + 1);
+                }
+                if (!firstType.equals(className)) {
+                    error = true;
+                }
+                if (!processingEnv.getTypeUtils().isAssignable(retType, params.get(1).asType())) {
+                    error = true;
+                }
+            }
+            if (error) {
+                computedPropElem = (ExecutableElement) e;
+                err = "Write method first argument needs to be " + className + " and second " + retType + " or Object";
+                continue;
+            }
+            return ee;
+        }
+        if (err == null) {
+            err = "Cannot find " + name + "(" + className + ", value) method in this class";
+        }
+        error(err, computedPropElem);
+        return null;
     }
 
 }
