@@ -88,7 +88,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             throw new IllegalStateException(ex);
         }
     }
-    
+
     @Override
     public Fn defineFn(String code, String... names) {
         return defineJSFn(code, names, null);
@@ -98,9 +98,9 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     public Fn defineFn(String code, String[] names, boolean[] keepAlive) {
         return defineJSFn(code, names, keepAlive);
     }
-    
-    
-    
+
+
+
     final JSFn defineJSFn(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
         sb.append("(function() {\n");
@@ -115,8 +115,8 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         sb.append("};\n");
         sb.append("})();\n");
         if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, 
-                "defining function #{0}:\n{1}\n", 
+            LOG.log(Level.FINE,
+                "defining function #{0}:\n{1}\n",
                 new Object[] { ++cnt, code }
             );
         }
@@ -152,24 +152,9 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         }
     }
 
-    private static String findCalleeClassName() {
-        for (StackTraceElement e : new Exception().getStackTrace()) {
-            String cn = e.getClassName();
-            if (cn.startsWith("org.netbeans.html")) {
-                continue;
-            }
-            if (cn.startsWith("net.java.html")) {
-                continue;
-            }
-            return cn;
-        }
-        return "org.netbeans.html";
-    }
-
     @Override
     public void displayPage(final URL resource, final Runnable onLoad) {
         this.onLoad = onLoad;
-        System.err.println("className: " + findCalleeClassName());
         final WebView view = findView(resource);
         this.engine = view.getEngine();
         boolean inspectOn = false;
@@ -211,7 +196,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     protected abstract void waitFinished();
 
     protected abstract WebView findView(final URL resource);
-    
+
     final JSObject convertArrays(Object[] arr) {
         for (int i = 0; i < arr.length; i++) {
             if (arr[i] instanceof Object[]) {
@@ -280,7 +265,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         }
         return checkArray(jsArray);
     }
-    
+
     @Override
     public Object toJavaScript(Object toReturn) {
         if (toReturn instanceof Object[]) {
@@ -289,7 +274,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             return toReturn;
         }
     }
-    
+
     @Override public void execute(final Runnable r) {
         if (Platform.isFxApplicationThread()) {
             Closeable c = Fn.activate(this);
@@ -301,7 +286,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 } catch (IOException ex) {
                     // ignore
                 }
-            }                
+            }
         } else {
             class Wrap implements Runnable {
                 @Override
@@ -315,7 +300,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                         } catch (IOException ex) {
                             // ignore
                         }
-                    }                
+                    }
                 }
             }
             Platform.runLater(new Wrap());
@@ -340,7 +325,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         public Object invoke(Object thiz, Object... args) throws Exception {
             return invokeImpl(thiz, true, args);
         }
-        
+
         final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
             try {
                 if (LOG.isLoggable(Level.FINE)) {
@@ -357,7 +342,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                             Object[] arr = (Object[]) args[i];
                             conv = ((AbstractFXPresenter)presenter()).convertArrays(arr);
                         }
-                        if (conv != null && keepAlive != null && 
+                        if (conv != null && keepAlive != null &&
                             !keepAlive[i] && !isJSReady(conv) &&
                             !conv.getClass().getSimpleName().equals("$JsCallbacks$") // NOI18N
                         ) {
@@ -386,7 +371,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             }
         }
     }
-    
+
     private static boolean isJSReady(Object obj) {
         if (obj == null) {
             return true;
@@ -405,7 +390,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         }
         return false;
     }
-    
+
     private static final class Weak extends WeakReference<Object> {
         public Weak(Object referent) {
             super(referent);

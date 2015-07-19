@@ -48,6 +48,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -71,6 +72,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 /** This is an implementation class, to implement browser builder API. Just
@@ -85,11 +88,12 @@ public class FXBrwsr extends Application {
 
     public static synchronized WebView findWebView(final URL url, final FXPresenter onLoad) {
         if (INSTANCE == null) {
+            final String callee = findCalleeClassName();
             Executors.newFixedThreadPool(1).submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        FXBrwsr.launch(FXBrwsr.class);
+                        FXBrwsr.launch(FXBrwsr.class, callee);
                     } catch (Throwable ex) {
                         ex.printStackTrace();
                     } finally {
@@ -141,8 +145,8 @@ public class FXBrwsr extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         BorderPane r = new BorderPane();
-        Rectangle2D rect = findInitialSize();
-        Scene scene = new Scene(r, rect.getWidth(), rect.getHeight());
+        Object[] arr = findInitialSize(this.getParameters().getRaw().get(0));
+        Scene scene = new Scene(r, (Double)arr[2], (Double)arr[3]);
         primaryStage.setScene(scene);
         this.root = r;
         this.stage = primaryStage;
@@ -150,19 +154,64 @@ public class FXBrwsr extends Application {
             INSTANCE = this;
             FXBrwsr.class.notifyAll();
         }
-        primaryStage.setX(rect.getMinX());
-        primaryStage.setY(rect.getMinY());
+        primaryStage.setX((Double)arr[0]);
+        primaryStage.setY((Double)arr[1]);
+        if (arr[4] != null) {
+            scene.getWindow().setOnCloseRequest((EventHandler<WindowEvent>) arr[4]);
+        }
         primaryStage.show();
     }
 
-    static Rectangle2D findInitialSize() {
+    static String findCalleeClassName() {
+        StackTraceElement[] frames = new Exception().getStackTrace();
+        for (StackTraceElement e : frames) {
+            String cn = e.getClassName();
+            if (cn.startsWith("org.netbeans.html.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("net.java.html.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("java.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("javafx.")) { // NOI18N
+                continue;
+            }
+            if (cn.startsWith("com.sun.")) { // NOI18N
+                continue;
+            }
+            return cn;
+        }
+        return "org.netbeans.html"; // NOI18N
+    }
+
+    private static Object[] findInitialSize(String callee) {
+        final Preferences prefs = Preferences.userRoot().node(callee.replace('.', '/'));
         Rectangle2D screen = Screen.getPrimary().getBounds();
-        return new Rectangle2D(
-            screen.getWidth() * 0.05,
-            screen.getHeight() * 0.05,
-            screen.getWidth() * 0.9,
-            screen.getHeight() * 0.9
-        );
+        double x = prefs.getDouble("x", screen.getWidth() * 0.05); // NOI18N
+        double y = prefs.getDouble("y", screen.getHeight() * 0.05); // NOI18N
+        double width = prefs.getDouble("width", screen.getWidth() * 0.9); // NOI18N
+        double height = prefs.getDouble("height", screen.getHeight() * 0.9); // NOI18N
+
+        Object[] arr = {
+            x, y, width, height, null
+        };
+
+        if (!callee.equals("org.netbeans.html")) { // NOI18N
+            arr[4] = new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    Window window = (Window) event.getSource();
+                    prefs.putDouble("x", window.getX()); // NOI18N
+                    prefs.putDouble("y", window.getY()); // NOI18N
+                    prefs.putDouble("width", window.getWidth()); // NOI18N
+                    prefs.putDouble("height", window.getHeight()); // NOI18N
+                }
+            };
+        }
+
+        return arr;
     }
 
     private WebView newView(final URL url, final FXPresenter onLoad) {
