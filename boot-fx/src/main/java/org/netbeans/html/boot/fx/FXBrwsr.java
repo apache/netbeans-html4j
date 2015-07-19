@@ -128,21 +128,21 @@ public class FXBrwsr extends Application {
             return INSTANCE.newView(url, onLoad);
         }
     }
-    
+
     static synchronized Stage findStage() throws InterruptedException {
         while (INSTANCE == null) {
             FXBrwsr.class.wait();
         }
         return INSTANCE.stage;
     }
-    
+
     private Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         BorderPane r = new BorderPane();
-        Rectangle2D screen = Screen.getPrimary().getBounds();
-        Scene scene = new Scene(r, screen.getWidth() * 0.9, screen.getHeight() * 0.9);
+        Rectangle2D rect = findInitialSize();
+        Scene scene = new Scene(r, rect.getWidth(), rect.getHeight());
         primaryStage.setScene(scene);
         this.root = r;
         this.stage = primaryStage;
@@ -150,9 +150,19 @@ public class FXBrwsr extends Application {
             INSTANCE = this;
             FXBrwsr.class.notifyAll();
         }
-        primaryStage.setX(scene.getWidth() * 0.05);
-        primaryStage.setY(scene.getHeight()* 0.05);
+        primaryStage.setX(rect.getMinX());
+        primaryStage.setY(rect.getMinY());
         primaryStage.show();
+    }
+
+    static Rectangle2D findInitialSize() {
+        Rectangle2D screen = Screen.getPrimary().getBounds();
+        return new Rectangle2D(
+            screen.getWidth() * 0.05,
+            screen.getHeight() * 0.05,
+            screen.getWidth() * 0.9,
+            screen.getHeight() * 0.9
+        );
     }
 
     private WebView newView(final URL url, final FXPresenter onLoad) {
@@ -203,7 +213,7 @@ public class FXBrwsr extends Application {
                 box.getChildren().addAll(text, buttons);
                 dialogStage.setScene(new Scene(box));
                 ok.setCancelButton(false);
-                
+
                 final boolean[] res = new boolean[1];
                 ok.setOnAction(new CloseDialogHandler(dialogStage, res));
                 cancel.setCancelButton(true);
@@ -240,7 +250,7 @@ public class FXBrwsr extends Application {
                 box.getChildren().addAll(text, line, buttons);
                 dialogStage.setScene(new Scene(box));
                 ok.setCancelButton(false);
-                
+
                 final boolean[] res = new boolean[1];
                 ok.setOnAction(new CloseDialogHandler(dialogStage, res));
                 cancel.setCancelButton(true);
@@ -254,7 +264,7 @@ public class FXBrwsr extends Application {
         final Worker<Void> w = view.getEngine().getLoadWorker();
         w.stateProperty().addListener(new ChangeListener<Worker.State>() {
             private String previous;
-            
+
             @Override
             public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                 if (newState.equals(Worker.State.SUCCEEDED)) {
@@ -276,7 +286,7 @@ public class FXBrwsr extends Application {
                 previous = crnt;
                 return true;
             }
-            
+
         });
         class Title implements ChangeListener<String> {
 
@@ -310,7 +320,7 @@ public class FXBrwsr extends Application {
             }
         }
     }
-    
+
     private static final class CloseDialogHandler implements EventHandler<ActionEvent> {
         private final Stage dialogStage;
         private final boolean[] res;
@@ -328,5 +338,5 @@ public class FXBrwsr extends Application {
             }
         }
     }
-    
+
 }
