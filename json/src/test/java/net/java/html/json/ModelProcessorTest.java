@@ -190,7 +190,7 @@ public class ModelProcessorTest {
             + "    static @ComputedProperty(write=\"setY\") int y(int prop) {\n"
             + "        return prop;\n"
             + "    }\n"
-            + "    static void setY(String prop) {\n"
+            + "    static void setY(XModel model, String prop) {\n"
             + "    }\n"
             + "}\n";
 
