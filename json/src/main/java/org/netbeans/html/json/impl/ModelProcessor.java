@@ -2062,6 +2062,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             ExecutableElement ee = (ExecutableElement) e;
+            if (ee.getReturnType().getKind() != TypeKind.VOID) {
+                computedPropElem = (ExecutableElement) e;
+                err = "Write method has to return void";
+                continue;
+            }
             TypeMirror retType = computedPropElem.getReturnType();
             final List<? extends VariableElement> params = ee.getParameters();
             boolean error = false;
