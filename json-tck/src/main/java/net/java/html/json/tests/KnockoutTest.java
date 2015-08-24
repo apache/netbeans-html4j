@@ -99,11 +99,42 @@ public final class KnockoutTest {
             m.setChoice(Choice.A);
             m.applyBindings();
 
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("A", v, "Value is really A: " + v);
 
-            getSetInput("B");
+            getSetInput("input", "B");
             triggerEvent("input", "change");
+
+            assertEquals(Choice.B, m.getChoice(), "Enum property updated: " + m.getChoice());
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            Utils.exposeHTML(KnockoutTest.class, "");
+        }
+    }
+
+
+    @KOTest public void modifyRadioValueOnEnum() throws Throwable {
+        Object exp = Utils.exposeHTML(KnockoutTest.class,
+            "<input id='i1' type=\"radio\" name=\"choice\" value=\"A\" data-bind=\"checked: choice\">Right\n" +
+            "<input id='input' type=\"radio\" name=\"choice\" value=\"B\" data-bind=\"checked: choice\">Never\n" +
+            "\n"
+        );
+        try {
+
+            KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
+            m.setChoice(Choice.B);
+            m.applyBindings();
+
+            assertFalse(isChecked("i1"), "B should be checked now");
+            assertTrue(isChecked("input"), "B should be checked now");
+
+            triggerEvent("i1", "click");
+            assertEquals(Choice.A, m.getChoice(), "Switched to A");
+            assertTrue(isChecked("i1"), "A should be checked now");
+            assertFalse(isChecked("input"), "A should be checked now");
+
+            triggerEvent("input", "click");
 
             assertEquals(Choice.B, m.getChoice(), "Enum property updated: " + m.getChoice());
         } catch (Throwable t) {
@@ -123,10 +154,10 @@ public final class KnockoutTest {
             m.setLatitude(50.5);
             m.applyBindings();
 
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("50.5", v, "Value is really 50.5: " + v);
 
-            getSetInput("49.5");
+            getSetInput("input", "49.5");
             triggerEvent("input", "change");
 
             assertEquals(49.5, m.getLatitude(), "Double property updated: " + m.getLatitude());
@@ -152,10 +183,10 @@ public final class KnockoutTest {
             m.getFirstPerson().setLastName("Tulach");
             m.applyBindings();
 
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("Jarda Tulach", v, "Value: " + v);
 
-            getSetInput("Mickey Mouse");
+            getSetInput("input", "Mickey Mouse");
             triggerEvent("input", "change");
 
             assertEquals("Mickey", m.getFirstPerson().getFirstName(), "First name updated");
@@ -177,10 +208,10 @@ public final class KnockoutTest {
             m.setEnabled(true);
             m.applyBindings();
 
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("true", v, "Value is really true: " + v);
 
-            getSetInput("false");
+            getSetInput("input", "false");
             triggerEvent("input", "change");
 
             assertFalse(m.isEnabled(), "Boolean property updated: " + m.isEnabled());
@@ -203,10 +234,10 @@ public final class KnockoutTest {
             m.setName("Kukuc");
             m.applyBindings();
 
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("Kukuc", v, "Value is really kukuc: " + v);
 
-            getSetInput("Jardo");
+            getSetInput("input", "Jardo");
             triggerEvent("input", "change");
 
             assertEquals("Jardo", m.getName(), "Name property updated: " + m.getName());
@@ -287,7 +318,7 @@ public final class KnockoutTest {
             js.setName("Kukuc");
             js.applyBindings();
             
-            String v = getSetInput(null);
+            String v = getSetInput("input", null);
             assertEquals("Kukuc", v, "Value is really kukuc: " + v);
             
             Timer t = new Timer("Set to Jardo");
@@ -299,7 +330,7 @@ public final class KnockoutTest {
             }, 1);
         }
         
-        String v = getSetInput(null);
+        String v = getSetInput("input", null);
         if (!"Jardo".equals(v)) {
             throw new InterruptedException();
         }
@@ -307,16 +338,27 @@ public final class KnockoutTest {
         Utils.exposeHTML(KnockoutTest.class, "");
     }
     
-    private static String getSetInput(String value) throws Exception {
+    private static String getSetInput(String id, String value) throws Exception {
         String s = "var value = arguments[0];\n"
-        + "var n = window.document.getElementById('input'); \n "
+        + "var n = window.document.getElementById(arguments[1]); \n "
         + "if (value != null) n['value'] = value; \n "
         + "return n['value'];";
         Object ret = Utils.executeScript(
             KnockoutTest.class,
-            s, value
+            s, value, id
         );
         return ret == null ? null : ret.toString();
+    }
+
+    private static boolean isChecked(String id) throws Exception {
+        String s = ""
+        + "var n = window.document.getElementById(arguments[0]); \n "
+        + "return n['checked'];";
+        Object ret = Utils.executeScript(
+            KnockoutTest.class,
+            s, id
+        );
+        return Boolean.TRUE.equals(ret);
     }
     
     public static void triggerEvent(String id, String ev) throws Exception {
