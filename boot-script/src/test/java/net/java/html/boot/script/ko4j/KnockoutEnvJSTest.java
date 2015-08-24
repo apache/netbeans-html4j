@@ -153,11 +153,9 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             return "Broken due to JDK-8047764";
         }
         if (
-            !"1.8.0_05-b13".equals(ver) &&
-            !"1.8.0_11-b12".equals(ver)
+            !ver.startsWith("1.8.0_")
         ) {
-            // we know that 1.8.0_05 and 1.8.0_11 are broken,
-            // let's not speculate about anything else
+            // 1.8.0_ are and will remain broken
             return null;
         }
         switch (methodName) {
@@ -168,6 +166,8 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             case "archetypeArrayModificationVisible":
             case "noLongerNeededArrayElementsCanDisappear":
                 return "Does not work on JDK8, due to JDK-8046013";
+            case "modifyRadioValueOnEnum":
+                return "Does not work on JDK8";
         }
         return null;
     }
