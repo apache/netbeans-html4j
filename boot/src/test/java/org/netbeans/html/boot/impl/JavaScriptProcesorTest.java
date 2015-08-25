@@ -45,8 +45,13 @@ package org.netbeans.html.boot.impl;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Locale;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
 
 /**
@@ -112,6 +117,26 @@ public class JavaScriptProcesorTest {
         
         Compile c = Compile.create("", code);
         c.assertNoErrors();
+    }
+    
+    @Test public void misorderNotified() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\", \"a\", \"b\"}, body =\"\"\n"
+            + "  )\n"
+            + "  private static native void testEqual(Object p, String q, int r);\n"
+            + "}\n";
+        
+        Compile c = Compile.create("", code);
+        List<Diagnostic<? extends JavaFileObject>> warnings = c.getDiagnostics(Diagnostic.Kind.WARNING);
+        assertTrue(warnings.size() >= 1, "There are warnings: " + warnings);
+        for (Diagnostic<? extends JavaFileObject> w : warnings) {
+            if (w.getMessage(Locale.US).contains("Actual method parameter names and args")) {
+                return;
+            }
+        }
+        fail("Expecting order warning: " + warnings);
     }
 
     @Test public void needJavaScriptBodyToUseResource() throws IOException {

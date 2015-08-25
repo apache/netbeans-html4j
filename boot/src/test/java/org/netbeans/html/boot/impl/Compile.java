@@ -110,10 +110,13 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     /** Obtains errors created during compilation.
      */
     public List<Diagnostic<? extends JavaFileObject>> getErrors() {
+        return getDiagnostics(Diagnostic.Kind.ERROR);
+    }
+    public List<Diagnostic<? extends JavaFileObject>> getDiagnostics(Diagnostic.Kind kind) {
         List<Diagnostic<? extends JavaFileObject>> err;
         err = new ArrayList<Diagnostic<? extends JavaFileObject>>();
         for (Diagnostic<? extends JavaFileObject> diagnostic : errors) {
-            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+            if (diagnostic.getKind() == kind) {
                 err.add(diagnostic);
             }
         }

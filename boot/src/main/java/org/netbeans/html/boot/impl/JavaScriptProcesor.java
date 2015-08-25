@@ -47,6 +47,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,11 +89,11 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Processor.class)
 public final class JavaScriptProcesor extends AbstractProcessor {
-    private final Map<String,Map<String,ExecutableElement>> javacalls = 
+    private final Map<String,Map<String,ExecutableElement>> javacalls =
         new HashMap<String,Map<String,ExecutableElement>>();
-    private final Map<String,Set<TypeElement>> bodies = 
+    private final Map<String,Set<TypeElement>> bodies =
         new HashMap<String, Set<TypeElement>>();
-    
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> set = new HashSet<String>();
@@ -100,7 +101,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         set.add(JavaScriptResource.class.getName());
         return set;
     }
-    
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final Messager msg = processingEnv.getMessager();
@@ -110,7 +111,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             ExecutableElement ee = (ExecutableElement)e;
             List<? extends VariableElement> params = ee.getParameters();
-            
+
             JavaScriptBody jsb = e.getAnnotation(JavaScriptBody.class);
             if (jsb == null) {
                 continue;
@@ -129,6 +130,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             String[] arr = jsb.args();
             if (params.size() != arr.length) {
                 msg.printMessage(Diagnostic.Kind.ERROR, "Number of args arguments does not match real arguments!", e);
+            }
+            for (int i = 0; i < arr.length; i++) {
+                if (!params.get(i).getSimpleName().toString().equals(arr[i])) {
+                    msg.printMessage(Diagnostic.Kind.WARNING, "Actual method parameter names and args ones " + Arrays.toString(arr) + " differ", e);
+                }
             }
             if (!jsb.wait4js() && ee.getReturnType().getKind() != TypeKind.VOID) {
                 msg.printMessage(Diagnostic.Kind.ERROR, "Methods that don't wait for JavaScript to finish must return void!", e);
@@ -156,7 +162,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             } else {
                 res = findPkg(e).replace('.', '/') + "/" + r.value();
             }
-            
+
             try {
                 FileObject os = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", res);
                 os.openInputStream().close();
@@ -173,7 +179,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     }
                 }
             }
-            
+
             boolean found = false;
             for (Element mthod : e.getEnclosedElements()) {
                 if (mthod.getKind() != ElementKind.METHOD) {
@@ -200,7 +206,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     }
 
     @Override
-    public Iterable<? extends Completion> getCompletions(Element e, 
+    public Iterable<? extends Completion> getCompletions(Element e,
         AnnotationMirror annotation, ExecutableElement member, String userText
     ) {
         StringBuilder sb = new StringBuilder();
@@ -229,7 +235,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         protected CharSequence callMethod(String ident, String fqn, String method, String params) {
             final TypeElement type = processingEnv.getElementUtils().getTypeElement(fqn);
             if (type == null) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                     "Callback to non-existing class " + fqn, e
                 );
                 return "";
@@ -251,12 +257,12 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             if (found == null) {
                 if (foundParams.length() == 0) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "Callback to class " + fqn + " with unknown method " + method, e
                     );
                 } else {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
-                        "Callback to " + fqn + "." + method + " with wrong parameters: " + 
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                        "Callback to " + fqn + "." + method + " with wrong parameters: " +
                         params + ". Only known parameters are " + foundParams, e
                     );
                 }
@@ -304,7 +310,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             return sb.toString();
         }
     }
-    
+
     private static void dumpElems(StringBuilder sb, Element e, char after) {
         if (e == null) {
             return;
@@ -319,14 +325,14 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         sb.append(e.getSimpleName());
         sb.append(after);
     }
-    
+
     private void generateJavaScriptBodyList(Map<String,Set<TypeElement>> bodies) {
         if (bodies.isEmpty()) {
             return;
         }
         try {
             FileObject all = processingEnv.getFiler().createResource(
-                StandardLocation.CLASS_OUTPUT, "", "META-INF/net.java.html.js.classes"                
+                StandardLocation.CLASS_OUTPUT, "", "META-INF/net.java.html.js.classes"
             );
             PrintWriter wAll = new PrintWriter(new OutputStreamWriter(
                 all.openOutputStream(), "UTF-8"
@@ -360,7 +366,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + "META-INF/net.java.html.js.classes: " + x.toString());
         }
     }
-    
+
     private void generateCallbackClass(Map<String,Map<String, ExecutableElement>> process) {
         for (Map.Entry<String, Map<String, ExecutableElement>> pkgEn : process.entrySet()) {
             String pkgName = pkgEn.getKey();
@@ -408,12 +414,12 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             return;
         }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
-        
-        
+
+
         source.append("\n  public java.lang.Object ")
                 .append(mangled)
                 .append("(");
-        
+
         String sep = "";
         StringBuilder convert = new StringBuilder();
         if (!isStatic) {
@@ -430,7 +436,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
             sep = ", ";
         }
-        
+
         int cnt = 0;
         for (VariableElement ve : m.getParameters()) {
             source.append(sep);
@@ -494,7 +500,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         if (useTryResources()) {
             source.append("    }\n");
         } else {
-            
+
             source.append("    } finally {\n");
             source.append("      a.close();\n");
             source.append("    }\n");
@@ -510,12 +516,12 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             return false;
         }
     }
-    
+
     private static String findPkg(Element e) {
         while (e.getKind() != ElementKind.PACKAGE) {
             e = e.getEnclosingElement();
         }
         return ((PackageElement)e).getQualifiedName().toString();
     }
-    
+
 }
