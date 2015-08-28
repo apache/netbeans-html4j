@@ -165,19 +165,19 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+        final boolean isFirebugOn = Boolean.getBoolean("firebug.lite"); // NOI18N
         final boolean isInspectOn = inspectOn;
-
         class Run implements Runnable {
 
             @Override
             public void run() {
-                if (isInspectOn) {
+                if (isInspectOn || isFirebugOn) {
                     view.setContextMenuEnabled(true);
                     final Parent p = view.getParent();
                     if (p instanceof BorderPane) {
                         BorderPane bp = (BorderPane) p;
                         if (bp.getTop() == null) {
-                            bp.setTop(new FXToolbar(view, bp));
+                            bp.setTop(new FXToolbar(view, bp, isFirebugOn));
                         }
                     }
                 }
