@@ -67,6 +67,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -80,7 +81,7 @@ final class FXToolbar extends ToolBar {
     private final ComboBox<String> comboZoom = new ComboBox<String>();
     private WatchDir watcher;
     
-    FXToolbar(WebView wv, BorderPane container) {
+    FXToolbar(WebView wv, BorderPane container, boolean enableFirebug) {
         this.webView = wv;
         this.container = container;
         
@@ -151,6 +152,17 @@ final class FXToolbar extends ToolBar {
                 listenOnChanges(automatic.isSelected());
             }
         });
+        if (enableFirebug){
+        final Button firebug = new Button("Firebug");
+        getItems().add(firebug);
+        firebug.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                enableFirebug(webView.getEngine());
+                firebug.setDisable(true);
+            }
+        });}
     }
 
     private String zoom( String zoomFactor ) {
@@ -417,5 +429,8 @@ final class FXToolbar extends ToolBar {
         } catch (Exception ex) {
             FXInspect.LOG.log(Level.SEVERE, null, ex);
         }
+    }
+       private static void enableFirebug(final WebEngine engine) {
+        engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}"); 
     }
 }

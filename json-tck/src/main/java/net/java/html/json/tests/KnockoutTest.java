@@ -116,8 +116,8 @@ public final class KnockoutTest {
 
     @KOTest public void modifyRadioValueOnEnum() throws Throwable {
         Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<input id='i1' type=\"radio\" name=\"choice\" value=\"A\" data-bind=\"checked: choice\">Right\n" +
-            "<input id='input' type=\"radio\" name=\"choice\" value=\"B\" data-bind=\"checked: choice\">Never\n" +
+            "<input id='i1' type=\"radio\" name=\"choice\" value=\"A\" data-bind=\"checked: choice\"></input>Right\n" +
+            "<input id='input' type=\"radio\" name=\"choice\" value=\"B\" data-bind=\"checked: choice\"></input>Never\n" +
             "\n"
         );
         try {
