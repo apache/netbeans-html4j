@@ -107,6 +107,12 @@ public final class JSONList<T> extends ArrayList<T> {
         return ret;
     }
 
+    public void fastReplace(Collection<? extends T> c) {
+        super.clear();
+        super.addAll(c);
+        notifyChange();
+    }
+
     @Override
     public boolean remove(Object o) {
         boolean ret = super.remove(o);

@@ -42,7 +42,9 @@
  */
 package org.netbeans.html.json.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
@@ -69,12 +71,14 @@ import org.testng.annotations.Test;
 public class JSONListTest implements Technology<Object> {
     private boolean replaceArray;
     private final Map<String,PropertyBinding> bindings = new HashMap<String,PropertyBinding>();
+    private final List<String> changed = new ArrayList<String>();
     
     public JSONListTest() {
     }
     
     @BeforeMethod public void clear() {
         replaceArray = false;
+        changed.clear();
     }
 
     @Test public void testConvertorOnAnObject() {
@@ -162,6 +166,36 @@ public class JSONListTest implements Technology<Object> {
         assertEquals(l.toString(), "{\"names\":[\"Jarda\",\"Jirka\",\"Parda\"]}", "Properly quoted");
     }
 
+    @Test public void testChangeOnProps() {
+        BrwsrCtx c = Contexts.newBuilder().register(Technology.class, this, 1).build();
+
+        assertTrue(changed.isEmpty());
+        
+        People p = Models.bind(new People(), c).applyBindings();
+        p.getAge().add(42);
+
+        assertEquals(sum(p.getAge()), 42);
+        assertFalse(changed.isEmpty());
+        changed.clear();
+
+        List<Integer> vals = new ArrayList<Integer>();
+        vals.add(12);
+        vals.add(30);
+        ((JSONList)p.getAge()).fastReplace(vals);
+
+        assertEquals(changed.size(), 1, "One change");
+        assertEquals(changed.get(0), "age", "One change");
+        assertEquals(sum(p.getAge()), 42);
+    }
+
+    private static int sum(List<Integer> arr) {
+        int sum = 0;
+        for (Integer i : arr) {
+            sum += i;
+        }
+        return sum;
+    }
+
     @Override
     public Object wrapModel(Object model) {
         return this;
@@ -174,6 +208,7 @@ public class JSONListTest implements Technology<Object> {
 
     @Override
     public void valueHasMutated(Object data, String propertyName) {
+        changed.add(propertyName);
     }
 
     @Override
@@ -198,5 +233,4 @@ public class JSONListTest implements Technology<Object> {
     public void runSafe(Runnable r) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

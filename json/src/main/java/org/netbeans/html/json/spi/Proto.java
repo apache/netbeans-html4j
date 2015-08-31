@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.json.spi;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.java.html.BrwsrCtx;
@@ -880,9 +881,16 @@ public final class Proto {
             } else {
                 newArr = new Object[] { value };
             }
-            arr.clear();
+            List<T> tmp = new ArrayList<T>(newArr.length);
             for (Object e : newArr) {
-                arr.add(extractValue(type, e));
+                tmp.add(extractValue(type, e));
+            }
+            if (arr instanceof JSONList) {
+                JSONList jsList = (JSONList) arr;
+                jsList.fastReplace(tmp);
+            } else {
+                arr.clear();
+                arr.addAll(tmp);
             }
         }
     }
