@@ -590,7 +590,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    Object o = prop_" + p.name() + ";\n");
                 if (isModel[0]) {
                     w.write("    prop_" + p.name() + " = v;\n");
-                    w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
+                    w.write("    if (TYPE.isSame(o , v)) return;\n");
                 } else {
                     w.write("    if (TYPE.isSame(prop_" + p.name() + ", v)) return;\n");
                     w.write("    prop_" + p.name() + " = v;\n");

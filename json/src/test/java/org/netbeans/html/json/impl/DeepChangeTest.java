@@ -178,6 +178,31 @@ public class DeepChangeTest {
         assertEquals(o.changes, 1, "One change so far");
     }
 
+    @Test public void changingModelClass() throws Exception {
+        final MyY myY = new MyY("Ahoj", 0);
+        MyX p = Models.bind(
+            new MyX(myY, new MyY("Hi", 333), new MyY("Hello", 999)),
+            c)
+        .applyBindings();
+        MyY realY = p.getOne();
+
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("one");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertFalse(o.pb.isReadOnly(), "Normal property");
+        assertEquals(o.get(), myY);
+        assertSame(o.get(), realY);
+
+        final MyY newY = new MyY("Hi", 1);
+        p.setOne(newY);
+
+        assertSame(p.getOne(), newY);
+        assertEquals(o.changes, 1, "One change");
+    }
+
     @Test public void addingIntoArray() throws Exception {
         MyX p = Models.bind(
             new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999)
@@ -417,10 +442,10 @@ public class DeepChangeTest {
     public void rebindReplacesTheInstance() throws Exception {
         BrwsrCtx ctx = Contexts.newBuilder().build();
         MyX x = new MyX();
-        
+
         MyY y = Models.bind(new MyY(), ctx);
         x.setOne(y);
-        
+
         assertSame(x.getOne(), y);
     }
 
