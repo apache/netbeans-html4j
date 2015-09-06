@@ -48,6 +48,25 @@
         <title>HTML for Java APIs</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style type="text/css">
+        table.field td {
+            padding: 4px;
+            width: 18px;
+            height: 18px;
+            font-size: 1.5em;
+            border: 1px solid black;
+        }
+        table.field td.UNKNOWN {
+            background-color: #D6E4E1;
+            cursor: pointer;
+        }
+        table.field td.EXPLOSION {
+            background-color: #A31E39;
+        }
+        table.field td.DISCOVERED {
+            background-color: #9DB2B1;
+        }
+        </style>
     </head>
     <body>
         <p>
@@ -127,7 +146,7 @@
             still use {@link net.java.html.json.Models#applyBindings(java.lang.Object)}
             or {@link net.java.html.json.Models#applyBindings(java.lang.Object,java.lang.String)}
             to perform the association of any model with the page element.
-        </ul>
+        </p>
         <p>
             Memory model when using Knockout bindings has been improved
             (required additions of two new methods:
@@ -533,25 +552,5 @@ $ ls src/main/webapp/pages/index.html
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>)
             </li>
         </ul>
-
-<style type="text/css">
-table.field td {
-    padding: 4px;
-    width: 18px;
-    height: 18px;
-    font-size: 1.5em;
-    border: 1px solid black;
-}
-table.field td.UNKNOWN {
-    background-color: #D6E4E1;
-    cursor: pointer;
-}
-table.field td.EXPLOSION {
-    background-color: #A31E39;
-}
-table.field td.DISCOVERED {
-    background-color: #9DB2B1;
-}
-</style>
     </body>
 </html>
