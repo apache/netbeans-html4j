@@ -423,8 +423,9 @@ final class FXToolbar extends ToolBar {
                 watcher.close();
                 watcher = null;
             }
-            if (turnOn) {
-                watcher = new WatchDir(webView.getEngine());
+            final WebEngine eng = webView.getEngine();
+            if (turnOn && eng.getLocation().startsWith("file:")) { // NOI18N
+                watcher = new WatchDir(eng);
             }
         } catch (Exception ex) {
             FXInspect.LOG.log(Level.SEVERE, null, ex);
