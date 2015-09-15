@@ -72,7 +72,11 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
         for (int i = 0; i < propNames.length; i++) {
             propNames[i] = propArr[i].getPropertyName();
             propReadOnly[i] = propArr[i].isReadOnly();
-            propValues[i] = propArr[i].getValue();
+            Object value = propArr[i].getValue();
+            if (value instanceof Enum) {
+                value = value.toString();
+            }
+            propValues[i] = value;
         }
         String[] funcNames = new String[funcArr.length];
         for (int i = 0; i < funcNames.length; i++) {
@@ -121,6 +125,9 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
     @Override
     public void valueHasMutated(Object data, String propertyName, Object oldValue, Object newValue) {
         Knockout.cleanUp();
+        if (newValue instanceof Enum) {
+            newValue = newValue.toString();
+        }
         Knockout.valueHasMutated(data, propertyName, oldValue, newValue);
     }
 

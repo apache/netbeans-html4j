@@ -171,7 +171,6 @@ final class Knockout extends WeakReference<Object> {
         + "      trigger();\n"
         + "      var r = activeGetter();\n"
         + "      activeGetter = realGetter;\n"
-        + "      r = @org.netbeans.html.ko4j.Knockout::noEnum(Ljava/lang/Object;)(r);\n"
         + "      if (r) try { var br = r.valueOf(); } catch (err) {}\n"
         + "      return br === undefined ? r: br;\n"
         + "    },\n"
@@ -230,12 +229,5 @@ final class Knockout extends WeakReference<Object> {
         } else {
             return o;
         }
-    }
-
-    static Object noEnum(Object o) {
-        if (o instanceof Enum) {
-            return o.toString();
-        }
-        return o;
     }
 }
