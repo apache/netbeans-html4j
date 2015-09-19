@@ -305,6 +305,33 @@ public final class KnockoutTest {
         
         Utils.exposeHTML(KnockoutTest.class, "");
     }
+
+    @KOTest public void nestedObjectEqualsChange() throws Exception {
+        nestedObjectEqualsChange(true);
+    }
+
+    @KOTest public void nestedObjectChange() throws Exception {
+        nestedObjectEqualsChange(false);
+    }
+    private  void nestedObjectEqualsChange(boolean preApply) throws Exception {
+        Utils.exposeHTML(KnockoutTest.class,
+"            <div data-bind='with: archetype'>\n" +
+"                <input id='input' data-bind='value: groupId'></input>\n" +
+"            </div>\n"
+        );
+
+        js = Models.bind(new KnockoutModel(), newContext());
+        if (preApply) {
+            js.applyBindings();
+        }
+        js.setArchetype(new ArchetypeData());
+        js.getArchetype().setGroupId("org.netbeans.html");
+        js.applyBindings();
+
+        String v = getSetInput("input", null);
+        assertEquals("org.netbeans.html", v, "groupId has been changed");
+        Utils.exposeHTML(KnockoutTest.class, "");
+    }
     
     @KOTest public void modifyValueAssertAsyncChangeInModel() throws Exception {
         if (js == null) {

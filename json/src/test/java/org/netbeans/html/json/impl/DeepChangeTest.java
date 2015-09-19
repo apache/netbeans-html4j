@@ -92,11 +92,19 @@ public class DeepChangeTest {
         }
         @ComputedProperty
         static String sndName(MyY one) {
-            return one.getValue().toUpperCase();
+            if (one == null || one.getValue() == null) {
+                return null;
+            } else {
+                return one.getValue().toUpperCase();
+            }
         }
         @ComputedProperty @Transitive(deep = false) 
         static String noName(MyY one) {
-            return one.getValue().toUpperCase();
+            if (one == null || one.getValue() == null) {
+                return null;
+            } else {
+                return one.getValue().toUpperCase();
+            }
         }
         @ComputedProperty @Transitive(deep = true) 
         static String thrdName(MyY one) {
@@ -447,6 +455,28 @@ public class DeepChangeTest {
         x.setOne(y);
 
         assertSame(x.getOne(), y);
+    }
+
+    @Test
+    public void rebindReplacesTheInstanceAndNotifies() throws Exception {
+        BrwsrCtx ctx = Contexts.newBuilder().build();
+        final MyY one = Models.bind(new MyY(), ctx);
+        MyX p = Models.bind(
+            new MyX(one, new MyY("Hi", 333), new MyY("Hello", 999)), c
+        ).applyBindings();
+
+        Map m = (Map) Models.toRaw(p);
+        
+        Object v = m.get("one");
+        assertNotNull(v, "Value should be in the map");
+        One o = (One) v;
+        assertEquals(o.changes, 0, "No changes yet");
+
+        MyY y = Models.bind(new MyY(), ctx);
+        p.setOne(y);
+
+        assertSame(p.getOne(), y);
+        assertSame(o.changes, 1, "One change now");
     }
 
     @Test
