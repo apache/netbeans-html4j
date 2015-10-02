@@ -62,8 +62,13 @@ import org.netbeans.html.context.spi.Contexts.Id;
  * application and based on other events in the application
  * {@link #runInBrowser(javafx.scene.web.WebView, java.lang.Runnable) re-execute code} 
  * inside of such {@link WebView}s.
+ * <p>
  * In case such detailed control is not necessary,
- * consider using {@link BrowserBuilder}.
+ * consider using {@link BrowserBuilder}. Btw. when using the {@link BrowserBuilder}
+ * one can execute presenter in headless mode. Just specify: <code>
+ * {@link System}.{@link System#setProperty(java.lang.String, java.lang.String) setProperty}("fxpresenter.headless", "true");
+ * </code>
+ *
  * 
  * @author Jaroslav Tulach
  * @since 0.6

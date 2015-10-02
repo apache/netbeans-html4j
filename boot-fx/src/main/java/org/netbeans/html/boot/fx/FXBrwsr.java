@@ -159,6 +159,9 @@ public class FXBrwsr extends Application {
         if (arr[4] != null) {
             scene.getWindow().setOnCloseRequest((EventHandler<WindowEvent>) arr[4]);
         }
+        if (Boolean.getBoolean("fxpresenter.headless")) {
+            return;
+        }
         primaryStage.show();
     }
 

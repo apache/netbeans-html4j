@@ -193,7 +193,6 @@ public class FXBrowsersOnResourceTest {
             pane.setCenter(getV1());
             pane.setBottom(getV2());
 
-            stage.show();
             CDL.countDown();
         }
         

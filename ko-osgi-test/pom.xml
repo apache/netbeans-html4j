@@ -32,7 +32,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
                 <configuration>
                     <additionalClasspathElements>
                         <additionalClasspathElement>${project.build.directory}/${project.build.finalName}.jar</additionalClasspathElement>
