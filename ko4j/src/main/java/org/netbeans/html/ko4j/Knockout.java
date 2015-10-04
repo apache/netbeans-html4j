@@ -44,6 +44,9 @@ package org.netbeans.html.ko4j;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
@@ -62,6 +65,7 @@ import org.netbeans.html.json.spi.PropertyBinding;
 @JavaScriptResource("knockout-3.2.0.debug.js")
 final class Knockout extends WeakReference<Object> {
     private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue();
+    private static final Set<Knockout> active = Collections.synchronizedSet(new HashSet<Knockout>());
     
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;
@@ -79,6 +83,7 @@ final class Knockout extends WeakReference<Object> {
         for (int i = 0; i < funcs.length; i++) {
             this.funcs[i] = funcs[i].weak();
         }
+        active.add(this);
     }
     
     static void cleanUp() {
@@ -87,6 +92,7 @@ final class Knockout extends WeakReference<Object> {
             if (ko == null) {
                 return;
             }
+            active.remove(ko);
             clean(ko.js);
             ko.js = null;
             ko.props = null;

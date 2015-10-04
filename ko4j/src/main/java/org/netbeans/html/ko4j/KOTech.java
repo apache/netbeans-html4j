@@ -66,6 +66,10 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
     
     @Override
     public Object wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+        return createKO(model, propArr, funcArr, null);
+    }
+
+    final Object createKO(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
         String[] propNames = new String[propArr.length];
         boolean[] propReadOnly = new boolean[propArr.length];
         Object[] propValues = new Object[propArr.length];
@@ -83,8 +87,12 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
             funcNames[i] = funcArr[i].getFunctionName();
         }
         Object ret = getJSObject();
-        new Knockout(model, ret, propArr, funcArr).wrapModel(
-            ret, 
+        Knockout newKO = new Knockout(model, ret, propArr, funcArr);
+        if (ko != null) {
+            ko[0] = newKO;
+        }
+        newKO.wrapModel(
+            ret,
             propNames, propReadOnly, propValues,
             funcNames
         );
