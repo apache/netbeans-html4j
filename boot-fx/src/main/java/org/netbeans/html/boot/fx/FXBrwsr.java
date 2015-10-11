@@ -92,11 +92,22 @@ public class FXBrwsr extends Application {
             Executors.newFixedThreadPool(1).submit(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        FXBrwsr.launch(FXBrwsr.class, callee);
-                    } catch (Throwable ex) {
-                        ex.printStackTrace();
-                    } finally {
+                    if (!Platform.isFxApplicationThread()) {
+                        try {
+                            Platform.runLater(this);
+                        } catch (IllegalStateException ex) {
+                            try {
+                                FXBrwsr.launch(FXBrwsr.class, callee);
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            } finally {
+                                FINISHED.countDown();
+                            }
+                        }
+                    } else {
+                        FXBrwsr brwsr = new FXBrwsr();
+                        brwsr.start(new Stage(), callee);
+                        INSTANCE = brwsr;
                         FINISHED.countDown();
                     }
                 }
@@ -144,8 +155,12 @@ public class FXBrwsr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        start(primaryStage, this.getParameters().getRaw().get(0));
+    }
+
+    final void start(Stage primaryStage, String callee) {
         BorderPane r = new BorderPane();
-        Object[] arr = findInitialSize(this.getParameters().getRaw().get(0));
+        Object[] arr = findInitialSize(callee);
         Scene scene = new Scene(r, (Double)arr[2], (Double)arr[3]);
         primaryStage.setScene(scene);
         this.root = r;
@@ -220,99 +235,22 @@ public class FXBrwsr extends Application {
     private WebView newView(final URL url, final FXPresenter onLoad) {
         final WebView view = new WebView();
         view.setContextMenuEnabled(false);
-        view.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
-            @Override
-            public void handle(WebEvent<String> t) {
-                final Stage dialogStage = new Stage();
-                dialogStage.initModality(Modality.WINDOW_MODAL);
-                dialogStage.initOwner(stage);
-                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
-                dialogStage.setTitle(r.getString("AlertTitle")); // NOI18N
-                final Button button = new Button(r.getString("AlertCloseButton")); // NOI18N
-                final Text text = new Text(t.getData());
-                VBox box = new VBox();
-                box.setAlignment(Pos.CENTER);
-                box.setSpacing(10);
-                box.setPadding(new Insets(10));
-                box.getChildren().addAll(text, button);
-                dialogStage.setScene(new Scene(box));
-                button.setCancelButton(true);
-                button.setOnAction(new CloseDialogHandler(dialogStage, null));
-                dialogStage.centerOnScreen();
-                dialogStage.showAndWait();
-            }
-        });
-        view.getEngine().setConfirmHandler(new Callback<String, Boolean>() {
-            @Override
-            public Boolean call(String question) {
-                final Stage dialogStage = new Stage();
-                dialogStage.initModality(Modality.WINDOW_MODAL);
-                dialogStage.initOwner(stage);
-                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
-                dialogStage.setTitle(r.getString("ConfirmTitle")); // NOI18N
-                final Button ok = new Button(r.getString("ConfirmOKButton")); // NOI18N
-                final Button cancel = new Button(r.getString("ConfirmCancelButton")); // NOI18N
-                final Text text = new Text(question);
-                final Insets ins = new Insets(10);
-                final VBox box = new VBox();
-                box.setAlignment(Pos.CENTER);
-                box.setSpacing(10);
-                box.setPadding(ins);
-                final HBox buttons = new HBox(10);
-                buttons.getChildren().addAll(ok, cancel);
-                buttons.setAlignment(Pos.CENTER);
-                buttons.setPadding(ins);
-                box.getChildren().addAll(text, buttons);
-                dialogStage.setScene(new Scene(box));
-                ok.setCancelButton(false);
+        Stage newStage;
+        BorderPane bp;
+        if (root == null) {
+            newStage = new Stage();
+            newStage.initOwner(stage);
+            bp = new BorderPane();
+            newStage.setScene(new Scene(bp));
+            newStage.show();
+        } else {
+            bp = root;
+            newStage = stage;
+            root = null;
+        }
 
-                final boolean[] res = new boolean[1];
-                ok.setOnAction(new CloseDialogHandler(dialogStage, res));
-                cancel.setCancelButton(true);
-                cancel.setOnAction(new CloseDialogHandler(dialogStage, null));
-                dialogStage.centerOnScreen();
-                dialogStage.showAndWait();
-                return res[0];
-            }
-        });
-        view.getEngine().setPromptHandler(new Callback<PromptData, String>() {
-            @Override
-            public String call(PromptData prompt) {
-                final Stage dialogStage = new Stage();
-                dialogStage.initModality(Modality.WINDOW_MODAL);
-                dialogStage.initOwner(stage);
-                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
-                dialogStage.setTitle(r.getString("PromptTitle")); // NOI18N
-                final Button ok = new Button(r.getString("PromptOKButton")); // NOI18N
-                final Button cancel = new Button(r.getString("PromptCancelButton")); // NOI18N
-                final Text text = new Text(prompt.getMessage());
-                final TextField line = new TextField();
-                if (prompt.getDefaultValue() != null) {
-                    line.setText(prompt.getDefaultValue());
-                }
-                final Insets ins = new Insets(10);
-                final VBox box = new VBox();
-                box.setAlignment(Pos.CENTER);
-                box.setSpacing(10);
-                box.setPadding(ins);
-                final HBox buttons = new HBox(10);
-                buttons.getChildren().addAll(ok, cancel);
-                buttons.setAlignment(Pos.CENTER);
-                buttons.setPadding(ins);
-                box.getChildren().addAll(text, line, buttons);
-                dialogStage.setScene(new Scene(box));
-                ok.setCancelButton(false);
-
-                final boolean[] res = new boolean[1];
-                ok.setOnAction(new CloseDialogHandler(dialogStage, res));
-                cancel.setCancelButton(true);
-                cancel.setOnAction(new CloseDialogHandler(dialogStage, null));
-                dialogStage.centerOnScreen();
-                dialogStage.showAndWait();
-                return res[0] ? line.getText() : null;
-            }
-        });
-        root.setCenter(view);
+        attachHandlers(view, newStage);
+        bp.setCenter(view);
         final Worker<Void> w = view.getEngine().getLoadWorker();
         w.stateProperty().addListener(new ChangeListener<Worker.State>() {
             private String previous;
@@ -360,6 +298,101 @@ public class FXBrwsr extends Application {
         view.getEngine().titleProperty().addListener(x);
         x.changed(null, null, null);
         return view;
+    }
+
+    private static void attachHandlers(final WebView view, final Stage owner) {
+        view.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
+            @Override
+            public void handle(WebEvent<String> t) {
+                final Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.WINDOW_MODAL);
+                dialogStage.initOwner(owner);
+                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
+                dialogStage.setTitle(r.getString("AlertTitle")); // NOI18N
+                final Button button = new Button(r.getString("AlertCloseButton")); // NOI18N
+                final Text text = new Text(t.getData());
+                VBox box = new VBox();
+                box.setAlignment(Pos.CENTER);
+                box.setSpacing(10);
+                box.setPadding(new Insets(10));
+                box.getChildren().addAll(text, button);
+                dialogStage.setScene(new Scene(box));
+                button.setCancelButton(true);
+                button.setOnAction(new CloseDialogHandler(dialogStage, null));
+                dialogStage.centerOnScreen();
+                dialogStage.showAndWait();
+            }
+        });
+        view.getEngine().setConfirmHandler(new Callback<String, Boolean>() {
+            @Override
+            public Boolean call(String question) {
+                final Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.WINDOW_MODAL);
+                dialogStage.initOwner(owner);
+                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
+                dialogStage.setTitle(r.getString("ConfirmTitle")); // NOI18N
+                final Button ok = new Button(r.getString("ConfirmOKButton")); // NOI18N
+                final Button cancel = new Button(r.getString("ConfirmCancelButton")); // NOI18N
+                final Text text = new Text(question);
+                final Insets ins = new Insets(10);
+                final VBox box = new VBox();
+                box.setAlignment(Pos.CENTER);
+                box.setSpacing(10);
+                box.setPadding(ins);
+                final HBox buttons = new HBox(10);
+                buttons.getChildren().addAll(ok, cancel);
+                buttons.setAlignment(Pos.CENTER);
+                buttons.setPadding(ins);
+                box.getChildren().addAll(text, buttons);
+                dialogStage.setScene(new Scene(box));
+                ok.setCancelButton(false);
+
+                final boolean[] res = new boolean[1];
+                ok.setOnAction(new CloseDialogHandler(dialogStage, res));
+                cancel.setCancelButton(true);
+                cancel.setOnAction(new CloseDialogHandler(dialogStage, null));
+                dialogStage.centerOnScreen();
+                dialogStage.showAndWait();
+                return res[0];
+            }
+        });
+        view.getEngine().setPromptHandler(new Callback<PromptData, String>() {
+            @Override
+            public String call(PromptData prompt) {
+                final Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.WINDOW_MODAL);
+                dialogStage.initOwner(owner);
+                ResourceBundle r = ResourceBundle.getBundle("org/netbeans/html/boot/fx/Bundle"); // NOI18N
+                dialogStage.setTitle(r.getString("PromptTitle")); // NOI18N
+                final Button ok = new Button(r.getString("PromptOKButton")); // NOI18N
+                final Button cancel = new Button(r.getString("PromptCancelButton")); // NOI18N
+                final Text text = new Text(prompt.getMessage());
+                final TextField line = new TextField();
+                if (prompt.getDefaultValue() != null) {
+                    line.setText(prompt.getDefaultValue());
+                }
+                final Insets ins = new Insets(10);
+                final VBox box = new VBox();
+                box.setAlignment(Pos.CENTER);
+                box.setSpacing(10);
+                box.setPadding(ins);
+                final HBox buttons = new HBox(10);
+                buttons.getChildren().addAll(ok, cancel);
+                buttons.setAlignment(Pos.CENTER);
+                buttons.setPadding(ins);
+                box.getChildren().addAll(text, line, buttons);
+                dialogStage.setScene(new Scene(box));
+                ok.setCancelButton(false);
+
+                final boolean[] res = new boolean[1];
+                ok.setOnAction(new CloseDialogHandler(dialogStage, res));
+                cancel.setCancelButton(true);
+                cancel.setOnAction(new CloseDialogHandler(dialogStage, null));
+                dialogStage.centerOnScreen();
+                dialogStage.showAndWait();
+                return res[0] ? line.getText() : null;
+            }
+        });
     }
 
     static void waitFinished() {

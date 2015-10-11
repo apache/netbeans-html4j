@@ -71,7 +71,15 @@ public class FXBrowsersOnResourceTest {
         new Thread("initFX") {
             @Override
             public void run() {
-                App.launch(App.class);
+                if (Platform.isFxApplicationThread()) {
+                    new App().start(new Stage());
+                } else {
+                    try {
+                        App.launch(App.class);
+                    } catch (IllegalStateException ex) {
+                        Platform.runLater(this);
+                    }
+                }
             }
         }.start();
         App.CDL.await();
@@ -182,7 +190,7 @@ public class FXBrowsersOnResourceTest {
         }
 
         @Override
-        public void start(Stage stage) throws Exception {
+        public void start(Stage stage) {
             pane= new BorderPane();
             Scene scene = new Scene(pane, 800, 600);
             stage.setScene(scene);

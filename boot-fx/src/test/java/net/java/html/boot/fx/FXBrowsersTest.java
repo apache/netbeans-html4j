@@ -68,7 +68,15 @@ public class FXBrowsersTest {
         new Thread("initFX") {
             @Override
             public void run() {
-                App.launch(App.class);
+                if (Platform.isFxApplicationThread()) {
+                    new App().start(new Stage());
+                } else {
+                    try {
+                        App.launch(App.class);
+                    } catch (IllegalStateException ex) {
+                        Platform.runLater(this);
+                    }
+                }
             }
         }.start();
         App.CDL.await();
@@ -122,7 +130,7 @@ public class FXBrowsersTest {
             @Override
             public void run() {
                 assertTrue(Platform.isFxApplicationThread());
-                three[0] = App.getV1().getEngine().executeScript("window.cnt");
+                three[0] = App.getV1().getEngine().executeScript("window.cntBrwsr");
                 finish.countDown();
             }
         });
@@ -173,8 +181,8 @@ public class FXBrowsersTest {
         private static native Object window();
         
         @JavaScriptBody(args = {}, body = ""
-            + "if (window.cnt) return ++window.cnt;"
-            + "return window.cnt = 1;"
+            + "if (window.cntBrwsr) return ++window.cntBrwsr;"
+            + "return window.cntBrwsr = 1;"
         )
         private static native int increment();
     }
@@ -198,7 +206,7 @@ public class FXBrowsersTest {
         }
 
         @Override
-        public void start(Stage stage) throws Exception {
+        public void start(Stage stage) {
             pane= new BorderPane();
             Scene scene = new Scene(pane, 800, 600);
             stage.setScene(scene);
