@@ -144,6 +144,68 @@ public class ModelProcessorTest {
         }
     }
 
+    @Test public void tooManyProperties() throws IOException {
+        manyProperties(255, false, 0);
+    }
+
+    @Test public void tooManyArrayPropertiesIsOK() throws IOException {
+        manyProperties(0, true, 300);
+    }
+
+    @Test public void justEnoughProperties() throws IOException {
+        manyProperties(254, true, 0);
+    }
+
+    @Test public void justEnoughPropertiesWithArrayOne() throws IOException {
+        manyProperties(253, true, 300);
+    }
+
+    @Test public void justEnoughPropertiesButOneArrayOne() throws IOException {
+        manyProperties(254, false, 300);
+    }
+
+    private void manyProperties(
+        int cnt, boolean constructorWithParams, int arrayCnt
+    ) throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        StringBuilder code = new StringBuilder();
+        code.append("package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "@Model(className=\"XModel\", properties={\n"
+        );
+        for (int i = 1; i <= cnt; i++) {
+            code.append("  @Property(name=\"prop").append(i).append("\", ");
+            code.append("type=int.class),\n");
+        }
+        for (int i = 1; i <= arrayCnt; i++) {
+            code.append("  @Property(name=\"array").append(i).append("\", ");
+            code.append("array=true, ");
+            code.append("type=int.class),\n");
+        }
+        code.append(""
+            + "})\n"
+            + "class X {\n"
+            + "    static {\n"
+            + "      new XModel();\n"
+            + "      new XModel("
+        );
+        if (constructorWithParams) {
+            code.append("0");
+            for (int i = 1; i < cnt; i++) {
+                code.append(",\n").append(i);
+            }
+        }
+        code.append(");\n"
+            + "    }\n"
+            + "}\n"
+        );
+
+        Compile c = Compile.create(html, code.toString());
+        assertTrue(c.getErrors().isEmpty(), "Compiles OK: " + c.getErrors());
+    }
+
     @Test public void writeableComputedPropertyMissingWrite() throws IOException {
         String html = "<html><body>"
             + "</body></html>";

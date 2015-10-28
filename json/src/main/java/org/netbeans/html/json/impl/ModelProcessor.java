@@ -270,9 +270,11 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("  };\n");
                 if (props.length > 0) {
-                    w.append("  public ").append(className).append("(");
+                    StringBuilder constructorWithArguments = new StringBuilder();
+                    constructorWithArguments.append("  public ").append(className).append("(");
                     Prprt firstArray = null;
                     String sep = "";
+                    int parameterCount = 0;
                     for (Prprt p : props) {
                         if (p.array()) {
                             if (firstArray == null) {
@@ -281,11 +283,12 @@ public final class ModelProcessor extends AbstractProcessor {
                             continue;
                         }
                         String tn = typeName(p);
-                        w.write(sep);
-                        w.write(tn);
+                        constructorWithArguments.append(sep);
+                        constructorWithArguments.append(tn);
                         String[] third = toGetSet(p.name(), tn, false);
-                        w.write(" " + third[2]);
+                        constructorWithArguments.append(" ").append(third[2]);
                         sep = ", ";
+                        parameterCount++;
                     }
                     if (firstArray != null) {
                         String tn;
@@ -293,25 +296,29 @@ public final class ModelProcessor extends AbstractProcessor {
                         boolean[] isEnum = {false};
                         boolean isPrimitive[] = {false};
                         tn = checkType(firstArray, isModel, isEnum, isPrimitive);
-                        w.write(sep);
-                        w.write(tn);
+                        constructorWithArguments.append(sep);
+                        constructorWithArguments.append(tn);
                         String[] third = toGetSet(firstArray.name(), tn, true);
-                        w.write("... " + third[2]);
+                        constructorWithArguments.append("... ").append(third[2]);
+                        parameterCount++;
                     }
-                    w.append(") {\n");
-                    w.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
+                    constructorWithArguments.append(") {\n");
+                    constructorWithArguments.append("    this(net.java.html.BrwsrCtx.findDefault(").append(className).append(".class));\n");
                     for (Prprt p : props) {
                         if (p.array()) {
                             continue;
                         }
                         String[] third = toGetSet(p.name(), null, false);
-                        w.write("    this.prop_" + p.name() + " = " + third[2] + ";\n");
+                        constructorWithArguments.append("    this.prop_" + p.name() + " = " + third[2] + ";\n");
                     }
                     if (firstArray != null) {
                         String[] third = toGetSet(firstArray.name(), null, true);
-                        w.write("    proto.initTo(this.prop_" + firstArray.name() + ", " + third[2] + ");\n");
+                        constructorWithArguments.append("    proto.initTo(this.prop_" + firstArray.name() + ", " + third[2] + ");\n");
                     }
-                    w.append("  };\n");
+                    constructorWithArguments.append("  };\n");
+                    if (parameterCount < 255) {
+                        w.write(constructorWithArguments.toString());
+                    }
                 }
                 w.append("  private static class Html4JavaType extends org.netbeans.html.json.spi.Proto.Type<").append(className).append("> {\n");
                 w.append("    private Html4JavaType() {\n      super(").append(className).append(".class, ").
