@@ -222,11 +222,13 @@ public final class ModelProcessor extends AbstractProcessor {
             try {
                 w.append("package " + pkg + ";\n");
                 w.append("import net.java.html.json.*;\n");
+                final String inPckName = inPckName(e);
+                w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
+                w.append("  private static Class<").append(inPckName).append("> modelFor() { return ").append(inPckName).append(".class; }\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
                 w.append("  private final org.netbeans.html.json.spi.Proto proto;\n");
                 w.append(body.toString());
-                w.append("  private static Class<" + inPckName(e) + "> modelFor() { return null; }\n");
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
                 w.append("    this.proto = TYPE.createProto(this, context);\n");
                 for (Prprt p : props) {
@@ -322,7 +324,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 w.append("  private static class Html4JavaType extends org.netbeans.html.json.spi.Proto.Type<").append(className).append("> {\n");
                 w.append("    private Html4JavaType() {\n      super(").append(className).append(".class, ").
-                    append(inPckName(e)).append(".class, " + propsGetSet.size() + ", "
+                    append(inPckName).append(".class, " + propsGetSet.size() + ", "
                     + functionsCount + ");\n");
                 {
                     for (int i = 0; i < propsGetSet.size(); i++) {
