@@ -153,7 +153,7 @@ public final class BrwsrCtx implements Executor {
     // called when your page is ready
     <b>public static void</b> onPageLoad(String... args) <b>throws</b> Exception {
         // the context at the time of page initialization
-        BrwsrCtx initialCtx = BrwsrCtx.findDefault(getClass());
+        BrwsrCtx initialCtx = BrwsrCtx.findDefault(Periodicaly.<b>class</b>);
         // the task that is associated with context 
         Periodicaly task = new Periodicaly(initialCtx);
         // creates a timer
