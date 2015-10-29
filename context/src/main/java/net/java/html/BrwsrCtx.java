@@ -158,7 +158,7 @@ public final class BrwsrCtx implements Executor {
         Periodicaly task = new Periodicaly(initialCtx);
         // creates a timer
         {@link java.util.Timer} t = new {@link java.util.Timer}("Move the box");
-        // run the task ever 100ms
+        // run the task every 100ms
         t.{@link java.util.Timer#scheduleAtFixedRate(java.util.TimerTask, long, long) scheduleAtFixedRate}(task, 0, 100);
     }
 }
