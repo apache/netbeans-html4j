@@ -128,7 +128,7 @@ public class KnockoutFelixIT {
                     b.start();
                     LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
                 } catch (BundleException ex) {
-                    LOG.log(Level.WARNING, "Cannot start bundle " + b.getSymbolicName(), ex);
+                    fail("Cannot start bundle " + b.getSymbolicName(), ex);
                 }
             }
             return framework;
