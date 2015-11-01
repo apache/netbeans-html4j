@@ -60,7 +60,8 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach
  */
 public class FXBrowsersTest {
-    
+    private static CountDownLatch PROPERTY_SET;
+
     public FXBrowsersTest() {
     }
     
@@ -85,7 +86,6 @@ public class FXBrowsersTest {
     @Test
     public void behaviorOfTwoWebViewsAtOnce() throws Throwable {
         class R implements Runnable {
-            CountDownLatch DONE = new CountDownLatch(1);
             Throwable t;
 
             @Override
@@ -94,8 +94,6 @@ public class FXBrowsersTest {
                     doTest();
                 } catch (Throwable ex) {
                     t = ex;
-                } finally {
-                    DONE.countDown();
                 }
             }
             
@@ -103,22 +101,12 @@ public class FXBrowsersTest {
                 URL u = FXBrowsersTest.class.getResource("/org/netbeans/html/boot/fx/empty.html");
                 assertNotNull(u, "URL found");
                 FXBrowsers.load(App.getV1(), u, OnPages.class, "first");
-                
             }
         }
         R run = new R();
+        PROPERTY_SET = new CountDownLatch(2);
         Platform.runLater(run);
-        run.DONE.await();
-        for (int i = 0; i < 100; i++) {
-            if (run.t != null) {
-                throw run.t;
-            }
-            if (System.getProperty("finalSecond") == null) {
-                Thread.sleep(100);
-            }
-        }
-        
-        
+        PROPERTY_SET.await();
         
         assertEquals(Integer.getInteger("finalFirst"), Integer.valueOf(3), "Three times in view one");
         assertEquals(Integer.getInteger("finalSecond"), Integer.valueOf(2), "Two times in view one");
@@ -161,6 +149,7 @@ public class FXBrowsersTest {
             
             assertEquals(increment(), 2, "Now it is two and not influenced by second view");
             System.setProperty("finalFirst", "" + increment());
+            PROPERTY_SET.countDown();
         }
         
         public static void second(String... args) {
@@ -175,6 +164,7 @@ public class FXBrowsersTest {
             
             assertEquals(increment(), 1, "Counting starts from zero");
             System.setProperty("finalSecond", "" + increment());
+            PROPERTY_SET.countDown();
         }
         
         @JavaScriptBody(args = {}, body = "return window;")
