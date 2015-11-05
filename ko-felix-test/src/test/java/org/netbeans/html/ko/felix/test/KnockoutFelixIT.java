@@ -122,13 +122,13 @@ public class KnockoutFelixIT {
                     if (b.getSymbolicName().contains("felix.framework")) {
                         continue;
                     }
-                    if (b.getSymbolicName().contains("grizzly.websockets-server")) {
+                    if (b.getSymbolicName().contains("glassfish.grizzly")) {
                         continue;
                     }
                     b.start();
                     LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
                 } catch (BundleException ex) {
-                    fail("Cannot start bundle " + b.getSymbolicName(), ex);
+                    throw new IllegalStateException("Cannot start bundle " + b.getSymbolicName(), ex);
                 }
             }
             return framework;
