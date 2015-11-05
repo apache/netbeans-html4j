@@ -189,6 +189,7 @@ public final class ModelProcessor extends AbstractProcessor {
             Map<String, Collection<String[]>> propsDeps = new HashMap<String, Collection<String[]>>();
             Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
             Prprt[] props = createProps(e, m.properties());
+            final String builderPrefix = findBuilderPrefix(e, m);
 
             if (!generateComputedProperties(className, body, props, e.getEnclosedElements(), propsGetSet, propsDeps)) {
                 ok = false;
@@ -196,7 +197,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateOnChange(e, propsDeps, props, className, functionDeps)) {
                 ok = false;
             }
-            if (!generateProperties(e, body, className, props, propsGetSet, propsDeps, functionDeps)) {
+            if (!generateProperties(e, builderPrefix, body, className, props, propsGetSet, propsDeps, functionDeps)) {
                 ok = false;
             }
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
@@ -271,7 +272,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.append("  };\n");
-                if (props.length > 0) {
+                if (props.length > 0 && builderPrefix == null) {
                     StringBuilder constructorWithArguments = new StringBuilder();
                     constructorWithArguments.append("  public ").append(className).append("(");
                     Prprt firstArray = null;
@@ -462,8 +463,13 @@ public final class ModelProcessor extends AbstractProcessor {
                             w.append(type).append(".valueOf(TYPE.stringValue(e)));\n");
                         } else {
                             if (isPrimitive(type)) {
-                                w.append("        this.prop_").append(pn).append(".add(TYPE.numberValue(e).");
-                                w.append(type).append("Value());\n");
+                                if (type.equals("char")) {
+                                    w.append("        this.prop_").append(pn).append(".add((char)TYPE.numberValue(e).");
+                                    w.append("intValue());\n");
+                                } else {
+                                    w.append("        this.prop_").append(pn).append(".add(TYPE.numberValue(e).");
+                                    w.append(type).append("Value());\n");
+                                }
                             } else {
                                 w.append("        this.prop_").append(pn).append(".add((");
                                 w.append(type).append(")e);\n");
@@ -561,8 +567,29 @@ public final class ModelProcessor extends AbstractProcessor {
         return ok;
     }
 
+    private static String findBuilderPrefix(Element e, Model m) {
+        if (!m.builder().isEmpty()) {
+            return m.builder();
+        }
+        for (AnnotationMirror am : e.getAnnotationMirrors()) {
+            for (Map.Entry<? extends Object, ? extends Object> entry : am.getElementValues().entrySet()) {
+                if ("builder()".equals(entry.getKey().toString())) {
+                    return "";
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String builderMethod(String builderPrefix, Prprt p) {
+        if (builderPrefix.isEmpty()) {
+            return p.name();
+        }
+        return builderPrefix + Character.toUpperCase(p.name().charAt(0)) + p.name().substring(1);
+    }
+
     private boolean generateProperties(
-        Element where,
+        Element where, String builderPrefix,
         Writer w, String className, Prprt[] properties,
         List<GetSet> props,
         Map<String,Collection<String[]>> deps,
@@ -583,6 +610,17 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 w.write("    return prop_" + p.name() + ";\n");
                 w.write("  }\n");
+                if (builderPrefix != null) {
+                    boolean[] isModel = {false};
+                    boolean[] isEnum = {false};
+                    boolean isPrimitive[] = {false};
+                    String ret = checkType(p, isModel, isEnum, isPrimitive);
+                    w.write("  public " + className + " " + builderMethod(builderPrefix, p) + "(" + ret + "... v) {\n");
+                    w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
+                    w.append("   TYPE.replaceValue(prop_").append(p.name()).append(", " + tn + ".class, v);\n");
+                    w.write("    return this;\n");
+                    w.write("  }\n");
+                }
             } else {
                 castTo = tn;
                 boolean isModel[] = { false };
@@ -623,6 +661,12 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
                 w.write("  }\n");
+                if (builderPrefix != null) {
+                    w.write("  public " + className + " " + builderMethod(builderPrefix, p) + "(" + tn + " v) {\n");
+                    w.write("    " + gs[1] + "(v);\n");
+                    w.write("    return this;\n");
+                    w.write("  }\n");
+                }
             }
 
             for (int i = 0; i < props.size(); i++) {

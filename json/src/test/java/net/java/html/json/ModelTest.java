@@ -65,7 +65,7 @@ import org.testng.annotations.Test;
  *
  * @author Jaroslav Tulach
  */
-@Model(className = "Modelik", targetId = "", properties = {
+@Model(className = "Modelik", builder = "change", targetId = "", properties = {
     @Property(name = "value", type = int.class),
     @Property(name = "count", type = int.class),
     @Property(name = "unrelated", type = long.class),
@@ -97,8 +97,18 @@ public class ModelTest {
     }
 
     @Test public void equalsAndHashCode() {
-        Modelik m1 = new Modelik(10, 20, 30, "changed", "firstName");
-        Modelik m2 = new Modelik(10, 20, 30, "changed", "firstName");
+        Modelik m1 = new Modelik();
+        m1.setValue(10);
+        m1.setCount(20);
+        m1.setUnrelated(30);
+        m1.setChangedProperty("changed");
+        m1.getNames().add("firstName");
+        Modelik m2 = new Modelik().
+            changeValue(10).
+            changeCount(20).
+            changeUnrelated(30).
+            changeChangedProperty("changed").
+            changeNames("firstName");
 
         assertTrue(m1.equals(m2), "They are the same");
         assertEquals(m1.hashCode(), m2.hashCode(), "Hashcode is the same");

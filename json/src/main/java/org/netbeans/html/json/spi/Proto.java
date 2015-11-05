@@ -875,15 +875,41 @@ public final class Proto {
          * @since 1.0
          */
         public final <T> void replaceValue(Collection<? super T> arr, Class<T> type, Object value) {
-            Object[] newArr;
+            List<T> tmp = new ArrayList<T>();
             if (value instanceof Object[]) {
-                newArr = (Object[]) value;
+                for (Object e : (Object[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof byte[]) {
+                for (Object e : (byte[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof short[]) {
+                for (Object e : (short[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof int[]) {
+                for (Object e : (int[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof char[]) {
+                for (Object e : (char[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof long[]) {
+                for (Object e : (long[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof float[]) {
+                for (Object e : (float[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
+            } else if (value instanceof double[]) {
+                for (Object e : (double[]) value) {
+                    tmp.add(extractValue(type, e));
+                }
             } else {
-                newArr = new Object[] { value };
-            }
-            List<T> tmp = new ArrayList<T>(newArr.length);
-            for (Object e : newArr) {
-                tmp.add(extractValue(type, e));
+                tmp.add(extractValue(type, value));
             }
             if (arr instanceof JSONList) {
                 JSONList jsList = (JSONList) arr;

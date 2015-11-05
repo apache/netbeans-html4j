@@ -48,7 +48,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URL;
 import java.util.List;
-import org.netbeans.html.json.spi.Technology;
 
 /** Defines a model class that represents a single 
  * <a target="_blank" href="http://en.wikipedia.org/wiki/JSON">JSON</a>-like object
@@ -222,4 +221,30 @@ public @interface Model {
      * @since 1.1
      */
     String targetId() default "";
+
+    /** Controls whether builder-like setters shall be generated. Once this
+     * attribute is set, all {@link #properties()} will get a builder like
+     * setter (takes value of the property and returns <code>this</code>
+     * so invocations can be chained). When this attribute is specified,
+     * the non-default constructor isn't generated at all.
+     * <p>
+     * Specifying <code>builder="assign"</code>
+     * and having {@link #properties() properties} <code>name</code> and
+     * <code>age</code> will generate method: <pre>
+     * <b>public</b> MyModel assignName(String name) { ... }
+     * <b>public</b> MyModel assignAge(int age) { ... }
+     * </pre>
+     * These methods can then be chained as <pre>
+     * MyModel m = <b>new</b> MyModel().assignName("name").assignAge(3);
+     * </pre>
+     * The <code>builder</code> attribute can be set to empty string <code>""</code> -
+     * then it is possible that some property names clash with Java keywords.
+     * It's responsibility of the user to specify valid builder prefix,
+     * so the generated methods are compilable.
+     *
+     * @return the prefix to put before {@link Property property} names when
+     *   generating their builder methods
+     * @since 1.3
+     */
+    String builder() default "";
 }
