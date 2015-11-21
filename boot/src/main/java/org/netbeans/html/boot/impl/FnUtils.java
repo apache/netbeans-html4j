@@ -58,6 +58,7 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -167,6 +168,18 @@ public final class FnUtils {
             return new FindInMethod(access, name, desc,
                     super.visitMethod(access & (~Opcodes.ACC_NATIVE), name, desc, signature, exceptions)
             );
+        }
+
+        @Override
+        public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+            if (name.startsWith("$$fn$$")) {
+                return null;
+            }
+            return superField(access, name, desc, signature, value);
+        }
+
+        final FieldVisitor superField(int access, String name, String desc, String signature, Object value) {
+            return super.visitField(access, name, desc, signature, value);
         }
 
         private final class FindInMethod extends MethodVisitor {
@@ -457,7 +470,7 @@ public final class FnUtils {
                 }
                 return true;
             }
-
+            
             @Override
             public void visitEnd() {
                 super.visitEnd();
@@ -466,7 +479,7 @@ public final class FnUtils {
                         // native method
                         super.visitMaxs(1, 0);
                     }
-                    FindInClass.this.visitField(
+                    FindInClass.this.superField(
                             Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
                             "$$fn$$" + name + "_" + found,
                             "Lorg/netbeans/html/boot/spi/Fn;",
