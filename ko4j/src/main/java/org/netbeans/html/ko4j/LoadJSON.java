@@ -52,16 +52,6 @@ import org.netbeans.html.json.spi.JSONCall;
 final class LoadJSON {
     private LoadJSON() {}
 
-    @JavaScriptBody(args = {"object", "property"},
-        body
-        = "if (property === null) return object;\n"
-        + "if (object === null) return null;\n"
-        + "var p = object[property]; return p ? p : null;"
-    )
-    private static Object getProperty(Object object, String property) {
-        return null;
-    }
-
     static String createJSONP(JSONCall whenDone) {
         int h = whenDone.hashCode();
         String name;
@@ -141,7 +131,7 @@ final class LoadJSON {
 
     static void extractJSON(Object jsonObject, String[] props, Object[] values) {
         for (int i = 0; i < props.length; i++) {
-            values[i] = getProperty(jsonObject, props[i]);
+            values[i] = Knockout.getProperty(jsonObject, props[i]);
         }
     }
 

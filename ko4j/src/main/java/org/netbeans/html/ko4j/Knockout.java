@@ -66,6 +66,17 @@ import org.netbeans.html.json.spi.PropertyBinding;
 final class Knockout extends WeakReference<Object> {
     private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue();
     private static final Set<Knockout> active = Collections.synchronizedSet(new HashSet<Knockout>());
+
+    @JavaScriptBody(args = {"object", "property"}, body = 
+        "var ret;\n" + 
+        "if (property === null) ret = object;\n" + 
+        "else if (object === null) ret = null;\n" + 
+        "else ret = object[property];\n" + 
+        "return ret ? ko.utils.unwrapObservable(ret) : null;"
+    )
+    static Object getProperty(Object object, String property) {
+        return null;
+    }
     
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;

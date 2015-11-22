@@ -167,6 +167,18 @@ public final class KnockoutTest {
             Utils.exposeHTML(KnockoutTest.class, "");
         }
     }
+    
+    @KOTest public void rawObject() {
+        final BrwsrCtx ctx = newContext();
+        Person p1 = Models.bind(new Person(), ctx);
+        p1.setFirstName("Jarda");
+        p1.setLastName("Tulach");
+        Object raw = Models.toRaw(p1);
+        Person p2 = Models.fromRaw(ctx, Person.class, raw);
+        
+        assertEquals(p2.getFirstName(), "Jarda", "First name");
+        assertEquals(p2.getLastName(), "Tulach", "Last name");
+    }
 
     @KOTest public void modifyComputedProperty() throws Throwable {
         Object exp = Utils.exposeHTML(KnockoutTest.class,
