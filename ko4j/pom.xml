@@ -22,6 +22,12 @@
           <plugin>
               <groupId>org.apache.felix</groupId>
               <artifactId>maven-bundle-plugin</artifactId>
+              <configuration>
+                  <instructions>
+                      <Require-Capability>osgi.extender;resolution:=optional;filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                      <Provide-Capability>osgi.serviceloader;osgi.serviceloader=org.netbeans.html.context.spi.Contexts$Provider</Provide-Capability>
+                  </instructions>
+              </configuration>
           </plugin>
           <plugin>
               <groupId>org.netbeans.html</groupId>

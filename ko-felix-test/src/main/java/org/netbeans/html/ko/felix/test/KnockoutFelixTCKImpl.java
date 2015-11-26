@@ -101,18 +101,20 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
         return testClasses();
     }
     
-    public static void start(URI server) throws Exception {
+    public static void start(String callBackClass, URI server, final boolean useAllClassloader) throws Exception {
         final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFelixTCKImpl.class).
             loadPage(server.toString()).
-            invoke("initialized");
+            invoke("initialized", callBackClass);
 
         Executors.newSingleThreadExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 try {
                     Bundle[] arr = FrameworkUtil.getBundle(BrowserBuilder.class).getBundleContext().getBundles();
-                    final ClassLoader osgiClassLoader = new AllBundlesLoader(arr);
-                    bb.classloader(osgiClassLoader);
+                    if (useAllClassloader) {
+                        final ClassLoader osgiClassLoader = new AllBundlesLoader(arr);
+                        bb.classloader(osgiClassLoader);
+                    }
                     bb.showAndWait();
                 } catch (Throwable t) {
                     t.printStackTrace();
@@ -121,16 +123,14 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
         });
     }
 
-    public static void initialized() throws Exception {
+    public static void initialized(String... args) throws Exception {
         Bundle bundle = FrameworkUtil.getBundle(KnockoutFelixTCKImpl.class);
         if (bundle == null) {
             throw new IllegalStateException(
                 "Should be loaded from a bundle. But was: " + KnockoutFelixTCKImpl.class.getClassLoader()
             );
         }
-        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(
-            "org.netbeans.html.ko.felix.test.KnockoutFelixIT"
-        );
+        Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(args[0]);
         Method m = classpathClass.getMethod("initialized", Class.class, Object.class);
         browserContext = Fn.activePresenter();
         m.invoke(null, KnockoutFelixTCKImpl.class, browserContext);

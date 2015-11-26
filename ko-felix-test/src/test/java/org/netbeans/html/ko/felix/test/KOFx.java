@@ -60,8 +60,10 @@ public final class KOFx implements ITest, Runnable {
     private Object result;
     private Object inst;
     private int count;
+    private final Class<?> itClass;
 
-    KOFx(Object p, Method m) {
+    KOFx(Class<?> itClass, Object p, Method m) {
+        this.itClass = itClass;
         this.p = p;
         this.m = m;
     }
@@ -90,7 +92,7 @@ public final class KOFx implements ITest, Runnable {
         boolean notify = true;
         Closeable a = null;
         try {
-            a = KnockoutFelixIT.activateInOSGi(p);
+            a = (Closeable) itClass.getMethod("activateInOSGi", Object.class).invoke(null, p);
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }

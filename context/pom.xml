@@ -24,6 +24,7 @@
               <configuration>
                   <instructions>
                       <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
+                      <Require-Capability>osgi.extender;resolution:=optional;filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;filter:="(osgi.serviceloader=org.netbeans.html.context.spi.Contexts$Provider)";cardinality:=multiple;resolution:=optional</Require-Capability>
                   </instructions>
               </configuration>
           </plugin>

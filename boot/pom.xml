@@ -26,6 +26,7 @@
                       <Agent-Class>org.netbeans.html.boot.impl.JsAgent</Agent-Class>
                       <Premain-Class>org.netbeans.html.boot.impl.JsAgent</Premain-Class>
                       <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
+                      <Require-Capability>osgi.extender;resolution:=optional;filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;filter:="(osgi.serviceloader=org.netbeans.html.boot.spi.Fn$Presenter)";cardinality:=multiple;resolution:=optional</Require-Capability>
                   </instructions>
               </configuration>
           </plugin>

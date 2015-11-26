@@ -66,16 +66,13 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Factory;
 
-/**
- *
- * @author Jaroslav Tulach
- */
-public class KnockoutFelixIT {
-    private static final Logger LOG = Logger.getLogger(KnockoutFelixIT.class.getName());
+public class KnockoutFelixAriesIT {
+    private static final Logger LOG = Logger.getLogger(KnockoutFelixAriesIT.class.getName());
     private static Framework framework;
     private static File dir;
     static Framework framework() throws Exception {
@@ -87,7 +84,7 @@ public class KnockoutFelixIT {
             String basedir = System.getProperty("basedir");
             assertNotNull("basedir preperty provided", basedir);
             File target = new File(basedir, "target");
-            dir = new File(target, "osgi");
+            dir = new File(target, "osgi-aries");
             dir.mkdirs();
             
             Map<String,String> config = new HashMap<String, String>();
@@ -116,6 +113,20 @@ public class KnockoutFelixIT {
             framework.init();
             loadClassPathBundles(framework);
             framework.start();
+            boolean ok = false;
+            for (Bundle b : framework.getBundleContext().getBundles()) {
+                try {
+                    if (!b.getSymbolicName().equals("org.apache.aries.spifly.dynamic.bundle")) {
+                        continue;
+                    }
+                    b.start();
+                    ok = true;
+                    LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
+                } catch (BundleException ex) {
+                    LOG.log(Level.WARNING, "Cannot start bundle " + b.getSymbolicName(), ex);
+                }
+            }
+            assertTrue(ok, "Aries installed");
             for (Bundle b : framework.getBundleContext().getBundles()) {
                 try {
                     if (b.getSymbolicName().contains("felix.framework")) {
@@ -127,7 +138,7 @@ public class KnockoutFelixIT {
                     b.start();
                     LOG.log(Level.INFO, "Started {0}", b.getSymbolicName());
                 } catch (BundleException ex) {
-                    throw new IllegalStateException("Cannot start bundle " + b.getSymbolicName(), ex);
+                    LOG.log(Level.WARNING, "Cannot start bundle " + b.getSymbolicName(), ex);
                 }
             }
             return framework;
@@ -171,9 +182,6 @@ public class KnockoutFelixIT {
                 if (name.contains("testng")) {
                     continue;
                 }
-                if (name.equals("org.apache.aries.spifly.dynamic.bundle")) {
-                    continue;
-                }
                 final String path = "reference:" + file.toURI().toString();
                 try {
                     Bundle b = f.getBundleContext().installBundle(path);
@@ -185,12 +193,12 @@ public class KnockoutFelixIT {
     }
     
     private static Class<?> loadOSGiClass(Class<?> c) throws Exception {
-        return KnockoutFelixTCKImpl.loadOSGiClass(c.getName(), KnockoutFelixIT.framework().getBundleContext());
+        return KnockoutFelixTCKImpl.loadOSGiClass(c.getName(), KnockoutFelixAriesIT.framework().getBundleContext());
     }
     
     private static Class<?> browserClass;
     private static Object browserContext;
-    
+
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class<?> tck = loadOSGiClass(KnockoutTCK.class);
         Class<?> peer = loadOSGiClass(KnockoutFelixTCKImpl.class);
@@ -207,9 +215,9 @@ public class KnockoutFelixIT {
         URI uri = DynamicHTTP.initServer();
 
         Method start = peer.getMethod("start", String.class, URI.class, boolean.class);
-        start.invoke(null, KnockoutFelixIT.class.getName(), uri, true);
+        start.invoke(null, KnockoutFelixAriesIT.class.getName(), uri, false);
         
-        ClassLoader l = getClassLoader(null);
+        ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
             seekKOTests(arr[i], res);
@@ -223,25 +231,22 @@ public class KnockoutFelixIT {
             asSubclass(Annotation.class);
         for (Method m : c.getMethods()) {
             if (m.getAnnotation(koTest) != null) {
-                res.add(new KOFx(KnockoutFelixIT.class, browserContext, m));
+                res.add(new KOFx(KnockoutFelixAriesIT.class, browserContext, m));
             }
         }
     }
 
-    static synchronized ClassLoader getClassLoader(Object[] presenter) throws InterruptedException {
+    static synchronized ClassLoader getClassLoader() throws InterruptedException {
         while (browserClass == null) {
-            KnockoutFelixIT.class.wait();
-        }
-        if (presenter != null) {
-            presenter[0] = browserContext;
+            KnockoutFelixAriesIT.class.wait();
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls, Object presenter) throws Exception {
         browserClass = browserCls;
         browserContext = presenter;
-        KnockoutFelixIT.class.notifyAll();
+        KnockoutFelixAriesIT.class.notifyAll();
     }
 
     public static Closeable activateInOSGi(Object presenter) throws Exception {

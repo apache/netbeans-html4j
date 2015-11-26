@@ -36,6 +36,7 @@
                     <additionalClasspathElements>
                         <additionalClasspathElement>${project.build.directory}/${project.build.finalName}.jar</additionalClasspathElement>
                     </additionalClasspathElements>
+                    <forkMode>always</forkMode>
                 </configuration>
                 <executions>
                     <execution>
@@ -124,6 +125,16 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.spifly</groupId>
+            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.log</artifactId>
+            <version>1.3.0</version>
         </dependency>
     </dependencies>
 </project>
