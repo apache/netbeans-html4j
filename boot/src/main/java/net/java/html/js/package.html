@@ -113,9 +113,9 @@
         function <code>mul</code> and use it.
         <p></p>
         <em>Real code tip:</em>
-        <a href="http://hg.netbeans.org/html4j/file/release-0.7/ko4j/src/main/java/org/netbeans/html/ko4j/Knockout.java">this</a> 
+        <a target="top" href="http://hg.netbeans.org/html4j/file/release-0.7/ko4j/src/main/java/org/netbeans/html/ko4j/Knockout.java">this</a> 
         is the way 
-        the <a href="http://knockoutjs.com">knockout.js</a> library
+        the <a target="top" href="http://knockoutjs.com">knockout.js</a> library
         is included in its <em>ko4j</em> library.
         
         <h3>Callback to Java</h3>
@@ -152,13 +152,88 @@
         <p></p>
         Please note that to turn the special Java callback syntax on, one
         needs to set the {@link net.java.html.js.JavaScriptBody#javacall()}
-        attribute to <b>true</b>.
+        attribute to <b>true</b>. The callback syntax consists of
+        following parts:
         <p></p>
-        <em>Editing hint:</em> there is an associated annotation processor 
+        <pre>[instance.]@classname::methodname(signature)(arguments)</pre>
+        <ul>
+            <li><b>instance</b> - must be present when calling an 
+                instance method and must be absent when calling a 
+                static method</li>
+            <li><b>classname</b> - fully qualified name of the class in 
+                which the method is declared 
+            </li>
+            <li><b>signature</b> - internal JVM method signature 
+                (as specified at 
+                <a target="top" href="http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432">JNI type Signatures</a>) 
+                without the trailing signature of the method return type</li>
+            <li><b>arguments</b> - the actual values to pass to the called Java method
+            </li>
+        </ul>
+
+        <p>Here is the <a target="top" href="http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432">JNI type signatures table</a>
+            one can use to convert
+            Java parameters to JVM's internal <em>letter</em> based 
+            representation:</p>
+        
+        <table border=1 width='100%'>
+            <tr>
+                <td><b>Type Signature</b></td>
+                <td><b>Java Type</b></td>
+            </tr>
+            <tr>
+              <td>Z</td>
+              <td>boolean</td>
+            </tr>
+            <tr>
+              <td>B</td>
+              <td>byte</td>
+            </tr>
+            <tr>
+              <td>C</td>
+              <td>char</td>
+            </tr>
+            <tr>
+              <td>S</td>
+              <td>short</td>
+            </tr>
+            <tr>
+              <td>I</td>
+              <td>int</td>
+            </tr>
+            <tr>
+              <td>J</td>
+              <td>long</td>
+            </tr>
+            <tr>
+              <td>F</td>
+              <td>float</td>
+            </tr>
+            <tr>
+              <td>D</td>
+              <td>double</td>
+            </tr>
+            <tr>
+              <td>L fully-qualified-class ;</td>
+              <td>fully-qualified-class</td>
+            </tr>
+            <tr>
+              <td>[ type</td>
+              <td>type[]</td>
+            </tr>
+          </tbody>
+        </table>
+        <p></p>
+        <em>Editing hint:</em> The callback syntax may seem complicated at
+        first, however there is an associated <b>annotation processor</b> 
         that checks the syntax and verifies the referenced class and
-        method of the right signature exist. If they do not, the
-        compilation fails. Thus don't despair seeing the syntax, you'll get early
-        warnings when there is a typo.
+        method with the requested signature exist. If it does not, the
+        <em>compilation fails offering correct alternatives</em>. 
+        Thus don't despair seeing the syntax, make sure you get the
+        fully qualified name of the callback class right. 
+        You'll get warning and help 
+        if there is a typo in the specified signature then -
+        during compilation of your code.
         
         <h3>Overloaded Methods</h3>
         
