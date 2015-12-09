@@ -359,6 +359,16 @@ public class ModelTest {
         assertEquals(first, "1st");
         assertEquals(last, "2nd");
     }
+    
+    @Model(className = "Inner", properties = {
+        @Property(name = "x", type = int.class)
+    })
+    static final class InnerCntrl {
+        @OnPropertyChange("x")
+        static void increment(Inner model) {
+            model.setX(model.getX() + 1);
+        }
+    }
 
     private static class MockTechnology implements Technology<Object> {
         private final List<String> mutated = new ArrayList<String>();
