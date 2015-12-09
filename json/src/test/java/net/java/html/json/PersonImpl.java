@@ -91,26 +91,45 @@ final class PersonImpl {
         }
     }
     
-    @Model(className = "People", targetId="myPeople", properties = {
+    @Model(className = "People", instance = true, targetId="myPeople", properties = {
         @Property(array = true, name = "info", type = Person.class),
         @Property(array = true, name = "nicknames", type = String.class),
         @Property(array = true, name = "age", type = int.class),
         @Property(array = true, name = "sex", type = Sex.class)
     })
     public static class PeopleImpl {
-        @ModelOperation static void addAge42(People p) {
+        private int addAgeCount;
+        private Runnable onInfoChange;
+        
+        @ModelOperation void onInfoChange(People self, Runnable r) {
+            onInfoChange = r;
+        }
+        
+        @ModelOperation void addAge42(People p) {
             p.getAge().add(42);
+            addAgeCount++;
         }
 
         @OnReceive(url = "url", method = "WebSocket", data = String.class)
-        static void innerClass(People p, String d) {
+        void innerClass(People p, String d) {
         }
         
-        @Function static void inInnerClass(People p, Person data, int x, double y, String nick) throws IOException {
+        @Function void inInnerClass(People p, Person data, int x, double y, String nick) throws IOException {
             p.getInfo().add(data);
             p.getAge().add(x);
             p.getAge().add((int)y);
             p.getNicknames().add(nick);
+        }
+        
+        @ModelOperation void readAddAgeCount(People p, int[] holder, Runnable whenDone) {
+            holder[0] = addAgeCount;
+            whenDone.run();
+        }
+        
+        @OnPropertyChange("age") void infoChange(People p) {
+            if (onInfoChange != null) {
+                onInfoChange.run();
+            }
         }
     }
 }

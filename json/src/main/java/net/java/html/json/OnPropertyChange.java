@@ -74,7 +74,8 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * The method's first argument should be the instance of the 
- * associated {@link Model model class}.
+ * associated {@link Model model class}. The method shall be non-private
+ * and unless {@link Model#instance() instance mode} is on also static.
  * There can be an optional second {@link String} argument which will be set
  * to the name of the changed property. The second argument is only useful when
  * a single method reacts to changes in multiple properties.
