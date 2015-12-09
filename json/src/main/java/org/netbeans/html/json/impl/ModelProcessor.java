@@ -607,6 +607,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 {
                     Collection<String> dependants = functionDeps.get(p.name());
                     if (dependants != null) {
+                        w.append("    ");
                         w.append(className).append(" model = ").append(className).append(".this;\n");
                         for (String call : dependants) {
                             w.append("  ").append(call);
@@ -950,7 +951,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
             for (String pn : onPC.value()) {
                 StringBuilder call = new StringBuilder();
-                call.append("  ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+                call.append("  ").append(inPckName(clazz)).append(".").append(n).append("(");
                 call.append(wrapPropName(e, className, "name", pn));
                 call.append(");\n");
 
