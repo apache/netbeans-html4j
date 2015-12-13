@@ -168,11 +168,17 @@ final class Knockout extends WeakReference<Object> {
         javacall = true,
         keepAlive = false,
         wait4js = false,
-        args = { "ret", "propNames", "propReadOnly", "propValues", "funcNames" },
+        args = { "ret", "copyFrom", "propNames", "propReadOnly", "propValues", "funcNames" },
         body = 
           "Object.defineProperty(ret, 'ko4j', { value : this });\n"
         + "function koComputed(index, name, readOnly, value) {\n"
-        + "  var trigger = ko['observable']()['extend']({'notify':'always'});"
+        + "  var orig = copyFrom ? copyFrom[name] : null;\n"
+        + "  if (!ko['isObservable'](orig)) {\n"
+        + "    orig = null;\n"
+        + "    var trigger = ko['observable']()['extend']({'notify':'always'});\n"
+        + "  } else {\n"
+        + "    var trigger = orig;\n"
+        + "  }\n"
         + "  function realGetter() {\n"
         + "    var self = ret['ko4j'];\n"
         + "    try {\n"
@@ -182,29 +188,38 @@ final class Knockout extends WeakReference<Object> {
         + "      alert(\"Cannot call getValue on \" + self + \" prop: \" + name + \" error: \" + e);\n"
         + "    }\n"
         + "  }\n"
-        + "  var activeGetter = function() { return value; };\n"
+        + "  var activeGetter = orig ? orig : function() { return value; };\n"
         + "  var bnd = {\n"
         + "    'read': function() {\n"
         + "      trigger();\n"
-        + "      var r = activeGetter();\n"
-        + "      activeGetter = realGetter;\n"
+        + "      if (orig) {\n"
+        + "        var r = orig();\n"
+        + "      } else {\n"
+        + "        var r = activeGetter();\n"
+        + "        activeGetter = realGetter;\n"
+        + "      }\n"
         + "      if (r) try { var br = r.valueOf(); } catch (err) {}\n"
         + "      return br === undefined ? r: br;\n"
         + "    },\n"
         + "    'owner': ret\n"
         + "  };\n"
         + "  if (!readOnly) {\n"
-        + "    bnd['write'] = function(val) {\n"
+        + "    function write(val) {\n"
+        + "      if (orig) orig(val);\n"
         + "      var self = ret['ko4j'];\n"
         + "      if (!self) return;\n"
-        + "      var model = val['ko4j'];\n"
+        + "      var model = val ? val['ko4j'] : null;\n"
         + "      self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);\n"
         + "    };\n"
+        + "    bnd['write'] = write;\n"
+        + "    if (orig) {\n"
+        + "      write(orig());\n"
+        + "    }\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"
         + "  cmpt['valueHasMutated'] = function(val) {\n"
         + "    if (arguments.length === 1) activeGetter = function() { return val; };\n"
-        + "    trigger['valueHasMutated']();\n"
+        + "    trigger(val);\n"
         + "  };\n"
         + "  ret[name] = cmpt;\n"
         + "}\n"
@@ -223,7 +238,7 @@ final class Knockout extends WeakReference<Object> {
         + "}\n"
         )
     native void wrapModel(
-        Object ret, 
+        Object ret, Object copyFrom,
         String[] propNames, Boolean[] propReadOnly, Object propValues,
         String[] funcNames
     );

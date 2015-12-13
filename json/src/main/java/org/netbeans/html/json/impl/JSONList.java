@@ -183,7 +183,7 @@ public final class JSONList<T> extends ArrayList<T> {
         proto.getContext().execute(new Runnable() {
             @Override
             public void run() {
-                Bindings m = PropertyBindingAccessor.getBindings(proto, false);
+                Bindings m = PropertyBindingAccessor.getBindings(proto, false, null);
                 if (m != null) {
                     m.valueHasMutated(name, null, JSONList.this);
                     for (String dependant : deps) {
@@ -214,6 +214,6 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     final Object koData() {
-        return koData(this, PropertyBindingAccessor.getBindings(proto, true));
+        return koData(this, PropertyBindingAccessor.getBindings(proto, true, null));
     }
 }

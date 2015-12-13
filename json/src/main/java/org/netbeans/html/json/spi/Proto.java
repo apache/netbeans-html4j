@@ -196,7 +196,7 @@ public final class Proto {
      * of the current model to the <em>body</em> element of the page.
      */
     public void applyBindings() {
-        initBindings().applyBindings(null);
+        initBindings(null).applyBindings(null);
     }
 
     /** Initializes the associated model to the specified element's subtree.
@@ -210,7 +210,7 @@ public final class Proto {
      * @see Technology.ApplyId
      */
     public void applyBindings(String id) {
-        initBindings().applyBindings(id);
+        initBindings(null).applyBindings(id);
     }
 
     /** Invokes the provided runnable in the {@link #getContext() context}
@@ -502,9 +502,9 @@ public final class Proto {
         return "Proto[" + obj + "]@" + Integer.toHexString(System.identityHashCode(this));
     }
 
-    final Bindings initBindings() {
+    final Bindings initBindings(Object originalObject) {
         if (ko == null) {
-            Bindings b = Bindings.apply(context, obj);
+            Bindings b = Bindings.apply(context);
             PropertyBinding[] pb = new PropertyBinding[type.propertyNames.length];
             for (int i = 0; i < pb.length; i++) {
                 pb[i] = b.registerProperty(
@@ -518,7 +518,7 @@ public final class Proto {
                 );
             }
             ko = b;
-            b.finish(obj, pb, fb);
+            b.finish(obj, originalObject, pb, fb);
         }
         return ko;
     }

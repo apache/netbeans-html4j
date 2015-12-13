@@ -68,7 +68,7 @@ public final class Bindings<Data> {
         return PropertyBindingAccessor.create(access, this, propName, index, model, readOnly);
     }
 
-    public static Bindings<?> apply(BrwsrCtx c, Object model) {
+    public static Bindings<?> apply(BrwsrCtx c) {
         Technology<?> bp = JSON.findTechnology(c);
         return apply(bp);
     }
@@ -77,9 +77,12 @@ public final class Bindings<Data> {
         return new Bindings<Data>(bp);
     }
     
-    public final void finish(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+    public final void finish(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
         assert data == null;
-        if (bp instanceof Technology.BatchInit) {
+        if (bp instanceof Technology.BatchCopy) {
+            Technology.BatchCopy<Data> bi = (Technology.BatchCopy<Data>)bp;
+            data = bi.wrapModel(model, copyFrom, propArr, funcArr);
+        } else if (bp instanceof Technology.BatchInit) {
             Technology.BatchInit<Data> bi = (Technology.BatchInit<Data>)bp;
             data = bi.wrapModel(model, propArr, funcArr);
         } else {

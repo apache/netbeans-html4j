@@ -72,14 +72,14 @@ public abstract class PropertyBindingAccessor {
         String method, Object data
     );
 
-    protected abstract Bindings bindings(Proto proto, boolean initialize);
+    protected abstract Bindings bindings(Proto proto, boolean initialize, Object copyFrom);
     protected abstract void notifyChange(Proto proto, int propIndex);
     protected abstract Proto findProto(Proto.Type<?> type, Object object);
     protected abstract <Model> Model cloneTo(Proto.Type<Model> type, Model model, BrwsrCtx c);
     protected abstract Object read(Proto.Type<?> from, BrwsrCtx c, Object data);
 
-    static Bindings getBindings(Proto proto, boolean initialize) {
-        return DEFAULT.bindings(proto, initialize);
+    static Bindings getBindings(Proto proto, boolean initialize, Object copyFrom) {
+        return DEFAULT.bindings(proto, initialize, copyFrom);
     }
 
     static void notifyProtoChange(Proto proto, int propIndex) {

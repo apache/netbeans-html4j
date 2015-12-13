@@ -81,6 +81,13 @@ public final class JSON {
         return t == null ? EmptyTech.EMPTY : t;
     }
 
+    public static <M> void readBindings(BrwsrCtx c, M model, Object value) {
+        Technology<?> tech = findTechnology(c);
+        if (tech instanceof Technology.BatchCopy) {
+            Proto p = findProto(model);
+            PropertyBindingAccessor.getBindings(p, true, value);
+        }
+    }
     public static void extract(BrwsrCtx c, Object value, String[] props, Object[] values) {
         Transfer t = findTransfer(c);
         t.extract(value, props, values);
@@ -285,7 +292,7 @@ public final class JSON {
         if (proto == null) {
             return null;
         }
-        final Bindings b = PropertyBindingAccessor.getBindings(proto, true);
+        final Bindings b = PropertyBindingAccessor.getBindings(proto, true, null);
         return b == null ? null : b.koData();
     }
 

@@ -57,7 +57,7 @@ import static org.netbeans.html.ko4j.KO4J.LOG;
  */
 @Contexts.Id("ko4j")
 final class KOTech
-implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Technology.ApplyId<Object> {
+implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Technology.ApplyId<Object> {
     private Object[] jsObjects;
     private int jsIndex;
 
@@ -65,11 +65,11 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
     }
     
     @Override
-    public Object wrapModel(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
-        return createKO(model, propArr, funcArr, null);
+    public Object wrapModel(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+        return createKO(model, copyFrom, propArr, funcArr, null);
     }
 
-    final Object createKO(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
+    final Object createKO(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
         String[] propNames = new String[propArr.length];
         Boolean[] propReadOnly = new Boolean[propArr.length];
         Object[] propValues = new Object[propArr.length];
@@ -92,7 +92,7 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
             ko[0] = newKO;
         }
         newKO.wrapModel(
-            ret,
+            ret, copyFrom,
             propNames, propReadOnly, propValues,
             funcNames
         );

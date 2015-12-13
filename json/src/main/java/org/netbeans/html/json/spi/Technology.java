@@ -135,7 +135,7 @@ public interface Technology<Data> {
      * @since 0.6
      */
     public static interface BatchInit<D> extends Technology<D> {
-        /** Wrap the given model into redering technology appropriate object 
+        /** Wrap the given model into rendering technology appropriate object
          * <code>D</code> and expose given properties and functions on it.
          * 
          * @param model the {@link Models#isModel(java.lang.Class) model} in Java
@@ -190,5 +190,27 @@ public interface Technology<Data> {
          * @param data the data to apply
          */
         public void applyBindings(String id, D data);
+    }
+
+    /** Extension of {@link BatchInit} with enhanced support for
+     * copying values. Technologies that support this interface provide a
+     * guarantee that result {@link Models#toRaw(java.lang.Object)}
+     * wrapped by {@link Models#fromRaw(net.java.html.BrwsrCtx, java.lang.Class, java.lang.Object)}
+     * will share essential properties (and not just values) of the original object.
+     *
+     * @since 1.3
+     */
+    public static interface BatchCopy<D> extends Technology<D> {
+        /** Wrap the given model into rendering technology appropriate object
+         * <code>D</code> and expose given properties and functions on it.
+         *
+         * @param model the {@link Models#isModel(java.lang.Class) model} in Java
+         * @param copyFrom the object to copy data from
+         *      (expectably of type D, but that isn't guaranteed) or <code>null</code>
+         * @param propArr array of property bindings to expose
+         * @param funcArr array of functions to expose
+         * @return appropriate wrapper around the model
+         */
+        public D wrapModel(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr);
     }
 }

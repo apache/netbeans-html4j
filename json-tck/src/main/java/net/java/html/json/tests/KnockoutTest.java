@@ -178,6 +178,10 @@ public final class KnockoutTest {
         
         assertEquals(p2.getFirstName(), "Jarda", "First name");
         assertEquals(p2.getLastName(), "Tulach", "Last name");
+
+        p2.setFirstName("Jirka");
+        assertEquals(p2.getFirstName(), "Jirka", "First name updated");
+        assertEquals(p1.getFirstName(), "Jirka", "First name updated in original object");
     }
 
     @KOTest public void modifyComputedProperty() throws Throwable {

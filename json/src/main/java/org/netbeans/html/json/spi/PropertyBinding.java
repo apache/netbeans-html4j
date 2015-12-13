@@ -67,8 +67,8 @@ public abstract class PropertyBinding {
             }
 
             @Override
-            protected Bindings bindings(Proto proto, boolean initialize) {
-                return initialize ? proto.initBindings() : proto.getBindings();
+            protected Bindings bindings(Proto proto, boolean initialize, Object copyFrom) {
+                return initialize ? proto.initBindings(copyFrom) : proto.getBindings();
             }
 
             @Override
