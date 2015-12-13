@@ -386,6 +386,59 @@ public class ModelProcessorTest {
         Compile c = Compile.create(html, code, "1.5");
         assertTrue(c.getErrors().isEmpty(), "No errors: " + c.getErrors());
     }
+    
+    @Test public void instanceNeedsDefaultConstructor() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.ComputedProperty;\n"
+            + "@Model(className=\"XModel\", instance=true, properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  X(int x) {}\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        c.assertError("Needs non-private default constructor when instance=true");
+    }
+    
+    @Test public void instanceNeedsNonPrivateConstructor() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.ComputedProperty;\n"
+            + "@Model(className=\"XModel\", instance=true, properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "  private X() {}\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        c.assertError("Needs non-private default constructor when instance=true");
+    }
+
+    @Test public void instanceNoConstructorIsOK() throws IOException {
+        String html = "<html><body>"
+            + "</body></html>";
+        String code = "package x.y.z;\n"
+            + "import net.java.html.json.Model;\n"
+            + "import net.java.html.json.Property;\n"
+            + "import net.java.html.json.ComputedProperty;\n"
+            + "@Model(className=\"XModel\", instance=true, properties={\n"
+            + "  @Property(name=\"prop\", type=long.class)\n"
+            + "})\n"
+            + "class X {\n"
+            + "}\n";
+
+        Compile c = Compile.create(html, code);
+        c.assertNoErrors();
+    }
 
     @Test public void putNeedsDataArgument() throws Exception {
         needsAnArg("PUT");

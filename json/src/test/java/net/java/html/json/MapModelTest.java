@@ -304,6 +304,38 @@ public class MapModelTest {
         assertEquals(p.getAge().get(1).intValue(), 7);
     }
     
+    @Test
+    public void addAge42ThreeTimes() {
+        People p = Models.bind(new People(), c);
+        Map m = (Map)Models.toRaw(p);
+        assertNotNull(m);
+        
+        class Inc implements Runnable {
+            int cnt;
+            
+            @Override
+            public void run() {
+                cnt++;
+            }
+        }
+        Inc incThreeTimes = new Inc();
+        p.onInfoChange(incThreeTimes);
+        
+        p.addAge42();
+        p.addAge42();
+        p.addAge42();
+        final int[] cnt = { 0, 0 };
+        p.readAddAgeCount(cnt, new Runnable() {
+            @Override
+            public void run() {
+                cnt[1] = 1;
+            }
+        });
+        assertEquals(cnt[1], 1, "Callback called");
+        assertEquals(cnt[0], 3, "Internal state kept");
+        assertEquals(incThreeTimes.cnt, 3, "Property change delivered three times");
+    }
+    
     static final class One {
         int changes;
         final PropertyBinding pb;

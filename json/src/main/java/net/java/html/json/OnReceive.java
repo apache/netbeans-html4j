@@ -102,6 +102,8 @@ import java.lang.annotation.Target;
  * One can use this method to communicate with the server
  * via <a href="doc-files/websockets.html">WebSocket</a> protocol since version 0.6.
  * Read the <a href="doc-files/websockets.html">tutorial</a> to see how.
+ * The method shall be non-private
+ * and unless {@link Model#instance() instance mode} is on also static.
  * <p>
  * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7138581">on-line demo</a>
  * to see REST access via {@link OnReceive} annotation.

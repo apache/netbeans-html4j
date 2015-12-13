@@ -223,11 +223,36 @@ public final class ModelProcessor extends AbstractProcessor {
             try {
                 w.append("package " + pkg + ";\n");
                 w.append("import net.java.html.json.*;\n");
-                final String inPckName = inPckName(e);
+                final String inPckName = inPckName(e, false);
                 w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private static Class<").append(inPckName).append("> modelFor() { return ").append(inPckName).append(".class; }\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
+                if (m.instance()) {
+                    int cCnt = 0;
+                    for (Element c : e.getEnclosedElements()) {
+                        if (c.getKind() != ElementKind.CONSTRUCTOR) {
+                            continue;
+                        }
+                        cCnt++;
+                        ExecutableElement ec = (ExecutableElement) c;
+                        if (ec.getParameters().size() > 0) {
+                            continue;
+                        }
+                        if (ec.getModifiers().contains(Modifier.PRIVATE)) {
+                            continue;
+                        }
+                        cCnt = 0;
+                        break;
+                    }
+                    if (cCnt > 0) {
+                        ok = false;
+                        error("Needs non-private default constructor when instance=true", e);
+                        w.append("  private final ").append(inPckName).append(" instance = null;\n");
+                    } else {
+                        w.append("  private final ").append(inPckName).append(" instance = new ").append(inPckName).append("();\n");
+                    }
+                }
                 w.append("  private final org.netbeans.html.json.spi.Proto proto;\n");
                 w.append(body.toString());
                 w.append("  private ").append(className).append("(net.java.html.BrwsrCtx context) {\n");
@@ -382,7 +407,13 @@ public final class ModelProcessor extends AbstractProcessor {
                     if (param instanceof ExecutableElement) {
                         ExecutableElement ee = (ExecutableElement)param;
                         w.append("        case " + (i / 2) + ":\n");
-                        w.append("          ").append(((TypeElement)e).getQualifiedName()).append(".").append(name).append("(");
+                        w.append("          ");
+                        if (m.instance()) {
+                            w.append("model.instance");
+                        } else {
+                            w.append(((TypeElement)e).getQualifiedName());
+                        }
+                        w.append(".").append(name).append("(");
                         w.append(wrapParams(ee, null, className, "model", "ev", "data"));
                         w.append(");\n");
                         w.append("          return;\n");
@@ -940,6 +971,7 @@ public final class ModelProcessor extends AbstractProcessor {
         Element clazz, StringWriter body, String className,
         List<? extends Element> enclosedElements, List<Object> functions
     ) {
+        boolean instance = clazz.getAnnotation(Model.class).instance();
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -949,7 +981,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (onF == null) {
                 continue;
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 error("@OnFunction method needs to be static", e);
                 return false;
             }
@@ -972,6 +1004,7 @@ public final class ModelProcessor extends AbstractProcessor {
         Prprt[] properties, String className,
         Map<String, Collection<String>> functionDeps
     ) {
+        boolean instance = clazz.getAnnotation(Model.class).instance();
         for (Element m : clazz.getEnclosedElements()) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -987,7 +1020,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     return false;
                 }
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 error("@OnPrprtChange method needs to be static", e);
                 return false;
             }
@@ -1004,7 +1037,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
             for (String pn : onPC.value()) {
                 StringBuilder call = new StringBuilder();
-                call.append("  ").append(inPckName(clazz)).append(".").append(n).append("(");
+                call.append("  ").append(inPckName(clazz, instance)).append(".").append(n).append("(");
                 call.append(wrapPropName(e, className, "name", pn));
                 call.append(");\n");
 
@@ -1032,6 +1065,7 @@ public final class ModelProcessor extends AbstractProcessor {
         List<? extends Element> enclosedElements,
         List<Object> functions
     ) {
+        boolean instance = clazz.getAnnotation(Model.class).instance();
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -1041,7 +1075,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (mO == null) {
                 continue;
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 error("@ModelOperation method needs to be static", e);
                 return false;
             }
@@ -1092,7 +1126,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
                 StringBuilder call = new StringBuilder();
                 call.append("{ Object[] arr = (Object[])data; ");
-                call.append(inPckName(clazz)).append(".").append(m.getSimpleName()).append("(");
+                call.append(inPckName(clazz, true)).append(".").append(m.getSimpleName()).append("(");
                 int i = 0;
                 for (VariableElement ve : e.getParameters()) {
                     if (i++ == 0) {
@@ -1133,6 +1167,7 @@ public final class ModelProcessor extends AbstractProcessor {
         inType.append("    switch (index) {\n");
         int index = 0;
         boolean ok = true;
+        boolean instance = clazz.getAnnotation(Model.class).instance();
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
                 continue;
@@ -1142,7 +1177,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (onR == null) {
                 continue;
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 error("@OnReceive method needs to be static", e);
                 return false;
             }
@@ -1392,7 +1427,7 @@ public final class ModelProcessor extends AbstractProcessor {
         body.append(
             "    case " + index + ": {\n" +
             "      if (type == 0) { /* on open */\n" +
-            "        ").append(inPckName(clazz)).append(".").append(n).append("(");
+            "        ").append(inPckName(clazz, true)).append(".").append(n).append("(");
         {
             String sep = "";
             for (String arg : args) {
@@ -1419,7 +1454,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!findOnError(e, ((TypeElement)clazz), onR.onError(), className)) {
                 return true;
             }
-            body.append("        ").append(inPckName(clazz)).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz, true)).append(".").append(onR.onError()).append("(");
             body.append("model, value);\n");
         }
         body.append(
@@ -1440,7 +1475,7 @@ public final class ModelProcessor extends AbstractProcessor {
             "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
         );
         {
-            body.append("        ").append(inPckName(clazz)).append(".").append(n).append("(");
+            body.append("        ").append(inPckName(clazz, true)).append(".").append(n).append("(");
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
@@ -1455,7 +1490,7 @@ public final class ModelProcessor extends AbstractProcessor {
         );
         if (!onR.onError().isEmpty()) {
             body.append(" else if (type == 3) { /* on close */\n");
-            body.append("        ").append(inPckName(clazz)).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz, true)).append(".").append(onR.onError()).append("(");
             body.append("model, null);\n");
             body.append(
                 "        return;" +
@@ -1687,7 +1722,10 @@ public final class ModelProcessor extends AbstractProcessor {
         w.write("  }\n");
     }
 
-    private String inPckName(Element e) {
+    private String inPckName(Element e, boolean preferInstance) {
+        if (preferInstance && e.getAnnotation(Model.class).instance()) {
+            return "model.instance";
+        }
         StringBuilder sb = new StringBuilder();
         while (e.getKind() != ElementKind.PACKAGE) {
             if (sb.length() == 0) {

@@ -52,7 +52,8 @@ import org.netbeans.html.json.spi.FunctionBinding;
 /** Methods in class annotated by {@link Model} can be 
  * annotated by this annotation to signal that they should be available
  * as functions to users of the model classes. The method
- * should be non-private, static and return <code>void</code>.
+ * should be non-private, static (unless {@link Model#instance() instance mode} is on)
+ * and return <code>void</code>.
  * It may take few arguments. The first argument can be the type of
  * the associated model class, the other argument can be of any type,
  * but has to be named <code>data</code> - this one represents the

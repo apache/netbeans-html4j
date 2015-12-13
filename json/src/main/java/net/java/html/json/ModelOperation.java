@@ -53,7 +53,8 @@ import java.lang.annotation.Target;
  * <p>
  * A method in a class annotated by {@link Model @Model} annotation may be
  * annotated by {@link ModelOperation @ModelOperation}. The method has
- * to be static, non-private and return <code>void</code>. The first parameter
+ * to be static (unless {@link Model#instance() instance mode} is on), 
+ * non-private and return <code>void</code>. The first parameter
  * of the method must be the {@link Model#className() model class} followed
  * by any number of additional arguments.
  * <p>
