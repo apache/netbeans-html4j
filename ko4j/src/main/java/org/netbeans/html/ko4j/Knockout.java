@@ -224,7 +224,7 @@ final class Knockout extends WeakReference<Object> {
         )
     native void wrapModel(
         Object ret, 
-        String[] propNames, boolean[] propReadOnly, Object propValues,
+        String[] propNames, Boolean[] propReadOnly, Object propValues,
         String[] funcNames
     );
     

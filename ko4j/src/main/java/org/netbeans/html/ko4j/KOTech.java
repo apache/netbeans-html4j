@@ -71,7 +71,7 @@ implements Technology.BatchInit<Object>, Technology.ValueMutated<Object>, Techno
 
     final Object createKO(Object model, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
         String[] propNames = new String[propArr.length];
-        boolean[] propReadOnly = new boolean[propArr.length];
+        Boolean[] propReadOnly = new Boolean[propArr.length];
         Object[] propValues = new Object[propArr.length];
         for (int i = 0; i < propNames.length; i++) {
             propNames[i] = propArr[i].getPropertyName();
