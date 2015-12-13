@@ -214,6 +214,7 @@ final class Knockout extends WeakReference<Object> {
         + "    bnd['write'] = write;\n"
         + "    if (orig) {\n"
         + "      write(orig());\n"
+        + "      orig.subscribe(write);\n"
         + "    }\n"
         + "  };\n"
         + "  var cmpt = ko['computed'](bnd);\n"

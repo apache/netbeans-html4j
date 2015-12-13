@@ -182,6 +182,10 @@ public final class KnockoutTest {
         p2.setFirstName("Jirka");
         assertEquals(p2.getFirstName(), "Jirka", "First name updated");
         assertEquals(p1.getFirstName(), "Jirka", "First name updated in original object");
+
+        p1.setFirstName("Ondra");
+        assertEquals(p1.getFirstName(), "Ondra", "1st name updated in original object");
+        assertEquals(p2.getFirstName(), "Ondra", "1st name updated in copied object");
     }
 
     @KOTest public void modifyComputedProperty() throws Throwable {
