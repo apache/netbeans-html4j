@@ -98,6 +98,7 @@
                        <exclude>*</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>*/nb-configuration.xml</exclude>
+                       <exclude>ko4j/src/main/resources/org/netbeans/html/ko4j/knockout-3.4.0.js</exclude>
                        <exclude>boot-script/src/test/resources/net/java/html/boot/script/ko4j/env.nashorn.1.2-debug.js</exclude>
                        <exclude>src/main/javadoc/resources/teavm.js</exclude>
                   </excludes>

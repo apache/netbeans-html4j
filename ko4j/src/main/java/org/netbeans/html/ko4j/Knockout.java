@@ -62,7 +62,7 @@ import org.netbeans.html.json.spi.PropertyBinding;
  *
  * @author Jaroslav Tulach
  */
-@JavaScriptResource("knockout-3.2.0.debug.js")
+@JavaScriptResource("knockout-3.4.0.js")
 final class Knockout extends WeakReference<Object> {
     private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue();
     private static final Set<Knockout> active = Collections.synchronizedSet(new HashSet<Knockout>());
