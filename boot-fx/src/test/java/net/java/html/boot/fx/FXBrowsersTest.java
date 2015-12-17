@@ -50,6 +50,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import net.java.html.BrwsrCtx;
 import net.java.html.js.JavaScriptBody;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
@@ -81,6 +82,43 @@ public class FXBrowsersTest {
             }
         }.start();
         App.CDL.await();
+    }
+    
+    @JavaScriptBody(args = {  }, body = "return true;")
+    static boolean inJS() {
+        return false;
+    }
+
+    @Test
+    public void brwsrCtxExecute() throws Throwable {
+        assertFalse(inJS(), "We aren't in JS now");
+        final CountDownLatch init = new CountDownLatch(1);
+        final BrwsrCtx[] ctx = { null };
+        FXBrowsers.runInBrowser(App.getV1(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(inJS(), "We are in JS context now");
+                ctx[0] = BrwsrCtx.findDefault(FXBrowsersTest.class);
+                init.countDown();
+            }
+        });
+        init.await();
+
+        final CountDownLatch cdl = new CountDownLatch(1);
+        class R implements Runnable {
+            @Override
+            public void run() {
+                if (Platform.isFxApplicationThread()) {
+                    assertTrue(inJS());
+                    cdl.countDown();
+                } else {
+                    ctx[0].execute(this);
+                }
+            }
+        }
+        new Thread(new R(), "Background thread").start();
+
+        cdl.await();
     }
 
     @Test

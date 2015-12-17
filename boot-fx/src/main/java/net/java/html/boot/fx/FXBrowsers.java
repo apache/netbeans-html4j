@@ -113,9 +113,11 @@ public final class FXBrowsers {
     ) {
         Object[] context = new Object[args.length + 1];
         System.arraycopy(args, 0, context, 1, args.length);
-        context[0] = new Load(webView);
+        final Load load = new Load(webView, null);
+        context[0] = load;
         BrowserBuilder.newBrowser(context).
             loadPage(url.toExternalForm()).
+            loadFinished(load).
             loadClass(onPageLoad).
             invoke(methodName, args).
             showAndWait();
@@ -194,10 +196,11 @@ public final class FXBrowsers {
     ) {
         Object[] newCtx = new Object[context.length + 1];
         System.arraycopy(context, 0, newCtx, 1, context.length);
-        newCtx[0] = new Load(webView);
+        final Load load = new Load(webView, onPageLoad);
+        newCtx[0] = load;
         BrowserBuilder.newBrowser(newCtx).
                 loadPage(url.toExternalForm()).
-                loadFinished(onPageLoad).
+                loadFinished(load).
                 classloader(loader).
                 showAndWait();
     }
@@ -227,15 +230,25 @@ public final class FXBrowsers {
         if (!(ud instanceof Load)) {
             throw new IllegalArgumentException();
         }
-        ((Load)ud).execute(code);
+        ((Load)ud).ctx.execute(code);
     }
     
-    private static class Load extends AbstractFXPresenter {
+    private static class Load extends AbstractFXPresenter implements Runnable {
         private final WebView webView;
+        private final Runnable myLoad;
+        private BrwsrCtx ctx;
 
-        public Load(WebView webView) {
-            webView.setUserData(this);
+        public Load(WebView webView, Runnable onLoad) {
             this.webView = webView;
+            this.myLoad = onLoad;
+            webView.setUserData(this);
+        }
+
+        public void run() {
+            ctx = BrwsrCtx.findDefault(Load.class);
+            if (myLoad != null) {
+                myLoad.run();
+            }
         }
         
         @Override
