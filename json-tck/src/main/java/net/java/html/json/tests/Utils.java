@@ -203,7 +203,7 @@ public final class Utils {
     
     static void assertNull(Object o, String msg) {
         if (o != null) {
-            throw new AssertionError(msg);
+            throw new AssertionError(msg + " but was: " + o);
         }
     }
 
@@ -220,6 +220,6 @@ public final class Utils {
         if (a != null && a.equals(b)) {
             return;
         }
-        throw new AssertionError(msg);
+        throw new AssertionError(msg + " expecting: " + b + " actual: " + a);
     }
 }
