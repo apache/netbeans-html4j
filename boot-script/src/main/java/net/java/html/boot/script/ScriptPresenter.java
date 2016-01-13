@@ -100,7 +100,7 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     }    
     private FnImpl defineImpl(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
-        sb.append("(function() {");
+        sb.append("(function() {\n");
         sb.append("  return function(");
         String sep = "";
         if (names != null) for (String n : names) {
@@ -109,8 +109,8 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
         sb.append(") {\n");
         sb.append(code);
-        sb.append("};");
-        sb.append("})()");
+        sb.append("\n  };\n");
+        sb.append("})()\n");
 
         final Object fn;
         try {
