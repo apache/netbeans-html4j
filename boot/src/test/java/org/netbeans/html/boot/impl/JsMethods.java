@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.boot.impl;
 
+import java.util.Map;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 
@@ -140,8 +141,14 @@ public class JsMethods {
     
     @JavaScriptBody(args = { "x" }, keepAlive = false, body = "throw 'Do not call me!'")
     public static native int checkAllowGC(java.lang.Object x);
+
+    @JavaScriptBody(args = { "map", "value" }, javacall = true, body =
+       "map.@java.util.Map::put(Ljava/lang/Object;Ljava/lang/Object;)('key',value);"
+    )
+    public static native void callParamTypes(Map<String,Integer> map, int value);
     
     enum Enm {
         A, B;
     }
 }
+

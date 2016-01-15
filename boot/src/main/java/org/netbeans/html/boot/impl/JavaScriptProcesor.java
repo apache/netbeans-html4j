@@ -75,6 +75,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -301,7 +302,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                         tm = ((ArrayType)tm).getComponentType();
                     }
                     sb.append('L');
-                    Element elm = processingEnv.getTypeUtils().asElement(tm);
+                    Types tu = processingEnv.getTypeUtils();
+                    Element elm = tu.asElement(tu.erasure(tm));
                     dumpElems(sb, elm, ';');
                 }
             }
@@ -413,7 +415,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             return;
         }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
-
+        Types tu = processingEnv.getTypeUtils();
 
         source.append("\n  public java.lang.Object ")
                 .append(mangled)
@@ -483,7 +485,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         sep = "";
         for (VariableElement ve : m.getParameters()) {
             source.append(sep);
-            source.append("(").append(ve.asType());
+            source.append("(").append(tu.erasure(ve.asType()));
             source.append(")arg").append(++cnt);
             sep = ", ";
         }

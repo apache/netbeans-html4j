@@ -46,6 +46,8 @@ import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.Assert;
 import static org.testng.Assert.*;
@@ -243,6 +245,13 @@ public class JsClassLoaderBase {
         java.lang.Object[] res = (java.lang.Object[]) ret;
         assertEquals(res.length, 1, "One element");
         assertEquals(res[0], "Ahoj", "The right string");
+    }
+
+    @Test public void parametricCallback() throws Throwable {
+        Map<String,Integer> map = new HashMap<String, Integer>();
+        Method st = methodClass.getMethod("callParamTypes", Map.class, int.class);
+        st.invoke(null, map, 42);
+        assertEquals(map.get("key"), Integer.valueOf(42), "The right value");
     }
     
    @Test public void checkTheTypeOfThrownException() throws Throwable {
