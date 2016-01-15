@@ -52,10 +52,10 @@ import net.java.html.js.JavaScriptResource;
  */
 @JavaScriptResource("jsmethods.js")
 public class JsMethods {
-    private Object value;
+    private java.lang.Object value;
     
     @JavaScriptBody(args = {}, body = "return 42;")
-    public static Object fortyTwo() {
+    public static java.lang.Object fortyTwo() {
         return -42;
     }
     
@@ -66,10 +66,10 @@ public class JsMethods {
     public static native int plus(int x);
     
     @JavaScriptBody(args = {}, body = "return this;")
-    public static native Object staticThis();
+    public static native java.lang.Object staticThis();
     
     @JavaScriptBody(args = {}, body = "return this;")
-    public native Object getThis();
+    public native java.lang.Object getThis();
     @JavaScriptBody(args = {"x"}, body = "return x;")
     public native int plusInst(int x);
     
@@ -110,7 +110,7 @@ public class JsMethods {
     public static native String fromEnum(Enm v);
     
     @JavaScriptBody(args = "arr", body = "return arr;")
-    public static native Object[] arr(Object[] arr);
+    public static native java.lang.Object[] arr(java.lang.Object[] arr);
     
     @JavaScriptBody(args = { "useA", "useB", "a", "b" }, body = "var l = 0;"
         + "if (useA) l += a;\n"
@@ -119,11 +119,11 @@ public class JsMethods {
     )
     public static native long chooseLong(boolean useA, boolean useB, long a, long b);
     
-    protected void onError(Object o) throws Exception {
+    protected void onError(java.lang.Object o) throws Exception {
         value = o;
     }
     
-    Object getError() {
+    java.lang.Object getError() {
         return value;
     }
     
@@ -131,7 +131,7 @@ public class JsMethods {
         "this.@org.netbeans.html.boot.impl.JsMethods::onError(Ljava/lang/Object;)(err);"
       + "return this.@org.netbeans.html.boot.impl.JsMethods::getError()();"
     )
-    public native Object recordError(Object err);
+    public native java.lang.Object recordError(java.lang.Object err);
     
     @JavaScriptBody(args = { "x", "y" }, body = "return x + y;")
     public static int plusOrMul(int x, int y) {
@@ -139,7 +139,7 @@ public class JsMethods {
     }
     
     @JavaScriptBody(args = { "x" }, keepAlive = false, body = "throw 'Do not call me!'")
-    public static native int checkAllowGC(Object x);
+    public static native int checkAllowGC(java.lang.Object x);
     
     enum Enm {
         A, B;

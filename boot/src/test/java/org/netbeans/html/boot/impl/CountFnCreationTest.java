@@ -49,8 +49,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import org.netbeans.html.boot.spi.Fn;
@@ -118,7 +116,7 @@ public class CountFnCreationTest implements Fn.Presenter {
         }
 
         @Override
-        public Object invoke(Object thiz, Object... args) throws Exception {
+        public java.lang.Object invoke(java.lang.Object thiz, java.lang.Object... args) throws Exception {
             return null;
         }
     }

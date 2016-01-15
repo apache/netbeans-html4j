@@ -46,8 +46,6 @@ import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.Assert;
 import static org.testng.Assert.*;
@@ -72,7 +70,7 @@ public class JsClassLoaderBase {
     @Test public void noParamMethod() throws Throwable {
         Method plus = methodClass.getMethod("fortyTwo");
         try {
-            final Object val = plus.invoke(null);
+            final java.lang.Object val = plus.invoke(null);
             assertTrue(val instanceof Number, "A number returned " + val);
             assertEquals(((Number)val).intValue(), 42);
         } catch (InvocationTargetException ex) {
@@ -100,7 +98,7 @@ public class JsClassLoaderBase {
     
     @Test public void instanceMethod() throws Throwable {
         Method plus = methodClass.getMethod("plusInst", int.class);
-        Object inst = methodClass.newInstance();
+        java.lang.Object inst = methodClass.newInstance();
         try {
             assertEquals(plus.invoke(inst, 10), 10);
         } catch (InvocationTargetException ex) {
@@ -118,7 +116,7 @@ public class JsClassLoaderBase {
     }
 
     @Test public void getThis() throws Throwable {
-        Object th = methodClass.newInstance();
+        java.lang.Object th = methodClass.newInstance();
         Method st = methodClass.getMethod("getThis");
         try {
             assertEquals(st.invoke(th), th);
@@ -166,7 +164,7 @@ public class JsClassLoaderBase {
     
     @Test public void callJavaScriptMethodOnOwnClass() throws Throwable {
         try {
-            Object thiz = methodClass.newInstance();
+            java.lang.Object thiz = methodClass.newInstance();
             Method st = methodClass.getMethod("returnYourSelf", methodClass);
             assertEquals(st.invoke(null, thiz), thiz, "Returns this");
         } catch (InvocationTargetException ex) {
@@ -190,7 +188,7 @@ public class JsClassLoaderBase {
         Class<? extends Enum> enmClazz2 = enmClazz.asSubclass(Enum.class);
         Method st = methodClass.getMethod("fromEnum", enmClazz);
         
-        Object valueB = Enum.valueOf(enmClazz2, "B");
+        java.lang.Object valueB = Enum.valueOf(enmClazz2, "B");
         assertEquals(st.invoke(null, valueB), "B", "Converts to string");
     }
     
@@ -210,7 +208,7 @@ public class JsClassLoaderBase {
     }
     
     @Test public void recordError() throws Throwable {
-        Method st = methodClass.getMethod("recordError", Object.class);
+        Method st = methodClass.getMethod("recordError", java.lang.Object.class);
         assertEquals(st.invoke(methodClass.newInstance(), "Hello"), "Hello", "The same parameter returned");
     }
     
@@ -239,10 +237,10 @@ public class JsClassLoaderBase {
     
     @Test public void arrayInOut() throws Throwable {
         String[] arr = { "Ahoj" };
-        Method st = methodClass.getMethod("arr", Object[].class);
-        Object ret = st.invoke(null, (Object) arr);
-        assertTrue(ret instanceof Object[], "Expecting array: " + ret);
-        Object[] res = (Object[]) ret;
+        Method st = methodClass.getMethod("arr", java.lang.Object[].class);
+        java.lang.Object ret = st.invoke(null, (java.lang.Object) arr);
+        assertTrue(ret instanceof java.lang.Object[], "Expecting array: " + ret);
+        java.lang.Object[] res = (java.lang.Object[]) ret;
         assertEquals(res.length, 1, "One element");
         assertEquals(res[0], "Ahoj", "The right string");
     }
@@ -250,7 +248,7 @@ public class JsClassLoaderBase {
    @Test public void checkTheTypeOfThrownException() throws Throwable {
         FnContext.currentPresenter(null);
         assertNull(Fn.activePresenter(), "No presenter is activer right now");
-        Object res = null;
+        java.lang.Object res = null;
         try {
             Method st = methodClass.getMethod("plus", int.class, int.class);
             try {
