@@ -48,8 +48,6 @@ import java.net.URL;
 import java.util.Collection;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,7 +55,7 @@ public class KeepAliveTest implements Fn.Presenter, Fn.KeepAlive, FindResources 
     private Class<?> jsMethods;
     @Test public void keepAliveIsSetToFalse() throws Exception {
         Closeable c = Fn.activate(this);
-        Number ret = (Number)jsMethods.getMethod("checkAllowGC", Object.class).invoke(null, this);
+        Number ret = (Number)jsMethods.getMethod("checkAllowGC", java.lang.Object.class).invoke(null, this);
         c.close();
         assertEquals(ret.intValue(), 0, "keepAlive is set to false");
     }    
@@ -79,7 +77,7 @@ public class KeepAliveTest implements Fn.Presenter, Fn.KeepAlive, FindResources 
     public Fn defineFn(String code, String[] names, final boolean[] keepAlive) {
         return new Fn(this) {
             @Override
-            public Object invoke(Object thiz, Object... args) throws Exception {
+            public java.lang.Object invoke(java.lang.Object thiz, java.lang.Object... args) throws Exception {
                 boolean res = true;
                 if (keepAlive != null) {
                     for (int i = 0; i < keepAlive.length; i++) {

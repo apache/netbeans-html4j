@@ -106,16 +106,16 @@ public class FnTest extends JsClassLoaderBase {
                 sb.append("};");
                 sb.append("})()");
                 try {
-                    final Object val = eng.eval(sb.toString());
+                    final java.lang.Object val = eng.eval(sb.toString());
                     return new Fn(this) {
                         @Override
-                        public Object invoke(Object thiz, Object... args) throws Exception {
-                            List<Object> all = new ArrayList<Object>(args.length + 1);
+                        public java.lang.Object invoke(java.lang.Object thiz, java.lang.Object... args) throws Exception {
+                            List<java.lang.Object> all = new ArrayList<java.lang.Object>(args.length + 1);
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
                             Invocable inv = (Invocable)eng;
                             try {
-                                Object ret = inv.invokeMethod(val, "call", all.toArray());
+                                java.lang.Object ret = inv.invokeMethod(val, "call", all.toArray());
                                 return val.equals(ret) ? null : ret;
                             } catch (ScriptException ex) {
                                 throw ex;

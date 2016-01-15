@@ -155,7 +155,7 @@ public class JavaScriptProcesorTest {
     @Test public void generatesCallbacksThatReturnObject() throws Exception {
         Class<?> callbacksForTestPkg = Class.forName("org.netbeans.html.boot.impl.$JsCallbacks$");
         Method m = callbacksForTestPkg.getDeclaredMethod("java_lang_Runnable$run$", Runnable.class);
-        assertEquals(m.getReturnType(), Object.class, "All methods always return object");
+        assertEquals(m.getReturnType(), java.lang.Object.class, "All methods always return object");
     }
     
     @Test public void hasInstanceField() throws Exception {

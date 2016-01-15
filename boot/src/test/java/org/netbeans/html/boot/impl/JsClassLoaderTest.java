@@ -44,7 +44,6 @@ package org.netbeans.html.boot.impl;
 
 import java.io.Closeable;
 import java.io.Reader;
-import org.netbeans.html.boot.spi.Fn;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -56,6 +55,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import org.netbeans.html.boot.spi.Fn;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -101,16 +101,16 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
                 sb.append("};");
                 sb.append("})()");
                 try {
-                    final Object val = eng.eval(sb.toString());
+                    final java.lang.Object val = eng.eval(sb.toString());
                     return new Fn(this) {
                         @Override
-                        public Object invoke(Object thiz, Object... args) throws Exception {
-                            List<Object> all = new ArrayList<Object>(args.length + 1);
+                        public java.lang.Object invoke(java.lang.Object thiz, java.lang.Object... args) throws Exception {
+                            List<java.lang.Object> all = new ArrayList<java.lang.Object>(args.length + 1);
                             all.add(thiz == null ? val : thiz);
                             all.addAll(Arrays.asList(args));
                             Invocable inv = (Invocable)eng;
                             try {
-                                Object ret = inv.invokeMethod(val, "call", all.toArray());
+                                java.lang.Object ret = inv.invokeMethod(val, "call", all.toArray());
                                 return val.equals(ret) ? null : ret;
                             } catch (Exception ex) {
                                 throw ex;
