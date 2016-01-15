@@ -72,7 +72,6 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -424,7 +423,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         StringBuilder convert = new StringBuilder();
         if (!isStatic) {
             if (selfObj) {
-                source.append("Object self");
+                source.append("java.lang.Object self");
                 convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
                 convert.append("      self").
                         append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(self").
@@ -443,7 +442,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             ++cnt;
             final TypeMirror t = ve.asType();
             if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
-                source.append("Object");
+                source.append("java.lang.Object");
                 convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
                 convert.append("      arg").append(cnt).
                         append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
@@ -464,7 +463,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         }
         source.append("    ");
         if (m.getReturnType().getKind() != TypeKind.VOID) {
-            source.append("Object $ret = ");
+            source.append("java.lang.Object $ret = ");
         }
         if (isStatic) {
             source.append(((TypeElement)m.getEnclosingElement()).getQualifiedName());
