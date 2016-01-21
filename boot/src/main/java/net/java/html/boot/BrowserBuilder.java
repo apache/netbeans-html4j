@@ -106,7 +106,6 @@ public final class BrowserBuilder {
     
     private String resource;
     private Class<?> clazz;
-    private Class[] browserClass;
     private Runnable onLoad;
     private String methodName;
     private String[] methodArgs;
@@ -312,10 +311,9 @@ public final class BrowserBuilder {
                     final Fn.Presenter currentP = aP != null ? aP : dP;
                     
                     Thread.currentThread().setContextClassLoader(activeLoader);
-                    final Class<?> newClazz = Class.forName(myCls.getName(), true, activeLoader);
-                    if (browserClass != null) {
-                        browserClass[0] = newClazz;
-                    }
+                    final Class<?> newClazz = onLoad != null ?
+                        myCls :
+                        Class.forName(myCls.getName(), true, activeLoader);
                     Contexts.Builder cb = Contexts.newBuilder(context);
                     if (!Contexts.fillInByProviders(newClazz, cb)) {
                         LOG.log(Level.WARNING, "Using empty technology for {0}", newClazz);
