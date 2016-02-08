@@ -251,7 +251,7 @@ public class JsClassLoaderBase {
         Map<String,Integer> map = new HashMap<String, Integer>();
         Method st = methodClass.getMethod("callParamTypes", Map.class, int.class);
         st.invoke(null, map, 42);
-        assertEquals(map.get("key"), Integer.valueOf(42), "The right value");
+        assertEquals(map.get("key").intValue(), 42, "The right value");
     }
     
    @Test public void checkTheTypeOfThrownException() throws Throwable {
