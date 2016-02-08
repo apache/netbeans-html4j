@@ -248,7 +248,7 @@ public class JsClassLoaderBase {
     }
 
     @Test public void parametricCallback() throws Throwable {
-        Map<String,Integer> map = new HashMap<String, Integer>();
+        Map<String,Number> map = new HashMap<String, Number>();
         Method st = methodClass.getMethod("callParamTypes", Map.class, int.class);
         st.invoke(null, map, 42);
         assertEquals(map.get("key").intValue(), 42, "The right value");
