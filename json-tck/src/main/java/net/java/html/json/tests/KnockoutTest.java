@@ -168,23 +168,45 @@ public final class KnockoutTest {
         }
     }
     
-    @KOTest public void rawObject() {
-        final BrwsrCtx ctx = newContext();
-        Person p1 = Models.bind(new Person(), ctx);
-        p1.setFirstName("Jarda");
-        p1.setLastName("Tulach");
-        Object raw = Models.toRaw(p1);
-        Person p2 = Models.fromRaw(ctx, Person.class, raw);
-        
-        assertEquals(p2.getFirstName(), "Jarda", "First name");
-        assertEquals(p2.getLastName(), "Tulach", "Last name");
+    @KOTest public void rawObject() throws Exception {
+        if (js == null) {
+            final BrwsrCtx ctx = newContext();
+            Person p1 = Models.bind(new Person(), ctx);
+            p1.setFirstName("Jarda");
+            p1.setLastName("Tulach");
+            Object raw = Models.toRaw(p1);
+            Person p2 = Models.fromRaw(ctx, Person.class, raw);
 
-        p2.setFirstName("Jirka");
-        assertEquals(p2.getFirstName(), "Jirka", "First name updated");
-        assertEquals(p1.getFirstName(), "Jirka", "First name updated in original object");
+            assertEquals(p2.getFirstName(), "Jarda", "First name");
+            assertEquals(p2.getLastName(), "Tulach", "Last name");
 
-        p1.setFirstName("Ondra");
-        assertEquals(p1.getFirstName(), "Ondra", "1st name updated in original object");
+            p2.setFirstName("Jirka");
+            assertEquals(p2.getFirstName(), "Jirka", "First name updated");
+
+            js = new KnockoutModel();
+            js.getPeople().add(p1);
+            js.getPeople().add(p2);
+        }
+
+        Person p1 = js.getPeople().get(0);
+        Person p2 = js.getPeople().get(1);
+
+        if (js.getPeople().size() == 2) {
+            if (!"Jirka".equals(p1.getFirstName())) {
+                throw new InterruptedException();
+            }
+
+            assertEquals(p1.getFirstName(), "Jirka", "First name updated in original object");
+
+            p1.setFirstName("Ondra");
+            assertEquals(p1.getFirstName(), "Ondra", "1st name updated in original object");
+            
+            js.getPeople().add(p1);
+        }
+
+        if (!"Ondra".equals(p2.getFirstName())) {
+            throw new InterruptedException();
+        }
         assertEquals(p2.getFirstName(), "Ondra", "1st name updated in copied object");
     }
 
