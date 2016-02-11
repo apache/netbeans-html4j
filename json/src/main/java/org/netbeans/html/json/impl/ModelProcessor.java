@@ -1097,6 +1097,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             List<String> args = new ArrayList<String>();
             {
+                body.append("  /** @see " + clazz.getSimpleName() + "#" + m.getSimpleName() + " */\n");
                 body.append("  public void ").append(m.getSimpleName()).append("(");
                 String sep = "";
                 boolean checkFirst = true;
