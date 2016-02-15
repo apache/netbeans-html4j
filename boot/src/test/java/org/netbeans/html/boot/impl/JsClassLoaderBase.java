@@ -131,7 +131,7 @@ public class JsClassLoaderBase {
         Method st = methodClass.getMethod("both", double.class, double.class);
         Throwable ex;
         try {
-            Object arr = st.invoke(null, 2, 5);
+            java.lang.Object arr = st.invoke(null, 2, 5);
             ex = null;
         } catch (InvocationTargetException invoke) {
             ex = invoke.getTargetException();
