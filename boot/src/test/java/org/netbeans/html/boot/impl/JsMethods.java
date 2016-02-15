@@ -146,6 +146,9 @@ public class JsMethods {
        "map.@java.util.Map::put(Ljava/lang/Object;Ljava/lang/Object;)('key',value);"
     )
     public static native void callParamTypes(Map<String,Integer> map, int value);
+
+    @JavaScriptBody(args = { "a", "b" }, body = "return [ a, b ];")
+    public static native double[] both(double a, double b);
     
     enum Enm {
         A, B;

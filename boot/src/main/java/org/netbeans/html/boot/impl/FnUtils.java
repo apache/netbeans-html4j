@@ -380,6 +380,11 @@ public final class FnUtils {
                                 public void visitClassType(String name) {
                                     returnType = Type.getType("[" + Type.getObjectType(name).getDescriptor());
                                 }
+
+                                @Override
+                                public void visitBaseType(char descriptor) {
+                                    returnType = Type.getType("[" + descriptor);
+                                }
                             };
                         }
                         loadObject();

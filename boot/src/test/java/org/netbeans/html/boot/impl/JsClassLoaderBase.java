@@ -126,6 +126,18 @@ public class JsClassLoaderBase {
             throw ex.getTargetException();
         }
     }
+
+    @Test public void primitiveArrayReturn() throws Throwable {
+        Method st = methodClass.getMethod("both", double.class, double.class);
+        Throwable ex;
+        try {
+            Object arr = st.invoke(null, 2, 5);
+            ex = null;
+        } catch (InvocationTargetException invoke) {
+            ex = invoke.getTargetException();
+        }
+        assertTrue(ex instanceof ClassCastException, "Primitive arrays aren't returned from JavaScript: " + ex);
+    }
     
     @Test public void truth() throws Throwable {
         Method st = methodClass.getMethod("truth");
