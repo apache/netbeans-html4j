@@ -112,7 +112,7 @@ public final class BrwsrCtx implements Executor {
         org.netbeans.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = Contexts.fillInByProviders(requestor, cb);
         if (!found) {
-            LOG.warning("No browser context found. Returning empty technology!");
+            LOG.config("No browser context found. Returning empty technology!");
             return EMPTY;
         }
         return cb.build();
