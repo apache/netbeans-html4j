@@ -263,11 +263,15 @@ public final class ModelProcessor extends AbstractProcessor {
                         String[] gs = toGetSet(p.name(), tn, p.array());
                         w.write("    this.prop_" + p.name() + " = proto.createList(\""
                             + p.name() + "\"");
-                        if (functionDeps.containsKey(p.name())) {
-                            int index = Arrays.asList(functionDeps.keySet().toArray()).indexOf(p.name());
-                            w.write(", " + index);
+                        if (p.mutable()) {
+                            if (functionDeps.containsKey(p.name())) {
+                                int index = Arrays.asList(functionDeps.keySet().toArray()).indexOf(p.name());
+                                w.write(", " + index);
+                            } else {
+                                w.write(", -1");
+                            }
                         } else {
-                            w.write(", -1");
+                            w.write(", java.lang.Integer.MIN_VALUE");
                         }
                         Collection<String[]> dependants = propsDeps.get(p.name());
                         if (dependants != null) {
@@ -672,6 +676,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    return (" + tn + ")prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
+                if (!p.mutable()) {
+                    w.write("    proto.initTo(null, null);\n");
+                }
                 w.write("    proto.verifyUnlocked();\n");
                 w.write("    Object o = prop_" + p.name() + ";\n");
                 if (isModel[0]) {
@@ -1999,6 +2006,10 @@ public final class ModelProcessor extends AbstractProcessor {
 
         boolean array() {
             return p.array();
+        }
+
+        boolean mutable() {
+            return p.mutable();
         }
 
         String typeName(ProcessingEnvironment env) {

@@ -46,6 +46,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
+import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.Technology;
 
 /** Represents a property in a class defined with {@link Model} annotation.
  *
@@ -76,4 +78,21 @@ public @interface Property {
      * @return true, if this property is supposed to represent an array of values
      */
     boolean array() default false;
+
+    /** Can the value of the property be mutated without restriction or not.
+     * If a property is defined as <em>not mutable</em>, it defines
+     * semi-immutable value that can only be changed in construction time
+     * before the object is passed to underlying {@link Technology}. 
+     * Attempts to modify the object later yield {@link IllegalStateException}.
+     *
+     * Technologies may decide to represent such non-mutable
+     * property in more effective way - for
+     * example Knockout Java Bindings technology (with {@link Contexts.Id id} "ko4j")
+     * uses plain JavaScript value (number, string, array, boolean) rather
+     * than classical observable.
+     *
+     * @return false if the value cannot change after its <em>first use</em>
+     * @since 1.3
+     */
+    boolean mutable() default true;
 }

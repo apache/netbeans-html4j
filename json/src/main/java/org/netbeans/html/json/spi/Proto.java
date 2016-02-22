@@ -48,6 +48,7 @@ import java.util.List;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
+import net.java.html.json.Property;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.JSON.WS;
@@ -463,7 +464,10 @@ public final class Proto {
      * @param <T> the type of the list elements
      * @param propName name of a property this list is associated with
      * @param onChange index of the property to use when the list is modified
-     *   during callback to {@link Type#onChange(java.lang.Object, int)}
+     *   during callback to {@link Type#onChange(java.lang.Object, int)}.
+     *   If the value is {@link Integer#MIN_VALUE}, then the list is
+     *   not fully {@link Property#mutable()} and throws {@link UnsupportedOperationException}
+     *   on such attempts.
      * @param dependingProps the array of {@link ComputedProperty derived properties}
      *   that depend on the value of the list
      * @return new, empty list associated with this proto-object and its model
