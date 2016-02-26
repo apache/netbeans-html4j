@@ -101,7 +101,11 @@
         {@link net.java.html.json.Model Model classes} can generate
         builder-like construction methods if builder
         {@link net.java.html.json.Model#builder() prefix} is specified.
-        The <em>JavaFX</em> presenter can be executed in headless mode -
+        {@link net.java.html.json.Property#mutable} can be <code>false</code>
+        to define a non-mutable (almost constant) property. That
+        in case of <em>Knockout</em> bindings means: the property is
+        represented by a plain value rather than an observable in the JavaScript
+        object. The <em>JavaFX</em> presenter can be executed in headless mode -
         just specify <code>-Dfxpresenter.headless=true</code> when launching
         its virtual machine and no window will be shown. This is particularly
         useful for testing. Configure your <em>surefire</em> or <em>failsafe</em>
