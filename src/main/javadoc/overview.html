@@ -346,39 +346,48 @@
 
         <h3>Getting Started</h3>
 
-        There are <a href="http://wiki.apidesign.org/wiki/DukeScriptInNetBeans">many ways</a>
-        to start developing
-        <a href="http://html.java.net">Html for Java</a> application.
-        However to be sure one chooses the most recent setup, it is recommended
-        to switch to good old command line and use a
-        <a href="http://wiki.apidesign.org/wiki/Knockout4Java">Maven archetype</a>
-        associated with every version of this project. Make sure at least
+        This <b>HTML/Java</b> API is used by
+        <a target="_blank" href="https://platform.netbeans.org/tutorials/nbm-dukescript.html">
+        NetBeans Platform</a> as well as other project. The smoothest way
+        to get started is to follow the
+        <a target="_blank" href="https://dukescript.com/getting_started.html">getting started</a>
+        tutorial. In case one wants to stick with a <em>Maven</em> and command
+        line, one can follow
+        <a target="_blank" href="https://dukescript.com/update/2015/02/05/New-Version-of-Dukescript.html">
+            these instructions<a>, make sure at least
         <em>JDK7</em> is your installed Java and type:
         <pre>
 $ mvn archetype:generate \
- -DarchetypeGroupId=org.apidesign.html \
+ -DarchetypeGroupId=com.dukescript.archetype \
  -DarchetypeArtifactId=knockout4j-archetype \
- -DarchetypeVersion=0.8 <em># or newer version, if available</em>
+ -DarchetypeVersion=0.11 <em># or newer version, if available</em>
         </pre>
-        Answer few questions (for example choose myfirstbrwsrpage as artifactId)
+        Answer few questions (for example choose <em>myfirstbrwsrpage</em> as artifactId)
         and then you can:
         <pre>
 $ cd myfirstbrwsrpage
-$ mvn process-classes exec:java
+$ mvn install
+$ mvn -f client/pom.xml process-classes exec:exec
         </pre>
         In a few seconds (or minutes if
-        <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
+        <a target="_blank" href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
         decides to download the whole Internet of dependencies) you should
-        see a sample Hello World application rendered in a
-        <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
+        see a sample Hello World application.
+        Immediatelly you can be
+        <a target="_blank" href="https://dukescript.com/best/practices/2015/04/12/no-redeploys.html">
+        productive without any redeploys</a> - even more productive than
+        with plain JavaScript!
+        <p>
+        The application is rendered in a
+        <a target="_blank" href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
         web view component (that of course requires your JDK to come
-        with <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>;
-        <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7
+        with <a target="_blank" href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>;
+        <a target="_blank" href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7
             and JDK8 from Oracle</a> contain everything that is needed).
         The generated application is built around one
         Java source (uses the {@link net.java.html.json.Model} annotation to
         auto-generate another <code>Data.java</code> class during compilation)
-        and one HTML file (uses the <a href="http://knockoutjs.com">Knockout</a>
+        and one HTML file (uses the <a target="_blank" href="http://knockoutjs.com">Knockout</a>
         syntax to <code>data-bind</code> the HTML elements to the
         generated <code>Data</code> model):
         <pre>
@@ -387,7 +396,7 @@ $ ls src/main/webapp/pages/index.html
         </pre>
         That is all you need to get started. Play with the sources,
         modify them and enjoy
-        <a href="http://html.java.net">Html for Java</a>!
+        <a target="_blank" href="http://html.java.net">Html for Java</a>!
 
         <h2>IDE Support</h2>
 
