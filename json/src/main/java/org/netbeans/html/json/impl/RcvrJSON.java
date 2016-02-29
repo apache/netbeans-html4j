@@ -42,8 +42,7 @@
  */
 package org.netbeans.html.json.impl;
 
-import java.util.ArrayList;
-import net.java.html.BrwsrCtx;
+import java.util.concurrent.Callable;
 
 /** Super type for those who wish to receive JSON messages.
  *
@@ -94,11 +93,20 @@ public abstract class RcvrJSON {
             };
         }
         
-        public static MsgEvnt createMessage(final Object value) {
+         public static MsgEvnt createMessage(final Object value) {
             return new MsgEvnt() {
+                private Object val = value;
+
                 @Override
                 public Object[] getValues() {
-                    return value instanceof Object[] ? (Object[])value : new Object[] { value };
+                    if (val instanceof Callable) {
+                        try {
+                            val = ((Callable)val).call();
+                        } catch (Exception ex) {
+                            throw new IllegalStateException("Cannot compute " + val, ex);
+                        }
+                    }
+                    return val instanceof Object[] ? (Object[])val : new Object[] { val };
                 }
                 
                 @Override
