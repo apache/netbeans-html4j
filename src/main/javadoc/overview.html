@@ -126,7 +126,15 @@
         Switched to <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=257130">minified version 3.4.0</a>
         of <a target="_blank" href="http://knockoutjs.com">knockout.js</a>.
         Better support for <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=257348">
-            recursive @Model definitions</a>.
+        recursive @Model definitions</a>.
+        New module <code>org.netbeans.html:xhr4j</code> provides implementation
+        of {@link org.netbeans.html.json.spi.Transfer} with
+        {@link org.netbeans.html.context.spi.Contexts.Id technology identifier}
+        <b>xhr4j</b> - this module can be used to
+        <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=257849'>workaround limitations
+        of CORS</a> by handling the {@link net.java.html.json.OnReceive}
+        connections in Java.
+
         <h3>What's Been Improved in Version 1.2.3?</h3>
 
         One can control {@link net.java.html.json.OnReceive#headers() HTTP request headers}
