@@ -48,25 +48,6 @@
         <title>HTML for Java APIs</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style type="text/css">
-        table.field td {
-            padding: 4px;
-            width: 18px;
-            height: 18px;
-            font-size: 1.5em;
-            border: 1px solid black;
-        }
-        table.field td.UNKNOWN {
-            background-color: #D6E4E1;
-            cursor: pointer;
-        }
-        table.field td.EXPLOSION {
-            background-color: #A31E39;
-        }
-        table.field td.DISCOVERED {
-            background-color: #9DB2B1;
-        }
-        </style>
     </head>
     <body>
         <p>
@@ -527,6 +508,25 @@ $ ls client/src/main/webapp/pages/index.html
         </p>
 
         <script type="text/html" id="field">
+            <style type="text/css">
+                table.field td {
+                    padding: 4px;
+                    width: 18px;
+                    height: 18px;
+                    font-size: 1.5em;
+                    border: 1px solid black;
+                }
+                table.field td.UNKNOWN {
+                    background-color: #D6E4E1;
+                    cursor: pointer;
+                }
+                table.field td.EXPLOSION {
+                    background-color: #A31E39;
+                }
+                table.field td.DISCOVERED {
+                    background-color: #9DB2B1;
+                }
+            </style>
             <table class="field">
                 <tbody>
                     <!-- ko foreach: rows -->
@@ -542,7 +542,11 @@ $ ls client/src/main/webapp/pages/index.html
             </table>
         </script>
 
+        <center>
+        <div id="minesweeper" style="background-color: #f0f0f0; align: center">
         <div data-bind="template: { name : 'field', if: fieldShowing }"></div>
+        </div>
+        </center>
 
         <!-- boot bck2brwsr -->
         <script type="text/javascript" src="resources/teavm.js"></script>
