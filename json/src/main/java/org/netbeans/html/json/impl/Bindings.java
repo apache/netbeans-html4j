@@ -64,8 +64,8 @@ public final class Bindings<Data> {
         this.bp = bp;
     }
     
-    public <M> PropertyBinding registerProperty(String propName, int index, M model, Proto.Type<M> access, boolean readOnly) {
-        return PropertyBindingAccessor.create(access, this, propName, index, model, readOnly);
+    public <M> PropertyBinding registerProperty(String propName, int index, M model, Proto.Type<M> access, byte propertyType) {
+        return PropertyBindingAccessor.create(access, this, propName, index, model, propertyType);
     }
 
     public static Bindings<?> apply(BrwsrCtx c) {

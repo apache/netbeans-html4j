@@ -88,6 +88,7 @@ public final class JSONList<T> extends ArrayList<T> {
     
     @Override
     public boolean add(T e) {
+        prepareChange();
         boolean ret = super.add(e);
         notifyChange();
         return ret;
@@ -95,6 +96,7 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
+        prepareChange();
         boolean ret = super.addAll(c);
         notifyChange();
         return ret;
@@ -102,12 +104,14 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
+        prepareChange();
         boolean ret = super.addAll(index, c);
         notifyChange();
         return ret;
     }
 
     public void fastReplace(Collection<? extends T> c) {
+        prepareChange();
         super.clear();
         super.addAll(c);
         notifyChange();
@@ -115,6 +119,7 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public boolean remove(Object o) {
+        prepareChange();
         boolean ret = super.remove(o);
         notifyChange();
         return ret;
@@ -122,12 +127,14 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public void clear() {
+        prepareChange();
         super.clear();
         notifyChange();
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
+        prepareChange();
         boolean ret = super.removeAll(c);
         notifyChange();
         return ret;
@@ -135,6 +142,7 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public boolean retainAll(Collection<?> c) {
+        prepareChange();
         boolean ret = super.retainAll(c);
         notifyChange();
         return ret;
@@ -142,6 +150,7 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public T set(int index, T element) {
+        prepareChange();
         T ret = super.set(index, element);
         notifyChange();
         return ret;
@@ -149,12 +158,14 @@ public final class JSONList<T> extends ArrayList<T> {
 
     @Override
     public void add(int index, T element) {
+        prepareChange();
         super.add(index, element);
         notifyChange();
     }
 
     @Override
     public T remove(int index) {
+        prepareChange();
         T ret = super.remove(index);
         notifyChange();
         return ret;
@@ -177,6 +188,16 @@ public final class JSONList<T> extends ArrayList<T> {
         }
         sb.append(']');
         return sb.toString();
+    }
+
+    private void prepareChange() {
+        if (index == Integer.MIN_VALUE) {
+            try {
+                proto.initTo(null, null);
+            } catch (IllegalStateException ex) {
+                throw new UnsupportedOperationException();
+            }
+        }
     }
 
     private void notifyChange() {

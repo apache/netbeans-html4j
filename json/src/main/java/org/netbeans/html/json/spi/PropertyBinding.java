@@ -45,6 +45,7 @@ package org.netbeans.html.json.spi;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import net.java.html.BrwsrCtx;
+import net.java.html.json.ComputedProperty;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
 import org.netbeans.html.json.impl.PropertyBindingAccessor;
@@ -93,10 +94,8 @@ public abstract class PropertyBinding {
 
             @Override
             protected <M> PropertyBinding newBinding(
-                Proto.Type<M> access, Bindings<?> bindings, String name,
-                int index, M model, boolean readOnly
-            ) {
-                return new Impl(model, bindings, name, index, access, readOnly);
+                Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model, byte propertyType) {
+                return new Impl(model, bindings, name, index, access, propertyType);
             }
         };
     }
@@ -121,11 +120,21 @@ public abstract class PropertyBinding {
      */
     public abstract Object getValue();
 
-    /** Is this property read only? Or can one call {@link #setValue(java.lang.Object)}?
+    /** Is this property read only?. Or can one call {@link #setValue(java.lang.Object)}?
+     * The property can still change, but only as a result of other
+     * properties being changed, just like {@link ComputedProperty} can.
      *
      * @return true, if this property is read only
      */
     public abstract boolean isReadOnly();
+
+    /** Is this property constant?. If a property is constant, than its
+     * value cannot changed after it is read.
+     *
+     * @return true, if this property is constant
+     * @since 1.3
+     */
+    public abstract boolean isConstant();
 
     /** Returns identical version of the binding, but one that holds on the
      * original model object via weak reference.
@@ -137,17 +146,17 @@ public abstract class PropertyBinding {
 
     private static abstract class AImpl<M> extends PropertyBinding {
         public final String name;
-        public final boolean readOnly;
+        public final byte propertyType;
         final Proto.Type<M> access;
         final Bindings<?> bindings;
         final int index;
 
-        public AImpl(Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
+        public AImpl(Bindings<?> bindings, String name, int index, Proto.Type<M> access, byte propertyType) {
             this.bindings = bindings;
             this.name = name;
             this.index = index;
             this.access = access;
-            this.readOnly = readOnly;
+            this.propertyType = propertyType;
         }
 
         protected abstract M model();
@@ -174,7 +183,12 @@ public abstract class PropertyBinding {
 
         @Override
         public boolean isReadOnly() {
-            return readOnly;
+            return (propertyType & 1) != 0;
+        }
+
+        @Override
+        public boolean isConstant() {
+            return (propertyType & 2) != 0;
         }
 
         @Override
@@ -186,8 +200,8 @@ public abstract class PropertyBinding {
     private static final class Impl<M> extends AImpl<M> {
         private final M model;
 
-        public Impl(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
-            super(bindings, name, index, access, readOnly);
+        public Impl(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, byte propertyType) {
+            super(bindings, name, index, access, propertyType);
             this.model = model;
         }
 
@@ -198,14 +212,14 @@ public abstract class PropertyBinding {
 
         @Override
         public PropertyBinding weak() {
-            return new Weak(model, bindings, name, index, access, readOnly);
+            return new Weak(model, bindings, name, index, access, propertyType);
         }
     }
 
     private static final class Weak<M> extends AImpl<M> {
         private final Reference<M> ref;
-        public Weak(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, boolean readOnly) {
-            super(bindings, name, index, access, readOnly);
+        public Weak(M model, Bindings<?> bindings, String name, int index, Proto.Type<M> access, byte propertyType) {
+            super(bindings, name, index, access, propertyType);
             this.ref = new WeakReference<M>(model);
         }
 

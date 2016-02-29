@@ -64,8 +64,7 @@ public abstract class PropertyBindingAccessor {
     }
 
     protected abstract <M> PropertyBinding newBinding(
-        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model, boolean readOnly
-    );
+        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model, byte propertyType);
     protected abstract JSONCall newCall(
         BrwsrCtx ctx, RcvrJSON callback,
         String headers, String urlBefore, String urlAfter,
@@ -87,9 +86,9 @@ public abstract class PropertyBindingAccessor {
     }
 
     static <M> PropertyBinding create(
-        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model , boolean readOnly
+        Proto.Type<M> access, Bindings<?> bindings, String name, int index, M model , byte propertyType
     ) {
-        return DEFAULT.newBinding(access, bindings, name, index, model, readOnly);
+        return DEFAULT.newBinding(access, bindings, name, index, model, propertyType);
     }
     public static JSONCall createCall(
         BrwsrCtx ctx, RcvrJSON callback,

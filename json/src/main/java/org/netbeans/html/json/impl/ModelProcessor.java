@@ -263,11 +263,15 @@ public final class ModelProcessor extends AbstractProcessor {
                         String[] gs = toGetSet(p.name(), tn, p.array());
                         w.write("    this.prop_" + p.name() + " = proto.createList(\""
                             + p.name() + "\"");
-                        if (functionDeps.containsKey(p.name())) {
-                            int index = Arrays.asList(functionDeps.keySet().toArray()).indexOf(p.name());
-                            w.write(", " + index);
+                        if (p.mutable()) {
+                            if (functionDeps.containsKey(p.name())) {
+                                int index = Arrays.asList(functionDeps.keySet().toArray()).indexOf(p.name());
+                                w.write(", " + index);
+                            } else {
+                                w.write(", -1");
+                            }
                         } else {
-                            w.write(", -1");
+                            w.write(", java.lang.Integer.MIN_VALUE");
                         }
                         Collection<String[]> dependants = propsDeps.get(p.name());
                         if (dependants != null) {
@@ -355,7 +359,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 {
                     for (int i = 0; i < propsGetSet.size(); i++) {
                         w.append("      registerProperty(\"").append(propsGetSet.get(i).name).append("\", ");
-                        w.append((i) + ", " + propsGetSet.get(i).readOnly + ");\n");
+                        w.append((i) + ", " + propsGetSet.get(i).readOnly + ", " + propsGetSet.get(i).constant + ");\n");
                     }
                 }
                 {
@@ -672,6 +676,9 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("    return (" + tn + ")prop_" + p.name() + ";\n");
                 w.write("  }\n");
                 w.write("  public void " + gs[1] + "(" + tn + " v) {\n");
+                if (!p.mutable()) {
+                    w.write("    proto.initTo(null, null);\n");
+                }
                 w.write("    proto.verifyUnlocked();\n");
                 w.write("    Object o = prop_" + p.name() + ";\n");
                 if (isModel[0]) {
@@ -721,7 +728,8 @@ public final class ModelProcessor extends AbstractProcessor {
                 gs[0],
                 gs[1],
                 tn,
-                gs[3] == null && !p.array()
+                gs[3] == null && !p.array(),
+                !p.mutable()
             ));
         }
         return ok;
@@ -857,7 +865,8 @@ public final class ModelProcessor extends AbstractProcessor {
                     gs[0],
                     null,
                     tn,
-                    true
+                    true,
+                    false
                 ));
             } else {
                 w.write("  public void " + gs[4] + "(" + write.getParameters().get(1).asType());
@@ -870,6 +879,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     gs[0],
                     gs[4],
                     tn,
+                    false,
                     false
                 ));
             }
@@ -2001,6 +2011,10 @@ public final class ModelProcessor extends AbstractProcessor {
             return p.array();
         }
 
+        boolean mutable() {
+            return p.mutable();
+        }
+
         String typeName(ProcessingEnvironment env) {
             RuntimeException ex;
             try {
@@ -2058,12 +2072,15 @@ public final class ModelProcessor extends AbstractProcessor {
         final String setter;
         final String type;
         final boolean readOnly;
-        GetSet(String name, String getter, String setter, String type, boolean readOnly) {
+        final boolean constant;
+        
+        GetSet(String name, String getter, String setter, String type, boolean readOnly, boolean constant) {
             this.name = name;
             this.getter = getter;
             this.setter = setter;
             this.type = type;
             this.readOnly = readOnly;
+            this.constant = constant;
         }
     }
 
