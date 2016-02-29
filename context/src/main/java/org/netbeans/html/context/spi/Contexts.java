@@ -42,6 +42,7 @@
  */
 package org.netbeans.html.context.spi;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -159,6 +160,7 @@ public final class Contexts {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
+    @Documented
     public @interface Id {
         /** Identifier(s) for the implementation. 
          * 
