@@ -409,7 +409,6 @@ public final class KnockoutTest {
 
     @Model(className = "ConstantModel", targetId = "", builder = "assign", properties = {
         @Property(name = "doubleValue", mutable = false, type = double.class),
-        @Property(name = "longValue", mutable = false, type = long.class),
         @Property(name = "stringValue", mutable = false, type = String.class),
         @Property(name = "boolValue", mutable = false, type = boolean.class),
         @Property(name = "intArray", mutable = false, type = int.class, array = true),
@@ -462,28 +461,13 @@ public final class KnockoutTest {
         Utils.exposeHTML(KnockoutTest.class, "");
     }
 
-    @KOTest public void nonMutableLong() throws Exception {
-        Utils.exposeHTML(KnockoutTest.class,
-            "Type: <input id='input' data-bind=\"value: typeof longValue\"></input>\n"
-        );
-
-        ConstantModel model = Models.bind(new ConstantModel(), newContext());
-        model.assignStringValue("Hello").assignLongValue(Long.MAX_VALUE);
-        model.applyBindings();
-
-        String v = getSetInput("input", null);
-        assertEquals(v, "number", "Right type found: " + v);
-
-        Utils.exposeHTML(KnockoutTest.class, "");
-    }
-
     @KOTest public void nonMutableIntArray() throws Exception {
         Utils.exposeHTML(KnockoutTest.class,
             "Type: <input id='input' data-bind=\"value: typeof intArray\"></input>\n"
         );
 
         ConstantModel model = Models.bind(new ConstantModel(), newContext());
-        model.assignStringValue("Hello").assignLongValue(Long.MAX_VALUE).assignIntArray(1, 2, 3, 4);
+        model.assignStringValue("Hello").assignDoubleValue(Long.MAX_VALUE).assignIntArray(1, 2, 3, 4);
         model.applyBindings();
 
         String v = getSetInput("input", null);
