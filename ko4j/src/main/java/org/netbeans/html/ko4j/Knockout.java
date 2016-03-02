@@ -168,7 +168,7 @@ final class Knockout extends WeakReference<Object> {
         javacall = true,
         keepAlive = false,
         wait4js = false,
-        args = { "ret", "copyFrom", "propNames", "propReadOnly", "propConstant", "propValues", "funcNames" },
+        args = { "ret", "copyFrom", "propNames", "propInfo", "propValues", "funcNames" },
         body = 
           "Object.defineProperty(ret, 'ko4j', { value : this });\n"
         + "function koComputed(index, name, readOnly, value) {\n"
@@ -225,10 +225,10 @@ final class Knockout extends WeakReference<Object> {
         + "  ret[name] = cmpt;\n"
         + "}\n"
         + "for (var i = 0; i < propNames.length; i++) {\n"
-        + "  if (propConstant[i]) {\n"
+        + "  if ((propInfo[i] & 2) !== 0) {\n"
         + "    ret[propNames[i]] = propValues[i];\n"
         + "  } else {\n"
-        + "    koComputed(i, propNames[i], propReadOnly[i], propValues[i]);\n"
+        + "    koComputed(i, propNames[i], (propInfo[i] & 1) !== 0, propValues[i]);\n"
         + "  }\n"
         + "}\n"
         + "function koExpose(index, name) {\n"
@@ -244,7 +244,7 @@ final class Knockout extends WeakReference<Object> {
         )
     native void wrapModel(
         Object ret, Object copyFrom,
-        String[] propNames, Boolean[] propReadOnly, Boolean[] propConstant,
+        String[] propNames, Number[] propInfo,
         Object propValues,
         String[] funcNames
     );

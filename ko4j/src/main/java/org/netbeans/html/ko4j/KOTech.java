@@ -71,13 +71,14 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
 
     final Object createKO(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
         String[] propNames = new String[propArr.length];
-        Boolean[] propReadOnly = new Boolean[propArr.length];
-        Boolean[] propConstant = new Boolean[propArr.length];
+        Number[] propInfo = new Number[propArr.length];
         Object[] propValues = new Object[propArr.length];
         for (int i = 0; i < propNames.length; i++) {
             propNames[i] = propArr[i].getPropertyName();
-            propReadOnly[i] = propArr[i].isReadOnly();
-            propConstant[i] = propArr[i].isConstant();
+            int info =
+                (propArr[i].isReadOnly() ? 1 : 0) +
+                (propArr[i].isConstant()? 2 : 0);
+            propInfo[i] = info;
             Object value = propArr[i].getValue();
             if (value instanceof Enum) {
                 value = value.toString();
@@ -95,8 +96,7 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
         }
         newKO.wrapModel(
             ret, copyFrom,
-            propNames, propReadOnly, propConstant, propValues,
-            funcNames
+            propNames, propInfo, propValues, funcNames
         );
         return ret;
     }
