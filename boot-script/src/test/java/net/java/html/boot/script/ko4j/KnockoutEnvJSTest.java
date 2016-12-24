@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -108,10 +109,15 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         baseUri = DynamicHTTP.initServer();
 
         final Fn.Presenter p = Scripts.createPresenter(KOCase.JS);
-        URL envNashorn = new URL("https://bugs.openjdk.java.net/secure/attachment/11894/env.nashorn.1.2-debug.js");
-        InputStream is = envNashorn.openStream();
-        p.loadScript(new InputStreamReader(is));
-        is.close();
+        try {
+            URL envNashorn = new URL("https://bugs.openjdk.java.net/secure/attachment/11894/env.nashorn.1.2-debug.js");
+            InputStream is = envNashorn.openStream();
+            p.loadScript(new InputStreamReader(is));
+            is.close();
+        } catch (ConnectException ex) {
+            ex.printStackTrace();
+            return new Object[0];
+        }
 
         final BrowserBuilder bb = BrowserBuilder.newBrowser(p).
             loadClass(KnockoutEnvJSTest.class).
