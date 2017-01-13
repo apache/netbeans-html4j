@@ -1,0 +1,12 @@
+language: java
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start || echo No X11
+  - sleep 3
+script:
+  - jdk_switcher use oraclejdk8 || java -version
+  - mvn install -DskipTests
+  - mvn verify
+os:
+  - linux
+  - osx
