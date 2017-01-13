@@ -140,6 +140,12 @@
     </dependency>
     <dependency>
       <groupId>org.netbeans.html</groupId>
+      <artifactId>ko4j</artifactId>
+      <scope>provided</scope>
+      <version>1.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.html</groupId>
       <artifactId>net.java.html.boot</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
