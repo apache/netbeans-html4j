@@ -92,6 +92,18 @@ final class Bodies {
         "return c.@net.java.html.js.tests.Sum::sum(II)(a, b);"
     )
     public static native int sumIndirect(Sum c, int a, int b);
+
+    @JavaScriptBody(args = { "c" }, javacall = true, body =
+        "return {\n" +
+        "  'sum' : function(a,b) {\n" +
+        "     return c.@net.java.html.js.tests.Sum::sum(II)(a, b);\n" +
+        "  }\n" +
+        "};\n"
+    )
+    public static native Object sumDelayed(Sum c);
+
+    @JavaScriptBody(args = { "sum", "a", "b" }, body = "return sum.sum(a, b);")
+    public static native int sumNow(Object sum, int a, int b);
     
     @JavaScriptBody(args = { "arr", "index" }, body = "return arr[index];")
     public static native Object select(Object[] arr, int index);
