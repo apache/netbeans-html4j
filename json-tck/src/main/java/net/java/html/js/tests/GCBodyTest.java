@@ -82,7 +82,6 @@ public class GCBodyTest {
 
         int res = Bodies.sumNow(jsSum, 22, 20);
         assertEquals(res, 42, "Expecting 42");
-        assertGC(ref, "Can disappear!");
         if (gcError != null) {
             throw gcError;
         }
