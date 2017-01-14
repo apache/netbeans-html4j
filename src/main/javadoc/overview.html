@@ -133,8 +133,33 @@
         of CORS</a> by handling the {@link net.java.html.json.OnReceive}
         connections in Java.
 
+        <h3>What's new in older versions?</h3>
+
+        <p>
+        Click the
+        <a href="#" onclick="return showHistoric(true)">link</a>
+        to view even more
+        <a href="#" onclick="return showHistoric(true)">historic changes</a>...
+        </p>
+
+        <a name="historic.changes"></a>
+        <div id="historic.changes">
+            <script>
+            function showHistoric(show) {
+                var e = document.getElementById("historic.changes");
+                if (show) {
+                    e.style.display="block";
+                } else {
+                    e.style.display="none";
+                }
+                return false;
+            }
+            showHistoric(false);
+            </script>
+
         <h3>What's Been Improved in Version 1.2.3?</h3>
 
+        <p>
         One can control {@link net.java.html.json.OnReceive#headers() HTTP request headers}
         when connecting to server using the {@link net.java.html.json.OnReceive}
         annotation. It is possible to have
@@ -146,6 +171,7 @@
         demonstrates.
         Bugfix of issues <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=250503'>250503</a>,
         <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=252987'>252987</a>.
+        </p>
 
         <h3>What's New in Version 1.1?</h3>
 
@@ -220,27 +246,6 @@
             prevent endless debugging when one forgets to do so.
         </p>
 
-        <p>
-        What's new in older versions? Click the
-        <a href="#" onclick="return showHistoric(true)">link</a>
-        to view even more
-        <a href="#" onclick="return showHistoric(true)">historic changes</a> below:
-        </p>
-
-        <a name="historic.changes"></a>
-        <div id="historic.changes">
-            <script>
-            function showHistoric(show) {
-                var e = document.getElementById("historic.changes");
-                if (show) {
-                    e.style.display="block";
-                } else {
-                    e.style.display="none";
-                }
-                return false;
-            }
-            showHistoric(false);
-            </script>
 
         <h3>What's New in Version 0.9?</h3>
 
@@ -358,7 +363,7 @@
 $ mvn archetype:generate \
  -DarchetypeGroupId=com.dukescript.archetype \
  -DarchetypeArtifactId=knockout4j-archetype \
- -DarchetypeVersion=0.11 <em># or newer version, if available</em>
+ -DarchetypeVersion=0.16 <em># or newer version, if available</em>
         </pre>
         Answer few questions (for example choose <em>myfirstbrwsrpage</em> as artifactId)
         and then you can:
