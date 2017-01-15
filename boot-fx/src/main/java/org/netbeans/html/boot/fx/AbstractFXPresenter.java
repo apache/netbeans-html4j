@@ -322,8 +322,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         int length = getArrayLength(toJS);
         if (length != -1) {
             Object[] arr = toArray(length, toJS);
-            System.err.println("converter to Java array:");
-            dumpArray(arr, "");
             return arr;
         }
         return values().realValue(js);
@@ -398,15 +396,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 }
             }
             Platform.runLater(new Wrap());
-        }
-    }
-
-    private void dumpArray(Object[] arr, String spaces) {
-        for (int i = 0; i < arr.length; i++) {
-            System.err.println(spaces + "[" + i + "] = " + arr[i]);
-            if (arr[i] instanceof Object[]) {
-                dumpArray((Object[]) arr[i], spaces + "  ");
-            }
         }
     }
 
