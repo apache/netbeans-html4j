@@ -5,6 +5,7 @@ before_script:
   - sleep 3
 script:
   - jdk_switcher use oraclejdk8 || java -version
+  - java -version
   - mvn install -DskipTests
   - mvn verify
 os:
