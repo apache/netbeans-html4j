@@ -117,6 +117,9 @@ final class Bodies {
     @JavaScriptBody(args = { "b" }, body = "return typeof b;")
     public static native String typeof(boolean b);
 
+    @JavaScriptBody(args = { "o" }, body = "return o.toString();")
+    public static native String toString(Object o);
+
     @JavaScriptBody(args = { "o" }, body = "return Array.isArray(o);")
     public static native boolean isArray(Object o);
 

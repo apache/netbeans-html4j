@@ -351,6 +351,9 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         if (value instanceof Character) {
             return (int) (char) (Character) value;
         }
+        if (value instanceof Enum) {
+            return value;
+        }
         int len = isArray(value);
         if (len >= 0) {
             Object[] copy = new Object[len];

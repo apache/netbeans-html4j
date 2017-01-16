@@ -154,6 +154,15 @@ public class JavaScriptBodyTest {
         assertEquals("number", doubleType, "Expecting number type: " + doubleType);
     }
 
+    enum Two {
+        ONE, TWO;
+    }
+
+    @KOTest public void toStringOfAnEnum() {
+        String enumStr = Bodies.toString(Two.ONE);
+        assertEquals(Two.ONE.toString(), enumStr, "Enum toString() used: " + enumStr);
+    }
+
     @KOTest public void computeInARunnable() {
         final int[] sum = new int[2];
         class First implements Runnable {
