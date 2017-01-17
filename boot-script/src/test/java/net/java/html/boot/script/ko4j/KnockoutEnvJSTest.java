@@ -155,6 +155,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
         final String ver = System.getProperty("java.runtime.version"); // NOI18N
         if (
             ver.startsWith("1.8.0_25") ||
+            ver.startsWith("1.8.0_31") ||
             ver.startsWith("1.8.0_40")
         ) {
             return "Broken due to JDK-8047764";
