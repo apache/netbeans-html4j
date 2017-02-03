@@ -66,12 +66,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.PromptData;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
@@ -278,25 +281,7 @@ public class FXBrwsr extends Application {
             }
 
         });
-        class Title implements ChangeListener<String> {
-
-            private String title;
-
-            public Title() {
-                super();
-            }
-
-            @Override
-            public void changed(ObservableValue<? extends String> ov, String t, String t1) {
-                title = view.getEngine().getTitle();
-                if (title != null) {
-                    stage.setTitle(title);
-                }
-            }
-        }
-        final Title x = new Title();
-        view.getEngine().titleProperty().addListener(x);
-        x.changed(null, null, null);
+        Title.observeView(view, stage);
         return view;
     }
 
@@ -393,6 +378,18 @@ public class FXBrwsr extends Application {
                 return res[0] ? line.getText() : null;
             }
         });
+        view.getEngine().setCreatePopupHandler(new Callback<PopupFeatures, WebEngine>() {
+            @Override
+            public WebEngine call(PopupFeatures param) {
+                final Stage stage = new Stage(StageStyle.UTILITY);
+                stage.initOwner(owner);
+                final WebView popUpView = new WebView();
+                stage.setScene(new Scene(popUpView));
+                Title.observeView(popUpView, stage);
+                stage.show();
+                return popUpView.getEngine();
+            }
+        });
     }
 
     static void waitFinished() {
@@ -420,6 +417,31 @@ public class FXBrwsr extends Application {
             dialogStage.close();
             if (res != null) {
                 res[0] = true;
+            }
+        }
+    }
+    private static class Title implements ChangeListener<String> {
+        private String title;
+        private final WebView view;
+        private final Stage stage;
+
+        private Title(WebView view, Stage stage) {
+            super();
+            this.view = view;
+            this.stage = stage;
+        }
+
+        public static void observeView(WebView view, Stage stage) {
+            Title t = new Title(view, stage);
+            view.getEngine().titleProperty().addListener(t);
+            t.changed(null, null, null);
+        }
+
+        @Override
+        public void changed(ObservableValue<? extends String> ov, String t, String t1) {
+            title = view.getEngine().getTitle();
+            if (title != null) {
+                stage.setTitle(title);
             }
         }
     }
