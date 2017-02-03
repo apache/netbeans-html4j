@@ -46,6 +46,7 @@ import com.oracle.truffle.api.interop.ForeignAccess;
 import com.oracle.truffle.api.interop.MessageResolution;
 import com.oracle.truffle.api.interop.Resolve;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.interop.UnknownIdentifierException;
 import com.oracle.truffle.api.nodes.Node;
 
 @MessageResolution(receiverType = JavaObject.class, language = TrufflePresenter.JavaLang.class)
@@ -76,6 +77,17 @@ final class JavaObject extends JavaValue implements TruffleObject {
 
         protected boolean access(JavaObject obj) {
             return false;
+        }
+    }
+
+    @Resolve(message = "INVOKE")
+    static abstract class Methods extends Node {
+
+        protected Object access(JavaObject javaObject, String methodName, Object[] args) {
+            if (methodName.equals("toString")) {
+                return javaObject.obj.toString();
+            }
+            throw UnknownIdentifierException.raise(methodName);
         }
     }
 
