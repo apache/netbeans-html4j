@@ -53,6 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             InputStream is = envNashorn.openStream();
             p.loadScript(new InputStreamReader(is));
             is.close();
-        } catch (ConnectException ex) {
+        } catch (UnknownHostException | ConnectException ex) {
             ex.printStackTrace();
             return new Object[0];
         }
