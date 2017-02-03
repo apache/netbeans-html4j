@@ -199,6 +199,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <link>http://bits.netbeans.org/8.0/javadoc/org-openide-util-lookup/</link>
                     <link>http://docs.oracle.com/javase/8/javafx/api/</link>
                 </links>              
+                <doclet>org.apidesign.javadoc.codesnippet.Doclet</doclet>
+                <docletArtifact>
+                    <groupId>org.apidesign.javadoc</groupId>
+                    <artifactId>codesnippet-doclet</artifactId>
+                    <version>0.11</version>
+                </docletArtifact>
+                <additionalparam>-snippetpath "${basedir}"</additionalparam>
               </configuration>
             </plugin>
             <plugin>

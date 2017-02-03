@@ -132,37 +132,7 @@ public final class BrwsrCtx implements Executor {
      * <p>
      * <b>Example Using a Timer</b>
      * </p>
-<pre>
-<b>public final class</b> Periodicaly <b>extends</b> {@link java.util.TimerTask} {
-    <b>private final</b> {@link BrwsrCtx} ctx;
-
-    <b>private</b> Periodicaly(BrwsrCtx ctx) {
-        // remember the browser context and use it later
-        this.ctx = ctx;
-    }
-    
-    <b>public void</b> run() {
-        // arrives on wrong thread, needs to be re-scheduled
-        ctx.{@link #execute(java.lang.Runnable) execute}(new Runnable() {
-            <b>public void</b> run() {
-                // code that needs to run in a browser environment
-            }
-        });
-    }
-
-    // called when your page is ready
-    <b>public static void</b> onPageLoad(String... args) <b>throws</b> Exception {
-        // the context at the time of page initialization
-        BrwsrCtx initialCtx = BrwsrCtx.findDefault(Periodicaly.<b>class</b>);
-        // the task that is associated with context 
-        Periodicaly task = new Periodicaly(initialCtx);
-        // creates a timer
-        {@link java.util.Timer} t = new {@link java.util.Timer}("Move the box");
-        // run the task every 100ms
-        t.{@link java.util.Timer#scheduleAtFixedRate(java.util.TimerTask, long, long) scheduleAtFixedRate}(task, 0, 100);
-    }
-}
-</pre>    
+     * {@codesnippet org.netbeans.html.boot.fx.Periodicaly}
      * 
      * @param exec the code to execute
      * @since 0.7.6
