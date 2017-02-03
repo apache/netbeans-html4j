@@ -74,7 +74,7 @@ public class TruffleJavaScriptTest {
         PolyglotEngine engine = PolyglotEngine.newBuilder().build();
         PolyglotEngine.Value result = null;
         try {
-            result = engine.eval(Source.fromText("6 * 7", "test.js").withMimeType("text/javascript"));
+            result = engine.eval(Source.newBuilder("6 * 7").name("test.js").mimeType("text/javascript").build());
         } catch (Exception notSupported) {
             if (notSupported.getMessage().contains("text/javascript")) {
                 return new Object[] { new Skip(true, notSupported.getMessage()) };
