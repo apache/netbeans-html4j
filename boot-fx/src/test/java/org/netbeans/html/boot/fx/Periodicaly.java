@@ -75,7 +75,7 @@ public final class Periodicaly extends TimerTask {
         BrwsrCtx initialCtx = BrwsrCtx.findDefault(Periodicaly.class);
         // the task that is associated with context
         Periodicaly task = new Periodicaly(initialCtx);
-        // creates a timer
+        // creates a new timer
         Timer t = new Timer("Move the box");
         // run the task every 100ms
         t.scheduleAtFixedRate(task, 0, 100);
