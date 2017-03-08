@@ -72,7 +72,7 @@ final class Knockout extends WeakReference<Object> {
         "if (property === null) ret = object;\n" + 
         "else if (object === null) ret = null;\n" + 
         "else ret = object[property];\n" + 
-        "return ret ? ko.utils.unwrapObservable(ret) : null;"
+        "return ret ? ko['utils']['unwrapObservable'](ret) : null;"
     )
     static Object getProperty(Object object, String property) {
         return null;
