@@ -1315,14 +1315,21 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             String n = e.getSimpleName().toString();
+            String c = inPckName(clazz, false);
             if (isWebSocket) {
-                body.append("  /** Performs WebSocket communication. Call with <code>null</code> data parameter\n");
+                body.append("  /** Performs WebSocket communication and then calls {@link ");
+                body.append(c).append("#").append(n).append("}.\n");
+                body.append("  * Call with <code>null</code> data parameter\n");
                 body.append("  * to open the connection (even if not required). Call with non-null data to\n");
                 body.append("  * send messages to server. Call again with <code>null</code> data to close the socket.\n");
                 body.append("  */\n");
                 if (onR.headers().length > 0) {
                     error("WebSocket spec does not support headers", e);
                 }
+            } else {
+                body.append("  /** Performs network communication and then calls {@link ");
+                body.append(c).append("#").append(n).append("}.\n");
+                body.append("  */\n");
             }
             body.append("  public void ").append(n).append("(");
             StringBuilder urlBefore = new StringBuilder();
