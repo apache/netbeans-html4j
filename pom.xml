@@ -97,10 +97,10 @@
       <url>http://netbeans.org</url>
   </organization>
   <scm>
-      <connection>scm:hg:https://hg.netbeans.org/html4j</connection>
-      <developerConnection>scm:hg:https://hg.netbeans.org/html4j</developerConnection>
-      <url>https://hg.netbeans.org/html4j</url>
-      <tag>default</tag>
+      <connection>scm:git:https://github.com/jtulach/html-java-api.git</connection>
+      <developerConnection>scm:git:https://github.com/jtulach/html-java-api.git</developerConnection>
+      <url>https://github.com/jtulach/html-java-api</url>
+      <tag>master</tag>
   </scm>
   <repositories>
       <repository>
