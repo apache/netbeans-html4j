@@ -79,7 +79,9 @@
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
     <module>boot-script</module>
+    <!--
     <module>boot-truffle</module>
+    -->
     <module>boot-agent-test</module>
     <module>xhr4j</module>
   </modules>
