@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+    Copyright 2013-2016 Oracle and/or its affiliates. All rights reserved.
+
+    Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+    Other names may be trademarks of their respective owners.
+
+    The contents of this file are subject to the terms of either the GNU
+    General Public License Version 2 only ("GPL") or the Common
+    Development and Distribution License("CDDL") (collectively, the
+    "License"). You may not use this file except in compliance with the
+    License. You can obtain a copy of the License at
+    http://www.netbeans.org/cddl-gplv2.html
+    or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
+    specific language governing permissions and limitations under the
+    License.  When distributing the software, include this License Header
+    Notice in each file and include the License file at
+    nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
+    particular file as subject to the "Classpath" exception as provided
+    by Oracle in the GPL Version 2 section of the License file that
+    accompanied this code. If applicable, add the following below the
+    License Header, with the fields enclosed by brackets [] replaced by
+    your own identifying information:
+    "Portions Copyrighted [year] [name of copyright owner]"
+
+    Contributor(s):
+
+    The Original Software is NetBeans. The Initial Developer of the Original
+    Software is Oracle. Portions Copyright 2013-2016 Oracle. All Rights Reserved.
+
+    If you wish your version of this file to be governed by only the CDDL
+    or only the GPL Version 2, indicate your decision by adding
+    "[Contributor] elects to include this software in this distribution
+    under the [CDDL or GPL Version 2] license." If you do not indicate a
+    single choice of license, a recipient has the option to distribute
+    your version of this file under either the CDDL, the GPL Version 2 or
+    to extend the choice of license to its licensees as provided above.
+    However, if you add GPL Version 2 code and therefore, elected the GPL
+    Version 2 license, then the option applies only if the new code is
+    made subject to such option by the copyright holder.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.netbeans.html</groupId>
+  <artifactId>pom</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>HTML APIs via Java</name>
+  <parent> 
+    <groupId>net.java</groupId>
+    <artifactId>jvnet-parent</artifactId>
+     <version>3</version>
+  </parent>  
+  <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <netbeans.version>RELEASE80</netbeans.version>
+      <grizzly.version>2.3.8</grizzly.version>
+      <license>COPYING</license>
+      <publicPackages />
+      <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
+      <netbeans.compile.on.save>none</netbeans.compile.on.save>
+  </properties>
+  <modules>
+    <module>json</module>
+    <module>json-tck</module>
+    <module>ko4j</module>
+    <module>sound</module>
+    <module>context</module>
+    <module>boot</module>
+    <module>boot-fx</module>
+    <module>geo</module>
+    <module>ko-ws-tyrus</module>
+    <module>html4j-maven-plugin</module>
+    <module>ko-felix-test</module>
+    <module>ko-osgi-test</module>
+    <module>equinox-agentclass-hook</module>
+    <module>boot-script</module>
+    <module>boot-truffle</module>
+    <module>boot-agent-test</module>
+    <module>xhr4j</module>
+  </modules>
+  <licenses>
+      <license>
+          <name>GPL-2.0wCPexc+CDDL</name>
+          <url>http://www.netbeans.org/cddl-gplv2.html</url>
+          <distribution>repo</distribution>
+      </license>
+  </licenses>
+  <organization>
+      <name>NetBeans</name>
+      <url>http://netbeans.org</url>
+  </organization>
+  <scm>
+      <connection>scm:hg:https://hg.netbeans.org/html4j</connection>
+      <developerConnection>scm:hg:https://hg.netbeans.org/html4j</developerConnection>
+      <url>https://hg.netbeans.org/html4j</url>
+      <tag>default</tag>
+  </scm>
+  <repositories>
+      <repository>
+          <id>netbeans</id>
+          <name>NetBeans</name>
+          <url>http://bits.netbeans.org/maven2/</url>
+      </repository>
+  </repositories>
+  <pluginRepositories>
+      <pluginRepository>
+          <id>mc-release</id>
+          <name>Local Maven repository of releases</name>
+          <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+          <snapshots>
+              <enabled>false</enabled>
+          </snapshots>
+          <releases>
+              <enabled>true</enabled>
+          </releases>
+      </pluginRepository>
+  </pluginRepositories>
+  <build>
+      <plugins>
+         <plugin>
+              <inherited>false</inherited>
+              <groupId>com.mycila.maven-license-plugin</groupId>
+              <artifactId>maven-license-plugin</artifactId>
+              <version>1.9.0</version>
+              <executions>
+                  <execution>
+                      <id>blah</id>
+                      <goals>
+                          <goal>check</goal>
+                      </goals>
+                  </execution>
+              </executions>
+              <configuration>
+                  <aggregate>true</aggregate>
+                  <basedir>${basedir}</basedir>
+                  <header>COPYING</header>
+                  <strictCheck>true</strictCheck>
+                  <excludes>
+                       <exclude>*</exclude>
+                       <exclude>.*/**</exclude>
+                       <exclude>*/nb-configuration.xml</exclude>
+                  </excludes>
+              </configuration>
+          </plugin>
+           <plugin>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+              <mavenExecutorId>forked-path</mavenExecutorId>
+              <useReleaseProfile>false</useReleaseProfile>
+              <arguments>-Pjvnet-release -Pgpg</arguments>
+              <tag>release-${releaseVersion}</tag>
+            </configuration>
+          </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9</version>
+              <configuration>
+                  <docfilessubdirs>true</docfilessubdirs>
+                  <subpackages>${publicPackages}</subpackages>
+                  <skip>false</skip>
+                  <excludePackageNames>
+org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests:org.netbeans.html.xhr4j
+                  </excludePackageNames>
+                <groups>
+                  <group>
+                    <title>JSON for Java</title>
+                    <packages>net.java.html.json</packages>
+                  </group>
+                  <group>
+                    <title>Core Client APIs</title>
+                    <packages>net.java.html.boot*:net.java.html.js:net.java.html</packages>
+                  </group>
+                  <group>
+                    <title>Geolocation API</title>
+                    <packages>net.java.html.geo</packages>
+                  </group>
+                  <group>
+                    <title>Sound API</title>
+                    <packages>net.java.html.sound</packages>
+                  </group>
+                  <group>
+                    <title>Testing and Headless API</title>
+                    <packages>net.java.html.boot.script:net.java.html.boot.truffle</packages>
+                  </group>
+                  <group>
+                    <title>Service Provider APIs (not commonly interesting)</title>
+                    <packages>org.netbeans.html.*</packages>
+                  </group>
+                </groups>   
+                <links>
+                    <link>http://testng.org/javadocs/</link>
+                    <link>http://bits.netbeans.org/8.0/javadoc/org-openide-util-lookup/</link>
+                    <link>http://docs.oracle.com/javase/8/javafx/api/</link>
+                </links>              
+              </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <packages>${publicPackages}</packages>
+                    <releaseVersion>1.3</releaseVersion>
+                </configuration>
+            </plugin>
+      </plugins>
+      <pluginManagement>
+          <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.13</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <fxpresenter.headless>true</fxpresenter.headless>
+                    </systemPropertyVariables>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <fxpresenter.headless>true</fxpresenter.headless>
+                    </systemPropertyVariables>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.1</version>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <subpackages>${publicPackages}</subpackages>
+                    <skip>false</skip>
+                </configuration>
+              </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>${publicPackages},META-INF.services.*;-noimport:=true;-split-package:=first</Export-Package>
+                        <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.netbeans.html</groupId>
+                <artifactId>html4j-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>classes</id>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                        <configuration>
+                            <classes>${project.build.directory}/test-classes</classes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+          </plugins>
+      </pluginManagement>
+  </build>
+  <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <version>6.7</version>
+          <scope>test</scope>
+          <exclusions>
+            <exclusion>
+              <artifactId>junit</artifactId>
+              <groupId>junit</groupId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>de.twentyeleven.skysail</groupId>
+            <artifactId>org.json-osgi</artifactId>
+            <version>20080701</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.netbeans.api</groupId>
+          <artifactId>org-netbeans-modules-classfile</artifactId>
+          <version>${netbeans.version}</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.netbeans.api</groupId>
+          <artifactId>org-openide-util-lookup</artifactId>
+          <version>${netbeans.version}</version>
+          <scope>compile</scope>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-java-source</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-libs-javacapi</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-spi-java-hints</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-parsing-api</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-spi-editor-hints</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-java-lexer</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-lexer</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-java-hints-test</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-libs-junit4</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-lib-nbjavac</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+      <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency> 
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-web-browser-api</artifactId>
+            <version>${netbeans.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org-netbeans-core</artifactId>
+                    <groupId>org.netbeans.modules</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-netbeans-core-multiview</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-netbeans-libs-lucene</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-netbeans-modules-diff</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-netbeans-modules-editor-fold</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-netbeans-modules-editor-guards</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <artifactId>org-netbeans-modules-projectapi</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
+      </dependencies>
+  </dependencyManagement>
+  <profiles>
+      <profile>
+          <id>jdk8</id>
+          <activation>
+              <file>
+                  <exists>${java.home}/lib/ext/jfxrt.jar</exists>
+              </file>
+          </activation>
+          <properties>
+            <jfxrt.jar>${java.home}/lib/ext/jfxrt.jar</jfxrt.jar>
+          </properties>
+      </profile>
+      <profile>
+          <id>jdk7</id>
+          <activation>
+              <file>
+                  <exists>${java.home}/lib/jfxrt.jar</exists>
+              </file>
+          </activation>
+          <properties>
+            <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
+          </properties>
+      </profile>
+  </profiles>
+</project>
