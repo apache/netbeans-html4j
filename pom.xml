@@ -117,6 +117,7 @@
                   <header>COPYING</header>
                   <strictCheck>true</strictCheck>
                   <excludes>
+                       <exclude>**/target/**</exclude>
                        <exclude>.*/**</exclude>
                        <exclude>*/nb-configuration.xml</exclude>
                   </excludes>
