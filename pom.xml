@@ -195,6 +195,33 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <releaseVersion>1.3</releaseVersion>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.12</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                            <goal>rat</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/target/**</exclude>
+                        <exclude>.gitignore</exclude>
+                        <exclude>**/*git/**</exclude>
+                        <exclude>**/*.sigtest</exclude>
+                    </excludes>
+                    <excludeSubProjects>false</excludeSubProjects>
+                    <useDefaultExcludes>false</useDefaultExcludes>
+                    <useEclipseDefaultExcludes>false</useEclipseDefaultExcludes>
+                    <useIdeaDefaultExcludes>false</useIdeaDefaultExcludes>
+                    <useMavenDefaultExcludes>false</useMavenDefaultExcludes>
+                </configuration>
+            </plugin>
       </plugins>
       <pluginManagement>
           <plugins>
