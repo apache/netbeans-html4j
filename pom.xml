@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.netbeans.html</groupId>
   <artifactId>pom</artifactId>
-  <version>1.4</version>
+  <version>2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent> 
@@ -76,7 +76,7 @@
       <connection>scm:git:https://github.com/jtulach/html-java-api.git</connection>
       <developerConnection>scm:git:https://github.com/jtulach/html-java-api.git</developerConnection>
       <url>https://github.com/jtulach/html-java-api</url>
-      <tag>release-1.4</tag>
+      <tag>master</tag>
   </scm>
   <repositories>
       <repository>
