@@ -37,7 +37,7 @@ public class GCKnockoutTest {
     })
     static class FullnameCntrl {
     }
-    
+
     @KOTest public void noLongerNeededArrayElementsCanDisappear() throws Exception {
         BrwsrCtx ctx = Utils.newContext(GCKnockoutTest.class);
         Object exp = Utils.exposeHTML(GCKnockoutTest.class,
@@ -58,8 +58,7 @@ public class GCKnockoutTest {
             cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 2, "Now two " + cnt);
 
-            Fullname removed = m.getAll().get(0);
-            m.getAll().remove(0);
+            Fullname removed = m.getAll().remove(0);
 
             cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 1, "Again One " + cnt);
@@ -67,16 +66,16 @@ public class GCKnockoutTest {
             Reference<?> ref = new WeakReference<Object>(removed);
             removed = null;
             assertGC(ref, "Can removed object disappear?");
-            
+
             ref = new WeakReference<Object>(m);
             m = null;
             assertNotGC(ref, "Root model cannot GC");
         } finally {
             Utils.exposeHTML(GCKnockoutTest.class, "");
         }
-        
+
     }
-    
+
     private void assertGC(Reference<?> ref, String msg) throws Exception {
         for (int i = 0; i < 100; i++) {
             if (ref.get() == null) {
@@ -94,7 +93,7 @@ public class GCKnockoutTest {
         }
         throw new OutOfMemoryError(msg);
     }
-    
+
     private void assertNotGC(Reference<?> ref, String msg) throws Exception {
         for (int i = 0; i < 10; i++) {
             if (ref.get() == null) {
@@ -111,5 +110,5 @@ public class GCKnockoutTest {
             System.runFinalization();
         }
     }
-    
+
 }

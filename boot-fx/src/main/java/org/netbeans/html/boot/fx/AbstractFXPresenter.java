@@ -406,7 +406,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                     LOG.log(Level.FINER, "  params: {0}", Arrays.asList(args));
                 }
                 List<Object> all = new ArrayList<Object>(args.length + 1);
-                all.add(thiz == null ? presenter.undefined() : thiz);
+                all.add(thiz == null ? presenter.undefined() : presenter.toJavaScript(thiz, true));
                 for (int i = 0; i < args.length; i++) {
                     Object conv = args[i];
                     if (arrayChecks) {

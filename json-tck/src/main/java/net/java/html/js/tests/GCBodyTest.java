@@ -99,6 +99,26 @@ public class GCBodyTest {
         assertEquals(r.value, null, "Setter called with null value");
     }
 
+    @KOTest public void thisIsHeldStrongly() throws Exception {
+        Sum s = new Sum();
+        Object res = s.jsSum(12, 30);
+        int intRes = Bodies.readIntX(res);
+        assertEquals(42, intRes);
+        WeakReference<Sum> ref = new WeakReference<Sum>(s);
+        s = null;
+        assertNotGC(ref, true, "s cannot disappear: we have reference to s via res.y field");
+    }
+
+    @KOTest public void argsArentHeldStrongly() throws Exception {
+        Sum s = new Sum();
+        Object res = Sum.jsStaticSum(s, 12, 30);
+        int intRes = Bodies.readIntX(res);
+        assertEquals(42, intRes);
+        WeakReference<Sum> ref = new WeakReference<Sum>(s);
+        s = null;
+        assertGC(ref, "Reference to s via res.y field is weak");
+    }
+
     private static Reference<?> sendRunnable(final int[] arr) {
         Runnable r = new Runnable() {
             @Override

@@ -20,6 +20,8 @@ package org.netbeans.html.json.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
@@ -278,10 +280,62 @@ public class DeepChangeTest {
         assertTrue(o.pb.isReadOnly(), "Derived property");
         assertEquals(o.get(), "Hi");
 
-        p.getX().getAll().get(0).setValue("Nazdar");
+        final List<MyY> all = p.getX().getAll();
+        MyY refStrong = all.get(0);
+        Reference<MyY> ref = new WeakReference<MyY>(refStrong);
+        refStrong.setValue("Nazdar");
         
         assertEquals(o.get(), "Nazdar");
         assertEquals(o.changes, 1, "One change so far");
+
+        final MyY hi = Models.bind(new MyY("Ciao", 33), c);
+        all.set(0, hi);
+
+        assertEquals(o.changes, 2, "Second change");
+        assertEquals(o.get(), "Ciao");
+
+        refStrong.setValue("Ignore");
+        assertEquals(o.changes, 2, "Still two changes");
+
+        refStrong = null;
+        assertGC(ref, "Original MyY can now disappear");
+    }
+
+    @Test
+    public void disappearModel() throws Exception {
+        MyOverall p = Models.bind(
+            new MyOverall(new MyX(new MyY("Ahoj", 0), new MyY("Hi", 333), new MyY("Hello", 999))
+        ), c);
+
+        MyY refStrong = disappearModelOperations(p);
+
+        Reference<MyOverall> ref = new WeakReference<MyOverall>(p);
+        p = null;
+        assertGC(ref, "MyOverall can now disappear");
+        assertNotNull(refStrong, "Submodel still used");
+    }
+
+    private MyY disappearModelOperations(MyOverall p) throws InvocationTargetException, IllegalAccessException, IllegalArgumentException {
+        Models.applyBindings(p);
+        Map m = (Map)Models.toRaw(p);
+        Object v = m.get("valueAccross");
+        assertNotNull(v, "Value should be in the map");
+        assertEquals(v.getClass(), One.class, "It is instance of One");
+        One o = (One)v;
+        assertEquals(o.changes, 0, "No changes so far");
+        assertTrue(o.pb.isReadOnly(), "Derived property");
+        assertEquals(o.get(), "Hi");
+        final List<MyY> all = p.getX().getAll();
+        MyY refStrong = all.get(0);
+        refStrong.setValue("Nazdar");
+        assertEquals(o.get(), "Nazdar");
+        assertEquals(o.changes, 1, "One change so far");
+        all.clear();
+        assertEquals(o.changes, 2, "Second change");
+        assertNull(o.get(), "MyY array is empty now");
+        refStrong.setValue("Ignore");
+        assertEquals(o.changes, 2, "Still two changes");
+        return refStrong;
     }
     
     @Test public void secondChangeInArrayIgnored() throws Exception {
@@ -589,5 +643,24 @@ public class DeepChangeTest {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
-    
+
+    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
+        for (int i = 0; i < 100; i++) {
+            if (isGone(ref)) {
+                return;
+            }
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                err.printStackTrace();
+            }
+        }
+        throw new InterruptedException(msg);
+    }
+
+    private static boolean isGone(Reference<?> ref) {
+        return ref.get() == null;
+    }
+
 }

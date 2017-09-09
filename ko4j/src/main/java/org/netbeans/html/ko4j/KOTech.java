@@ -70,7 +70,8 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
         if (ko != null) {
             ko[0] = newKO;
         }
-        newKO.wrapModel(
+        Knockout.wrapModel(
+            newKO,
             ret, copyFrom,
             propNames, propInfo, propValues, funcNames
         );

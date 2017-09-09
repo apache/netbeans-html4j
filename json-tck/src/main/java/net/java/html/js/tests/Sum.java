@@ -18,6 +18,8 @@
  */
 package net.java.html.js.tests;
 
+import net.java.html.js.JavaScriptBody;
+
 /**
  *
  * @author Jaroslav Tulach
@@ -26,7 +28,23 @@ public final class Sum {
     public int sum(int a, int b) {
         return a + b;
     }
+
+    @JavaScriptBody(args = { "a", "b" }, javacall = true, keepAlive = false, body =
+        "return {\n"
+      + "  'x' : this.@net.java.html.js.tests.Sum::sum(II)(a, b),\n"
+      + "  'y' : this\n"
+      + "}\n"
+    )
+    public native Object jsSum(int a, int b);
     
+    @JavaScriptBody(args = { "thiz", "a", "b" }, javacall = true, keepAlive = false, body =
+        "return {\n"
+      + "  'x' : thiz.@net.java.html.js.tests.Sum::sum(II)(a, b),\n"
+      + "  'y' : thiz\n"
+      + "}\n"
+    )
+    public static native Object jsStaticSum(Sum thiz, int a, int b);
+
     public int sum(Object[] arr) {
         int s = 0;
         for (int i = 0; i < arr.length; i++) {

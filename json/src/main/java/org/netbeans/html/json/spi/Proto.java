@@ -50,6 +50,7 @@ public final class Proto {
     private final net.java.html.BrwsrCtx context;
     private org.netbeans.html.json.impl.Bindings ko;
     private Observers observers;
+    private Observers.Usages usages;
 
     Proto(Object obj, Type type, BrwsrCtx context) {
         this.obj = obj;
@@ -88,7 +89,7 @@ public final class Proto {
      * @since 0.9
      */
     public void acquireLock(String propName) throws IllegalStateException {
-        Observers.beginComputing(this, propName);
+        usages = Observers.beginComputing(this, propName, usages);
     }
 
     /** A property on this proto object is about to be accessed. Verifies

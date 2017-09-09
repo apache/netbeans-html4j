@@ -197,9 +197,9 @@ public final class JSONList<T> extends ArrayList<T> {
         proto.getContext().execute(new Runnable() {
             @Override
             public void run() {
+                proto.valueHasMutated(name);
                 Bindings m = PropertyBindingAccessor.getBindings(proto, false, null);
                 if (m != null) {
-                    m.valueHasMutated(name, null, JSONList.this);
                     for (String dependant : deps) {
                         m.valueHasMutated(dependant, null, null);
                     }

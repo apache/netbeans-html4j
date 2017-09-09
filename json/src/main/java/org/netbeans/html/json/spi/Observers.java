@@ -18,11 +18,12 @@
  */
 package org.netbeans.html.json.spi;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -37,11 +38,12 @@ final class Observers {
         assert Thread.holdsLock(GLOBAL);
     }
     
-    static void beginComputing(Proto p, String name) {
+    static Usages beginComputing(Proto p, String name, Usages usages) {
         synchronized (GLOBAL) {
             verifyUnlocked(p);
             final Watcher nw = new Watcher(p, name);
             GLOBAL.push(nw);
+            return Usages.register(name, nw, usages);
         }
     }
     
@@ -88,11 +90,12 @@ final class Observers {
         }
     }
     
-    private static final class Ref extends WeakReference<Watcher> {
+    private static final class Ref {
+        private final Watcher ref;
         private final String prop;
         
         public Ref(Watcher ref, String prop) {
-            super(ref);
+            this.ref = ref;
             this.prop = prop;
         }
         
@@ -109,6 +112,10 @@ final class Observers {
                 return w;
             }
             return null;
+        }
+
+        Watcher get() {
+            return ref.proto == null ? null : ref;
         }
     }
     
@@ -183,7 +190,7 @@ final class Observers {
                 it.remove();
                 continue;
             }
-            if (rw == w && r.prop.equals(r.prop)) {
+            if (rw == w && ref.prop.equals(r.prop)) {
                 return;
             }
         }
@@ -191,8 +198,8 @@ final class Observers {
     }
     
     private static final class Watcher {
+        Proto proto;
         final Thread owner;
-        final Proto proto;
         final String prop;
 
         Watcher(Proto proto, String prop) {
@@ -205,5 +212,30 @@ final class Observers {
         public String toString() {
             return "Watcher: " + proto + ", " + prop;
         }
+
+        void destroy() {
+            proto = null;
+        }
+    }
+
+    static final class Usages {
+        private final Map<String,Watcher> watchers = new HashMap<String, Watcher>();
+
+        private Usages() {
+        }
+
+        static Usages register(String propName, Watcher w, Usages usages) {
+            if (propName != null) {
+                if (usages == null) {
+                    usages = new Usages();
+                }
+                Observers.Watcher prev = usages.watchers.put(propName, w);
+                if (prev != null) {
+                    prev.destroy();
+                }
+            }
+            return usages;
+        }
+
     }
 }
