@@ -221,7 +221,8 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <excludes>
                         <exclude>**/target/**</exclude>
                         <exclude>.gitignore</exclude>
-                        <exclude>**/*git/**</exclude>
+                        <exclude>**/.git/**</exclude>
+                        <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                     </excludes>
                     <excludeSubProjects>false</excludeSubProjects>
