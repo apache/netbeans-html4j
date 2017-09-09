@@ -18,10 +18,11 @@
  */
 package net.java.html.json.tests;
 
-import java.net.URI;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.tck.KnockoutTCK;
 
@@ -46,6 +47,21 @@ public final class Utils {
             return true;
         }
         return false;
+    }
+
+    static void scheduleLater(int delay, final Runnable r) {
+        for (KnockoutTCK tck : tcks(r.getClass())) {
+            if (tck.scheduleLater(delay, r)) {
+                return;
+            }
+        }
+        Timer t = new Timer("Running later");
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                r.run();
+            }
+        }, delay);
     }
 
     private Utils() {
@@ -84,7 +100,9 @@ public final class Utils {
 
     private static Iterable<KnockoutTCK> tcks(Class<?> clazz) {
         if (instantiatedTCK != null) {
-            return Collections.singleton(instantiatedTCK);
+            List<KnockoutTCK> l = (List<KnockoutTCK>)(Object)new People().getInfo();
+            l.add(instantiatedTCK);
+            return l;
         }
         return ServiceLoader.load(KnockoutTCK.class, cl(clazz));
     }
@@ -135,7 +153,7 @@ public final class Utils {
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
         for (KnockoutTCK tck : tcks(clazz)) {
-            URI o = tck.prepareURL(content, mimeType, parameters);
+            String o = tck.prepareWebResource(content, mimeType, parameters);
             if (o != null) {
                 return o.toString();
             }

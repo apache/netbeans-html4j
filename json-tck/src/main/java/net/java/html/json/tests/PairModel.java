@@ -18,12 +18,12 @@
  */
 package net.java.html.json.tests;
 
-import java.util.Arrays;
 import java.util.List;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.Property;
 
 /**
@@ -40,7 +40,7 @@ class PairModel {
     
     @ComputedProperty 
     static List<String> bothNames(String firstName, String lastName) {
-        return Arrays.asList(firstName, lastName);
+        return Models.asList(firstName, lastName);
     }
     
     @ComputedProperty

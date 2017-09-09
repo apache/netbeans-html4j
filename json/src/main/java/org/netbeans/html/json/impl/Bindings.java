@@ -18,8 +18,6 @@
  */
 package org.netbeans.html.json.impl;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.json.spi.FunctionBinding;
 import org.netbeans.html.json.spi.PropertyBinding;
@@ -31,8 +29,6 @@ import org.netbeans.html.json.spi.Technology;
  * @author Jaroslav Tulach
  */
 public final class Bindings<Data> {
-    private static final Logger LOG = Logger.getLogger(Bindings.class.getName()); 
-    
     private Data data;
     private final Technology<Data> bp;
 
@@ -93,12 +89,6 @@ public final class Bindings<Data> {
             Technology.ApplyId<Data> ai = (Technology.ApplyId<Data>) bp;
             ai.applyBindings(id, data);
             return;
-        }
-        if (id != null) {
-            LOG.log(Level.WARNING, 
-                "Technology {0} does not implement ApplyId extension. Can't apply to {1}. Applying globally.", 
-                new Object[]{bp, id}
-            );
         }
         bp.applyBindings(data);
     }

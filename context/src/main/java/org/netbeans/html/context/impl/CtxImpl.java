@@ -18,10 +18,6 @@
  */
 package org.netbeans.html.context.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.spi.Contexts;
 
@@ -31,14 +27,14 @@ import org.netbeans.html.context.spi.Contexts;
  * @author Jaroslav Tulach
  */
 public final class CtxImpl {
-    private final List<Bind<?>> techs;
+    private Bind<?>[] techs;
     private final Object[] context;
     
     public CtxImpl(Object[] context) {
-        this(context, new ArrayList<Bind<?>>());
+        this(context, new Bind<?>[0]);
     }
     
-    private CtxImpl(Object[] context, List<Bind<?>> techs) {
+    private CtxImpl(Object[] context, Bind<?>[] techs) {
         this.techs = techs;
         this.context = context;
     }
@@ -54,15 +50,14 @@ public final class CtxImpl {
     }
 
     public BrwsrCtx build() {
-        Collections.sort(techs, new BindCompare());
-        final List<Bind<?>> arr = Collections.unmodifiableList(techs);
-        CtxImpl impl = new CtxImpl(context, arr);
+        new BindCompare().sort(techs);
+        CtxImpl impl = new CtxImpl(context, techs.clone());
         BrwsrCtx ctx = CtxAccssr.getDefault().newContext(impl);
         return ctx;
     }
 
     public <Tech> void register(Class<Tech> type, Tech impl, int priority) {
-        techs.add(new Bind<Tech>(type, impl, priority));
+        techs = new BindCompare().add(techs, new Bind<Tech>(type, impl, priority));
     }
     
     private static final class Bind<Tech> {
@@ -82,8 +77,34 @@ public final class CtxImpl {
         }
     }
     
-    private final class BindCompare implements Comparator<Bind<?>> {
-        boolean isPrefered(Bind<?> b) {
+    private final class BindCompare {
+
+        void sort(Bind<?>[] techs) {
+            for (int i = 0; i < techs.length; i++) {
+                Bind<?> min = techs[i];
+                int minIndex = i;
+                for  (int j = i + 1; j < techs.length; j++) {
+                    if (compare(min, techs[j]) > 0) {
+                        min = techs[j];
+                        minIndex = j;
+                    }
+                }
+                if (minIndex != i) {
+                    techs[minIndex] = techs[i];
+                    techs[i] = min;
+                }
+            }
+        }
+
+        private <Tech> Bind<?>[] add(Bind<?>[] techs, Bind<Tech> bind) {
+            Bind<?>[] newArr = new Bind<?>[techs.length + 1];
+            for (int i = 0; i < techs.length; i++) {
+                newArr[i] = techs[i];
+            }
+            newArr[techs.length] = bind;
+            return newArr;
+        }
+        private boolean isPrefered(Bind<?> b) {
             final Class<?> implClazz = b.impl.getClass();
             Contexts.Id id = implClazz.getAnnotation(Contexts.Id.class);
             if (id == null) {
@@ -99,8 +120,7 @@ public final class CtxImpl {
             return false;
         }
         
-        @Override
-        public int compare(Bind<?> o1, Bind<?> o2) {
+        private int compare(Bind<?> o1, Bind<?> o2) {
             boolean p1 = isPrefered(o1);
             boolean p2 = isPrefered(o2);
             if (p1 != p2) {

@@ -22,7 +22,9 @@ import net.java.html.BrwsrCtx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 import org.netbeans.html.json.impl.JSON;
+import org.netbeans.html.json.impl.SimpleList;
 import org.netbeans.html.json.spi.Technology;
 
 /** Information about and 
@@ -163,5 +165,16 @@ public final class Models {
      */
     public static void applyBindings(Object model, String targetId) {
         JSON.applyBindings(model, targetId);
+    }
+
+    /** Wrap provided values into mutable list.
+     *
+     * @param <T> type of the values and resulting list
+     * @param values the values, if any
+     * @return full features implementation of mutable and extendable list
+     * @since 1.5
+     */
+    public static <T> List<T> asList(T... values) {
+        return SimpleList.asList(values);
     }
 }

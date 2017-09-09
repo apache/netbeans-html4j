@@ -18,21 +18,18 @@
  */
 package org.netbeans.html.json.spi;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import org.netbeans.html.json.impl.SimpleList;
 
 /**
  *
  * @author Jaroslav Tulach
  */
 final class Observers {
-    private static final LinkedList<Watcher> GLOBAL = new LinkedList<Watcher>();
-    private final List<Watcher> watchers = new ArrayList<Watcher>();
-    private final List<Ref> observers = new ArrayList<Ref>();
+    private static final List<Watcher> GLOBAL = SimpleList.asList();
+    private final List<Watcher> watchers = SimpleList.asList();
+    private final List<Ref> observers = SimpleList.asList();
 
     Observers() {
         assert Thread.holdsLock(GLOBAL);
@@ -42,7 +39,7 @@ final class Observers {
         synchronized (GLOBAL) {
             verifyUnlocked(p);
             final Watcher nw = new Watcher(p, name);
-            GLOBAL.push(nw);
+            GLOBAL.add(nw);
             return Usages.register(name, nw, usages);
         }
     }
@@ -118,7 +115,7 @@ final class Observers {
             return ref.proto == null ? null : ref;
         }
     }
-    
+
     private Watcher find(String prop) {
         if (prop == null) {
             return null;
@@ -148,7 +145,7 @@ final class Observers {
     }
 
     static final void valueHasMutated(Proto p, String propName) {
-        List<Watcher> mutated = new LinkedList<Watcher>();
+        List<Watcher> mutated = SimpleList.asList();
         synchronized (GLOBAL) {
             Observers mine = p.observers(false);
             if (mine == null) {
@@ -219,7 +216,8 @@ final class Observers {
     }
 
     static final class Usages {
-        private final Map<String,Watcher> watchers = new HashMap<String, Watcher>();
+        private final List<String> names = SimpleList.asList();
+        private final List<Watcher> watchers = SimpleList.asList();
 
         private Usages() {
         }
@@ -229,9 +227,14 @@ final class Observers {
                 if (usages == null) {
                     usages = new Usages();
                 }
-                Observers.Watcher prev = usages.watchers.put(propName, w);
-                if (prev != null) {
+                int index = usages.names.indexOf(propName);
+                if (index == -1) {
+                    usages.names.add(propName);
+                    usages.watchers.add(w);
+                } else {
+                    Watcher prev = usages.watchers.get(index);
                     prev.destroy();
+                    usages.watchers.set(index, w);
                 }
             }
             return usages;

@@ -24,7 +24,6 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -174,7 +173,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
     private static native String findBaseURL();
     
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -189,11 +188,8 @@ public final class KnockoutFXTest extends KnockoutTCK {
             URL query = new URL(baseURL, sb.toString());
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
-            URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return br.readLine();
         } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        } catch (URISyntaxException ex) {
             throw new IllegalStateException(ex);
         }
     }

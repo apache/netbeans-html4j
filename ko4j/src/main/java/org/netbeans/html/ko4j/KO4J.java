@@ -18,7 +18,6 @@
  */
 package org.netbeans.html.ko4j;
 
-import java.util.logging.Logger;
 import net.java.html.json.Model;
 import net.java.html.json.OnReceive;
 import org.netbeans.html.boot.spi.Fn;
@@ -54,7 +53,6 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Provider.class)
 public final class KO4J implements Provider {
-    static final Logger LOG = Logger.getLogger(KOSockets.class.getName());
     private KOTech ko4j;
     private KOTransfer trans;
     private KOSockets socks;

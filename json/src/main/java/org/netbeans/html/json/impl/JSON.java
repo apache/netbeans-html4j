@@ -22,8 +22,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.FunctionBinding;
@@ -344,12 +342,17 @@ public final class JSON {
 
     }
 
-    private static final Map<Class,Proto.Type<?>> modelTypes;
-    static {
-        modelTypes = new HashMap<Class, Proto.Type<?>>();
+    private static final class ModelTypes extends ClassValue<Proto.Type[]> {
+        static final ModelTypes MODELS = new ModelTypes();
+
+        @Override
+        protected Proto.Type[] computeValue(Class<?> type) {
+            return new Proto.Type<?>[1];
+        }
     }
+
     public static void register(Class c, Proto.Type<?> type) {
-        modelTypes.put(c, type);
+        ModelTypes.MODELS.get(c)[0]= type;
     }
 
     public static boolean isModel(Class<?> clazz) {
@@ -358,7 +361,7 @@ public final class JSON {
 
     static Proto.Type<?> findType(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
-            Proto.Type<?> from = modelTypes.get(clazz);
+            Proto.Type<?> from = ModelTypes.MODELS.get(clazz)[0];
             if (from == null) {
                 initClass(clazz);
             } else {
@@ -407,7 +410,7 @@ public final class JSON {
             return modelClazz.cast(data.toString());
         }
         for (int i = 0; i < 2; i++) {
-            Proto.Type<?> from = modelTypes.get(modelClazz);
+            Proto.Type<?> from = ModelTypes.MODELS.get(modelClazz)[0];
             if (from == null) {
                 initClass(modelClazz);
             } else {

@@ -22,8 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
@@ -75,7 +73,7 @@ public final class ConvertTypesTest {
     }
     private static Object createJSON(boolean includeSex) 
     throws UnsupportedEncodingException {
-        Map<String,Object> map = new HashMap<String,Object>();
+        Map<String,Object> map = SimpleMap.empty();
         map.put("firstName", "son");
         map.put("lastName", "dj");
         if (includeSex) {
@@ -126,7 +124,7 @@ public final class ConvertTypesTest {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS(null, true, true, -1, null);
         
-        List<Person> arr = new ArrayList<Person>();
+        List<Person> arr = Models.asList();
         Models.parse(c, Person.class, o, arr);
         
         assertEquals(arr.size(), 1, "There is one item in " + arr);
@@ -163,7 +161,7 @@ public final class ConvertTypesTest {
         sb.append("  \"lastName\" : null } ]\n");  
         
         final ByteArrayInputStream is = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
-        List<Person> arr = new ArrayList<Person>();
+        List<Person> arr = Models.asList();
         Models.parse(c, Person.class, is, arr);
         
         assertEquals(arr.size(), 2, "There are two items in " + arr);
@@ -237,7 +235,7 @@ public final class ConvertTypesTest {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS(null, false, false, 5, null);
         
-        List<Person> res = new ArrayList<Person>();
+        List<Person> res = Models.asList();
         Models.parse(c, Person.class, o, res);
         
         assertEquals(res.size(), 5, "Five elements found" + res);
@@ -262,7 +260,7 @@ public final class ConvertTypesTest {
         final BrwsrCtx c = newContext();
         final InputStream o = createIS("{ \"info\" : ", false, false, array, "}");
 
-        List<People> res = new ArrayList<People>();
+        List<People> res = Models.asList();
         Models.parse(c, People.class, o, res);
 
         assertEquals(res.size(), 1, "One people" + res);

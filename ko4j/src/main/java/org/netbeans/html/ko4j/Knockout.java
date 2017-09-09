@@ -18,11 +18,6 @@
  */
 package org.netbeans.html.ko4j;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
@@ -39,9 +34,7 @@ import org.netbeans.html.json.spi.PropertyBinding;
  * @author Jaroslav Tulach
  */
 @JavaScriptResource("knockout-3.4.0.js")
-final class Knockout extends WeakReference<Object> {
-    private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue();
-    private static final Set<Knockout> active = Collections.synchronizedSet(new HashSet<Knockout>());
+final class Knockout  {
 
     @JavaScriptBody(args = {"object", "property"}, body =
         "var ret;\n" +
@@ -60,7 +53,7 @@ final class Knockout extends WeakReference<Object> {
     private Object strong;
 
     public Knockout(Object model, Object js, PropertyBinding[] props, FunctionBinding[] funcs) {
-        super(model, QUEUE);
+        this.strong = model;
         this.js = js;
         this.props = new PropertyBinding[props.length];
         for (int i = 0; i < props.length; i++) {
@@ -70,16 +63,14 @@ final class Knockout extends WeakReference<Object> {
         for (int i = 0; i < funcs.length; i++) {
             this.funcs[i] = funcs[i].weak();
         }
-        active.add(this);
     }
 
     static void cleanUp() {
         for (;;) {
-            Knockout ko = (Knockout)QUEUE.poll();
+            Knockout ko = null;
             if (ko == null) {
                 return;
             }
-            active.remove(ko);
             clean(ko.js);
             ko.js = null;
             ko.props = null;
@@ -88,7 +79,10 @@ final class Knockout extends WeakReference<Object> {
     }
 
     final void hold() {
-        strong = get();
+    }
+
+    final Object get() {
+        return strong;
     }
 
     final Object getValue(int index) {

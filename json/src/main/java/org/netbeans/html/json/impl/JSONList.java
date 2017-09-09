@@ -19,8 +19,6 @@
 package org.netbeans.html.json.impl;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -30,7 +28,7 @@ import org.netbeans.html.json.spi.Proto;
  *
  * @author Jaroslav Tulach
  */
-public final class JSONList<T> extends ArrayList<T> {
+public final class JSONList<T> extends SimpleList<T> {
     private final Proto proto;
     private final String name;
     private final String[] deps;
@@ -119,11 +117,7 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     public void sort(Comparator<? super T> c) {
-        Object[] arr = this.toArray();
-        Arrays.sort(arr, (Comparator<Object>) c);
-        for (int i = 0; i < arr.length; i++) {
-            super.set(i, (T) arr[i]);
-        }
+        super.sort(c);
         notifyChange();
     }
 
@@ -159,8 +153,8 @@ public final class JSONList<T> extends ArrayList<T> {
     }
 
     @Override
-    protected void removeRange(int fromIndex, int toIndex) {
-        super.removeRange(fromIndex, toIndex);
+    void clearImpl(int from, int to) {
+        super.clearImpl(from, to);
         notifyChange();
     }
 

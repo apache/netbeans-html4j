@@ -36,7 +36,6 @@ import org.netbeans.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public final class FnContext implements Closeable {
-    private static final Logger LOG = Logger.getLogger(FnContext.class.getName());
     private static final FnContext DUMMY;
     static {
         DUMMY = new FnContext(null, null);
@@ -84,7 +83,7 @@ public final class FnContext implements Closeable {
         }
         pw.println("Cannot initialize asm-5.0.jar!");
         pw.flush();
-        LOG.log(Level.SEVERE, w.toString(), t);
+        Logger.getLogger(FnContext.class.getName()).log(Level.SEVERE, w.toString(), t);
         return null;
     }
 

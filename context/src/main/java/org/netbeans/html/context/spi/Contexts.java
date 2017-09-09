@@ -23,9 +23,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashSet;
 import java.util.ServiceLoader;
-import java.util.Set;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.impl.CtxImpl;
 
@@ -91,7 +89,7 @@ public final class Contexts {
         } catch (SecurityException ex) {
             l = null;
         }
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        ClassSet classes = new ClassSet(null);
         for (Provider cp : ServiceLoader.load(Provider.class, l)) {
             if (!classes.add(cp.getClass())) {
                 continue;
@@ -122,6 +120,28 @@ public final class Contexts {
             }
         }
         return found;
+    }
+
+    private static class ClassSet {
+        private final Class<?> clazz;
+        private ClassSet next;
+
+        public ClassSet(Class<?> clazz) {
+            this.clazz = clazz;
+        }
+
+
+        boolean add(Class<?> c) {
+            if (clazz == c) {
+                return false;
+            }
+            if (next == null) {
+                next = new ClassSet(c);
+                return true;
+            } else {
+                return next.add(c);
+            }
+        }
     }
     
     /** Identifies the technologies passed to {@link Builder context builder}

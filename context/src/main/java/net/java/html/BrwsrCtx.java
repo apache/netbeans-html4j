@@ -19,7 +19,6 @@
 package net.java.html;
 
 import java.util.concurrent.Executor;
-import java.util.logging.Logger;
 import org.netbeans.html.context.impl.CtxAccssr;
 import org.netbeans.html.context.impl.CtxImpl;
 import org.netbeans.html.context.spi.Contexts;
@@ -41,7 +40,6 @@ import org.netbeans.html.context.spi.Contexts.Id;
  * @author Jaroslav Tulach
  */
 public final class BrwsrCtx implements Executor {
-    private static final Logger LOG = Logger.getLogger(BrwsrCtx.class.getName());
     private final CtxImpl impl;
     private BrwsrCtx(CtxImpl impl) {
         this.impl = impl;
@@ -88,7 +86,6 @@ public final class BrwsrCtx implements Executor {
         org.netbeans.html.context.spi.Contexts.Builder cb = Contexts.newBuilder();
         boolean found = Contexts.fillInByProviders(requestor, cb);
         if (!found) {
-            LOG.config("No browser context found. Returning empty technology!");
             return EMPTY;
         }
         return cb.build();

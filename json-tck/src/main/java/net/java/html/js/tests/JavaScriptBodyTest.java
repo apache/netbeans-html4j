@@ -19,8 +19,8 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
+import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -264,7 +264,7 @@ public class JavaScriptBodyTest {
         Object b = Bodies.callbackAndPush(a, "Worl\nd!");
         assertTrue(b instanceof Object[], "Returns an array: " + b);
         Object[] arr = (Object[]) b;
-        String str = Arrays.toString(arr);
+        String str = Models.asList(arr).toString();
         assertEquals(arr.length, 2, "Size is two " + str);
         assertEquals("He\nllo", arr[0], "Hello expected: " + arr[0]);
         assertEquals("Worl\nd!", arr[1], "World! expected: " + arr[1]);

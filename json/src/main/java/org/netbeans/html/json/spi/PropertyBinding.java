@@ -36,6 +36,8 @@ public abstract class PropertyBinding {
     PropertyBinding() {
     }
 
+    static final boolean weakSupported;
+
     static {
         new PropertyBindingAccessor() {
             @Override
@@ -74,6 +76,14 @@ public abstract class PropertyBinding {
                 return new Impl(model, bindings, name, index, access, propertyType);
             }
         };
+        boolean weakOK;
+        try {
+            Class<?> weakRefClass = Class.forName("java.lang.ref.WeakReference"); // NOI18N
+            weakOK = weakRefClass != null;
+        } catch (ClassNotFoundException ex) {
+            weakOK = false;
+        }
+        weakSupported = weakOK;
     }
 
     /** Name of the property this binding represents.
@@ -188,7 +198,11 @@ public abstract class PropertyBinding {
 
         @Override
         public PropertyBinding weak() {
-            return new Weak(model, bindings, name, index, access, propertyType);
+            if (weakSupported) {
+                return new Weak(model, bindings, name, index, access, propertyType);
+            } else {
+                return this;
+            }
         }
     }
 

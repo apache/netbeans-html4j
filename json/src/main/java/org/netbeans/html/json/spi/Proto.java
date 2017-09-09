@@ -18,12 +18,12 @@
  */
 package org.netbeans.html.json.spi;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Model;
+import net.java.html.json.Models;
 import net.java.html.json.Property;
 import org.netbeans.html.json.impl.Bindings;
 import org.netbeans.html.json.impl.JSON;
@@ -878,7 +878,7 @@ public final class Proto {
          * @since 1.0
          */
         public final <T> void replaceValue(Collection<? super T> arr, Class<T> type, Object value) {
-            List<T> tmp = new ArrayList<T>();
+            List<T> tmp = Models.asList();
             if (value instanceof Object[]) {
                 for (Object e : (Object[]) value) {
                     tmp.add(extractValue(type, e));

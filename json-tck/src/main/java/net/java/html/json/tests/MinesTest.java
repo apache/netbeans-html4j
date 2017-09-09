@@ -18,9 +18,7 @@
  */
 package net.java.html.json.tests;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
@@ -42,7 +40,7 @@ public final class MinesTest {
     @KOTest public void paintTheGridOnClick() throws Throwable {
         if (m == null) {
             BrwsrCtx ctx = Utils.newContext(MinesTest.class);
-            Object exp = Utils.exposeHTML(MinesTest.class, 
+            Object exp = Utils.exposeHTML(MinesTest.class,
     "            <button id='init' data-bind='click: normalSize'></button>\n" +
     "            <table>\n" +
     "                <tbody id='table'>\n" +
@@ -72,21 +70,21 @@ public final class MinesTest {
             throw new InterruptedException();
         }
         assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
-        
+
         Utils.exposeHTML(MinesTest.class, "");
     }
-    
+
     @KOTest public void countAround() throws Exception {
         Mines mines = new Mines();
         mines.init(5, 5, 0);
         mines.getRows().get(0).getColumns().get(0).setMine(true);
         mines.getRows().get(1).getColumns().get(0).setMine(true);
         mines.getRows().get(0).getColumns().get(1).setMine(true);
-        
+
         int cnt = around(mines, 1, 1);
         assertEquals(cnt, 3, "There are three mines around. Was: " + cnt);
     }
-    
+
     private static void scheduleClick(String id, int delay) throws Exception {
         String s = "var id = arguments[0]; var delay = arguments[1];"
             + "var e = window.document.getElementById(id);\n "
@@ -100,11 +98,11 @@ public final class MinesTest {
             MinesTest.class,
             s, id, delay);
     }
-    
+
     enum GameState {
         IN_PROGRESS, WON, LOST;
     }
-    
+
     @Model(className = "Row", properties = {
         @Property(name = "columns", type = Square.class, array = true)
     })
@@ -121,21 +119,21 @@ public final class MinesTest {
             switch (state) {
                 case EXPLOSION: return "&#x2717;";
                 case UNKNOWN: return "&nbsp;";
-                case DISCOVERED: return "&#x2714;";  
+                case DISCOVERED: return "&#x2714;";
                 case N_0: return "&nbsp;";
             }
             return "&#x278" + (state.ordinal() - 1);
         }
-        
+
         @ComputedProperty static String style(SquareType state) {
             return state == null ? null : state.toString();
         }
     }
-    
+
     enum SquareType {
         N_0, N_1, N_2, N_3, N_4, N_5, N_6, N_7, N_8,
         UNKNOWN, EXPLOSION, DISCOVERED;
-        
+
         final boolean isVisible() {
             return name().startsWith("N_");
         }
@@ -151,17 +149,26 @@ public final class MinesTest {
             return values()[ordinal() + 1];
         }
     }
-    
+
     @ComputedProperty static boolean fieldShowing(GameState state) {
         return state != null;
     }
-    
+
     @Function static void normalSize(Mines m) {
         m.init(10, 10, 10);
     }
-    
+
+    private static int randIndex;
+    private static int[] RANDOM = {
+        4, 5, 8, 1, 3, 9, 2, 7, 7, 3, 8, 5, 4, 0,
+        2, 7, 5, 3, 2, 9, 8, 8, 5, 3, 5, 8, 1, 5
+    };
+    private static int random() {
+        return RANDOM[randIndex++ % RANDOM.length];
+    }
+
     @ModelOperation static void init(Mines model, int width, int height, int mines) {
-        List<Row> rows = new ArrayList<Row>(height);
+        List<Row> rows = Models.asList();
         for (int y = 0; y < height; y++) {
             Square[] columns = new Square[width];
             for (int x = 0; x < width; x++) {
@@ -169,11 +176,10 @@ public final class MinesTest {
             }
             rows.add(new Row(columns));
         }
-        
-        Random r = new Random();
+
         while (mines > 0) {
-            int x = r.nextInt(width);
-            int y = r.nextInt(height);
+            int x = random() % width;
+            int y = random() % height;
             final Square s = rows.get(y).getColumns().get(x);
             if (s.isMine()) {
                 continue;
@@ -186,10 +192,10 @@ public final class MinesTest {
         model.getRows().clear();
         model.getRows().addAll(rows);
     }
-    
+
     @ModelOperation static void computeMines(Mines model) {
-        List<Integer> xBombs = new ArrayList<Integer>();
-        List<Integer> yBombs = new ArrayList<Integer>();
+        List<Integer> xBombs = Models.asList();
+        List<Integer> yBombs = Models.asList();
         final List<Row> rows = model.getRows();
         boolean emptyHidden = false;
         SquareType[][] arr = new SquareType[rows.size()][];
@@ -214,7 +220,7 @@ public final class MinesTest {
         for (int i = 0; i < xBombs.size(); i++) {
             int x = xBombs.get(i);
             int y = yBombs.get(i);
-            
+
             incrementAround(arr, x, y);
         }
         for (int y = 0; y < rows.size(); y++) {
@@ -227,13 +233,13 @@ public final class MinesTest {
                 }
             }
         }
-        
+
         if (!emptyHidden) {
             model.setState(GameState.WON);
             showAllBombs(model, SquareType.DISCOVERED);
         }
     }
-    
+
     private static void incrementAround(SquareType[][] arr, int x, int y) {
         incrementAt(arr, x - 1, y - 1);
         incrementAt(arr, x - 1, y);
@@ -242,11 +248,11 @@ public final class MinesTest {
         incrementAt(arr, x + 1, y - 1);
         incrementAt(arr, x + 1, y);
         incrementAt(arr, x + 1, y + 1);
-        
+
         incrementAt(arr, x, y - 1);
         incrementAt(arr, x, y + 1);
     }
-    
+
     private static void incrementAt(SquareType[][] arr, int x, int y) {
         if (y >= 0 && y < arr.length) {
             SquareType[] r = arr[y];
@@ -258,7 +264,7 @@ public final class MinesTest {
             }
         }
     }
-    
+
     static void showAllBombs(Mines model, SquareType state) {
         for (Row row : model.getRows()) {
             for (Square square : row.getColumns()) {
@@ -268,7 +274,7 @@ public final class MinesTest {
             }
         }
     }
-    
+
     private static void expandKnown(Mines model, Square data) {
         final List<Row> rows = model.getRows();
         for (int y = 0; y < rows.size(); y++) {

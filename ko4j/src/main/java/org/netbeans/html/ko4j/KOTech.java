@@ -18,11 +18,12 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.util.List;
+import net.java.html.json.Models;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.FunctionBinding;
 import org.netbeans.html.json.spi.PropertyBinding;
 import org.netbeans.html.json.spi.Technology;
-import static org.netbeans.html.ko4j.KO4J.LOG;
 
 /** This is an implementation package - just
  * include its JAR on classpath and use official {@link Context} API
@@ -132,8 +133,11 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
         Object ko = Knockout.applyBindings(id, data);
         if (ko instanceof Knockout) {
             ((Knockout)ko).hold();
+            applied.add((Knockout) ko);
         }
     }
+
+    private static final List<Knockout> applied = Models.asList();
 
     @Override
     public Object wrapArray(Object[] arr) {
@@ -142,7 +146,6 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
     
     @Override
     public void runSafe(final Runnable r) {
-        LOG.warning("Technology.runSafe has been deprecated. Use BrwsrCtx.execute!");
         r.run();
     }    
 

@@ -38,6 +38,7 @@ import org.netbeans.html.boot.impl.FnContext;
  * @author Jaroslav Tulach
  */
 public abstract class Fn {
+    private static Map<String, Set<Presenter>> LOADED;
     private final Presenter presenter;
     
     /**
@@ -126,8 +127,6 @@ public abstract class Fn {
         return p.defineFn(code, names);
     }
     
-    private static final Map<String,Set<Presenter>> LOADED = new HashMap<String, Set<Presenter>>();
-    
     /** Wraps function to ensure that the script represented by <code>resource</code>
      * gets loaded into the browser environment before the function <code>fn</code>
      * is executed.
@@ -164,6 +163,9 @@ public abstract class Fn {
                     p = FnContext.currentPresenter(false);
                 }
                 if (p != null) {
+                    if (LOADED == null) {
+                        LOADED = new HashMap<String, Set<Presenter>>();
+                    }
                     Set<Presenter> there = LOADED.get(resource);
                     if (there == null) {
                         there = new HashSet<Presenter>();

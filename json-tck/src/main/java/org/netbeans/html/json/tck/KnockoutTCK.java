@@ -19,6 +19,7 @@
 package org.netbeans.html.json.tck;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.tests.ConvertTypesTest;
@@ -85,9 +86,25 @@ public abstract class KnockoutTCK {
      *   <code>$1</code> to reference <code>parameters</code> by their position
      * @param mimeType the type of the resource
      * @param parameters names of parameters as reference by <code>content</code>
-     * @return URI the test can connect to to obtain the (processed) content
+     * @return URL the test can connect to to obtain the (processed) content
+     * @since 1.5
      */
-    public abstract URI prepareURL(String content, String mimeType, String[] parameters);
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
+        return prepareURL(content, mimeType, parameters).toString();
+    }
+
+    /**
+     * @deprecated provide {@link #prepareWebResource(java.lang.String, java.lang.String, java.lang.String[])}
+     *    implementation instead since post 1.4 version of HTML/Java API.
+     */
+    @Deprecated
+    public URI prepareURL(String content, String mimeType, String[] parameters) {
+        try {
+            return new URI(prepareWebResource(content, mimeType, parameters));
+        } catch (URISyntaxException ex) {
+            throw new IllegalStateException();
+        }
+    }
     
     /** Gives you list of classes included in the TCK. Their test methods
      * are annotated by {@link KOTest} annotation. The methods are public
@@ -116,5 +133,16 @@ public abstract class KnockoutTCK {
         return false;
     }
 
+    /** Schedules the given runnable to run later.
+     *
+     * @param delay the delay in milliseconds
+     * @param r the runnable to run
+     * @return <code>true</code> if the runnable was really scheduled,
+     *   <code>false</code> otherwise
+     * @since 1.5 version
+     */
+    public boolean scheduleLater(int delay, Runnable r) {
+        return false;
+    }
 
 }
