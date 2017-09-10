@@ -63,9 +63,10 @@
   </modules>
   <licenses>
       <license>
-          <name>GPL-2.0wCPexc+CDDL</name>
-          <url>http://www.netbeans.org/cddl-gplv2.html</url>
+          <name>Apache License, Version 2.0</name>
+          <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
           <distribution>repo</distribution>
+          <comments>A business-friendly OSS license</comments>
       </license>
   </licenses>
   <organization>
@@ -73,11 +74,15 @@
       <url>http://netbeans.org</url>
   </organization>
   <scm>
-      <connection>scm:git:https://github.com/jtulach/html-java-api.git</connection>
-      <developerConnection>scm:git:https://github.com/jtulach/html-java-api.git</developerConnection>
-      <url>https://github.com/jtulach/html-java-api</url>
+      <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-netbeans-html4j.git</connection>
+      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-netbeans-html4j.git</developerConnection>
+      <url>https://github.com/apache/incubator-netbeans-html4j/tree/${project.scm.tag}</url>
       <tag>master</tag>
   </scm>
+  <issueManagement>
+      <system>jira</system>
+      <url>https://issues.apache.org/jira/browse/NETBEANS</url>
+  </issueManagement>
   <repositories>
       <repository>
           <id>netbeans</id>
