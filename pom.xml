@@ -206,7 +206,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 </executions>
                 <configuration>
                     <packages>${publicPackages}</packages>
-                    <releaseVersion>1.3</releaseVersion>
+                    <releaseVersion>1.4</releaseVersion>
                 </configuration>
             </plugin>
             <plugin>
