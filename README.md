@@ -38,7 +38,8 @@ and [iOS WebView](https://dukescript.com/javadoc/presenters/com/dukescript/prese
 developed by [DukeScript project](https://dukescript.com/).
 
 This technology has also been adopted by some Java bytecode to JavaScript
-transpilers - for example [Bck2Brwsr VM](https://github.com/jtulach/bck2brwsr/) -
+transpilers - for example [TeaVM](http://teavm.org/docs/intro/dukescript.html)
+or [Bck2Brwsr VM](https://github.com/jtulach/bck2brwsr/) -
 as such you can also run the same Java application in a pluginless browser.
 
 Porting of HTML/Java rendering pipeline is as easy as implementing
