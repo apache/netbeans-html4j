@@ -342,8 +342,26 @@ public final class JSON {
 
     }
 
-    private static final class ModelTypes extends ClassValue<Proto.Type[]> {
-        static final ModelTypes MODELS = new ModelTypes();
+    private static interface ModelTypes {
+        public Proto.Type[] get(Class<?> type);
+
+        static final ModelTypes MODELS = initModelTypes();
+    }
+
+    static ModelTypes initModelTypes() {
+        try {
+            return initClassValueTypes();
+        } catch (LinkageError err) {
+            return new LinkedListTypes();
+        }
+    }
+
+    private static ModelTypes initClassValueTypes() {
+        return new ClassValueTypes();
+    }
+
+    private static final class ClassValueTypes extends ClassValue<Proto.Type[]>
+    implements ModelTypes {
 
         @Override
         protected Proto.Type[] computeValue(Class<?> type) {
@@ -351,8 +369,36 @@ public final class JSON {
         }
     }
 
+    private static final class LinkedListTypes implements ModelTypes {
+        private Item items;
+        private static final class Item {
+            final Item next;
+            final Class<?> clazz;
+            final Proto.Type<?>[] type = { null };
+
+            Item(Item next, Class<?> clazz) {
+                this.next = next;
+                this.clazz = clazz;
+            }
+        }
+
+        @Override
+        public synchronized Proto.Type[] get(Class<?> clazz) {
+            Item it = items;
+            while (it != null) {
+                if (it.clazz == clazz) {
+                    return it.type;
+                }
+                it = it.next;
+            }
+            it = new Item(items, clazz);
+            items = it;
+            return it.type;
+        }
+    }
+
     public static void register(Class c, Proto.Type<?> type) {
-        ModelTypes.MODELS.get(c)[0]= type;
+        ModelTypes.MODELS.get(c)[0] = type;
     }
 
     public static boolean isModel(Class<?> clazz) {
