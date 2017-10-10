@@ -41,7 +41,13 @@ final class Knockout  {
         "if (property === null) ret = object;\n" +
         "else if (object === null) ret = null;\n" +
         "else ret = object[property];\n" +
-        "return ret ? ko['utils']['unwrapObservable'](ret) : null;"
+        "if (typeof ret !== 'undefined' && ret !== null) {\n" +
+        "  if (typeof ko !== 'undefined' && ko['utils'] && ko['utils']['unwrapObservable']) {\n" +
+        "    return ko['utils']['unwrapObservable'](ret);\n" +
+        "  }\n" +
+        "  return ret;\n" +
+        "}\n" +
+        "return null;\n"
     )
     static Object getProperty(Object object, String property) {
         return null;

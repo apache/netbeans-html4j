@@ -100,6 +100,20 @@ public final class JSONTest {
             "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
     }
 
+    @KOTest public void fromJsonEmptyValues() throws Throwable {
+        final BrwsrCtx c = newContext();
+        Person p = Models.bind(new Person(), c);
+        p.setSex(Sex.MALE);
+        p.setFirstName("");
+        p.setLastName("");
+
+        byte[] arr = p.toString().getBytes("UTF-8");
+        Person p2 = Models.parse(c, Person.class, new ByteArrayInputStream(arr));
+
+        assertEquals(p2.getFirstName(), p.getFirstName(),
+            "Should be the same: " + p.getFirstName() + " != " + p2.getFirstName());
+    }
+
     @KOTest public void toJSONWithEscapeCharactersInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);

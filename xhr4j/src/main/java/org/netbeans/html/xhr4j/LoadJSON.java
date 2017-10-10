@@ -226,8 +226,14 @@ final class LoadJSON implements Runnable {
         "var ret;\n" + 
         "if (property === null) ret = object;\n" + 
         "else if (object === null) ret = null;\n" + 
-        "else ret = object[property];\n" + 
-        "return ret ? (typeof ko === 'undefined' ? ret : ko.utils.unwrapObservable(ret)) : null;"
+        "else ret = object[property];\n" +
+        "if (typeof ret !== 'undefined' && ret !== null) {\n" +
+        "  if (typeof ko !== 'undefined' && ko['utils'] && ko['utils']['unwrapObservable']) {\n" +
+        "    return ko['utils']['unwrapObservable'](ret);\n" +
+        "  }\n" +
+        "  return ret;\n" +
+        "}\n" +
+        "return null;\n"
     )
     private static Object getProperty(Object object, String property) {
         return null;
