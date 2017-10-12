@@ -193,6 +193,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                         <exclude>README.md</exclude>
+                        <exclude>DEPENDENCIES</exclude>
                     </excludes>
                     <excludeSubProjects>false</excludeSubProjects>
                     <useDefaultExcludes>false</useDefaultExcludes>
@@ -200,6 +201,46 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <useIdeaDefaultExcludes>false</useIdeaDefaultExcludes>
                     <useMavenDefaultExcludes>false</useMavenDefaultExcludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>per-module-deps</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <resourceBundles>
+                                <!-- Will generate META-INF/DEPENDENCIES
+                                META-INF/LICENSE META-INF/NOTICE -->
+                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                                <!-- Will generate META-INF/DISCLAIMER  -->
+                                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
+                            </resourceBundles>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>all-deps</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+                            <excludeGroupIds>org.netbeans.html</excludeGroupIds>
+                            <resourceBundles>
+                                <!-- Will generate META-INF/DEPENDENCIES
+                                META-INF/LICENSE META-INF/NOTICE -->
+                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                            </resourceBundles>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
       </plugins>
       <pluginManagement>
