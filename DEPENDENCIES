@@ -7,8 +7,8 @@ HTML APIs via Java
 
 
 From: 'an unknown organization'
-  - OSGi json classes (http://wiki.twentyeleven.de/org.json-osgi) de.twentyeleven.skysail:org.json-osgi:bundle:20080701
-    License: Apache 2  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - JSON library from Android SDK (http://developer.android.com/sdk) com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1
+    License: Apache License 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
   - Eclipse Equinox OSGi Framework (http://www.eclipse.org/equinox/) org.eclipse:org.eclipse.osgi:jar:3.8.0.v20120529-1548
     License: Eclipse Public License  (http://www.eclipse.org/legal/epl-v10.html)
   - Plexus Cipher: encryption/decryption Component (http://spice.sonatype.org/plexus-cipher) org.sonatype.plexus:plexus-cipher:jar:1.4
@@ -31,10 +31,6 @@ From: 'Google, Inc.' (http://www.google.com)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Sisu Guice - Core Library (http://code.google.com/p/google-guice/sisu-guice/) org.sonatype.sisu:sisu-guice:jar:3.1.0
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-From: 'JSON' (http://json.org/)
-  - JSON (JavaScript Object Notation) (http://www.json.org/java/index.html) org.json:json:jar:20080701
-    License: provided without support or warranty  (http://www.json.org/license.html)
 
 From: 'ObjectWeb' (http://www.objectweb.org/)
   - ASM Debug All (http://asm.objectweb.org/asm-debug-all/) org.ow2.asm:asm-debug-all:jar:5.0.3
