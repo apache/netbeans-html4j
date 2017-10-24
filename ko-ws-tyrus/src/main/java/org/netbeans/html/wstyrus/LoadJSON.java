@@ -185,20 +185,16 @@ final class LoadJSON implements Runnable {
 
     private static JSONTokener createTokener(InputStream is) throws IOException {
         Reader r = new InputStreamReader(is, "UTF-8");
-        try {
-            return new JSONTokener(r);
-        } catch (LinkageError ex) {
-            // phones may carry outdated version of JSONTokener
-            StringBuilder sb = new StringBuilder();
-            for (;;) {
-                int ch = r.read();
-                if (ch == -1) {
-                    break;
-                }
-                sb.append((char)ch);
+        StringBuilder sb = new StringBuilder();
+        char[] arr = new char[4096];
+        for (;;) {
+            int len = r.read(arr);
+            if (len == -1) {
+                break;
             }
-            return new JSONTokener(sb.toString());
+            sb.append(arr, 0, len);
         }
+        return new JSONTokener(sb.toString());
     }
 
     static Object convertToArray(Object o) throws JSONException {

@@ -526,7 +526,7 @@ public final class Proto {
      * @since 0.7
      */
     public static abstract class Type<Model> {
-        private final Class<Model> clazz;
+        private final Class<? extends Model> clazz;
         private final String[] propertyNames;
         private final byte[] propertyType;
         private final String[] functions;
@@ -540,14 +540,8 @@ public final class Proto {
          * @param functions  number of functions the class has
          */
         protected Type(
-            Class<Model> clazz, Class<?> modelFor, int properties, int functions
+            Class<? extends Model> clazz, Class<?> modelFor, int properties, int functions
         ) {
-            assert getClass().getName().endsWith("$Html4JavaType");
-            try {
-                assert getClass().getDeclaringClass() == clazz;
-            } catch (SecurityException ex) {
-                // OK, no check
-            }
             this.clazz = clazz;
             this.propertyNames = new String[properties];
             this.propertyType = new byte[properties];

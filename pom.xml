@@ -341,9 +341,9 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </exclusions>
         </dependency>
         <dependency>
-            <groupId>de.twentyeleven.skysail</groupId>
-            <artifactId>org.json-osgi</artifactId>
-            <version>20080701</version>
+            <groupId>com.vaadin.external.google</groupId>
+            <artifactId>android-json</artifactId>
+            <version>0.0.20131108.vaadin1</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>

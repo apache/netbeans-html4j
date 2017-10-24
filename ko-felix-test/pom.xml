@@ -78,8 +78,8 @@
             <systemPath>${jfxrt.jar}</systemPath>
         </dependency>
         <dependency>
-            <groupId>de.twentyeleven.skysail</groupId>
-            <artifactId>org.json-osgi</artifactId>
+            <groupId>com.vaadin.external.google</groupId>
+            <artifactId>android-json</artifactId>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>

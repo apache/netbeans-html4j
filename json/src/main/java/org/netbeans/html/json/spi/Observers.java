@@ -58,7 +58,6 @@ final class Observers {
 
     static void accessingValue(Proto p, String propName) {
         synchronized (GLOBAL) {
-            verifyUnlocked(p);
             for (Watcher w : GLOBAL) {
                 Observers mine = p.observers(true);
                 mine.add(w, new Ref(w, propName));

@@ -20,13 +20,12 @@ package net.java.html.json;
 
 import net.java.html.BrwsrCtx;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import net.java.html.json.MapModelTest.One;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.json.spi.Proto;
 import org.netbeans.html.json.spi.Technology;
 import org.netbeans.html.json.spi.Transfer;
 import org.testng.annotations.BeforeMethod;
@@ -57,18 +56,18 @@ public class TypesTest {
         c = Contexts.newBuilder().register(Technology.class, t, 1).
             register(Transfer.class, t, 1).build();
     }
-    @Function static void readFromEvent(int intX, 
-        byte byteX, 
-        short shortX, long longX, float floatX, 
+    @Function static void readFromEvent(int intX,
+        byte byteX,
+        short shortX, long longX, float floatX,
         boolean boolX,
         char charX,
         double doubleX,
         String StringX, Types myModel) {
-        
+
         myModel.setIntX(intX);
         myModel.setDoubleX(doubleX);
         myModel.setStringX(StringX);
-        
+
         myModel.setByteX(byteX);
         myModel.setShortX(shortX);
         myModel.setLongX(longX);
@@ -76,7 +75,7 @@ public class TypesTest {
         myModel.setBoolX(boolX);
         myModel.setCharX(charX);
     }
-    
+
     @Test public void canParseEventAttributes() {
         Types t = Models.bind(new Types(), c);
         t.setIntX(33);
@@ -88,16 +87,16 @@ public class TypesTest {
         t.setLongX(66);
         t.setFloatX(99f);
         t.setBoolX(true);
-        
+
         assertValidJSON(t.toString());
-        
+
         Object json = Models.toRaw(t);
-        
+
         Types copy = Models.bind(new Types(), c);
         Map copyMap = (Map) Models.toRaw(copy);
         One o = (One) copyMap.get("readFromEvent");
         o.fb.call(null, json);
-        
+
         assertEquals(copy.getIntX(), 33);
         assertEquals(copy.getDoubleX(), 180.5);
         assertEquals(copy.getStringX(), "Ahoj");
@@ -108,7 +107,7 @@ public class TypesTest {
         assertTrue(copy.isBoolX());
         assertEquals(copy.getCharX(), 'A');
     }
-    
+
     private static void assertValidJSON(String text) {
         ScriptEngineManager sem = new ScriptEngineManager();
         ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
@@ -117,5 +116,49 @@ public class TypesTest {
         } catch (ScriptException ex) {
             fail("Cannot parse " + text, ex);
         }
+    }
+
+    @Test
+    public void subclassOfProtoType() {
+        class MyType extends Proto.Type<Number> {
+            public MyType() {
+                super(Integer.class, Integer.class, 0, 0);
+            }
+
+            @Override
+            protected void setValue(Number model, int index, Object value) {
+            }
+
+            @Override
+            protected Object getValue(Number model, int index) {
+                return null;
+            }
+
+            @Override
+            protected void call(Number model, int index, Object data, Object event) throws Exception {
+            }
+
+            @Override
+            protected Number cloneTo(Number model, BrwsrCtx ctx) {
+                return model;
+            }
+
+            @Override
+            protected Number read(BrwsrCtx c, Object json) {
+                return null;
+            }
+
+            @Override
+            protected void onChange(Number model, int index) {
+            }
+
+            @Override
+            protected Proto protoFor(Object object) {
+                return null;
+            }
+        }
+
+        MyType type = new MyType();
+        assertNotNull(type, "Can be instantiated");
     }
 }

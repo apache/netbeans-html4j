@@ -206,14 +206,10 @@ public class ModelTest {
         }
     }
 
-    @Test public void computedPropertyCannotReadToModel() {
+    @Test public void computedPropertyReadToModel() {
         leakedModel = model;
-        try {
-            String res = model.getNotAllowedRead();
-            fail("We should not be allowed to read from the model: " + res);
-        } catch (IllegalStateException ex) {
-            // OK, we can't read
-        }
+        String res = model.getAllowedRead();
+        assertEquals("Allowed: " + model.getUnrelated(), res);
     }
 
     @OnReceive(url = "{protocol}://{host}?query={query}", data = Person.class, onError = "errorState")
@@ -303,8 +299,8 @@ public class ModelTest {
     }
 
     @ComputedProperty
-    static String notAllowedRead() {
-        return "Not allowed callback: " + leakedModel.getUnrelated();
+    static String allowedRead() {
+        return "Allowed: " + leakedModel.getUnrelated();
     }
 
     @ComputedProperty
