@@ -1,3 +1,5 @@
 */target/
 /target/
 *.orig
+*/nb-configuration.xml
+
