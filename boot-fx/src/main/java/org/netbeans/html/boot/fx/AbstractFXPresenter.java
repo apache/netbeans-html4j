@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -182,9 +183,9 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         waitFinished();
     }
 
-    protected abstract void waitFinished();
+    abstract void waitFinished();
 
-    protected abstract WebView findView(final URL resource);
+    abstract WebView findView(final URL resource);
 
     final JSObject convertArrays(Object[] arr) {
         for (int i = 0; i < arr.length; i++) {
@@ -569,8 +570,9 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             Object java = obj.getMember("fxBrwsrId");
             if (java instanceof JSObject) {
                 for (;;) {
-                    int resultHash;
-                    int resultId;
+                    final int resultHash;
+                    final int resultId;
+                    final NavigableSet<Ref> refs;
                     synchronized (this) {
                         this.hash = -1;
                         this.id = -1;
@@ -579,28 +581,38 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                         assert this.id != -1;
                         resultHash = this.hash;
                         resultId = this.id;
+                        refs = values.get(resultHash);
+                        if (refs == null) {
+                            return null;
+                        }
                     }
 
-                    final NavigableSet<Ref> refs = values.get(resultHash);
                     Iterator<Ref> it = refs.iterator();
                     while (it.hasNext()) {
                         Ref next = it.next();
-                        Object pojo = next.value();
-                        if (next.id() == resultId) {
-                            return pojo;
-                        }
-                        if (pojo == null) {
+                        Object[] pojo = { next.value() };
+                        if (pojo[0] == null) {
                             it.remove();
+                            continue;
+                        }
+                        if (next.id() == resultId) {
+                            return emitJavaObject(pojo, resultHash, resultId);
                         }
                     }
                     if (refs.isEmpty()) {
-                        values.remove(resultHash);
+                        synchronized (this) {
+                            values.remove(resultHash);
+                        }
                     }
                 }
             }
             return obj;
         }
+
     }
 
+    Object emitJavaObject(Object[] pojo, int hash, int id) {
+        return pojo[0];
+    }
 
 }

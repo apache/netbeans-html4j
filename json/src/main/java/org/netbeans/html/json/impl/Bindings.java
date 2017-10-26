@@ -69,7 +69,11 @@ public final class Bindings<Data> {
     }
     
     
-    public Data koData() {
+    final Object jsObj() {
+        if (bp instanceof Technology.ToJavaScript) {
+            Technology.ToJavaScript<Data> toJS = (Technology.ToJavaScript<Data>) bp;
+            return toJS.toJavaScript(data);
+        }
         return data;
     }
 

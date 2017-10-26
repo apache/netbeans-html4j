@@ -35,6 +35,9 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.netbeans.html.boot.fx.FXGCPresenter;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
@@ -42,13 +45,10 @@ import org.netbeans.html.json.spi.Transfer;
 import org.netbeans.html.json.spi.WSTransfer;
 import org.netbeans.html.json.tck.KOTest;
 import org.netbeans.html.json.tck.KnockoutTCK;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.ko4j.KO4J;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 
 /**
@@ -75,7 +75,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
         
         URI uri = TyrusDynamicHTTP.initServer();
     
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(TyrusKnockoutTest.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter()).loadClass(TyrusKnockoutTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
         

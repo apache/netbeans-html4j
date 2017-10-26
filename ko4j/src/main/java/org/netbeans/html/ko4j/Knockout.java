@@ -71,6 +71,10 @@ final class Knockout  {
         }
     }
 
+    final Object js() {
+        return js;
+    }
+
     static void cleanUp() {
         for (;;) {
             Knockout ko = null;

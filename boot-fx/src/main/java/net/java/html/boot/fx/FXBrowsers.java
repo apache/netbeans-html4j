@@ -18,16 +18,13 @@
  */
 package net.java.html.boot.fx;
 
+import org.netbeans.html.boot.fx.InitializeWebView;
 import java.net.URL;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.boot.fx.AbstractFXPresenter;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.context.spi.Contexts.Id;
 
@@ -89,7 +86,7 @@ public final class FXBrowsers {
     ) {
         Object[] context = new Object[args.length + 1];
         System.arraycopy(args, 0, context, 1, args.length);
-        final Load load = new Load(webView, null);
+        final InitializeWebView load = new InitializeWebView(webView, null);
         context[0] = load;
         BrowserBuilder.newBrowser(context).
             loadPage(url.toExternalForm()).
@@ -172,7 +169,7 @@ public final class FXBrowsers {
     ) {
         Object[] newCtx = new Object[context.length + 1];
         System.arraycopy(context, 0, newCtx, 1, context.length);
-        final Load load = new Load(webView, onPageLoad);
+        final InitializeWebView load = new InitializeWebView(webView, onPageLoad);
         newCtx[0] = load;
         BrowserBuilder.newBrowser(newCtx).
                 loadPage(url.toExternalForm()).
@@ -203,67 +200,9 @@ public final class FXBrowsers {
      */
     public static void runInBrowser(WebView webView, Runnable code) {
         Object ud = webView.getUserData();
-        if (!(ud instanceof Load)) {
+        if (!(ud instanceof InitializeWebView)) {
             throw new IllegalArgumentException();
         }
-        ((Load)ud).ctx.execute(code);
+        ((InitializeWebView)ud).runInContext(code);
     }
-    
-    private static class Load extends AbstractFXPresenter implements Runnable {
-        private final WebView webView;
-        private final Runnable myLoad;
-        private BrwsrCtx ctx;
-
-        public Load(WebView webView, Runnable onLoad) {
-            this.webView = webView;
-            this.myLoad = onLoad;
-            webView.setUserData(this);
-        }
-
-        public void run() {
-            ctx = BrwsrCtx.findDefault(Load.class);
-            if (myLoad != null) {
-                myLoad.run();
-            }
-        }
-        
-        @Override
-        protected void waitFinished() {
-            // don't wait
-        }
-
-        @Override
-        protected WebView findView(final URL resource) {
-            final Worker<Void> w = webView.getEngine().getLoadWorker();
-            w.stateProperty().addListener(new ChangeListener<Worker.State>() {
-                private String previous;
-
-                @Override
-                public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
-                    if (newState.equals(Worker.State.SUCCEEDED)) {
-                        if (checkValid()) {
-                            onPageLoad();
-                        }
-                    }
-                    if (newState.equals(Worker.State.FAILED)) {
-                        checkValid();
-                        throw new IllegalStateException("Failed to load " + resource);
-                    }
-                }
-
-                private boolean checkValid() {
-                    final String crnt = webView.getEngine().getLocation();
-                    if (previous != null && !previous.equals(crnt)) {
-                        w.stateProperty().removeListener(this);
-                        return false;
-                    }
-                    previous = crnt;
-                    return true;
-                }
-            });
-
-            return webView;
-        }
-    }
-    
 }

@@ -34,7 +34,8 @@ import org.netbeans.html.json.spi.Technology;
  */
 @Contexts.Id("ko4j")
 final class KOTech
-implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Technology.ApplyId<Object> {
+implements Technology.BatchCopy<Knockout>, Technology.ValueMutated<Knockout>,
+Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
     private Object[] jsObjects;
     private int jsIndex;
 
@@ -42,11 +43,11 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
     }
     
     @Override
-    public Object wrapModel(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
+    public Knockout wrapModel(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr) {
         return createKO(model, copyFrom, propArr, funcArr, null);
     }
 
-    final Object createKO(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
+    final Knockout createKO(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
         String[] propNames = new String[propArr.length];
         Number[] propInfo = new Number[propArr.length];
         Object[] propValues = new Object[propArr.length];
@@ -76,7 +77,7 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
             ret, copyFrom,
             propNames, propInfo, propValues, funcNames
         );
-        return ret;
+        return newKO;
     }
     
     private Object getJSObject() {
@@ -95,42 +96,43 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
     }
     
     @Override
-    public Object wrapModel(Object model) {
+    public Knockout wrapModel(Object model) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void bind(PropertyBinding b, Object model, Object data) {
+    public void bind(PropertyBinding b, Object model, Knockout data) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void valueHasMutated(Object data, String propertyName) {
-        Knockout.cleanUp();
-        Knockout.valueHasMutated(data, propertyName, null, null);
+    public void valueHasMutated(Knockout data, String propertyName) {
+        valueHasMutated(data, propertyName, null, null);
     }
     
     @Override
-    public void valueHasMutated(Object data, String propertyName, Object oldValue, Object newValue) {
+    public void valueHasMutated(Knockout data, String propertyName, Object oldValue, Object newValue) {
         Knockout.cleanUp();
-        if (newValue instanceof Enum) {
-            newValue = newValue.toString();
+        if (data != null) {
+            if (newValue instanceof Enum) {
+                newValue = newValue.toString();
+            }
+            Knockout.valueHasMutated(data.js(), propertyName, oldValue, newValue);
         }
-        Knockout.valueHasMutated(data, propertyName, oldValue, newValue);
     }
 
     @Override
-    public void expose(FunctionBinding fb, Object model, Object d) {
+    public void expose(FunctionBinding fb, Object model, Knockout data) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void applyBindings(Object data) {
+    public void applyBindings(Knockout data) {
         applyBindings(null, data);
     }
     @Override
-    public void applyBindings(String id, Object data) {
-        Object ko = Knockout.applyBindings(id, data);
+    public void applyBindings(String id, Knockout data) {
+        Object ko = Knockout.applyBindings(id, data.js());
         if (ko instanceof Knockout) {
             ((Knockout)ko).hold();
             applied.add((Knockout) ko);
@@ -152,5 +154,10 @@ implements Technology.BatchCopy<Object>, Technology.ValueMutated<Object>, Techno
     @Override
     public <M> M toModel(Class<M> modelClass, Object data) {
         return modelClass.cast(Knockout.toModel(data));
+    }
+
+    @Override
+    public Object toJavaScript(Knockout data) {
+        return data.js();
     }
 }

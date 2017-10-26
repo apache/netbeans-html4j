@@ -23,15 +23,18 @@ import net.java.html.json.Model;
 import net.java.html.json.Models;
 import org.netbeans.html.context.spi.Contexts.Id;
 
-/** An implementation of a binding between model classes (see {@link Model})
+/** *  An implementation of a binding between model classes (see {@link Model})
  * and particular technology like <a href="http://knockoutjs.com">knockout.js</a>
- * in a browser window, etc.
- * Since introduction of {@link Id technology identifiers} one can choose between
- * different background implementations to handle the conversion and
- * communication requests. The currently known provider is
- * <code>org.netbeans.html:ko4j</code> module which registers 
+ * in a browser window, etc.Since introduction of {@link Id technology identifiers} one can choose between
+ different background implementations to handle the conversion and
+ communication requests.
+ * The currently known provider is
+ <code>org.netbeans.html:ko4j</code> module which registers 
  * a <a href="http://knockoutjs.com" target="_blank">knockout.js</a>
  * implementation called <b>ko4j</b>.
+ *
+ * @param <Data> technology internal type that keeps internal data for each
+ *    instance of {@linkplains Model model class}.
  *
  * @author Jaroslav Tulach
  */
@@ -188,5 +191,26 @@ public interface Technology<Data> {
          * @return appropriate wrapper around the model
          */
         public D wrapModel(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr);
+    }
+
+    /** Convertor of the internal data type to object suitable as a JavaScript
+     * representation. Certain technologies need to keep some data in Java
+     * and only part of them in JavaScript-ready object. With the help of
+     * {@code ToJavaScript} interface, they can parametrize their
+     * {@link Technology} with the Java type and implement
+     * {@link #toJavaScript(java.lang.Object)}
+     * method to extract the proper JavaScript part from that object.
+     *
+     * @param <D> the internal data type
+     * @since 1.5.1
+     */
+    public static interface ToJavaScript<D> extends Technology<D> {
+        /** Extracts JavaScript ready representation.
+         *
+         * @param data technology's internal data structure
+         * @return object ready to represent the data in JavaScript
+         * @since 1.5.1
+         */
+        public Object toJavaScript(D data);
     }
 }

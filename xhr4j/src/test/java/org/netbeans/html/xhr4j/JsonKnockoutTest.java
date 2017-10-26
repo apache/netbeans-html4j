@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.boot.fx.FXGCPresenter;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
@@ -69,7 +70,7 @@ public final class JsonKnockoutTest extends KnockoutTCK {
         
         URI uri = JsonDynamicHTTP.initServer();
     
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(JsonKnockoutTest.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter()).loadClass(JsonKnockoutTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
         

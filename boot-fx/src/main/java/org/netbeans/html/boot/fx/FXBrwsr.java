@@ -65,7 +65,7 @@ public class FXBrwsr extends Application {
     private static final CountDownLatch FINISHED = new CountDownLatch(1);
     private BorderPane root;
 
-    public static synchronized WebView findWebView(final URL url, final FXPresenter onLoad) {
+    public static synchronized WebView findWebView(final URL url, final AbstractFXPresenter onLoad) {
         if (INSTANCE == null) {
             final String callee = findCalleeClassName();
             Executors.newFixedThreadPool(1).submit(new Runnable() {
@@ -211,7 +211,7 @@ public class FXBrwsr extends Application {
         return arr;
     }
 
-    private WebView newView(final URL url, final FXPresenter onLoad) {
+    private WebView newView(final URL url, final AbstractFXPresenter onLoad) {
         final WebView view = new WebView();
         view.setContextMenuEnabled(false);
         Stage newStage;

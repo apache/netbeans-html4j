@@ -19,22 +19,22 @@
 package org.netbeans.html.boot.fx;
 
 import java.io.File;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.logging.Level;
 import javafx.scene.web.WebView;
-import net.java.html.boot.BrowserBuilder;
-import org.netbeans.html.boot.spi.Fn;
-import org.openide.util.lookup.ServiceProvider;
 
-/** This is an implementation class, use {@link BrowserBuilder} API. Just
- * include this JAR on classpath and the {@link BrowserBuilder} API will find
- * this implementation automatically.
+/** Presenter for stress testing. It tries to force few GC cycles
+ * before returning a Java object from {@link WebView} to simulate the
+ * fact that in JDK8 newer than build 112 the Java objects exposed to
+ * {@link WebView} are held by weak references.
  *
  * @author Jaroslav Tulach
  */
-@ServiceProvider(service = Fn.Presenter.class)
-public final class FXPresenter extends AbstractFXPresenter {
+public final class FXGCPresenter extends AbstractFXPresenter {
     static {
         try {
             try {
@@ -63,4 +63,39 @@ public final class FXPresenter extends AbstractFXPresenter {
     WebView findView(final URL resource) {
         return FXBrwsr.findWebView(resource, this);
     }
+
+    @Override
+    Object emitJavaObject(Object[] pojo, int hash, int id) {
+        Reference<Object> ref = new WeakReference<Object>(pojo[0]);
+        boolean nonNull = ref.get() != null;
+        assertGC(ref);
+        Object r;
+        if ((r = ref.get()) == null && nonNull) {
+            throw new NullPointerException("Value has been GCed to null for " + hash + " and " + id);
+        }
+        return r;
+    }
+
+    private static boolean isGone(Reference<?> ref) {
+        return ref.get() == null;
+    }
+
+    private static void assertGC(Reference<Object> ref) {
+        long l = System.currentTimeMillis();
+        for (int i = 0; i < 3; i++) {
+            if (isGone(ref)) {
+                return;
+            }
+
+            try {
+                System.gc();
+                System.runFinalization();
+            } catch (Error err) {
+                LOG.log(Level.INFO, "Problems during GCing attempt of " + ref.get(), err);
+            }
+        }
+        final long took = System.currentTimeMillis() - l;
+        LOG.log(Level.FINE, "Good: No GC of {1} for {0} ms.", new Object[]{took, ref.get()});
+    }
+
 }

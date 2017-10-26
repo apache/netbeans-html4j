@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.boot.fx.FXGCPresenter;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.Technology;
@@ -70,7 +71,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         
         URI uri = DynamicHTTP.initServer();
     
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutFXTest.class).
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter()).loadClass(KnockoutFXTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
         

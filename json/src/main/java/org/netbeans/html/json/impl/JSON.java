@@ -267,7 +267,7 @@ public final class JSON {
             return null;
         }
         final Bindings b = PropertyBindingAccessor.getBindings(proto, true, null);
-        return b == null ? null : b.koData();
+        return b == null ? null : b.jsObj();
     }
 
     private static Proto findProto(Object object) {
