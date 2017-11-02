@@ -342,63 +342,18 @@ public final class JSON {
 
     }
 
-    private static interface ModelTypes {
-        public Proto.Type[] get(Class<?> type);
 
-        static final ModelTypes MODELS = initModelTypes();
-    }
-
-    static ModelTypes initModelTypes() {
+    static ModelTypes initModelTypes(String implName) {
         try {
-            return initClassValueTypes();
-        } catch (LinkageError err) {
+            Class<?> clazz = Class.forName(implName);
+            return (ModelTypes) clazz.newInstance();
+        } catch (Exception ex) {
             return new LinkedListTypes();
         }
     }
 
-    private static ModelTypes initClassValueTypes() {
-        return new ClassValueTypes();
-    }
-
-    private static final class ClassValueTypes extends ClassValue<Proto.Type[]>
-    implements ModelTypes {
-
-        @Override
-        protected Proto.Type[] computeValue(Class<?> type) {
-            return new Proto.Type<?>[1];
-        }
-    }
-
-    private static final class LinkedListTypes implements ModelTypes {
-        private Item items;
-        private static final class Item {
-            final Item next;
-            final Class<?> clazz;
-            final Proto.Type<?>[] type = { null };
-
-            Item(Item next, Class<?> clazz) {
-                this.next = next;
-                this.clazz = clazz;
-            }
-        }
-
-        @Override
-        public synchronized Proto.Type[] get(Class<?> clazz) {
-            Item it = items;
-            while (it != null) {
-                if (it.clazz == clazz) {
-                    return it.type;
-                }
-                it = it.next;
-            }
-            it = new Item(items, clazz);
-            items = it;
-            return it.type;
-        }
-    }
-
     public static void register(Class c, Proto.Type<?> type) {
-        ModelTypes.MODELS.get(c)[0] = type;
+        ModelTypes.MODELS.find(c)[0] = type;
     }
 
     public static boolean isModel(Class<?> clazz) {
@@ -407,7 +362,7 @@ public final class JSON {
 
     static Proto.Type<?> findType(Class<?> clazz) {
         for (int i = 0; i < 2; i++) {
-            Proto.Type<?> from = ModelTypes.MODELS.get(clazz)[0];
+            Proto.Type<?> from = ModelTypes.MODELS.find(clazz)[0];
             if (from == null) {
                 initClass(clazz);
             } else {
@@ -456,7 +411,7 @@ public final class JSON {
             return modelClazz.cast(data.toString());
         }
         for (int i = 0; i < 2; i++) {
-            Proto.Type<?> from = ModelTypes.MODELS.get(modelClazz)[0];
+            Proto.Type<?> from = ModelTypes.MODELS.find(modelClazz)[0];
             if (from == null) {
                 initClass(modelClazz);
             } else {
