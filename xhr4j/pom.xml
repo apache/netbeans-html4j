@@ -136,6 +136,11 @@
         <artifactId>javax.servlet-api</artifactId>
         <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <description>Implementation module with support for XHR via Java.
 Use it to workaround CORS limitations.</description>

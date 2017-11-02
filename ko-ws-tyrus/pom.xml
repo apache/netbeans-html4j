@@ -164,6 +164,11 @@
         <scope>test</scope>
         <version>3.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <description>An implementation module that provides support for WebSocket protocol on JDK7. 
 No need to use it when running on JDK8 with FX WebView supporting WebSocket directly.</description>

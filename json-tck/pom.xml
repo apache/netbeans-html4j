@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <scope>compile</scope>
+      <scope>test</scope>
       <type>jar</type>
       <exclusions>
         <exclusion>
