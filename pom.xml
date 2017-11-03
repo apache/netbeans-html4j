@@ -75,8 +75,8 @@
       <url>http://netbeans.org</url>
   </organization>
   <scm>
-      <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-netbeans-html4j.git</connection>
-      <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-netbeans-html4j.git</developerConnection>
+      <connection>scm:git:https://gitbox.apache.org/repos/asf//incubator-netbeans-html4j.git</connection>
+      <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-netbeans-html4j.git</developerConnection>
       <url>https://github.com/apache/incubator-netbeans-html4j/tree/${project.scm.tag}</url>
       <tag>master</tag>
   </scm>
