@@ -222,6 +222,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/nb-configuration.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
+                        <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.4.0.js</exclude>
                     </excludes>
                     <excludeSubProjects>false</excludeSubProjects>
                     <useDefaultExcludes>false</useDefaultExcludes>
@@ -266,6 +267,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                                 META-INF/LICENSE META-INF/NOTICE -->
                                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
                             </resourceBundles>
+                            <appendedResourcesDirectory>ko4j/src/main/appended-resources</appendedResourcesDirectory>
                         </configuration>
                     </execution>
                 </executions>
