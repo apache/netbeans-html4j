@@ -24,6 +24,7 @@ interface ModelTypes {
     Proto.Type[] find(Class<?> type);
 
     static final ModelTypes MODELS = JSON.initModelTypes(
+        "java.lang.ClassValue",
         "org.netbeans.html.json.impl.ClassValueTypes"
     );
 }

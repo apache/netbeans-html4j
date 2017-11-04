@@ -343,13 +343,24 @@ public final class JSON {
     }
 
 
-    static ModelTypes initModelTypes(String implName) {
+    static ModelTypes initModelTypes(String preload, String implName) {
+        ModelTypes types = null;
         try {
+            Class.forName(preload);
             Class<?> clazz = Class.forName(implName);
-            return (ModelTypes) clazz.newInstance();
-        } catch (Exception ex) {
-            return new LinkedListTypes();
+            types = (ModelTypes) clazz.newInstance();
+        } catch (ClassNotFoundException ex) {
+            // OK, not supported
+        } catch (NoClassDefFoundError ex) {
+            // OK, not supported
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        } finally {
+            if (types == null) {
+                types = new LinkedListTypes();
+            }
         }
+        return types;
     }
 
     public static void register(Class c, Proto.Type<?> type) {
