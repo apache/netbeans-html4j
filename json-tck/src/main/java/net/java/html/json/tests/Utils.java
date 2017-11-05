@@ -18,12 +18,12 @@
  */
 package net.java.html.json.tests;
 
-import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Timer;
 import java.util.TimerTask;
 import net.java.html.BrwsrCtx;
+import net.java.html.json.Models;
 import org.netbeans.html.json.tck.KnockoutTCK;
 
 /**
@@ -100,9 +100,7 @@ public final class Utils {
 
     private static Iterable<KnockoutTCK> tcks(Class<?> clazz) {
         if (instantiatedTCK != null) {
-            List<KnockoutTCK> l = (List<KnockoutTCK>)(Object)new People().getInfo();
-            l.add(instantiatedTCK);
-            return l;
+            return Models.asList(instantiatedTCK);
         }
         return ServiceLoader.load(KnockoutTCK.class, cl(clazz));
     }
