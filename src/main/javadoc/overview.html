@@ -27,28 +27,97 @@
     </head>
     <body>
         <p>
-         Use Java to write application logic; Use HTML5 to render the UI;
-         {@link net.java.html.json.Model Animate an HTML page from Java}
-         (see <a target="_blank" href="http://dew.apidesign.org/dew/#7212206">Duke being rotated</a> by CSS);
-         Use {@link net.java.html.json.OnReceive REST} or
-         <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>;
-         interact with <a href="net/java/html/js/package-summary.html">JavaScript</a>;
-         Get the best of both worlds!
+        The <em>HTML/Java API</em> provides 
+        {@link net.java.html.js basic building blocks}
+        as well as advanced 
+        {@link net.java.html.json.Model high level concepts}
+        to make communication between <b>JavaScript</b> and <b>Java</b> as smooth as possible.
+        </p>
+        <p>
+        Every <b>browser widget</b> Java API offers ways for communication between Java and
+        JavaScript running in such widget. However, each of them is unique - e.g. one
+        writes different code when communicating with {@link javafx.scene.web.WebView JavaFX WebView},
+        different one when communicating with 
+        <a target="_blank" href="https://developer.android.com/reference/android/webkit/WebView.html">Android WebView</a>
+        yet another one when talking to 
+        <a target="_blank" href="https://developer.apple.com/documentation/uikit/uiwebview">iOS WebView</a>.
+        </p>
+        <p>
+        The goal of <em>HTML/Java API</em> is to <b>unify this communication</b>. By providing simple
+        and highly portable {@link net.java.html.js basic building blocks}
+        one can create sophisticated APIs (like
+        {@link net.java.html.json UI bindings},
+        <a target="_blank" href="https://dukescript.com/javadoc/charts/">charts</a>,
+        <a target="_blank" href="https://dukescript.com/javadoc/leaflet4j/">maps</a>,
+        <a target="_blank" href="https://dukescript.com/javadoc/canvas/">canvas</a>, or
+        <a target="_blank" href="https://dukescript.com/javadoc/libs/net/java/html/lib/snapsvg/Snap/package-summary.html">SnapSVG</a>
+        that can be embedded into
+        {@link net.java.html.boot.fx.FXBrowsers Swing or JavaFX applications},
+        executed {@link net.java.html.boot.script.Scripts headlessly on a server}
+        or executed anywhere <em>HTML/Java API</em> was ported.
+        </p>
+        <p>
+        Various ports of this rendering pipeline were built including support for
+        pure <a target="_blank" href="https://github.com/dukescript/dukescript-presenters/">"webkit desktop rendring</a>
+        <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/Android.html">Android WebView</a>
+        and <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/iOS.html">iOS WebView</a>
+        developed by <a target="_blank" href="https://dukescript.com/">DukeScript project</a>.
+        </p>
+        <p>
+        This technology has also been adopted by some Java bytecode to JavaScript
+        transpilers - for example <a target="_blank" href="http://teavm.org/docs/intro/dukescript.html">TeaVM</a>
+        or <a target="_blank" href="https://github.com/jtulach/bck2brwsr/">Bck2Brwsr VM</a> -
+        as such you can also run the same Java application in a <b>pluginless browser</b>.
+        </p>
+        <p>
+        Porting of HTML/Java rendering pipeline is as easy as implementing
+        {@link org/netbeans/html/boot/spi/Fn.Presenter}
+        interface and successfully passing the
+        {@link org/netbeans/html/json/tck test compatibility kit}.
+        </p>
+        
+        <h3>Highlights</h3>
 
-         The goal of these APIs is to use full featured Java runtime
-         (like real <a target="_blank" href="http://wiki.apidesign.org/wiki/HotSpot">HotSpot VM</a>),
-         but still rely on a very lightweight rendering technology
-         (so it can potentially fit
-         <a target="_blank" href="http://bck2brwsr.apidesign.org">Bck2Brwsr</a> and definitely
-         to various types of phones). What can be more lightweight
-         (from a browser perspective) than
-         <a target="_blank" href="http://wiki.apidesign.org/wiki/HTML">HTML</a>!?
-         By default we use {@link net.java.html.boot.fx JavaFX's WebView}
-         component to display the <a target="_blank" href="http://wiki.apidesign.org/wiki/HTML">HTML</a>.
-         We eliminate the need to manipulate the DOM directly,
-         there is a special {@link net.java.html.json Java to Knockout.js binding}.
-         As a result the <a target="_blank" href="http://knockoutjs.com">HTML uses Knockout.js syntax</a>,
-         yet the application code can be written in Java.
+        The <em>HTML/Java API</em> lets you easily mix <b>Java</b> and <b>JavaScript</b>:
+        
+        <ul>
+            <li>Use industry standard <b>Java</b> language to write application logic.
+            </li>
+            <li>Use rock solid <b>HTML5</b> to render the application <b>UI</b>.</li>
+            <li>Use {@link net.java.html.json high level bindings} to control your UI
+                with a <b>Modelâviewâviewmodel</b> paradigm -
+                see <a target="_blank" href="http://dew.apidesign.org/dew/#9891256">classical TODO</a>
+                example.
+            </li>
+            <li>Use {@link net.java.html.json.OnReceive REST} or
+                <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>
+                to simplify network communication from a browser.
+            </li>
+            <li>
+                Use {@link net.java.html.js basic building blocks} to
+                interact with <a href="net/java/html/js/package-summary.html">JavaScript</a>.
+            </li>
+                
+        </ul>
+        
+        <p>
+        Get the best of both worlds by combining the industry stability of
+        <b>Java</b> and richness of <b>JavaScript</b> ecosystem when it comes
+        to UI and rendering frameworks.
+        </p>
+        
+        <p>
+        The <em>HTML/Java API</em> offers you unified access to 
+        full featured Java runtime (like real <b>HotSpot VM</b>) and
+        very lightweight rendering technology (so it can potentially fit
+        <a target="_blank" href="https://github.com/jtulach/bck2brwsr">Bck2Brwsr</a> and definitely
+        to various types of phones - e.g.
+        <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/Android.html">Android</a>
+        and <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/iOS.html">iOS</a>). 
+        What can be more lightweight (from a browser perspective) than
+        <b>HTML</b>!? Speed up your development with {@link net.java.html.boot.fx JavaFX's WebView}
+        component to display the <b>HTML</b>, get browser inspect features,
+        CSS navigation and IDE integration.
         </p>
 
         <h3>New in version 1.5.1</h3>
