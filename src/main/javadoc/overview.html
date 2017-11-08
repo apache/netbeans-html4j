@@ -71,9 +71,9 @@
         </p>
         <p>
         Porting of HTML/Java rendering pipeline is as easy as implementing
-        {@link org/netbeans/html/boot/spi/Fn.Presenter}
+        {@link org.netbeans.html.boot.spi.Fn.Presenter}
         interface and successfully passing the
-        {@link org/netbeans/html/json/tck test compatibility kit}.
+        {@link org.netbeans.html.json.tck test compatibility kit}.
         </p>
         
         <h3>Highlights</h3>
@@ -85,7 +85,7 @@
             </li>
             <li>Use rock solid <b>HTML5</b> to render the application <b>UI</b>.</li>
             <li>Use {@link net.java.html.json high level bindings} to control your UI
-                with a <b>Modelâviewâviewmodel</b> paradigm -
+                with a <b>Model-view-viewmodel</b> paradigm -
                 see <a target="_blank" href="http://dew.apidesign.org/dew/#9891256">classical TODO</a>
                 example.
             </li>
@@ -121,26 +121,34 @@
         </p>
 
         <h3>New in version 1.5.1</h3>
-        
-        Using <a target="_blank" href="http://search.maven.org/#artifactdetails%7Ccom.vaadin.external.google%7Candroid-json%7C0.0.20131108.vaadin1%7Cjar">Android JSON</a>
-        parsing library as it is Apache licensed - 
-        bug <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-89">#89</a>.
-        It is acceptable to read properties of a model when
-        {@link net.java.html.json.ComputedProperty computing a property}.
-        Regular subclassing of {@link org.netbeans.html.json.spi.Proto.Type} is
-        possible.
-        Bugfix <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-99">#99</a>
-        - better garbage collector related behavior of <b>ko4j</b> instances thanks
-        to introduction of {@link org.netbeans.html.json.spi.Technology.ToJavaScript}.
-        
-        <h3>New in version 1.5</h3>
 
         <p>
             The project has been donated to <a target="_blank" href="http://apache.org">Apache Foundation</a>
             and the code is now hosted in the
             <a target="_blank" href="http://github.com/apache/incubator-netbeans-html4j">incubator repository</a>
-            along other Apache incubating projects.
+            along other Apache incubating projects. Contribute to the project by forking its
+            <a target="_blank" href="http://github.com/apache/incubator-netbeans-html4j">GitHub repository</a>.
         </p>
+
+        <p>
+            Using <a target="_blank" href="http://search.maven.org/#artifactdetails%7Ccom.vaadin.external.google%7Candroid-json%7C0.0.20131108.vaadin1%7Cjar">Android JSON</a>
+            parsing library as it is Apache licensed -
+            bug <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-89">#89</a>.
+            It is acceptable to read properties of a model when
+            {@link net.java.html.json.ComputedProperty computing a property}.
+            Regular subclassing of {@link org.netbeans.html.json.spi.Proto.Type} is
+            possible.
+            Bugfix <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-99">#99</a>
+            - better garbage collector related behavior of <b>ko4j</b> instances thanks
+            to introduction of {@link org.netbeans.html.json.spi.Technology.ToJavaScript}.
+            Mentioning <a target="_blank" href="http://knockoutjs.com">knockout.js</a>
+            license in the <b>ko4j</b> artifact - bug
+            <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-98">#98</a>.
+            Simplifying dependencies of {@link org.netbeans.html.json.tck} - bug
+            <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-111">#111</a>
+        </p>
+
+        <!-- following ones were added in version 1.5 -->
 
         <p>
         Bug fix for <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=270481">
@@ -651,7 +659,7 @@ $ ls client/src/main/webapp/pages/index.html
         </script>
 
         <center>
-        <div id="minesweeper" style="background-color: #f0f0f0; align: center">
+        <div id="minesweeper" style="align: center">
         <div data-bind="template: { name : 'field', if: fieldShowing }"></div>
         </div>
         </center>
@@ -709,12 +717,15 @@ $ ls client/src/main/webapp/pages/index.html
         online:
         <ul>
             <li>Current <a target="_blank" href="http://bits.netbeans.org/html+java/dev/">development</a> version
+            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.5">1.5</a>
+            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.4">1.4</a>
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.3">1.3</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.2.3">1.2.3</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.1">1.1</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.0">1.0</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/0.9">0.9</a>
-                and historic ones (<a target="_blank" href="http://bits.netbeans.org/html+java/0.8.3">0.8.3</a>,
+                and historic ones (
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.2.3">1.2.3</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.1">1.1</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.0">1.0</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/0.9">0.9</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.3">0.8.3</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.2">0.8.2</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.1">0.8.1</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8">0.8</a>, and
