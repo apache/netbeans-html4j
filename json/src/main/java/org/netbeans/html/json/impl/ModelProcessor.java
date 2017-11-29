@@ -272,7 +272,7 @@ public final class ModelProcessor extends AbstractProcessor {
                         boolean isPrimitive[] = {false};
                         String tn = checkType(p, isModel, isEnum, isPrimitive);
                         if (isModel[0]) {
-                            w.write("    prop_" + p.name() + " = this;\n");
+                            w.write("    prop_" + p.name() + " = TYPE; /* uninitialized */\n");
                         }
                     }
                 }
@@ -588,7 +588,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  }\n");
                 if (thisToNull) {
                     w.write("  private Object thisToNull(Object value) {\n");
-                    w.write("    return value == this ? null : value;\n");
+                    w.write("    return value == this || value == TYPE ? null : value;\n");
                     w.write("  }\n");
                 }
                 w.write("}\n");
@@ -671,7 +671,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 w.write("  public " + tn + " " + gs[0] + "() {\n");
                 w.write("    proto.accessProperty(\"" + p.name() + "\");\n");
                 if (isModel[0]) {
-                    w.write("    if (prop_" + p.name() + " == this) prop_" + p.name() + " = new " + tn +"();\n");
+                    w.write("    if (prop_" + p.name() + " == TYPE) prop_" + p.name() + " = new " + tn +"();\n");
                 }
                 w.write("    return (" + tn + ")prop_" + p.name() + ";\n");
                 w.write("  }\n");
@@ -1780,7 +1780,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     w.write("    ret.prop_" + p.name() + " = " + gs[0] + "();\n");
                     continue;
                 }
-                w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + " == null ? null : prop_" + p.name() + " == this ? ret : " + gs[0] + "().clone();\n");
+                w.write("    ret.prop_" + p.name() + " =  prop_" + p.name() + " == null ? null : prop_" + p.name() + " == TYPE ? TYPE : " + gs[0] + "().clone();\n");
             } else {
                 w.write("    proto.cloneList(ret." + gs[0] + "(), ctx, prop_" + p.name() + ");\n");
             }

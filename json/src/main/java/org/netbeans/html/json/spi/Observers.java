@@ -20,6 +20,7 @@ package org.netbeans.html.json.spi;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import org.netbeans.html.json.impl.SimpleList;
 
 /**
@@ -37,7 +38,6 @@ final class Observers {
     
     static Usages beginComputing(Proto p, String name, Usages usages) {
         synchronized (GLOBAL) {
-            verifyUnlocked(p);
             final Watcher nw = new Watcher(p, name);
             GLOBAL.add(nw);
             return Usages.register(name, nw, usages);
@@ -68,9 +68,9 @@ final class Observers {
     static void finishComputing(Proto p) {
         synchronized (GLOBAL) {
             boolean found = false;
-            Iterator<Watcher> it = GLOBAL.iterator();
-            while (it.hasNext()) {
-                Watcher w = it.next();
+            ListIterator<Watcher> it = GLOBAL.listIterator(GLOBAL.size());
+            while (it.hasPrevious()) {
+                Watcher w = it.previous();
                 if (w.proto == p && w.owner == Thread.currentThread()) {
                     if (w.prop != null) {
                         Observers mine = p.observers(true);
@@ -78,6 +78,7 @@ final class Observers {
                     }
                     found = true;
                     it.remove();
+                    break;
                 }
             }
             if (!found) {
@@ -153,20 +154,18 @@ final class Observers {
             Iterator<Ref> it = mine.observers.iterator();
             while (it.hasNext()) {
                 Ref ref = it.next();
-                if (ref.get() == null) {
+                Watcher w = ref.watcher();
+                if (w == null || w.proto == null) {
                     it.remove();
                     continue;
                 }
                 if (ref.prop.equals(propName)) {
-                    Watcher w = ref.watcher();
-                    if (w != null) {
-                        mutated.add(w);
-                    }
+                    mutated.add(w);
                 }
             }
         }
         for (Watcher w : mutated) {
-            w.proto.valueHasMutated(w.prop);
+            w.valueHasMutated();
         }
     }
 
@@ -211,6 +210,13 @@ final class Observers {
 
         void destroy() {
             proto = null;
+        }
+
+        void valueHasMutated() {
+            Proto p = proto;
+            if (p != null) {
+                p.valueHasMutated(prop);
+            }
         }
     }
 
