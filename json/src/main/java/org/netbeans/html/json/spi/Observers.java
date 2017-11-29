@@ -154,20 +154,18 @@ final class Observers {
             Iterator<Ref> it = mine.observers.iterator();
             while (it.hasNext()) {
                 Ref ref = it.next();
-                if (ref.get() == null) {
+                Watcher w = ref.watcher();
+                if (w == null || w.proto == null) {
                     it.remove();
                     continue;
                 }
                 if (ref.prop.equals(propName)) {
-                    Watcher w = ref.watcher();
-                    if (w != null) {
-                        mutated.add(w);
-                    }
+                    mutated.add(w);
                 }
             }
         }
         for (Watcher w : mutated) {
-            w.proto.valueHasMutated(w.prop);
+            w.valueHasMutated();
         }
     }
 
@@ -212,6 +210,13 @@ final class Observers {
 
         void destroy() {
             proto = null;
+        }
+
+        void valueHasMutated() {
+            Proto p = proto;
+            if (p != null) {
+                p.valueHasMutated(prop);
+            }
         }
     }
 
