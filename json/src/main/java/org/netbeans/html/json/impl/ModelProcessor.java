@@ -818,33 +818,59 @@ public final class ModelProcessor extends AbstractProcessor {
             w.write(" " + gs[0] + "() {\n");
             int arg = 0;
             boolean deep = false;
-            for (VariableElement pe : ee.getParameters()) {
-                final String dn = pe.getSimpleName().toString();
 
-                if (!verifyPropName(pe, dn, fixedProps)) {
-                    ok = false;
-                }
-                final TypeMirror pt = pe.asType();
-                if (isModel(pt)) {
-                    deep = true;
-                }
-                final String dt = fqn(pt, ee);
-                if (dt.startsWith("java.util.List") && pt instanceof DeclaredType) {
-                    final List<? extends TypeMirror> ptArgs = ((DeclaredType)pt).getTypeArguments();
-                    if (ptArgs.size() == 1 && isModel(ptArgs.get(0))) {
+            final List<? extends VariableElement> methodParameters = ee.getParameters();
+
+            String unknownSingleProperty = methodParameters.size() != 1 ? null :
+                verifyPropName(methodParameters.get(0), fixedProps);
+
+            if (unknownSingleProperty == null) {
+                for (VariableElement pe : methodParameters) {
+                    final String dn = pe.getSimpleName().toString();
+
+                    String unknownPropertyError = verifyPropName(pe, fixedProps);
+                    if (unknownPropertyError != null) {
+                        error(unknownPropertyError, e);
+                        ok = false;
+                    }
+                    final TypeMirror pt = pe.asType();
+                    if (isModel(pt)) {
                         deep = true;
                     }
-                }
-                String[] call = toGetSet(dn, dt, false);
-                w.write("    " + dt + " arg" + (++arg) + " = ");
-                w.write(call[0] + "();\n");
+                    final String dt = fqn(pt, ee);
+                    if (dt.startsWith("java.util.List") && pt instanceof DeclaredType) {
+                        final List<? extends TypeMirror> ptArgs = ((DeclaredType)pt).getTypeArguments();
+                        if (ptArgs.size() == 1 && isModel(ptArgs.get(0))) {
+                            deep = true;
+                        }
+                    }
+                    String[] call = toGetSet(dn, dt, false);
+                    w.write("    " + dt + " arg" + (++arg) + " = ");
+                    w.write(call[0] + "();\n");
 
-                Collection<String[]> depends = deps.get(dn);
-                if (depends == null) {
-                    depends = new LinkedHashSet<String[]>();
-                    deps.put(dn, depends);
+                    Collection<String[]> depends = deps.get(dn);
+                    if (depends == null) {
+                        depends = new LinkedHashSet<String[]>();
+                        deps.put(dn, depends);
+                    }
+                    depends.add(new String[] { sn, gs[0] });
                 }
-                depends.add(new String[] { sn, gs[0] });
+            } else {
+                VariableElement firstProp = methodParameters.get(0);
+                TypeMirror type = firstProp.asType();
+                CharSequence simpleName;
+                if (type.getKind() == TypeKind.DECLARED) {
+                    simpleName = ((DeclaredType) type).asElement().getSimpleName();
+                } else {
+                    simpleName = type.toString();
+                }
+                if (simpleName.toString().equals(className)) {
+                } else {
+                    error("Single parameter needs to be of type " + className + " or " + unknownSingleProperty, e);
+                    ok = false;
+                    continue NEXT_ANNOTATION;
+                }
+                w.write("    " + simpleName + " arg" + (++arg) + " = this;\n");
             }
             w.write("    try {\n");
             if (tp != null) {
@@ -965,12 +991,13 @@ public final class ModelProcessor extends AbstractProcessor {
         return null;
     }
 
-    private boolean verifyPropName(Element e, String propName, Prprt[] existingProps) {
+    private String verifyPropName(Element e, Prprt[] existingProps) {
+        String propName = e.getSimpleName().toString();
         StringBuilder sb = new StringBuilder();
         String sep = "";
         for (Prprt Prprt : existingProps) {
             if (Prprt.name().equals(propName)) {
-                return true;
+                return null;
             }
             sb.append(sep);
             sb.append('"');
@@ -978,11 +1005,7 @@ public final class ModelProcessor extends AbstractProcessor {
             sb.append('"');
             sep = ", ";
         }
-        error(
-            propName + " is not one of known properties: " + sb
-            , e
-        );
-        return false;
+        return propName + " has to be one of known properties: " + sb;
     }
 
     private static String findPkgName(Element e) {
