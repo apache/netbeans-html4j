@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.assertEquals;
@@ -50,14 +49,13 @@ public class FnTest extends JsClassLoaderBase {
 
     @BeforeClass
     public static void createClassLoader() throws Exception {
-        ScriptEngineManager sem = new ScriptEngineManager();
-        final ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
+        final ScriptEngine eng = JsUtils.initializeEngine();
         
         final URL my = FnTest.class.getProtectionDomain().getCodeSource().getLocation();
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
         
-        class Impl implements FindResources, Fn.Presenter {
+        class Impl implements FindResources, Fn.Presenter, Fn.FromJavaScript {
             @Override
             public void findResources(String path, Collection<? super URL> results, boolean oneIsEnough) {
                 URL u = ul.findResource(path);
@@ -111,6 +109,11 @@ public class FnTest extends JsClassLoaderBase {
             @Override
             public void loadScript(Reader code) throws Exception {
                 eng.eval(code);
+            }
+
+            @Override
+            public java.lang.Object toJava(java.lang.Object js) {
+                return JsUtils.toJava(eng, js);
             }
         }
         Impl impl = new Impl();

@@ -65,12 +65,34 @@ public class JsMethods {
         + "}\n"
         + "return a;"
     )
-    private static native int sumArr(Arithm at, int... arr);
-    
+    private static native int sumTwo(Arithm at, int... arr);
+
     public static int sumArr(int... arr) {
-        return sumArr(new Arithm(), arr);
+        return sumTwo(new Arithm(), arr);
+    }
+
+    @JavaScriptBody(args = {"r"}, javacall = true, body =
+        "var array = new Array();\n"
+      + "array[0]=1; array[1]=2;\n"
+      + "return r.@org.netbeans.html.boot.impl.Arithm::sumInts([I)(array);\n"
+    )
+    private static native int sumInts(Arithm r);
+
+    @JavaScriptBody(args = {"r"}, javacall = true, body =
+        "var array = new Array();\n"
+      + "array[0]=1; array[1]=2;\n"
+      + "return r.@org.netbeans.html.boot.impl.Arithm::sumArr([Ljava/lang/Object;)(array);\n"
+    )
+    private static native int sumArr(Arithm r);
+
+    public static int sumInts() {
+        return sumInts(new Arithm());
     }
     
+    public static int sumArr() {
+        return sumArr(new Arithm());
+    }
+
     @JavaScriptBody(args = { "x", "y" }, body = "return mul(x, y);")
     public static native int useExternalMul(int x, int y);
     

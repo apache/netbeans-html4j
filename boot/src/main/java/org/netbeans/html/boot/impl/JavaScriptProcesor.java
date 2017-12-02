@@ -259,6 +259,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             StringBuilder sb = new StringBuilder();
             sb.append('(');
             for (TypeMirror tm : t.getParameterTypes()) {
+                while (tm.getKind() == TypeKind.ARRAY) {
+                    sb.append('[');
+                    tm = ((ArrayType) tm).getComponentType();
+                }
                 if (tm.getKind().isPrimitive()) {
                     switch (tm.getKind()) {
                         case INT: sb.append('I'); break;
@@ -270,13 +274,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                         case FLOAT: sb.append('F'); break;
                         case LONG: sb.append('J'); break;
                         default:
-                            throw new IllegalStateException("Uknown " + tm.getKind());
+                            throw new IllegalStateException("Unknown " + tm.getKind());
                     }
                 } else {
-                    while (tm.getKind() == TypeKind.ARRAY) {
-                        sb.append('[');
-                        tm = ((ArrayType)tm).getComponentType();
-                    }
                     sb.append('L');
                     Types tu = processingEnv.getTypeUtils();
                     Element elm = tu.asElement(tu.erasure(tm));

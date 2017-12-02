@@ -29,7 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.annotations.AfterClass;
@@ -45,13 +44,12 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        ScriptEngineManager sem = new ScriptEngineManager();
-        final ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
-        
+        final ScriptEngine eng = JsUtils.initializeEngine();
+
         final URL my = JsClassLoaderTest.class.getProtectionDomain().getCodeSource().getLocation();
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
-        class MyCL extends FnUtils.JsClassLoaderImpl implements Fn.Presenter {
+        class MyCL extends FnUtils.JsClassLoaderImpl implements Fn.Presenter, Fn.FromJavaScript {
 
             public MyCL(ClassLoader parent) {
                 super(parent, null, null);
@@ -117,7 +115,13 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
             public void displayPage(URL page, Runnable onPageLoad) {
                 throw new UnsupportedOperationException();
             }
-        };
+
+            @Override
+            public java.lang.Object toJava(java.lang.Object js) {
+                return JsUtils.toJava(eng, js);
+            }
+        }
+;
         
         MyCL l = new MyCL(parent);
         Closeable close = FnContext.activate(l);
