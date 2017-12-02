@@ -74,21 +74,10 @@ public class JsMethods {
     @JavaScriptBody(args = {"r"}, javacall = true, body =
         "var array = new Array();\n"
       + "array[0]=1; array[1]=2;\n"
-      + "return r.@org.netbeans.html.boot.impl.Arithm::sumInts([I)(array);\n"
-    )
-    private static native int sumInts(Arithm r);
-
-    @JavaScriptBody(args = {"r"}, javacall = true, body =
-        "var array = new Array();\n"
-      + "array[0]=1; array[1]=2;\n"
       + "return r.@org.netbeans.html.boot.impl.Arithm::sumArr([Ljava/lang/Object;)(array);\n"
     )
     private static native int sumArr(Arithm r);
 
-    public static int sumInts() {
-        return sumInts(new Arithm());
-    }
-    
     public static int sumArr() {
         return sumArr(new Arithm());
     }
@@ -146,7 +135,7 @@ public class JsMethods {
     public static native void callParamTypes(Map<String,Integer> map, int value);
 
     @JavaScriptBody(args = { "a", "b" }, body = "return [ a, b ];")
-    public static native double[] both(double a, double b);
+    public static native Object both(double a, double b);
     
     enum Enm {
         A, B;

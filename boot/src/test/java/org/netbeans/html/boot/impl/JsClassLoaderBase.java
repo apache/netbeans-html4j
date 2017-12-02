@@ -259,16 +259,4 @@ public class JsClassLoaderBase {
         }
     }    
 
-   @Test public void sumInts() throws Throwable {
-        Method st = methodClass.getMethod("sumInts");
-        java.lang.Object res = st.invoke(null);
-        assertEquals(res, 3, "The right value");
-    }
-
-   @Test public void sumArr() throws Throwable {
-        Method st = methodClass.getMethod("sumArr");
-        java.lang.Object res = st.invoke(null);
-        assertEquals(res, 3, "The right value");
-    }
-
 }

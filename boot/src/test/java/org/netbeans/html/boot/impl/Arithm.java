@@ -27,19 +27,11 @@ public class Arithm {
         return a + b;
     }
 
-    public int sumInts(int[] arr) {
-        int s = 0;
-        for (int e : arr) {
-            s += e;
-        }
-        return s;
-    }
-
     public int sumArr(java.lang.Object[] arr) {
-        int[] copy = new int[arr.length];
+        Integer[] copy = new Integer[arr.length];
         for (int i = 0; i < arr.length; i++) {
             copy[i] = ((Number)arr[i]).intValue();
         }
-        return sumInts(copy);
+        return 0;
     }
 }

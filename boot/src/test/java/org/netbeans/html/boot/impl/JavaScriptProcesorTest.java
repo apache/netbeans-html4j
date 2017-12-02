@@ -95,6 +95,72 @@ public class JavaScriptProcesorTest {
         c.assertNoErrors();
     }
     
+    @Test public void primitiveArrayGeneratesAnError() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, body =\n"
+            + "    \"return [ 1, 2 ];\"\n"
+            + "  )\n"
+            + "  private static native double[] returnPrimitive(Object r);\n"
+            + "}\n";
+
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("Use Object[]");
+    }
+
+    @Test public void nonObjectArrayGeneratesAnError() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, body =\n"
+            + "    \"return [ 1, 2 ];\"\n"
+            + "  )\n"
+            + "  private static native Double[] returnPrimitive(Object r);\n"
+            + "}\n";
+
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("Use Object[]");
+    }
+
+    @Test public void primitiveArrayCallbackGeneratesAnError() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, javacall = true, body =\n"
+            + "    \"return @x.y.z.X::acceptDouble([D)([ 1, 2 ]);\"\n"
+            + "  )\n"
+            + "  private static native Object[] returnPrimitive(Object r);\n"
+            + "  static double[] acceptDouble(double[] arr) {\n"
+            + "    return arr;\n"
+            + "  }\n"
+            + "}\n";
+
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("Use Object[]");
+    }
+
+    @Test public void nonObjectArrayCallbackGeneratesAnError() throws IOException {
+        String code = "package x.y.z;\n"
+            + "import net.java.html.js.JavaScriptBody;\n"
+            + "class X {\n"
+            + "  @JavaScriptBody(args={\"r\"}, javacall = true, body =\n"
+            + "    \"return @x.y.z.X::acceptDouble([Ljava/lang/Double;)([ 1, 2 ]);\"\n"
+            + "  )\n"
+            + "  private static native Object[] returnPrimitive(Object r);\n"
+            + "  static Double[] acceptDouble(Double[] arr) {\n"
+            + "    return arr;\n"
+            + "  }\n"
+            + "}\n";
+
+        Compile c = Compile.create("", code);
+        c.assertErrors();
+        c.assertError("Use Object[]");
+    }
+
     @Test public void misorderNotified() throws IOException {
         String code = "package x.y.z;\n"
             + "import net.java.html.js.JavaScriptBody;\n"

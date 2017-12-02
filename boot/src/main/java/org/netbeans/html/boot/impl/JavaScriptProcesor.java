@@ -118,6 +118,14 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (!jsb.javacall() && jsb.body().contains(".@")) {
                 msg.printMessage(Diagnostic.Kind.WARNING, "Usage of .@ usually requires javacall=true", e);
             }
+            if (ee.getReturnType().getKind() == TypeKind.ARRAY) {
+                ArrayType at = (ArrayType) ee.getReturnType();
+                TypeMirror objectType = processingEnv.getElementUtils().getTypeElement("java.lang.Object").asType();
+                    final TypeMirror componentType = at.getComponentType();
+                if (!processingEnv.getTypeUtils().isSameType(objectType, componentType)) {
+                    wrongArrayError(componentType, e);
+                }
+            }
             if (jsb.javacall()) {
                 JsCallback verify = new VerifyCallback(e);
                 try {
@@ -201,6 +209,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         return null;
     }
 
+    final void wrongArrayError(TypeMirror paramType, Element method) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Don't use " + paramType + " array. Use Object[].", method);
+    }
+
     private class VerifyCallback extends JsCallback {
         private final Element e;
         public VerifyCallback(Element e) {
@@ -217,13 +229,14 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 return "";
             }
             ExecutableElement found = null;
+            String paramTypes = null;
             StringBuilder foundParams = new StringBuilder();
             for (Element m : type.getEnclosedElements()) {
                 if (m.getKind() != ElementKind.METHOD) {
                     continue;
                 }
                 if (m.getSimpleName().contentEquals(method)) {
-                    String paramTypes = findParamTypes((ExecutableElement)m);
+                    paramTypes = findParamTypes((ExecutableElement)m);
                     if (paramTypes.equals(params)) {
                         found = (ExecutableElement) m;
                         break;
@@ -248,7 +261,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                     mangledOnes = new TreeMap<String, ExecutableElement>();
                     javacalls.put(findPkg(e), mangledOnes);
                 }
-                String mangled = JsCallback.mangle(fqn, method, findParamTypes(found));
+                String mangled = JsCallback.mangle(fqn, method, paramTypes);
                 mangledOnes.put(mangled, found);
             }
             return "";
@@ -258,10 +271,13 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             ExecutableType t = (ExecutableType) method.asType();
             StringBuilder sb = new StringBuilder();
             sb.append('(');
-            for (TypeMirror tm : t.getParameterTypes()) {
+            for (TypeMirror paramType : t.getParameterTypes()) {
+                TypeMirror tm = paramType;
+                boolean isArray = false;
                 while (tm.getKind() == TypeKind.ARRAY) {
                     sb.append('[');
                     tm = ((ArrayType) tm).getComponentType();
+                    isArray = true;
                 }
                 if (tm.getKind().isPrimitive()) {
                     switch (tm.getKind()) {
@@ -276,10 +292,18 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                         default:
                             throw new IllegalStateException("Unknown " + tm.getKind());
                     }
+                    if (isArray) {
+                        wrongArrayError(paramType, method);
+                    }
                 } else {
                     sb.append('L');
                     Types tu = processingEnv.getTypeUtils();
-                    Element elm = tu.asElement(tu.erasure(tm));
+                    final TypeMirror erasedType = tu.erasure(tm);
+                    TypeMirror objectType = processingEnv.getElementUtils().getTypeElement("java.lang.Object").asType();
+                    if (isArray && !processingEnv.getTypeUtils().isSameType(objectType, erasedType)) {
+                        wrongArrayError(paramType, method);
+                    }
+                    Element elm = tu.asElement(erasedType);
                     dumpElems(sb, elm, ';');
                 }
             }
