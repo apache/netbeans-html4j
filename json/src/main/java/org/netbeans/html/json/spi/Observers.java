@@ -49,7 +49,7 @@ final class Observers {
             for (Watcher w : GLOBAL) {
                 if (w.proto == p) {
                     if (w.owner == Thread.currentThread()) {
-                        throw new IllegalStateException("Re-entrant attempt to access " + p);
+                        throw new IllegalStateException("Re-entrant attempt to access " + p.toStr());
                     }
                 }
             }
