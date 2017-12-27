@@ -19,6 +19,7 @@
 package net.java.html.js;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -38,9 +39,26 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
+@Repeatable(JavaScriptResource.Group.class)
 public @interface JavaScriptResource {
     /** The JavaScript file to load in before associated class can execute.
      * @return relative path with respect to the annotated class
      */
     public String value();
+
+    /** Represents a group of resources to load. When initializing element
+     * annotated by {@code Group} annotation, load all resources, one by one, in the
+     * order they appear in the {@link Group#value() array}.
+     *
+     * @since 1.6
+     */
+    @Retention(RetentionPolicy.CLASS)
+    @Target(ElementType.TYPE)
+    public static @interface Group {
+        /** Multiple instances of {@link JavaScriptResource} to load.
+         *
+         * @return array of resources to load
+         */
+        JavaScriptResource[] value();
+    }
 }
