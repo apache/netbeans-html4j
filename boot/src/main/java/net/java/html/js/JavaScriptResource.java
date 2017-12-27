@@ -51,9 +51,11 @@ public @interface JavaScriptResource {
      * order they appear in the {@link Group#value() array}.
      *
      * @since 1.6
+     * @deprecated Don't use directly. Repeat the {@link JavaScriptResource} annotation.
      */
     @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.TYPE)
+    @Deprecated
     public static @interface Group {
         /** Multiple instances of {@link JavaScriptResource} to load.
          *
