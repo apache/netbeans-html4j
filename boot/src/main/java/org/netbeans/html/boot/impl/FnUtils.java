@@ -117,7 +117,8 @@ public final class FnUtils {
     private static final class FindInClass extends ClassVisitor {
         private String name;
         private int found;
-        private String resource;
+        private int resourcesCnt = 0;
+        private final String[] resources = new String[256];
 
         public FindInClass(ClassLoader l, ClassVisitor cv) {
             super(Opcodes.ASM4, cv);
@@ -133,6 +134,9 @@ public final class FnUtils {
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
             final AnnotationVisitor del = super.visitAnnotation(desc, visible);
             if ("Lnet/java/html/js/JavaScriptResource;".equals(desc)) {
+                return new LoadResource(del);
+            }
+            if ("Lnet/java/html/js/JavaScriptResource$Group;".equals(desc)) {
                 return new LoadResource(del);
             }
             return del;
@@ -259,7 +263,12 @@ public final class FnUtils {
                 Label noPresenter = new Label();
                 super.visitInsn(Opcodes.DUP);
                 super.visitJumpInsn(Opcodes.IFNULL, noPresenter);
-                if (resource != null) {
+                int cnt = resourcesCnt;
+                while (cnt > 0) {
+                    String resource = resources[--cnt];
+                    if (resource == null) {
+                        continue;
+                    }
                     super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
                     super.visitLdcInsn(resource);
                     super.visitMethodInsn(Opcodes.INVOKESTATIC,
@@ -533,12 +542,22 @@ public final class FnUtils {
                 super.visit(attrName, value);
                 String relPath = (String) value;
                 if (relPath.startsWith("/")) {
-                    resource = relPath;
+                    resources[resourcesCnt++] = relPath;
                 } else {
                     int last = name.lastIndexOf('/');
                     String fullPath = name.substring(0, last + 1) + relPath;
-                    resource = fullPath;
+                    resources[resourcesCnt++] = fullPath;
                 }
+            }
+
+            @Override
+            public AnnotationVisitor visitArray(String name) {
+                return this;
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String name, String desc) {
+                return this;
             }
         }
     }

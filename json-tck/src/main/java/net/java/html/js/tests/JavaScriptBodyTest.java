@@ -434,6 +434,11 @@ public class JavaScriptBodyTest {
     }
 
     @KOTest
+    public void orderOfJavaScriptResources() throws Exception {
+        assertEquals("Hello World!", ResourceOrder.helloWorld());
+    }
+
+    @KOTest
     public void globalValueInCallbackAvailable() throws Exception {
         final String[] value = { null, null };
         Bodies.callback(new Runnable() {

@@ -75,6 +75,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         Set<String> set = new HashSet<String>();
         set.add(JavaScriptBody.class.getName());
         set.add(JavaScriptResource.class.getName());
+        set.add(JavaScriptResource.Group.class.getName());
         return set;
     }
 
@@ -140,44 +141,16 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (r == null) {
                 continue;
             }
-            final String res;
-            if (r.value().startsWith("/")) {
-                res = r.value().substring(1);
-            } else {
-                res = findPkg(e).replace('.', '/') + "/" + r.value();
-            }
+            checkJavaScriptBody(r, e, msg);
+        }
 
-            try {
-                FileObject os = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", res);
-                os.openInputStream().close();
-            } catch (IOException ex1) {
-                try {
-                    FileObject os2 = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", res);
-                    os2.openInputStream().close();
-                } catch (IOException ex2) {
-                    try {
-                        FileObject os3 = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, "", res);
-                        os3.openInputStream().close();
-                    } catch (IOException ex3) {
-                        msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find resource " + res, e);
-                    }
-                }
+        for (Element e : roundEnv.getElementsAnnotatedWith(JavaScriptResource.Group.class)) {
+            JavaScriptResource.Group g = e.getAnnotation(JavaScriptResource.Group.class);
+            if (g == null) {
+                continue;
             }
-
-            boolean found = false;
-            for (Element mthod : e.getEnclosedElements()) {
-                if (mthod.getKind() != ElementKind.METHOD) {
-                    continue;
-                }
-                if (mthod.getAnnotation(JavaScriptBody.class) != null) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                msg.printMessage(Diagnostic.Kind.ERROR, "At least one method needs @JavaScriptBody annotation. "
-                    + "Otherwise it is not guaranteed the resource will ever be loaded,", e
-                );
+            for (JavaScriptResource r : g.value()) {
+                checkJavaScriptBody(r, e, msg);
             }
         }
 
@@ -187,6 +160,48 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             javacalls.clear();
         }
         return true;
+    }
+
+    private void checkJavaScriptBody(JavaScriptResource r, Element e, final Messager msg) {
+        final String res;
+        if (r.value().startsWith("/")) {
+            res = r.value().substring(1);
+        } else {
+            res = findPkg(e).replace('.', '/') + "/" + r.value();
+        }
+
+        try {
+            FileObject os = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", res);
+            os.openInputStream().close();
+        } catch (IOException ex1) {
+            try {
+                FileObject os2 = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", res);
+                os2.openInputStream().close();
+            } catch (IOException ex2) {
+                try {
+                    FileObject os3 = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, "", res);
+                    os3.openInputStream().close();
+                } catch (IOException ex3) {
+                    msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find resource " + res, e);
+                }
+            }
+        }
+
+        boolean found = false;
+        for (Element mthod : e.getEnclosedElements()) {
+            if (mthod.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            if (mthod.getAnnotation(JavaScriptBody.class) != null) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            msg.printMessage(Diagnostic.Kind.ERROR, "At least one method needs @JavaScriptBody annotation. "
+                    + "Otherwise it is not guaranteed the resource will ever be loaded,", e
+            );
+        }
     }
 
     @Override
