@@ -232,6 +232,9 @@ public final class BrowserBuilder {
         }
         IOException mal[] = { null };
         URL url = findLocalizedResourceURL(resource, locale, mal, myCls);
+        if (url == null) {
+            throw new NullPointerException("Cannot find page " + resource + " to display");
+        }
         
         Fn.Presenter dfnr = null;
         for (Object o : context) {

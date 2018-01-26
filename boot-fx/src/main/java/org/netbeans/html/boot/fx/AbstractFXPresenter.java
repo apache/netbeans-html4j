@@ -171,7 +171,11 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                         }
                     }
                 }
-                engine.load(resource.toExternalForm());
+                try {
+                    engine.load(resource.toExternalForm());
+                } catch (RuntimeException ex) {
+                    LOG.log(Level.SEVERE, "Cannot load resource " + resource, ex);
+                }
             }
         }
         Run run = new Run();
