@@ -71,8 +71,8 @@
       </license>
   </licenses>
   <organization>
-      <name>NetBeans</name>
-      <url>http://netbeans.org</url>
+      <name>The Apache Software Foundation</name>
+      <url>http://apache.org</url>
   </organization>
   <scm>
       <connection>scm:git:https://gitbox.apache.org/repos/asf//incubator-netbeans-html4j.git</connection>
