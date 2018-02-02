@@ -45,6 +45,9 @@ final class JsUtils {
     }
 
     static java.lang.Object toJava(ScriptEngine eng, java.lang.Object js) {
+        if (js instanceof Boolean || js instanceof String || js instanceof Number) {
+            return js;
+        }
         try {
             Number len = (Number) ((Invocable) eng).invokeFunction("checkArray", js, null);
             if (len != null && len.intValue() >= 0) {
