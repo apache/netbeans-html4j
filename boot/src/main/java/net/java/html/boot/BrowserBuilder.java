@@ -27,6 +27,7 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 import java.util.Collection;
@@ -233,7 +234,18 @@ public final class BrowserBuilder {
         IOException mal[] = { null };
         URL url = findLocalizedResourceURL(resource, locale, mal, myCls);
         if (url == null) {
-            throw new NullPointerException("Cannot find page " + resource + " to display");
+            final IOException ex = new IOException("Cannot find page " + resource + " to display");
+            class InvalidHandler extends URLStreamHandler {
+                @Override
+                protected URLConnection openConnection(URL u) throws IOException {
+                    throw ex;
+                }
+            }
+            try {
+                url = new URL("resource", null, -1, resource, new InvalidHandler());
+            } catch (MalformedURLException malformed) {
+                throw new IllegalStateException(malformed);
+            }
         }
         
         Fn.Presenter dfnr = null;
