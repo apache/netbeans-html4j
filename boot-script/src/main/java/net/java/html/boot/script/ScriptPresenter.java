@@ -322,9 +322,11 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             return true;
         }
         final String cn = obj.getClass().getName();
-        if (cn.startsWith("jdk.nashorn") || ( // NOI18N
-            cn.contains(".mozilla.") && cn.contains(".Native") // NOI18N
-        )) {
+        if (
+            cn.startsWith("com.oracle.truffle") || // NOI18N
+            cn.startsWith("jdk.nashorn") || // NOI18N
+            (cn.contains(".mozilla.") && cn.contains(".Native")) // NOI18N
+        ) {
             return true;
         }
         if (obj instanceof Character) {
