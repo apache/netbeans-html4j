@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package net.java.html.boot.script.ko4j;
+package net.java.html.boot.script;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,9 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
-import net.java.html.boot.script.Scripts;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
@@ -50,6 +51,7 @@ import org.netbeans.html.wstyrus.TyrusContext;
 import org.openide.util.lookup.ServiceProvider;
 import org.testng.Assert;
 import static org.testng.Assert.*;
+import org.testng.SkipException;
 import org.testng.annotations.Factory;
 
 /**
@@ -66,13 +68,10 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        try {
-            Class.forName("java.lang.FunctionalInterface");
-        } catch (ClassNotFoundException ex) {
-            // only runs on JDK8
-            return new Object[0];
+        ScriptEngine eng = new ScriptEngineManager().getEngineByName("nashorn");
+        if (eng == null) {
+            throw new SkipException("Nashorn engine not found. Skipping!");
         }
-
 
         Class[] arr = testClasses();
         for (int i = 0; i < arr.length; i++) {
@@ -85,7 +84,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
 
         baseUri = DynamicHTTP.initServer();
 
-        final Fn.Presenter p = Scripts.createPresenter(KOCase.JS);
+        final Fn.Presenter p = new ScriptPresenter(eng, KOCase.JS);
         try {
             URL envNashorn = new URL("https://bugs.openjdk.java.net/secure/attachment/11894/env.nashorn.1.2-debug.js");
             InputStream is = envNashorn.openStream();

@@ -66,10 +66,14 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private final Executor exc;
     private final Object undefined;
 
-    public ScriptPresenter(Executor exc) {
+    ScriptPresenter(Executor exc) {
+        this(new ScriptEngineManager().getEngineByName("javascript"), exc);
+    }
+
+    ScriptPresenter(ScriptEngine eng, Executor exc) {
+        this.eng = eng;
         this.exc = exc;
         try {
-            eng = new ScriptEngineManager().getEngineByName("javascript");
             eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
             eng.eval("function confirm(msg) { Packages.java.lang.System.out.println(msg); return true; };");
             eng.eval("function prompt(msg, txt) { Packages.java.lang.System.out.println(msg + ':' + txt); return txt; };");
@@ -161,6 +165,9 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     }
 
     final Object checkArray(Object val) throws Exception {
+        if (val instanceof Boolean || val instanceof Number || val instanceof String) {
+            return val;
+        }
         final FnImpl fn = arraySizeFn();
         final Object fnRes = fn.invokeImpl(null, false, val, null);
         int length = ((Number) fnRes).intValue();
@@ -177,7 +184,7 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         if (arraySize == null) {
             try {
                 arraySize = defineImpl("\n"
-                    + "if (to === null) {\n"
+                    + "if (to == null) {\n"
                     + "  if (Object.prototype.toString.call(arr) === '[object Array]') return arr.length;\n"
                     + "  else return -1;\n"
                     + "} else {\n"

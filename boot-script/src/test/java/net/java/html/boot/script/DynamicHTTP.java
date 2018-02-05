@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package net.java.html.boot.script.ko4j;
+package net.java.html.boot.script;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
