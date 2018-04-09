@@ -46,13 +46,37 @@
               <groupId>org.netbeans.html</groupId>
               <artifactId>html4j-maven-plugin</artifactId>
           </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>2.19.1</version>
+              <configuration>
+                  <junitArtifactName>com.dukescript.api:junit-osgi</junitArtifactName>
+                  <systemPropertyVariables>
+                      <fxpresenter.headless>true</fxpresenter.headless>
+                  </systemPropertyVariables>
+              </configuration>
+          </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>com.dukescript.api</groupId>
+            <artifactId>junit-browser-runner</artifactId>
+            <version>1.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>net.java.html.boot.script</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>net.java.html.boot.fx</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
