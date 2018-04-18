@@ -60,11 +60,12 @@ public class ProcessJsAnnotationsGradle implements Plugin<Project> {
                     }
                     Iterable<?> outs = invoke(Iterable.class, sourceSet, "getOutput");
                     for (Object classes : outs) {
-                        try {
-                            process.process((File) classes);
-                        } catch (IOException ex) {
-                            throw new GradleException("Cannot process " + classes, ex);
-                        }
+                        process.addRoot((File) classes);
+                    }
+                    try {
+                        process.process();
+                    } catch (IOException ex) {
+                        throw new GradleException(ex.getMessage(), ex);
                     }
                 }
             }

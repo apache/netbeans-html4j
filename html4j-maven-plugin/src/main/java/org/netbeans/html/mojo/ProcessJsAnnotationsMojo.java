@@ -18,22 +18,8 @@
  */
 package org.netbeans.html.mojo;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,7 +30,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.objectweb.asm.ClassReader;
 
 @Mojo(
     name="process-js-annotations",
@@ -82,8 +67,9 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
         if (!foundAsm) {
             jsa.addAsm();
         }
+        jsa.addRoot(classes);
         try {
-            jsa.process(classes);
+            jsa.process();
         } catch (IOException ex) {
             throw new MojoExecutionException("Problem converting JavaScriptXXX annotations", ex);
         }
