@@ -36,6 +36,12 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <repositories>
+      <repository>
+          <id>gradle</id>
+          <url>https://repo.gradle.org/gradle/libs-releases-local/</url>
+      </repository>
+  </repositories>
   <build>
       <plugins>
           <plugin>
@@ -67,7 +73,7 @@
           </plugin>
       </plugins>
   </build>
-      
+
   <dependencies>
       <dependency>
           <groupId>org.apache.maven</groupId>
@@ -88,7 +94,7 @@
           <type>jar</type>
       </dependency>
       <dependency>
-          <groupId>org.ow2.asm</groupId> 
+          <groupId>org.ow2.asm</groupId>
           <artifactId>asm</artifactId>
           <type>jar</type>
       </dependency>
@@ -97,6 +103,20 @@
           <artifactId>testng</artifactId>
           <scope>test</scope>
           <type>jar</type>
+      </dependency>
+
+      <!-- gradle plugin -->
+      <dependency>
+          <groupId>org.gradle</groupId>
+          <artifactId>gradle-core</artifactId>
+          <version>3.0</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy</artifactId>
+          <version>1.8.3</version>
+          <scope>provided</scope>
       </dependency>
   </dependencies>
 </project>
