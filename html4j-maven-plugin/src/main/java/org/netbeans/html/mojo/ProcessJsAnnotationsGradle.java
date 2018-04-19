@@ -19,66 +19,47 @@
 
 package org.netbeans.html.mojo;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Set;
 import org.gradle.api.Action;
-import org.gradle.api.GradleException;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
-public class ProcessJsAnnotationsGradle implements Plugin<Project> {
+public final class ProcessJsAnnotationsGradle implements Plugin<Project> {
 
     @Override
     public void apply(final Project p) {
-        Task t = p.task("process-js-annotations");
-        t.doLast(new Action<Task>() {
+        final ProcessJsAnnotationsTask process = p.getTasks().create("process-js-annotations", ProcessJsAnnotationsTask.class, new Action<ProcessJsAnnotationsTask>() {
             @Override
-            public void execute(Task t) {
-                final Set<?> allSourceSets = (Set<?>) p.findProperty("sourceSets");
-                for (Object sourceSet : allSourceSets) {
-                    ProcessJsAnnotations process = new ProcessJsAnnotations() {
-                        @Override
-                        protected void log(String msg) {
-                            p.getLogger().info(msg);
-                        }
-                    };
-
-                    Iterable cp = invoke(Iterable.class, sourceSet, "getRuntimeClasspath");
-                    boolean asm = false;
-                    for (Object elem : cp) {
-                        final File pathElement = (File) elem;
-                        process.addClasspathEntry(pathElement);
-                        if (pathElement.getName().contains("asm")) {
-                            asm = true;
-                        }
-                    }
-                    if (!asm) {
-                        process.addAsm();
-                    }
-                    Iterable<?> outs = invoke(Iterable.class, sourceSet, "getOutput");
-                    for (Object classes : outs) {
-                        process.addRoot((File) classes);
-                    }
-                    try {
-                        process.process();
-                    } catch (IOException ex) {
-                        throw new GradleException(ex.getMessage(), ex);
-                    }
-                }
+            public void execute(ProcessJsAnnotationsTask process) {
             }
         });
-    }
-
-    private static <T> T invoke(Class<T> returnType, Object obj, String methodName) {
-        try {
-            Method methodOutput = obj.getClass().getMethod(methodName);
-            Object res = methodOutput.invoke(obj);
-            return returnType.cast(res);
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
+        p.afterEvaluate(new Action<Project>() {
+            @Override
+            public void execute(final Project p) {
+                Set<? extends Task> tasks = (Set<? extends Task>) p.findProperty("tasks");
+                for (Task task : tasks) {
+                    if (task.getName().startsWith("compile")) {
+                        process.dependsOn(task);
+                    }
+                    if (
+                            task.getName().equals("test") ||
+                            task.getName().equals("run") ||
+                            task.getName().equals("jar")
+                    ) {
+                        if (task instanceof DefaultTask) {
+                            ((DefaultTask)task).dependsOn(process);
+                        }
+                    }
+                }
+                process.doLast(new Action<Task>() {
+                    @Override
+                    public void execute(Task t) {
+                        process.processJsAnnotations(p);
+                    }
+                });
+            }
+        });
     }
 }
