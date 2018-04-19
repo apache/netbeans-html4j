@@ -2,4 +2,6 @@
 /target/
 *.orig
 */nb-configuration.xml
-
+/html4j-maven-plugin/src/test/resources/org/netbeans/html/mojo/gradle*/build/*
+/html4j-maven-plugin/src/test/resources/org/netbeans/html/mojo/gradle*/.gradle/*
+/html4j-maven-plugin/src/test/resources/org/netbeans/html/mojo/gradle*/.nb*gradle/*
