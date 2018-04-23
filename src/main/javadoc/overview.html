@@ -40,9 +40,10 @@
         </p>
         <h3>Motivation</h3>
         <p>
-         The motivation for this project was the inability of Swing and JavaFX
-         to keep up with the rapid development of browser based technologies, and their <a href="http://www.oracle.com/technetwork/java/javase/javaclientroadmapupdate2018mar-4414431.pdf">uncertain future</a>.
-         The logical solution was to simply use these technologies from Java instead of trying to keep up.
+         The motivation for this project is the inability of Swing and JavaFX
+         to keep up with the rapid development of browser based technologies, and the
+         <a href="http://www.oracle.com/technetwork/java/javase/javaclientroadmapupdate2018mar-4414431.pdf">uncertain future of Swing and JavaFX</a>.
+         The logical solution is to simply use these technologies from Java instead of trying to build a whole own alternative stack.
          With Java/HTML we created a better and more powerful alternative, which is still small and easy to maintain.
         </p>
         <h3>Model View ViewModel Pattern</h3>
@@ -51,13 +52,13 @@
          pattern to separate
          the view from the logic of the application. This approach is different
          from Swing or JavaFX, as the Java code doesn't require any references to the widgets
-         that are displayed in the view. The Java code instead exposes properties 
-         for the View to bind to, and Functions that can be called in response to user
+         that are displayed in the view. The Java code instead exposes {@link net.java.html.json.Property properties} 
+         for the View to bind to, and {@link net.java.html.json.Function functions} that can be called in response to user
          interactions. This keeps the {@link net.java.html.json.Model Java API} small and simple to learn.</p>
         
         
         <h3>Supported Platforms</h3>
-         <p>This architecture also makes it easy to port the technology to dfferent platforms.         Porting of HTML/Java is as easy as implementing
+         <p>This architecture also makes it easy to port the technology to different platforms.         Porting of HTML/Java is as easy as implementing
         {@link org.netbeans.html.boot.spi.Fn.Presenter}
         interface and successfully passing the
         {@link org.netbeans.html.json.tck test compatibility kit}.    
@@ -75,19 +76,19 @@
         </p>
         <h3>Getting started</h3>
 
-        This <b>HTML/Java</b> API is used by
         The easiest way to get started is following the
         <a target="_blank" href="https://dukescript.com/getting_started.html">getting started</a>
         tutorial. If you prefer commandline you can also use the <a href="https://github.com/dukescript/maven-archetypes" target="_blank">Maven Archetypes</a>.
          
         Just type:
         <pre>
-$ mvn archetype:generate \
- -DarchetypeGroupId=com.dukescript.archetype \
- -DarchetypeArtifactId=knockout4j-archetype \
- -DarchetypeVersion=0.23 <em># or newer version, if available</em>
+$mvn archetype:generate \
+	-DarchetypeGroupId=com.dukescript.archetype \
+	-DarchetypeArtifactId=knockout4j-archetype \
+        -DgroupId=your.company -DartifactId=test -Dversion=1.0-SNAPSHOT 
+	-DarchetypeVersion=0.23 \ <em># or newer version, if available</em>
         </pre>
-        Answer few questions (for example choose <em>myfirstbrwsrpage</em> as artifactId)
+        
         and then you can: 
         <pre>
 $ cd myfirstbrwsrpage
@@ -105,7 +106,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
             There's a <a href="http://dukescript.com/blog.html" target="_blank">Blog</a> with the latest news and tips and tricks 
             how to get the most out of these APIs and also an extensive <a href="https://dukescript.com/getting_started.html" target="_blank"> getting started guide</a> 
             explaining all the concepts and walking you through code examples. For advanced users there's an in depth tutorial on the <a href="https://dukescript.com/knockout4j.html" target="_blank">
-                Knockout For Java</a> API with many examplesand tipps and tricks.
+                Knockout For Java</a> API with many examples and tipps and tricks.
         </p>
           
         
