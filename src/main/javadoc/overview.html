@@ -27,36 +27,41 @@
     </head>
     <body>
         <p>
-        The <em>HTML/Java API</em> provides 
-        {@link net.java.html.js basic building blocks}
-        as well as advanced 
-        {@link net.java.html.json.Model high level concepts}
-        to make communication between <b>JavaScript</b> and <b>Java</b> as smooth as possible.
+        The <em>HTML/Java API</em> is an alternative to Swing and JavaFX for creating 
+        applications with a graphical user interface. It's major strengths is the 
+        intelligent combination of existing technologies. 
+        <br>
+        With HTML/Java, the proven model used on servers for many years, has been ported to the client.
+         Java is used for developing business and view logic, while
+         HTML5, CSS and JavaScript are used to render the UI. 
+        Get the best of both worlds by combining the industry stability of
+        <b>Java</b> and richness of <b>JavaScript</b> ecosystem when it comes
+        to UI and rendering frameworks.
         </p>
+        <h3>Motivation</h3>
         <p>
-        Every <b>browser widget</b> Java API offers ways for communication between Java and
-        JavaScript running in such widget. However, each of them is unique - e.g. one
-        writes different code when communicating with {@link javafx.scene.web.WebView JavaFX WebView},
-        different one when communicating with 
-        <a target="_blank" href="https://developer.android.com/reference/android/webkit/WebView.html">Android WebView</a>
-        yet another one when talking to 
-        <a target="_blank" href="https://developer.apple.com/documentation/uikit/uiwebview">iOS WebView</a>.
+         The motivation for this project is the inability of Swing and JavaFX
+         to keep up with the rapid development of browser based technologies, and the
+         <a href="http://www.oracle.com/technetwork/java/javase/javaclientroadmapupdate2018mar-4414431.pdf">uncertain future of Swing and JavaFX</a>.
+         The logical solution is to simply use these technologies from Java instead of trying to build a whole own alternative stack.
+         With Java/HTML we created a better and more powerful alternative, which is still small and easy to maintain.
         </p>
-        <p>
-        The goal of <em>HTML/Java API</em> is to <b>unify this communication</b>. By providing simple
-        and highly portable {@link net.java.html.js basic building blocks}
-        one can create sophisticated APIs (like
-        {@link net.java.html.json UI bindings},
-        <a target="_blank" href="https://dukescript.com/javadoc/charts/">charts</a>,
-        <a target="_blank" href="https://dukescript.com/javadoc/leaflet4j/">maps</a>,
-        <a target="_blank" href="https://dukescript.com/javadoc/canvas/">canvas</a>, or
-        <a target="_blank" href="https://dukescript.com/javadoc/libs/net/java/html/lib/snapsvg/Snap/package-summary.html">SnapSVG</a>
-        that can be embedded into
-        {@link net.java.html.boot.fx.FXBrowsers Swing or JavaFX applications},
-        executed {@link net.java.html.boot.script.Scripts headlessly on a server}
-        or executed anywhere <em>HTML/Java API</em> was ported.
-        </p>
-        <p>
+        <h3>Model View ViewModel Pattern</h3>
+        <p> For this Java/HTML makes use of the 
+         <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel">Model View ViewModel (MVVM)</a>
+         pattern to separate
+         the view from the logic of the application. This approach is different
+         from Swing or JavaFX, as the Java code doesn't require any references to the widgets
+         that are displayed in the view. The Java code instead exposes {@link net.java.html.json.Property properties} 
+         for the View to bind to, and {@link net.java.html.json.Function functions} that can be called in response to user
+         interactions. This keeps the {@link net.java.html.json.Model Java API} small and simple to learn.</p>
+        
+        
+        <h3>Supported Platforms</h3>
+         <p>This architecture also makes it easy to port the technology to different platforms.         Porting of HTML/Java is as easy as implementing
+        {@link org.netbeans.html.boot.spi.Fn.Presenter}
+        interface and successfully passing the
+        {@link org.netbeans.html.json.tck test compatibility kit}.    
         Various ports of this rendering pipeline were built including support for
         pure <a target="_blank" href="https://github.com/dukescript/dukescript-presenters/">"webkit desktop rendring</a>
         <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/Android.html">Android WebView</a>
@@ -69,57 +74,94 @@
         or <a target="_blank" href="https://github.com/jtulach/bck2brwsr/">Bck2Brwsr VM</a> -
         as such you can also run the same Java application in a <b>pluginless browser</b>.
         </p>
-        <p>
-        Porting of HTML/Java rendering pipeline is as easy as implementing
-        {@link org.netbeans.html.boot.spi.Fn.Presenter}
-        interface and successfully passing the
-        {@link org.netbeans.html.json.tck test compatibility kit}.
-        </p>
-        
-        <h3>Highlights</h3>
+        <h3>Getting started</h3>
 
-        The <em>HTML/Java API</em> lets you easily mix <b>Java</b> and <b>JavaScript</b>:
+        The easiest way to get started is following the
+        <a target="_blank" href="https://dukescript.com/getting_started.html">getting started</a>
+        tutorial. If you prefer commandline you can also use the <a href="https://github.com/dukescript/maven-archetypes" target="_blank">Maven Archetypes</a>.
+         
+        Just type:
+        <pre>
+$mvn archetype:generate \
+	-DarchetypeGroupId=com.dukescript.archetype \
+	-DarchetypeArtifactId=knockout4j-archetype \
+        -DgroupId=your.company -DartifactId=test -Dversion=1.0-SNAPSHOT 
+	-DarchetypeVersion=0.23 \ <em># or newer version, if available</em>
+        </pre>
         
-        <ul>
-            <li>Use industry standard <b>Java</b> language to write application logic.
-            </li>
-            <li>Use rock solid <b>HTML5</b> to render the application <b>UI</b>.</li>
-            <li>Use {@link net.java.html.json high level bindings} to control your UI
-                with a <b>Model-view-viewmodel</b> paradigm -
-                see <a target="_blank" href="http://dew.apidesign.org/dew/#9891256">classical TODO</a>
-                example.
-            </li>
-            <li>Use {@link net.java.html.json.OnReceive REST} or
-                <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>
-                to simplify network communication from a browser.
-            </li>
-            <li>
-                Use {@link net.java.html.js basic building blocks} to
-                interact with <a href="net/java/html/js/package-summary.html">JavaScript</a>.
-            </li>
-                
-        </ul>
+        and then you can: 
+        <pre>
+$ cd myfirstbrwsrpage
+$ mvn install
+$ mvn -f client/pom.xml process-classes exec:exec
+        </pre>
         
-        <p>
-        Get the best of both worlds by combining the industry stability of
-        <b>Java</b> and richness of <b>JavaScript</b> ecosystem when it comes
-        to UI and rendering frameworks.
+        <h3>More Information</h3>
+        <p>We tried to make our API Docs as useful as possible, so they contain 
+            lots of valuable information. So this should be your first stop when looking for information:
+            Current <a target="_blank" href="http://bits.netbeans.org/html+java/dev/">development</a> version
+            
         </p>
-        
-        <p>
-        The <em>HTML/Java API</em> offers you unified access to 
-        full featured Java runtime (like real <b>HotSpot VM</b>) and
-        very lightweight rendering technology (so it can potentially fit
-        <a target="_blank" href="https://github.com/jtulach/bck2brwsr">Bck2Brwsr</a> and definitely
-        to various types of phones - e.g.
-        <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/Android.html">Android</a>
-        and <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/iOS.html">iOS</a>). 
-        What can be more lightweight (from a browser perspective) than
-        <b>HTML</b>!? Speed up your development with {@link net.java.html.boot.fx JavaFX's WebView}
-        component to display the <b>HTML</b>, get browser inspect features,
-        CSS navigation and IDE integration.
+        <p>The <a href="http://dukescript.com" target="_blank">DukeScript project</a> contains a lot of information for Java/HTML developers.
+            There's a <a href="http://dukescript.com/blog.html" target="_blank">Blog</a> with the latest news and tips and tricks 
+            how to get the most out of these APIs and also an extensive <a href="https://dukescript.com/getting_started.html" target="_blank"> getting started guide</a> 
+            explaining all the concepts and walking you through code examples. For advanced users there's an in depth tutorial on the <a href="https://dukescript.com/knockout4j.html" target="_blank">
+                Knockout For Java</a> API with many examples and tipps and tricks.
         </p>
+          
+        
+        
+        <h3>Try it</h3>
+        <p>And finally, if you want to see this API in action, look no further, here's an example
+            application running with the <a href="https://github.com/jtulach/bck2brwsr/" target="_blank">Bck2Brwsr VM</a> directly in your browser.</p>
+                <script type="text/html" id="field">
+            <style type="text/css">
+                table.field td {
+                    padding: 4px;
+                    width: 18px;
+                    height: 18px;
+                    font-size: 1.5em;
+                    border: 1px solid black;
+                }
+                table.field td.UNKNOWN {
+                    background-color: #D6E4E1;
+                    cursor: pointer;
+                }
+                table.field td.EXPLOSION {
+                    background-color: #A31E39;
+                }
+                table.field td.DISCOVERED {
+                    background-color: #9DB2B1;
+                }
+            </style>
+            <table class="field">
+                <tbody>
+                    <!-- ko foreach: rows -->
+                    <tr>
+                        <!-- ko foreach: columns -->
+                        <td data-bind="css: style, click: $parents[1].click" >
+                            <div data-bind='html: html'></div>
+                        </td>
+                        <!-- /ko -->
+                    </tr>
+                    <!-- /ko -->
+                </tbody>
+            </table>
+        </script>
 
+        <center>
+        <div id="minesweeper" style="align: center">
+        <div data-bind="template: { name : 'field', if: fieldShowing }"></div>
+        </div>
+        </center>
+
+        <!-- boot bck2brwsr -->
+        <script type="text/javascript" src="https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/teavm.js"></script>
+        <script>
+            var vm = new VM();
+            vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
+        </script>
+        
         <h3>New version will include</h3>
 
         <p>
@@ -437,288 +479,6 @@
             {@link net.java.html.BrwsrCtx#execute(java.lang.Runnable) using Java timer}.
         </p>
         </div>
-
-        <h3>Interesting Entry Points</h3>
-
-        <p>Learn how to {@link net.java.html.json.Model animate an HTML page from Java}
-            without referencing single HTML element from the Java code.
-        </p>
-        <p>Use {@link net.java.html.json.OnReceive JSON} to communicate
-            with REST based server API.
-        </p>
-        <p>Use <a href="net/java/html/json/doc-files/websockets.html">WebSockets</a>
-            and JSON.
-        </p>
-        <p>Call JavaScript methods from Java and vice versa, via
-            <a href="net/java/html/js/package-summary.html">JavaScriptBody</a>.
-        </p>
-
-        <h3>Getting Started</h3>
-
-        This <b>HTML/Java</b> API is used by
-        <a target="_blank" href="https://platform.netbeans.org/tutorials/nbm-dukescript.html">
-        NetBeans Platform</a> as well as other project. The smoothest way
-        to get started is to follow the
-        <a target="_blank" href="https://dukescript.com/getting_started.html">getting started</a>
-        tutorial. In case one wants to stick with a <em>Maven</em> and command
-        line, one can follow
-        <a target="_blank" href="https://dukescript.com/update/2015/02/05/New-Version-of-Dukescript.html">
-            these instructions</a>, make sure at least
-        <em>JDK7</em> is your installed Java and type:
-        <pre>
-$ mvn archetype:generate \
- -DarchetypeGroupId=com.dukescript.archetype \
- -DarchetypeArtifactId=knockout4j-archetype \
- -DarchetypeVersion=0.16 <em># or newer version, if available</em>
-        </pre>
-        Answer few questions (for example choose <em>myfirstbrwsrpage</em> as artifactId)
-        and then you can:
-        <pre>
-$ cd myfirstbrwsrpage
-$ mvn install
-$ mvn -f client/pom.xml process-classes exec:exec
-        </pre>
-        In a few seconds (or minutes if
-        <a target="_blank" href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
-        decides to download the whole Internet of dependencies) you should
-        see a sample Hello World application.
-        Immediatelly you can be
-        <a target="_blank" href="https://dukescript.com/best/practices/2015/04/12/no-redeploys.html">
-        productive without any redeploys</a> - even more productive than
-        with plain JavaScript!
-        <p>
-        The application is rendered in a
-        <a target="_blank" href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
-        web view component (that of course requires your JDK to come
-        with <a target="_blank" href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>;
-        <a target="_blank" href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK7
-            and JDK8 from Oracle</a> contain everything that is needed).
-        The generated application is built around one
-        Java source (uses the {@link net.java.html.json.Model} annotation to
-        auto-generate another <code>Data.java</code> class during compilation)
-        and one HTML file (uses the <a target="_blank" href="http://knockoutjs.com">Knockout</a>
-        syntax to <code>data-bind</code> the HTML elements to the
-        generated <code>Data</code> model):
-        <pre>
-$ ls client/src/main/java/**/DataModel.java
-$ ls client/src/main/webapp/pages/index.html
-        </pre>
-        That is all you need to get started. Play with the sources,
-        modify them and enjoy
-        <a target="_blank" href="http://html.java.net">Html for Java</a>!
-
-        <h2>IDE Support</h2>
-
-        <p>
-            This API is part of <a target="_blank"
-            href="http://netbeans.org">NetBeans.org</a> project and as such
-            it works naturally with the <a target="_blank"
-            href="https://netbeans.org/features/index.html">NetBeans IDE</a>.
-            On the other hand, the API is using nothing NetBeans specific,
-            it builds on standard Java6 APIs and as such it shall work fine
-            in any IDE.
-        </p>
-
-        <p>
-            A lot of work is done by
-            <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">
-            annotation processors</a>
-            that generate various boiler plate code during compilation. This
-            is a standard part of Java since JDK6, but for example Eclipse
-            is known not to deal with processors well and developers using
-            it need to be careful. IntelliJ users hasn't reported any issues
-            and of course, NetBeans IDE support for
-            <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">processors</a>
-            is outstanding.
-        </p>
-
-        <p>
-            When using {@link net.java.html.js.JavaScriptBody} annotation, it is
-            useful to do a bit of post processing of classes. There is a
-            <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
-            plugin for that.
-            NetBeans IDE will invoke it when doing a build. Other IDEs may
-            need some hint to do so.
-            Anyway: If one does not see all (generated) sources or is getting
-            {@link java.lang.LinkageError}s when executing the application,
-            switch to command line and do clean build
-            from there:
-        </p>
-        <pre>$ mvn clean install</pre>
-        <p>
-            If that succeeds, your IDE of choice will hopefully
-            pick the generated sources up and present the result of the build
-            properly. If not,
-            <a href="https://netbeans.org/downloads/">download NetBeans</a>,
-            you will be pleasantly
-            surprised - for example with our excellent
-            <a href="net/java/html/js/package-summary.html#debugging">Java/JavaScript
-            debugging</a> support.
-        </p>
-
-        <a name="deploy">
-        <h2>Deploy Your Application</h2>
-        </a>
-
-        <p>
-        It is not goal of this documentation to list all possible ways
-        to package and deploy applications which use this API. However it is
-        important for new comers to see the benefits of using the
-        <a href="http://html.java.net">HTML for Java</a> API and as such
-        let's list at least few bundling options, known to work at the time of writing
-        this documentation.
-        </p>
-
-        <p>
-        First of all, this is a <em>client technology</em>. You write client applications
-        with it which may, but need not connect to a server. You don't need
-        Tomcat or WebLogic to deploy
-        <a href="http://html.java.net">HTML for Java</a> applications.
-        </p>
-
-        <p>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/javafx_logo.jpg' width="64"
-                 height="64" align="left"/>
-            The sample project generated by
-            <code>org.apidesign.html knockout4j-archetype</code> is configured
-            to use <a href="http://wiki.apidesign.org/wiki/JavaFX">JavaFX</a>
-            as the rendering technology. This setup is primarily suitable for
-            development - it needs no special packaging, starts quickly and
-            allows you to use classical HotSpot VM debuggers. A final
-            artifact from the build is also a ZIP file which you can use
-            and distribute to your users. Good for desktop applications.
-        </p>
-
-        <p>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/netbeans_logo.jpg' width="64"
-                 height="64" align="right"/>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/eclipse_logo.png' width="64"
-                 height="64" align="right"/>
-            All the <a href="http://html.java.net">HTML for Java</a> libraries
-            are packaged as <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
-            bundles and as such they can easily be run in NetBeans as well as
-            in Eclipse. As a result one can use
-            <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a>
-            and have a common module system for both platforms. In addition to that
-            one can render using
-            HTML and have a common UI in both platforms. In such case
-            your application would be packaged as a set of
-            <a href="http://wiki.apidesign.org/wiki/OSGi">OSGi</a> bundles.
-            Read
-            <a href="http://wiki.apidesign.org/wiki/HTML">more</a>...
-        </p>
-
-        <p>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/chrome_logo.png' width="64"
-                 height="64" align="left"/>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/safari_logo.png' width="64"
-                 height="64" align="left"/>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/ie_logo.png' width="64"
-                 height="64" align="left"/>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/firefox_logo.png' width="64"
-                 height="64" align="left"/>
-
-            There is more and more attempts to execute Java bytecode
-            in a browser, without any special Java plugin installed.
-            The <a href="http://html.java.net">HTML for Java</a> is
-            carefully designed to produce lightweight, well performing
-            applications even on such restricted environments. It uses
-            no reflection calls and that allows to statically pre-compile
-            the applications into JavaScript. One of such environments
-            is called <a target="_blank" href="http://wiki.apidesign.org/wiki/Bck2Brwsr">Bck2Brwsr</a>,
-            another <a target="_blank" href="http://wiki.apidesign.org/wiki/TeaVM">TeaVM</a>. Both support the
-            {@link net.java.html.js.JavaScriptBody} annotation. Read
-            <a target="_blank" href="http://wiki.apidesign.org/wiki/Bck2BrwsrViaCLI">more</a> or play
-            a minesweeper game packaged for your browser
-            (of course <a target="_blank"
-                href="https://github.com/jtulach/minesweeper">written</a> in Java):
-        </p>
-
-        <script type="text/html" id="field">
-            <style type="text/css">
-                table.field td {
-                    padding: 4px;
-                    width: 18px;
-                    height: 18px;
-                    font-size: 1.5em;
-                    border: 1px solid black;
-                }
-                table.field td.UNKNOWN {
-                    background-color: #D6E4E1;
-                    cursor: pointer;
-                }
-                table.field td.EXPLOSION {
-                    background-color: #A31E39;
-                }
-                table.field td.DISCOVERED {
-                    background-color: #9DB2B1;
-                }
-            </style>
-            <table class="field">
-                <tbody>
-                    <!-- ko foreach: rows -->
-                    <tr>
-                        <!-- ko foreach: columns -->
-                        <td data-bind="css: style, click: $parents[1].click" >
-                            <div data-bind='html: html'></div>
-                        </td>
-                        <!-- /ko -->
-                    </tr>
-                    <!-- /ko -->
-                </tbody>
-            </table>
-        </script>
-
-        <center>
-        <div id="minesweeper" style="align: center">
-        <div data-bind="template: { name : 'field', if: fieldShowing }"></div>
-        </div>
-        </center>
-
-        <!-- boot bck2brwsr -->
-        <script type="text/javascript" src="https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/teavm.js"></script>
-        <script>
-            var vm = new VM();
-            vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
-        </script>
-
-        <p>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/ios_logo.jpg' width="64"
-                 height="64" align="right"/>
-            <img src='https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/android_logo.jpg' width="64"
-                 height="64" align="right"/>
-
-            Now when we have seen that the
-            <a href="http://html.java.net">HTML for Java</a> applications
-            can run on any modern browser, we can ask whether they can also
-            fit into a phone!? Yes, they can and especially to phones
-            that can execute Java code already! Just by changing your
-            packaging you can create an APK file and deploy it to your
-            Android phone.
-            Read <a target="_blank" href="http://wiki.apidesign.org/wiki/DlvkBrwsr">more</a>
-            or install <a target="_blank" href="https://play.google.com/store/apps/details?id=org.apidesign.demo.minesweeper">
-                Fair Minesweeper for Android</a>...
-        </p>
-        <p>
-            In case you'd like your application to reach out to second biggest
-            group of smartphone users, don't despair: It
-            seems the set of devices that can execute
-            <a href="http://html.java.net">HTML for Java</a> applications
-            has been extended to <em>iPads</em> and <em>iPhones</em>. Get the
-            <a target="_blank" href="http://wiki.apidesign.org/wiki/IBrwsr">details here</a>
-            and play <a target="_blank" href="https://itunes.apple.com/us/app/fair-minesweeper/id903688146">
-                Fair Minesweeper on iOS</a>!
-        </p>
-        <p>
-            Convinced it makes sense to use
-            <a href="http://html.java.net">HTML for Java</a>
-            APIs for writing applications that are
-            <em>written once, displayed anywhere</em>? Or do you have an
-            environment which is not supported? In such case you can bring
-            <a href="http://html.java.net">HTML for Java</a>
-            to your environment yourself. Just implement your own
-            {@link org.netbeans.html.boot.spi.Fn.Presenter}!
-        </p>
 
         <h2>Other Resources</h2>
 
