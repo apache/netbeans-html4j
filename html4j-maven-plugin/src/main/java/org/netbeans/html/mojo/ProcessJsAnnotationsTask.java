@@ -41,16 +41,9 @@ public class ProcessJsAnnotationsTask extends DefaultTask {
                 }
             };
             Iterable cp = invoke(Iterable.class, sourceSet, "getRuntimeClasspath");
-            boolean asm = false;
             for (Object elem : cp) {
                 final File pathElement = (File) elem;
                 process.addClasspathEntry(pathElement);
-                if (pathElement.getName().contains("asm")) {
-                    asm = true;
-                }
-            }
-            if (!asm) {
-                process.addAsm();
             }
             Iterable<?> outs = invoke(Iterable.class, sourceSet, "getOutput");
             for (Object classes : outs) {

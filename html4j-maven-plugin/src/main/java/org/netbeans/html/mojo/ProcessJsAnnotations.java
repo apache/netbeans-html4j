@@ -37,9 +37,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.objectweb.asm.ClassReader;
 
 abstract class ProcessJsAnnotations {
+    private Boolean addAsm;
     private final LinkedList<URL> cp = new LinkedList<>();
     private final List<File> roots = new LinkedList<>();
 
@@ -53,9 +56,8 @@ abstract class ProcessJsAnnotations {
         }
     }
 
-    public void addAsm() {
-        URL loc = ClassReader.class.getProtectionDomain().getCodeSource().getLocation();
-        cp.addFirst(loc);
+    public void setAddAsm(boolean add) {
+        this.addAsm = add;
     }
 
     public void addRoot(File file) {
@@ -68,6 +70,22 @@ abstract class ProcessJsAnnotations {
             cp.add(r.toURI().toURL());
         }
         URLClassLoader l = new URLClassLoader(cp.toArray(new URL[cp.size()]));
+        Boolean asm = addAsm;
+        if (asm == null) {
+            try {
+                l.loadClass(ClassReader.class.getName());
+                // OK
+                asm = false;
+            } catch (ClassNotFoundException ex) {
+                asm = true;
+            }
+        }
+        if (asm) {
+            URL loc = ClassReader.class.getProtectionDomain().getCodeSource().getLocation();
+            cp.addFirst(loc);
+            l = new URLClassLoader(cp.toArray(new URL[cp.size()]));
+        }
+
         MultiFile master = classes.child("META-INF", "net.java.html.js.classes");
         processClasses(l, master, classes);
     }

@@ -65,7 +65,7 @@ public final class ProcessJsAnnotationsMojo extends AbstractMojo {
             }
         }
         if (!foundAsm) {
-            jsa.addAsm();
+            jsa.setAddAsm(true);
         }
         jsa.addRoot(classes);
         try {
