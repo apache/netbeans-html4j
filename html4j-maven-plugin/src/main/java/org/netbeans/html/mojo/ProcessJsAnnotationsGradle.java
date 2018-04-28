@@ -38,7 +38,7 @@ public final class ProcessJsAnnotationsGradle implements Plugin<Project> {
         p.afterEvaluate(new Action<Project>() {
             @Override
             public void execute(final Project p) {
-                Set<? extends Task> tasks = (Set<? extends Task>) p.findProperty("tasks");
+                Set<? extends Task> tasks = (Set<? extends Task>) p.property("tasks");
                 for (Task task : tasks) {
                     if (task.getName().startsWith("compile")) {
                         process.dependsOn(task);

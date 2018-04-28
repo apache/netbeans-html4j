@@ -29,7 +29,7 @@ import org.gradle.api.Project;
 
 public class ProcessJsAnnotationsTask extends DefaultTask {
     void processJsAnnotations(final Project p) {
-        final Set<?> allSourceSets = (Set<?>) p.findProperty("sourceSets");
+        final Set<?> allSourceSets = (Set<?>) p.property("sourceSets");
         if (allSourceSets == null) {
             throw new GradleException("Cannot find sourceSets for project " + p);
         }
