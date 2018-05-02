@@ -153,4 +153,25 @@
           <scope>provided</scope>
       </dependency>
   </dependencies>
+  <profiles>
+      <profile>
+          <id>local-gradle</id>
+          <activation>
+              <property>
+                  <name>gradle.installation</name>
+              </property>
+          </activation>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.fortasoft</groupId>
+                      <artifactId>gradle-maven-plugin</artifactId>
+                      <configuration>
+                          <gradleInstallationDir>${gradle.installation}</gradleInstallationDir>
+                      </configuration>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+  </profiles>
 </project>
