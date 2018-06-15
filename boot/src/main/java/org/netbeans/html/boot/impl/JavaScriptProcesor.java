@@ -80,6 +80,15 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     }
 
     @Override
+    public SourceVersion getSupportedSourceVersion() {
+        try {
+            return SourceVersion.valueOf("RELEASE_8"); // NOI18N
+        } catch (IllegalArgumentException ex) {
+            return SourceVersion.RELEASE_7;
+        }
+    }
+
+    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         final Messager msg = processingEnv.getMessager();
         for (Element e : roundEnv.getElementsAnnotatedWith(JavaScriptBody.class)) {
