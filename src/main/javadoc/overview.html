@@ -91,7 +91,7 @@ $mvn archetype:generate \
         
         and then you can: 
         <pre>
-$ cd myfirstbrwsrpage
+$ cd test
 $ mvn install
 $ mvn -f client/pom.xml process-classes exec:exec
         </pre>
@@ -156,7 +156,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
         </center>
 
         <!-- boot bck2brwsr -->
-        <script type="text/javascript" src="https://rawgit.com/jtulach/minesweeper/877b7983b1c1a157ebb85850896bcf04d7f5c7f2/client-web/src/main/webapp/resources/teavm.js"></script>
+        <script src="teavm.js" type="text/javascript"></script>
         <script>
             var vm = new VM();
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
