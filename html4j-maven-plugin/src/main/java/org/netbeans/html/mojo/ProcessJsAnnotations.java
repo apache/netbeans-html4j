@@ -305,5 +305,17 @@ abstract class ProcessJsAnnotations {
             }
             throw new FileNotFoundException();
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            String sep = "";
+            for (File r : roots) {
+                sb.append(sep);
+                sb.append(r.toString());
+                sep = ", ";
+            }
+            return sb.toString();
+        }
     }
 }
