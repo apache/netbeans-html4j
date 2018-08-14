@@ -1115,6 +1115,7 @@ public final class ModelProcessor extends AbstractProcessor {
         List<? extends Element> enclosedElements,
         List<Object> functions
     ) {
+        final Types tu = processingEnv.getTypeUtils();
         boolean instance = clazz.getAnnotation(Model.class).instance();
         for (Element m : enclosedElements) {
             if (m.getKind() != ElementKind.METHOD) {
@@ -1158,7 +1159,11 @@ public final class ModelProcessor extends AbstractProcessor {
                             error("First parameter of @ModelOperation method must be " + className, m);
                             return false;
                         }
-                        args.add(ve.getSimpleName().toString());
+                        if (ve.asType().getKind() == TypeKind.ARRAY) {
+                            args.add("(Object) " + ve.getSimpleName().toString());
+                        } else {
+                            args.add(ve.getSimpleName().toString());
+                        }
                         body.append(sep).append("final ");
                         body.append(ve.asType().toString()).append(" ");
                         body.append(ve.toString());
