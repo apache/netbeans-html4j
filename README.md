@@ -1,10 +1,10 @@
-# HTML/Java API
+# NetBeans Web Toolkit
 
 In need of cross platform, client side interaction between Java and JavaScript?
 
 [![Build Status](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-linux)](https://builds.apache.org/job/incubator-netbeans-html4j-linux/)
 
-The HTML/Java library provides [basic building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
+The NetBeans Web Toolkit provides [basic building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
 as well as advanced [high level concepts](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/json/Model.html)
 to make communication between JavaScript and Java as smooth as possible.
 
@@ -18,7 +18,7 @@ writes different code when communicating with [JavaFX WebView](https://docs.orac
 different one when communicating with [Android WebView](https://developer.android.com/reference/android/webkit/WebView.html),
 yet another one when talking to [iOS WebView](https://developer.apple.com/documentation/uikit/uiwebview).
 
-The goal of HTML/Java API is to **unify this communication**. By providing simple
+The goal of NetBeans Web Toolkit is to **unify this communication**. By providing simple
 and highly portable [building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
 one can create sophisticated APIs (like
 [UI bindings](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/json/package-summary.html),
@@ -29,7 +29,7 @@ one can create sophisticated APIs (like
 that can be embedded into
 [Swing or JavaFX applications](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/boot/fx/FXBrowsers.html),
 executed [headlessly on a server](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/boot/script/Scripts.html)
-or executed anywhere HTML/Java API was ported.
+or executed anywhere NetBeans Web Toolkit was ported.
 
 Various ports of this rendering pipeline were built including support for
 pure [webkit desktop rendring](https://github.com/dukescript/dukescript-presenters/),
@@ -42,14 +42,14 @@ transpilers - for example [TeaVM](http://teavm.org/docs/intro/dukescript.html)
 or [Bck2Brwsr VM](https://github.com/jtulach/bck2brwsr/) -
 as such you can also run the same Java application in a pluginless browser.
 
-Porting of HTML/Java rendering pipeline is as easy as implementing
+Porting of NetBeans Web Toolkit rendering pipeline is as easy as implementing
 [Fn.Presenter](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/org/netbeans/html/boot/spi/Fn.Presenter.html)
 interface and successfully passing the
 [test compatibility kit](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/org/netbeans/html/json/tck/package-summary.html).
 
 ## Getting Started
 
-The HTML/Java API is IDE and build tool neutral. It can be used with
+The NetBeans Web Toolkit is IDE and build tool neutral. It can be used with
 [Ant](http://ant.apache.org), [Maven](http://maven.apache.org) or **Gradle**.
 It is easy to edit it with [Eclipse](https://dukescript.com/best/practices/2015/07/01/DukeScript-with-Eclipse.html),
 [IntelliJ](https://dukescript.com/best/practices/2016/04/19/IDEA.html) or
