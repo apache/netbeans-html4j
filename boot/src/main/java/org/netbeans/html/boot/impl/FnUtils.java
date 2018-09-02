@@ -49,7 +49,6 @@ import org.objectweb.asm.signature.SignatureWriter;
  * @author Jaroslav Tulach
  */
 public final class FnUtils {
-    
     private FnUtils() {
     }
     
@@ -121,7 +120,7 @@ public final class FnUtils {
         private final String[] resources = new String[256];
 
         public FindInClass(ClassLoader l, ClassVisitor cv) {
-            super(Opcodes.ASM4, cv);
+            super(Opcodes.ASM5, cv);
         }
 
         @Override
@@ -170,7 +169,7 @@ public final class FnUtils {
             private boolean bodyGenerated;
 
             public FindInMethod(int access, String name, String desc, MethodVisitor mv) {
-                super(Opcodes.ASM4, mv);
+                super(Opcodes.ASM5, mv);
                 this.access = access;
                 this.name = name;
                 this.desc = desc;
@@ -306,7 +305,7 @@ public final class FnUtils {
                     private int loadIndex = offset;
 
                     public SV() {
-                        super(Opcodes.ASM4);
+                        super(Opcodes.ASM5);
                     }
 
                     @Override
@@ -359,7 +358,7 @@ public final class FnUtils {
                     @Override
                     public SignatureVisitor visitArrayType() {
                         if (nowReturn) {
-                            return new SignatureVisitor(Opcodes.ASM4) {
+                            return new SignatureVisitor(Opcodes.ASM5) {
                                 @Override
                                 public void visitClassType(String name) {
                                     returnType = Type.getType("[" + Type.getObjectType(name).getDescriptor());
@@ -493,7 +492,7 @@ public final class FnUtils {
                 boolean keepAlive = true;
 
                 public FindInAnno() {
-                    super(Opcodes.ASM4);
+                    super(Opcodes.ASM5);
                 }
 
                 @Override
@@ -534,7 +533,7 @@ public final class FnUtils {
 
         private final class LoadResource extends AnnotationVisitor {
             public LoadResource(AnnotationVisitor av) {
-                super(Opcodes.ASM4, av);
+                super(Opcodes.ASM5, av);
             }
 
             @Override
@@ -552,12 +551,12 @@ public final class FnUtils {
 
             @Override
             public AnnotationVisitor visitArray(String name) {
-                return this;
+                return new LoadResource(super.visitArray(name));
             }
 
             @Override
             public AnnotationVisitor visitAnnotation(String name, String desc) {
-                return this;
+                return new LoadResource(super.visitAnnotation(name, desc));
             }
         }
     }

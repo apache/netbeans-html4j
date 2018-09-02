@@ -95,6 +95,12 @@
       <artifactId>net.java.html.boot</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <description>Test Compatibility Kit for anyone who wants to consume the net.java.html.json APIs and
 render their objects using own technology (e.g. own browser, MVVC, etc.).</description>

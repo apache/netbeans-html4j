@@ -191,6 +191,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                                     <includes>
                                       <include>org.testng:*:*:jar:test</include>
                                       <include>org.ow2.asm:*:*:jar:provided</include>
+                                      <include>org.ow2.asm:*:*:jar:test</include>
                                     </includes>
                                 </bannedDependencies>
                             </rules>
