@@ -1313,7 +1313,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 if (expectsList == 1) {
                     args.add("arr");
                 } else if (expectsList == 2) {
-                    args.add("java.util.Arrays.asList(arr)");
+                    args.add("net.java.html.json.Models.asList(arr)");
                 } else {
                     args.add("arr[0]");
                 }
@@ -1506,7 +1506,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
-                if (arg.startsWith("arr") || arg.startsWith("java.util.Array")) {
+                if (arg.startsWith("arr") || arg.startsWith("net.java.html.json.Models.asList")) {
                     body.append("null");
                 } else {
                     body.append(arg);
