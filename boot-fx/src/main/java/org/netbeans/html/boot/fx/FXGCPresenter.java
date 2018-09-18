@@ -41,10 +41,10 @@ public final class FXGCPresenter extends AbstractFXPresenter {
                 Class<?> c = Class.forName("javafx.application.Platform");
                 // OK, on classpath
             } catch (ClassNotFoundException classNotFoundException) {
-                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                m.setAccessible(true);
                 File f = new File(System.getProperty("java.home"), "lib/jfxrt.jar");
                 if (f.exists()) {
+                    Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                    m.setAccessible(true);
                     URL l = f.toURI().toURL();
                     m.invoke(ClassLoader.getSystemClassLoader(), l);
                 }
