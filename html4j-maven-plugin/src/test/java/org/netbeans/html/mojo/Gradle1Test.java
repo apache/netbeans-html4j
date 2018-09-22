@@ -26,11 +26,19 @@ import java.net.URLClassLoader;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 public class Gradle1Test {
     @Test
     public void checkTheResultOfTheBuild() throws Exception {
+        try {
+            Class.forName("java.lang.Module");
+            throw new SkipException("Don't test Gradle on new JDKs yet");
+        } catch (ClassNotFoundException ex) {
+            // OK, go on with the test
+        }
+
         URL b = Gradle1Test.class.getResource("gradle1/build.gradle");
         assertNotNull(b, "gradle build script found");
         URL u = Gradle1Test.class.getResource("gradle1/build/libs/gradle1-1.0-SNAPSHOT.jar");

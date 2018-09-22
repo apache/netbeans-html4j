@@ -147,6 +147,11 @@
         <scope>test</scope>
     </dependency>
     <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-web</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.glassfish.grizzly</groupId>
       <artifactId>grizzly-http-server</artifactId>
       <version>${grizzly.version}</version>
