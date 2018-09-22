@@ -80,25 +80,6 @@
                <target>1.7</target>
             </configuration>
          </plugin>
-         <plugin>
-             <groupId>org.fortasoft</groupId>
-             <artifactId>gradle-maven-plugin</artifactId>
-             <version>1.0.8</version>
-             <configuration>
-                 <tasks>
-                     <task>build</task>
-                 </tasks>
-                 <gradleProjectDirectory>src/test/resources/org/netbeans/html/mojo/gradle1</gradleProjectDirectory>
-             </configuration>
-             <executions>
-                 <execution>
-                     <phase>generate-test-resources</phase>
-                     <goals>
-                         <goal>invoke</goal>
-                     </goals>
-                 </execution>
-             </executions>
-         </plugin>
       </plugins>
   </build>
 
@@ -154,6 +135,35 @@
       </dependency>
   </dependencies>
   <profiles>
+      <profile>
+          <id>run-gradle</id>
+          <activation>
+              <jdk>[1.8,1.9)</jdk>
+          </activation>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.fortasoft</groupId>
+                      <artifactId>gradle-maven-plugin</artifactId>
+                      <version>1.0.8</version>
+                      <configuration>
+                          <tasks>
+                              <task>build</task>
+                          </tasks>
+                          <gradleProjectDirectory>src/test/resources/org/netbeans/html/mojo/gradle1</gradleProjectDirectory>
+                      </configuration>
+                      <executions>
+                          <execution>
+                              <phase>generate-test-resources</phase>
+                              <goals>
+                                  <goal>invoke</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
       <profile>
           <id>local-gradle</id>
           <activation>

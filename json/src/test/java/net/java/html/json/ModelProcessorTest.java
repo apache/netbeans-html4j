@@ -23,6 +23,7 @@ import java.util.Locale;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import static org.testng.Assert.*;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 /** Verify errors emitted by the processor.
@@ -415,6 +416,13 @@ public class ModelProcessorTest {
     }
 
     @Test public void canWeCompileWithJDK1_5SourceLevel() throws IOException {
+        try {
+            Class.forName("java.lang.Module");
+            throw new SkipException("Cannot use 1.5 source level on new JDKs");
+        } catch (ClassNotFoundException ex) {
+            // OK, go on
+        }
+
         String html = "<html><body>"
             + "</body></html>";
         String code = "package x.y.z;\n"

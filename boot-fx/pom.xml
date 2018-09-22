@@ -56,13 +56,6 @@
   </build>
   <dependencies>
     <dependency>
-        <groupId>com.oracle</groupId>
-        <artifactId>javafx</artifactId>
-        <version>2.2</version>
-        <scope>system</scope>
-        <systemPath>${jfxrt.jar}</systemPath>
-    </dependency>
-    <dependency>
       <groupId>org.netbeans.api</groupId>
       <artifactId>org-openide-util-lookup</artifactId>
       <scope>provided</scope>
@@ -84,6 +77,11 @@
       <artifactId>net.java.html.json.tck</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-web</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
     <description>A presentation provider to show JavaFX WebView 

@@ -29,6 +29,7 @@ import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarFile;
@@ -185,5 +186,11 @@ final class NbInstrumentation implements Instrumentation {
     public void setNativeMethodPrefix(ClassFileTransformer transformer, String prefix) {
         throw new UnsupportedOperationException();
     }
-    
+
+    public void redefineModule(Module module, Set<Module> extraReads, Map<String, Set<Module>> extraExports, Map<String, Set<Module>> extraOpens, Set<Class<?>> extraUses, Map<Class<?>, List<Class<?>>> extraProvides) {
+    }
+
+    public boolean isModifiableModule(Module module) {
+        return true;
+    }
 }

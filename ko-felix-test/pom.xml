@@ -78,13 +78,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>javafx</artifactId>
-            <version>2.2</version>
-            <scope>system</scope>
-            <systemPath>${jfxrt.jar}</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.vaadin.external.google</groupId>
             <artifactId>android-json</artifactId>
         </dependency>
@@ -123,6 +116,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>net.java.html.boot.fx</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

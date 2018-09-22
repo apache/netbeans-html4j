@@ -86,13 +86,17 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
 
         final Fn.Presenter p = new ScriptPresenter(eng, KOCase.JS);
         try {
-            URL envNashorn = new URL("https://bugs.openjdk.java.net/secure/attachment/11894/env.nashorn.1.2-debug.js");
-            InputStream is = envNashorn.openStream();
-            p.loadScript(new InputStreamReader(is));
-            is.close();
-        } catch (UnknownHostException | ConnectException ex) {
-            ex.printStackTrace();
-            return new Object[0];
+            Class.forName("java.lang.Module");
+        } catch (ClassNotFoundException oldJDK) {
+            try {
+                URL envNashorn = new URL("https://bugs.openjdk.java.net/secure/attachment/11894/env.nashorn.1.2-debug.js");
+                InputStream is = envNashorn.openStream();
+                p.loadScript(new InputStreamReader(is));
+                is.close();
+            } catch (UnknownHostException | ConnectException ex) {
+                ex.printStackTrace();
+                return new Object[0];
+            }
         }
 
         final BrowserBuilder bb = BrowserBuilder.newBrowser(p).
@@ -128,6 +132,12 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     }
 
     private static String skipMsg(String methodName) {
+        try {
+            Class.forName("java.lang.Module");
+            return "Don't try the env.js emulation on JDK9 and newer";
+        } catch (ClassNotFoundException oldJDK) {
+            // OK, go on
+        }
         final String ver = System.getProperty("java.runtime.version"); // NOI18N
         if (
             ver.startsWith("1.8.0_25") ||
