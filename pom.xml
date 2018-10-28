@@ -27,9 +27,9 @@
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent>
-    <groupId>net.java</groupId>
-    <artifactId>jvnet-parent</artifactId>
-     <version>3</version>
+      <groupId>org.apache</groupId>
+      <artifactId>apache</artifactId>
+      <version>10</version>
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -223,41 +223,17 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-remote-resources-plugin</artifactId>
                 <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>per-module-deps</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <resourceBundles>
-                                <!-- Will generate META-INF/DEPENDENCIES
-                                META-INF/LICENSE META-INF/NOTICE -->
-                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                                <!-- Will generate META-INF/DISCLAIMER  -->
-                                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
-                            </resourceBundles>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>all-deps</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                            <excludeGroupIds>org.netbeans.html</excludeGroupIds>
-                            <resourceBundles>
-                                <!-- Will generate META-INF/DEPENDENCIES
-                                META-INF/LICENSE META-INF/NOTICE -->
-                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                            </resourceBundles>
-                            <appendedResourcesDirectory>ko4j/src/main/appended-resources</appendedResourcesDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <resourceBundles>
+                        <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                        <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
+                    </resourceBundles>
+                    <excludeGroupIds>org.netbeans.html</excludeGroupIds>
+                    <resourceBundles>
+                        <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                    </resourceBundles>
+                    <appendedResourcesDirectory>ko4j/src/main/appended-resources</appendedResourcesDirectory>
+                </configuration>
             </plugin>
       </plugins>
       <pluginManagement>
