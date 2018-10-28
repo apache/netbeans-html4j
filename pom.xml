@@ -93,16 +93,13 @@
   </repositories>
   <build>
       <plugins>
-           <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>2.4</version>
-            <configuration>
-              <mavenExecutorId>forked-path</mavenExecutorId>
-              <useReleaseProfile>false</useReleaseProfile>
-              <arguments>-Pjvnet-release -Pgpg</arguments>
-              <tag>release-${releaseVersion}</tag>
-            </configuration>
-          </plugin>
+            <plugin>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.4</version>
+              <configuration>
+                  <tag>release-${releaseVersion}</tag>
+              </configuration>
+            </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
@@ -197,6 +194,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 </executions>
                 <configuration>
                     <excludes>
+                        <exclude>release.properties</exclude>
                         <exclude>**/target/**</exclude>
                         <exclude>.gitignore</exclude>
                         <exclude>**/.git/**</exclude>
