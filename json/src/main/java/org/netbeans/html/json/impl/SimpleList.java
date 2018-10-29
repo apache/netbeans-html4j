@@ -239,9 +239,9 @@ public class SimpleList<E> implements List<E> {
         }
     }
 
-    private void ensureAccess(int reqSize) {
+    private int ensureAccess(int reqSize) {
         if (reqSize < size) {
-            return;
+            return size;
         }
 
         int newSize = arr == null ? 0 : arr.length;
@@ -257,6 +257,11 @@ public class SimpleList<E> implements List<E> {
         }
 
         arr = newArr;
+        return reqSize;
+    }
+
+    private void ensureSize(int newSize) {
+        this.size = ensureAccess(newSize);
     }
 
     @Override
@@ -404,6 +409,15 @@ public class SimpleList<E> implements List<E> {
         return sb.toString();
     }
 
+    public static void ensureSize(List<?> list, int size) {
+        if (list instanceof SimpleList) {
+            ((SimpleList<?>) list).ensureSize(size);
+            return;
+        }
+        while (list.size() < size) {
+            list.add(null);
+        }
+    }
 
     private final class Sub implements List<E> {
         private final int from;

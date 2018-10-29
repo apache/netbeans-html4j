@@ -2,7 +2,9 @@
 
 In need of cross platform, client side interaction between Java and JavaScript?
 
-[![Build Status](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-linux)](https://builds.apache.org/job/incubator-netbeans-html4j-linux/)
+[![Travis](https://travis-ci.org/apache/incubator-netbeans-html4j.svg?branch=master)](https://travis-ci.org/apache/incubator-netbeans-html4j)
+[![Linux](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-linux)](https://builds.apache.org/job/incubator-netbeans-html4j-linux/)
+[![Windows](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-windows)](https://builds.apache.org/job/incubator-netbeans-html4j-windows)
 
 The HTML/Java library provides [basic building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
 as well as advanced [high level concepts](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/json/Model.html)
