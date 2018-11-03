@@ -162,9 +162,12 @@ $ mvn -f client/pom.xml process-classes exec:exec
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
         </script>
         
-        <h3>New version will include</h3>
+        <h3>New in version 1.6</h3>
 
         <p>
+            Compiles on JDK11 while using
+            <a target="_blank" href="https://openjfx.io">Open JavaFX</a> 11
+            when necessary.
             {@link net.java.html.json.ComputedProperty Computed properties} can
             depend on other computed properties -
             <a target="_blank" href="https://github.com/apache/incubator-netbeans-html4j/pull/3">PR #3</a>.
@@ -216,6 +219,38 @@ $ mvn -f client/pom.xml process-classes exec:exec
         Simplifying {@link org.netbeans.html.json.tck.KnockoutTCK} to avoid
         usage of {@link java.net.URI}, etc.
         </p>
+
+        <h3>What's new in older versions?</h3>
+
+        <p>
+        Click the
+        <a href="#" onclick="return showHistoric()">link</a>
+        to view even more
+        <a href="#" onclick="return showHistoric()">historic changes</a>...
+        </p>
+
+        <a name="historic.changes"></a>
+        <div id="historic.changes">
+            <script>
+            (function() {
+                var visible;
+                function showHistoric(show) {
+                    var e = document.getElementById("historic.changes");
+                    if (show === undefined) {
+                        show = !visible;
+                    }
+                    if (show) {
+                        e.style.display="block";
+                    } else {
+                        e.style.display="none";
+                    }
+                    visible = show;
+                    return false;
+                }
+                showHistoric(false);
+                this.showHistoric = showHistoric;
+            })()
+            </script>
 
         <h3>New features in version 1.4</h3>
 
@@ -282,30 +317,6 @@ $ mvn -f client/pom.xml process-classes exec:exec
         <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=257849'>workaround limitations
         of CORS</a> by handling the {@link net.java.html.json.OnReceive}
         connections in Java.
-
-        <h3>What's new in older versions?</h3>
-
-        <p>
-        Click the
-        <a href="#" onclick="return showHistoric(true)">link</a>
-        to view even more
-        <a href="#" onclick="return showHistoric(true)">historic changes</a>...
-        </p>
-
-        <a name="historic.changes"></a>
-        <div id="historic.changes">
-            <script>
-            function showHistoric(show) {
-                var e = document.getElementById("historic.changes");
-                if (show) {
-                    e.style.display="block";
-                } else {
-                    e.style.display="none";
-                }
-                return false;
-            }
-            showHistoric(false);
-            </script>
 
         <h3>What's Been Improved in Version 1.2.3?</h3>
 
@@ -490,6 +501,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
         online:
         <ul>
             <li>Current <a target="_blank" href="https://dukescript.com/javadoc/html+java/dev/">development</a> version
+            <li>Version <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.6/">1.6</a>
             <li>Version <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.5.1/">1.5.1</a>
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.5">1.5</a>
             <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.4">1.4</a>
