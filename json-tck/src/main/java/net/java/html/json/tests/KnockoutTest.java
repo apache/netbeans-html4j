@@ -300,10 +300,13 @@ public final class KnockoutTest {
 ""
             );
 
-            js = Models.bind(new KnockoutModel(), newContext());
-            js.getArchetypes().add(new ArchetypeData("ko4j", "org.netbeans.html", "0.8.3", "ko4j", "ko4j", null));
-            js.getArchetypes().add(new ArchetypeData("crud", "org.netbeans.html", "0.8.3", "crud", "crud", null));
-            js.getArchetypes().add(new ArchetypeData("3rd", "org.netbeans.html", "0.8.3", "3rd", "3rd", null));
+            {
+                KnockoutModel km = new KnockoutModel();
+                km.getArchetypes().add(new ArchetypeData("ko4j", "org.netbeans.html", "0.8.3", "ko4j", "ko4j", null));
+                km.getArchetypes().add(new ArchetypeData("crud", "org.netbeans.html", "0.8.3", "crud", "crud", null));
+                km.getArchetypes().add(new ArchetypeData("3rd", "org.netbeans.html", "0.8.3", "3rd", "3rd", null));
+                js = Models.bind(km, newContext());
+            }
             js.setArchetype(js.getArchetypes().get(1));
             js.applyBindings();
 
@@ -339,7 +342,7 @@ public final class KnockoutTest {
         if (preApply) {
             js.applyBindings();
         }
-        js.setArchetype(new ArchetypeData());
+        js.setArchetype(Models.bind(new ArchetypeData(), newContext()));
         js.getArchetype().setGroupId("org.netbeans.html");
         js.applyBindings();
 
