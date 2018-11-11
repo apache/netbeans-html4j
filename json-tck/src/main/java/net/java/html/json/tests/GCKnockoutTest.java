@@ -47,13 +47,13 @@ public class GCKnockoutTest {
         );
         try {
             GC m = Models.bind(new GC(), ctx);
-            m.getAll().add(new Fullname("Jarda", "Tulach"));
+            m.getAll().add(Models.bind(new Fullname("Jarda", "Tulach"), ctx));
             Models.applyBindings(m);
 
             int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 1, "One child, but was " + cnt);
 
-            m.getAll().add(new Fullname("HTML", "Java"));
+            m.getAll().add(Models.bind(new Fullname("HTML", "Java"), ctx));
 
             cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 2, "Now two " + cnt);
