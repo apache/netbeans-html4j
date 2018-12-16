@@ -165,14 +165,15 @@ final class Bodies {
     )
     static native int incAsync();
     
-    @JavaScriptBody(args = { "arr" }, body = 
+    @JavaScriptBody(args = { "obj" }, body = 
         "var ret = [];\n" +
-        "for (var i in arr) {\n" +
-        "  ret.push(arr[i]);\n" +
+        "for (var i in obj) {\n" +
+        "  ret.push(i);\n" +
+        "  ret.push(obj[i]);\n" +
         "}\n" +
         "return ret;\n"
     )
-    static native Object[] forIn(Object[] in);
+    static native Object[] forIn(Object obj);
 
     @JavaScriptBody(args = { "max" }, body = 
         "var arr = [];\n"
@@ -242,4 +243,20 @@ final class Bodies {
 "    }          \n" +
 "}";
     }
+
+    @JavaScriptBody(args = { "o", "n" }, body = "return o[n];")
+    static native Object get(Object o, String n);
+
+    @JavaScriptBody(args = { "o", "n", "arg" }, body = "\n" + 
+        "try {\n" +
+        "  if (arg == null) {\n" +
+        "    return o[n]();\n" +
+        "  } else {\n" +
+        "    return o[n](arg);\n" +
+        "  }\n" +
+        "} catch (e) {\n" +
+        "  return n;\n" +
+        "}\n"
+    )
+    static native Object invoke(Object o, String n, Object arg);
 }

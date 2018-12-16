@@ -19,6 +19,9 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
@@ -128,6 +131,22 @@ public class JavaScriptBodyTest {
     @KOTest public void typeOfDoubleValueOf() {
         String doubleType = Bodies.typeof(0.33, true);
         assertEquals("number", doubleType, "Expecting number type: " + doubleType);
+    }
+
+    private static void assertNoProp(Object obj, String name, Object arg) {
+        Object prop = Bodies.get(obj, name);
+        assertNull(prop, "Expecting no value for property " + name + ", but was " + Bodies.typeof(prop, false));
+
+        try {
+            Object res = Bodies.invoke(obj, name, arg);
+            if (name.equals(res)) {
+                return;
+            }
+            fail("Invoking " + name + " on " + obj + " returned " + res);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     enum Two {
@@ -332,11 +351,11 @@ public class JavaScriptBodyTest {
     @KOTest public void iterateArray() {
         String[] arr = { "Ahoj", "Hi", "Ciao" };
         Object[] ret = Bodies.forIn(arr);
-        assertEquals(ret.length, 3, "Three elements returned: " + ret.length);
+        assertEquals(ret.length, 6, "Three elements returned: " + ret.length);
         assertNotEquals(ret, arr, "Different arrays");
-        assertEquals(ret[0], "Ahoj", "Expecting Ahoj: " + ret[0]);
-        assertEquals(ret[1], "Hi", "Expecting Hi: " + ret[1]);
-        assertEquals(ret[2], "Ciao", "Expecting Ciao: " + ret[2]);
+        assertEquals(ret[1], "Ahoj", "Expecting Ahoj: " + ret[0]);
+        assertEquals(ret[3], "Hi", "Expecting Hi: " + ret[1]);
+        assertEquals(ret[5], "Ciao", "Expecting Ciao: " + ret[2]);
     }
     
     @KOTest public void primitiveTypes() {
@@ -377,6 +396,132 @@ public class JavaScriptBodyTest {
         Sum s = new Sum();
         int nullAndUnknown = Bodies.sumNonNull(s);
         assertEquals(nullAndUnknown, 1, "Only one slot");
+    }
+
+    @KOTest
+    public void exposedPropertiesOfAJavaObject() {
+        Sum s = new Sum();
+        Object[] props = Bodies.forIn(s);
+
+        Set<Object> all = new HashSet<>(Arrays.asList(props));
+        assertEquals(0, all.size(), "No own properties: " + all);
+    }
+
+
+    @KOTest
+    public void exposedEqualsOfAJavaObject() {
+        Sum s = new Sum();
+        assertNoProp(s, "equals", s);
+    }
+
+    @KOTest
+    public void exposedHashCodeOfAJavaObject() {
+        Sum s = new Sum();
+
+        assertNoProp(s, "hashCode", null);
+    }
+
+    @KOTest
+    public void exposedWaitOfAJavaObject() {
+        Sum s = new Sum();
+
+        assertNoProp(s, "wait", null);
+    }
+
+    @KOTest
+    public void exposedGetClassOfAJavaObject() {
+        Sum s = new Sum();
+
+        assertNoProp(s, "getClass", null);
+    }
+
+    @KOTest
+    public void exposedNotifyOfAJavaObject() {
+        Sum s = new Sum();
+
+        assertNoProp(s, "notify", null);
+    }
+
+    @KOTest
+    public void exposedNotifyAllOfAJavaObject() {
+        Sum s = new Sum();
+
+        assertNoProp(s, "notifyAll", null);
+    }
+
+    @KOTest
+    public void exposedEqualsOfAJavaArray() {
+        Object s = new Object[5];
+        assertNoProp(s, "equals", s);
+    }
+
+    @KOTest
+    public void exposedHashCodeOfAJavaArray() {
+        Object s = new Object[5];
+
+        assertNoProp(s, "hashCode", null);
+    }
+
+    @KOTest
+    public void exposedWaitOfAJavaArray() {
+        Object s = new Object[5];
+
+        assertNoProp(s, "wait", null);
+    }
+
+    @KOTest
+    public void exposedGetClassOfAJavaArray() {
+        Object s = new Object[5];
+
+        assertNoProp(s, "getClass", null);
+    }
+
+    @KOTest
+    public void exposedNotifyOfAJavaArray() {
+        Object s = new Object[5];
+
+        assertNoProp(s, "notify", null);
+    }
+
+    @KOTest
+    public void exposedNotifyAllOfAJavaArray() {
+        Object s = new Object[5];
+
+        assertNoProp(s, "notifyAll", null);
+    }
+
+    @KOTest
+    public void exposedEqualsOfAJavaPrimitiveArray() {
+        Object s = new int[5];
+        assertNoProp(s, "equals", s);
+    }
+
+    @KOTest
+    public void exposedHashCodeOfAJavaPrimitiveArray() {
+        Object s = new int[5];
+
+        assertNoProp(s, "hashCode", null);
+    }
+
+    @KOTest
+    public void exposedWaitOfAJavaPrimitiveArray() {
+        Object s = new int[5];
+
+        assertNoProp(s, "wait", null);
+    }
+
+    @KOTest
+    public void exposedGetClassOfAJavaPrimitiveArray() {
+        Object s = new int[5];
+
+        assertNoProp(s, "getClass", null);
+    }
+
+    @KOTest
+    public void exposedNotifyOfAJavaPrimitiveArray() {
+        Object s = new int[5];
+
+        assertNoProp(s, "notify", null);
     }
 
     @KOTest public void problematicString() {

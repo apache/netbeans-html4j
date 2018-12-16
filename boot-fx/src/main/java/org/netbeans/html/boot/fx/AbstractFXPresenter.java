@@ -22,11 +22,9 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -192,16 +190,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
 
     abstract WebView findView(final URL resource);
 
-    final JSObject convertArrays(Object[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] instanceof Object[]) {
-                arr[i] = convertArrays((Object[]) arr[i]);
-            }
-        }
-        final JSObject wrapArr = (JSObject)wrapArrFn().call("array", arr); // NOI18N
-        return wrapArr;
-    }
-
     private final JavaValues values() {
         if (values == null) {
             values = new JavaValues();
@@ -231,9 +219,11 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 newPOJOImpl = (JSObject) defineJSFn(
                     "var k = {};\n" +
                     "k.fxBrwsrId = function(hash, id) {\n" +
-                    "  return {\n" +
-                    "    'fxBrwsrId' : function(callback) { callback.hashAndId(hash, id); }\n" +
-                    "  }\n" +
+                    "  var obj = {};\n" +
+                    "  Object.defineProperty(obj, 'fxBrwsrId', {\n" +
+                    "    value : function(callback) { callback.hashAndId(hash, id) }\n" +
+                    "  });\n" +
+                    "  return obj;\n" +
                     "};\n" +
                     "return k;\n", new String[] { "callback" }, null
                 ).invokeImpl(null, false);
@@ -336,8 +326,8 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         if (value instanceof Enum) {
             return value;
         }
-        int len = isArray(value);
-        if (len >= 0) {
+        if (value.getClass().isArray()) {
+            int len = Array.getLength(value);
             Object[] copy = new Object[len];
             for (int i = 0; i < len; i++) {
                 copy[i] = toJavaScript(Array.get(value, i));
@@ -436,14 +426,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 t.printStackTrace();
                 throw t;
             }
-        }
-    }
-
-    protected int isArray(Object value) {
-        try {
-            return Array.getLength(value);
-        } catch (IllegalArgumentException ex) {
-            return -1;
         }
     }
 
