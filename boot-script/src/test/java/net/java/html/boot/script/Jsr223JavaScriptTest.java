@@ -23,10 +23,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 
 /**
@@ -41,7 +44,24 @@ public class Jsr223JavaScriptTest {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter(SingleCase.JS)).
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("javascript");
+        Object left = engine.eval(
+            "(function() {\n" +
+            "  var names = Object.getOwnPropertyNames(this);\n" +
+            "  for (var i = 0; i < names.length; i++) {\n" +
+            "    var n = names[i];\n" +
+            "    if (n === 'Object') continue;\n" +
+            "    if (n === 'Number') continue;\n" +
+            "    if (n === 'Boolean') continue;\n" +
+            "    if (n === 'Array') continue;\n" +
+            "    delete this[n];\n" +
+            "  }\n" +
+            "  return Object.getOwnPropertyNames(this).toString();\n" +
+            "})()\n" +
+            ""
+        );
+        assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter(engine, SingleCase.JS)).
             loadClass(Jsr223JavaScriptTest.class).
             loadPage("empty.html").
             invoke("initialized");

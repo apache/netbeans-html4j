@@ -83,12 +83,7 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
             eng.eval("function confirm(msg) { Packages.java.lang.System.out.println(msg); return true; };");
             eng.eval("function prompt(msg, txt) { Packages.java.lang.System.out.println(msg + ':' + txt); return txt; };");
-            Object undef;
-            if (JDK7) {
-                undef = new JDK7Callback().undefined(eng);
-            } else {
-                undef = ((Object[])eng.eval("Java.to([undefined])"))[0];
-            }
+            Object undef = new UndefinedCallback().undefined(eng);
             this.undefined = undef;
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
@@ -418,85 +413,25 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
     }
 
-    private static final class JDK7Callback implements ObjectOutput {
+    private static final class UndefinedCallback extends Callback {
         private Object undefined;
 
         @Override
-        public void writeObject(Object obj) throws IOException {
+        public void callback(Object obj) {
             undefined = obj;
         }
 
-        @Override
-        public void write(int b) throws IOException {
-        }
-
-        @Override
-        public void write(byte[] b) throws IOException {
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-        }
-
-        @Override
-        public void flush() throws IOException {
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-
-        @Override
-        public void writeBoolean(boolean v) throws IOException {
-        }
-
-        @Override
-        public void writeByte(int v) throws IOException {
-        }
-
-        @Override
-        public void writeShort(int v) throws IOException {
-        }
-
-        @Override
-        public void writeChar(int v) throws IOException {
-        }
-
-        @Override
-        public void writeInt(int v) throws IOException {
-        }
-
-        @Override
-        public void writeLong(long v) throws IOException {
-        }
-
-        @Override
-        public void writeFloat(float v) throws IOException {
-        }
-
-        @Override
-        public void writeDouble(double v) throws IOException {
-        }
-
-        @Override
-        public void writeBytes(String s) throws IOException {
-        }
-
-        @Override
-        public void writeChars(String s) throws IOException {
-        }
-
-        @Override
-        public void writeUTF(String s) throws IOException {
-        }
-
         public Object undefined(ScriptEngine eng) {
+            undefined = this;
             try {
-                eng.eval("function isJDK7Undefined(js) { js.writeObject(undefined); }");
+                Object fn = eng.eval("(function(js) { js.callback(undefined); })");
                 Invocable inv = (Invocable) eng;
-                inv.invokeFunction("isJDK7Undefined", this);
+                inv.invokeMethod(fn, "call", null, this);
             } catch (NoSuchMethodException | ScriptException ex) {
                 throw new IllegalStateException(ex);
+            }
+            if (undefined == this) {
+                throw new IllegalStateException();
             }
             return undefined;
         }
