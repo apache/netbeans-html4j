@@ -1872,21 +1872,26 @@ public final class ModelProcessor extends AbstractProcessor {
             return e.getSimpleName().toString();
         }
 
-        final Model m = e == null ? null : e.getAnnotation(Model.class);
-        String ret;
-        if (m != null) {
-            ret = findPkgName(e) + '.' + m.className();
-            isModel[0] = true;
-            models.put(e, m.className());
-        } else if (findModelForMthd(e)) {
-            ret = ((TypeElement)e).getQualifiedName().toString();
-            isModel[0] = true;
-        } else {
-            ret = tm.toString();
-        }
         TypeMirror enm = processingEnv.getElementUtils().getTypeElement("java.lang.Enum").asType();
         enm = processingEnv.getTypeUtils().erasure(enm);
         isEnum[0] = processingEnv.getTypeUtils().isSubtype(tm, enm);
+
+        String ret;
+        if (!isEnum[0]) {
+            final Model m = e == null ? null : e.getAnnotation(Model.class);
+            if (m != null) {
+                ret = findPkgName(e) + '.' + m.className();
+                isModel[0] = true;
+                models.put(e, m.className());
+            } else if (findModelForMthd(e)) {
+                ret = ((TypeElement)e).getQualifiedName().toString();
+                isModel[0] = true;
+            } else {
+                ret = tm.toString();
+            }
+        } else {
+            ret = tm.toString();
+        }
         return ret;
     }
 
@@ -2107,7 +2112,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 return new Prprt[0];
             }
 
-            if (e.getKind() != ElementKind.CLASS) {
+            if (!e.getKind().isClass()) {
                 throw new IllegalStateException("" + e.getKind());
             }
             TypeElement te = (TypeElement)e;

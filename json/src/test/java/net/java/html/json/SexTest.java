@@ -18,14 +18,22 @@
  */
 package net.java.html.json;
 
-@Model(className = "MaleOrFemale", properties = {
-    @Property(name = "sex", type = Sex.class)
-})
-public enum Sex {
-    MALE, FEMALE;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 
-    @ComputedProperty
-    static boolean woman(Sex sex) {
-        return FEMALE == sex;
+public class SexTest {
+    @Test
+    public void checkWoman() {
+        MaleOrFemale mof = new MaleOrFemale();
+        mof.setSex(Sex.FEMALE);
+        assertTrue("Woman", mof.isWoman());
+    }
+
+    @Test
+    public void noWoman() {
+        MaleOrFemale mof = new MaleOrFemale();
+        mof.setSex(Sex.MALE);
+        assertFalse("No woman", mof.isWoman());
     }
 }
