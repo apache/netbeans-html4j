@@ -56,6 +56,7 @@ final class Knockout  {
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;
     private Object js;
+    private Object copyFrom;
     private Object strong;
 
     public Knockout(Object model, Object copyFrom, PropertyBinding[] props, FunctionBinding[] funcs) {
@@ -68,10 +69,13 @@ final class Knockout  {
         for (int i = 0; i < funcs.length; i++) {
             this.funcs[i] = funcs[i].weak();
         }
-        this.js = initObjs(copyFrom);
+        this.copyFrom = copyFrom;
     }
 
     final Object js() {
+        if (js == null) {
+            this.js = initObjs(copyFrom);
+        }
         return js;
     }
 
