@@ -58,9 +58,8 @@ final class Knockout  {
     private Object js;
     private Object strong;
 
-    public Knockout(Object model, Object js, PropertyBinding[] props, FunctionBinding[] funcs) {
+    public Knockout(Object model, Object copyFrom, PropertyBinding[] props, FunctionBinding[] funcs) {
         this.strong = model;
-        this.js = js;
         this.props = new PropertyBinding[props.length];
         for (int i = 0; i < props.length; i++) {
             this.props[i] = props[i].weak();
@@ -69,10 +68,36 @@ final class Knockout  {
         for (int i = 0; i < funcs.length; i++) {
             this.funcs[i] = funcs[i].weak();
         }
+        this.js = initObjs(copyFrom);
     }
 
     final Object js() {
         return js;
+    }
+
+    private Object initObjs(Object copyFrom) {
+        String[] propNames = new String[props.length];
+        Number[] propInfo = new Number[props.length];
+        Object[] propValues = new Object[props.length];
+        for (int i = 0; i < propNames.length; i++) {
+            propNames[i] = props[i].getPropertyName();
+            int info
+                    = (props[i].isReadOnly() ? 1 : 0)
+                    + (props[i].isConstant() ? 2 : 0);
+            propInfo[i] = info;
+            Object value = props[i].getValue();
+            if (value instanceof Enum) {
+                value = value.toString();
+            }
+            propValues[i] = value;
+        }
+        String[] funcNames = new String[funcs.length];
+        for (int i = 0; i < funcNames.length; i++) {
+            funcNames[i] = funcs[i].getFunctionName();
+        }
+        Object ret = CacheObjs.find().getJSObject();
+        wrapModel(this,ret, copyFrom, propNames, propInfo, propValues, funcNames);
+        return ret;
     }
 
     static void cleanUp() {
@@ -228,7 +253,7 @@ final class Knockout  {
         + "  koExpose(i, funcNames[i]);\n"
         + "}\n"
         )
-    static native void wrapModel(
+    private static native void wrapModel(
         Knockout thiz,
         Object ret, Object copyFrom,
         String[] propNames, Number[] propInfo,
