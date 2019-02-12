@@ -18,9 +18,12 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
+import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.spi.FunctionBinding;
 import org.netbeans.html.json.spi.PropertyBinding;
 
@@ -55,7 +58,7 @@ final class Knockout  {
 
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;
-    private Object js;
+    private final Map<Fn.Presenter,Object> objs = new HashMap<Fn.Presenter, Object>();
     private Object copyFrom;
     private Object strong;
 
@@ -73,8 +76,10 @@ final class Knockout  {
     }
 
     final Object js() {
+        Object js = objs.get(Fn.activePresenter());
         if (js == null) {
-            this.js = initObjs(copyFrom);
+            js = initObjs(copyFrom);
+            objs.put(Fn.activePresenter(), js);
         }
         return js;
     }
@@ -110,8 +115,8 @@ final class Knockout  {
             if (ko == null) {
                 return;
             }
-            clean(ko.js);
-            ko.js = null;
+            Object js = ko.objs.remove(Fn.activePresenter());
+            clean(js);
             ko.props = null;
             ko.funcs = null;
         }
