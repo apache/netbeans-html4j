@@ -59,8 +59,8 @@ final class Knockout  {
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;
     private final Map<Fn.Presenter,Object> objs = new HashMap<Fn.Presenter, Object>();
-    private Object copyFrom;
-    private Object strong;
+    private final Object copyFrom;
+    private final Object strong;
 
     public Knockout(Object model, Object copyFrom, PropertyBinding[] props, FunctionBinding[] funcs) {
         this.strong = model;
@@ -144,6 +144,10 @@ final class Knockout  {
         funcs[index].call(data, ev);
     }
 
+    final void valueHasMutated(String propertyName, Object oldValue, Object newValue) {
+        valueHasMutated(js(), propertyName, oldValue, newValue);
+    }
+
     @JavaScriptBody(args = { "model", "prop", "oldValue", "newValue" },
         wait4js = false,
         body =
@@ -161,9 +165,13 @@ final class Knockout  {
         + "  }\n"
         + "}\n"
     )
-    native static void valueHasMutated(
+    private native static void valueHasMutated(
         Object model, String prop, Object oldValue, Object newValue
     );
+
+    final Object applyBindings(String id) {
+        return applyBindings(id, js());
+    }
 
     @JavaScriptBody(args = { "id", "bindings" }, body =
         "var d = window['document'];\n" +
@@ -172,7 +180,7 @@ final class Knockout  {
         "ko['applyBindings'](bindings, e);\n" +
         "return bindings['ko4j'];\n"
     )
-    native static Object applyBindings(String id, Object bindings);
+    private native static Object applyBindings(String id, Object bindings);
 
     @JavaScriptBody(args = { "cnt" }, body =
         "var arr = new Array(cnt);\n" +

@@ -74,7 +74,7 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
             if (newValue instanceof Enum) {
                 newValue = newValue.toString();
             }
-            Knockout.valueHasMutated(data.js(), propertyName, oldValue, newValue);
+            data.valueHasMutated(propertyName, oldValue, newValue);
         }
     }
 
@@ -89,7 +89,7 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
     }
     @Override
     public void applyBindings(String id, Knockout data) {
-        Object ko = Knockout.applyBindings(id, data.js());
+        Object ko = data.applyBindings(id);
         if (ko instanceof Knockout) {
             ((Knockout)ko).hold();
             applied.add((Knockout) ko);
