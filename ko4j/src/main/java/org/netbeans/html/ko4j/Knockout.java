@@ -79,15 +79,16 @@ final class Knockout  {
     }
 
     final Object js() {
-        Object js = objs.get(Fn.activePresenter());
+        final Fn.Presenter c = Fn.activePresenter();
+        Object js = objs.get(c);
         if (js == null) {
-            js = initObjs(copyFrom);
-            objs.put(Fn.activePresenter(), js);
+            js = initObjs(c, copyFrom);
+            objs.put(c, js);
         }
         return js;
     }
 
-    private Object initObjs(Object copyFrom) {
+    private Object initObjs(Fn.Presenter p, Object copyFrom) {
         String[] propNames = new String[props.length];
         Number[] propInfo = new Number[props.length];
         Object[] propValues = new Object[props.length];
@@ -107,7 +108,7 @@ final class Knockout  {
         for (int i = 0; i < funcNames.length; i++) {
             funcNames[i] = funcs[i].getFunctionName();
         }
-        Object ret = CacheObjs.find().getJSObject();
+        Object ret = CacheObjs.find(p).getJSObject();
         wrapModel(this,ret, copyFrom, propNames, propInfo, propValues, funcNames);
         return ret;
     }
