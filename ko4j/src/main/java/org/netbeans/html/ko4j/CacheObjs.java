@@ -19,56 +19,36 @@
 
 package org.netbeans.html.ko4j;
 
-import java.lang.ref.WeakReference;
 import org.netbeans.html.boot.spi.Fn;
 
-final class CacheObjs extends WeakReference<Fn.Presenter> {
+final class CacheObjs {
     /* both @GuardedBy CacheObjs.class */
-    private static CacheObjs list;
-    private CacheObjs next;
+    private static CacheObjs[] list = new CacheObjs[16];
+    private static int listAt = 0;
+    private final Fn.Presenter ref;
 
     /* both @GuardedBy presenter single threaded access */
     private Object[] jsObjects;
     private int jsIndex;
 
-    private CacheObjs(CacheObjs next, Fn.Presenter p) {
-        super(p);
-        this.next = next;
+    private CacheObjs(Fn.Presenter p) {
+        this.ref = p;
+    }
+
+    Fn.Presenter get() {
+        return ref;
     }
 
     static synchronized CacheObjs find(Fn.Presenter key) {
-        if (list == null) {
-            return list = new CacheObjs(null, key);
-        }
-
-        Fn.Presenter p;
-        for (;;) {
-            p = list.get();
-            if (p != null) {
-                break;
+        for (int i = 0; i < list.length; i++) {
+            if (list[i] != null && list[i].get() == key) {
+                return list[i];
             }
-            list = list.next;
         }
-
-        if (p == key) {
-            return list;
-        }
-
-        CacheObjs prev = list;
-        CacheObjs now = list.next;
-
-        while (now != null) {
-            p = now.get();
-            if (p == null) {
-                prev.next = now;
-            }
-            if (p == key) {
-                return now;
-            }
-            prev = now;
-            now = now.next;
-        }
-        return prev.next = new CacheObjs(null, key);
+        CacheObjs co = new CacheObjs(key);
+        list[listAt] = co;
+        listAt = (listAt + 1) % list.length;
+        return co;
     }
 
     Object getJSObject() {
