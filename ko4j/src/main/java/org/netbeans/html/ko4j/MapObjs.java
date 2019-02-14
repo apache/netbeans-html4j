@@ -24,8 +24,17 @@ import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 
 final class MapObjs {
-    private static final Object UNINITIALIZED = new Object();
-    private static Object onlyPresenter = UNINITIALIZED;
+    private static Object onlyPresenter;
+    private static boolean usePresenter;
+
+    static {
+        reset();
+    }
+
+    static void reset() {
+        onlyPresenter = null;
+        usePresenter = true;
+    }
 
     private final List<Object> all;
 
@@ -38,20 +47,20 @@ final class MapObjs {
         if (now instanceof MapObjs) {
             return ((MapObjs)now).put(key, js);
         } else {
-            if (onlyPresenter == UNINITIALIZED) {
-                onlyPresenter = key;
-                return js;
-            } else if (onlyPresenter == key) {
-                return js;
-            } else {
+            if (usePresenter) {
                 if (onlyPresenter == null) {
-                    assert now == null;
-                    return new MapObjs(key, js);
+                    onlyPresenter = key;
+                    return js;
+                } else if (onlyPresenter == key) {
+                    return js;
                 } else {
-                    final MapObjs map = new MapObjs(onlyPresenter, now, key, js);
-                    onlyPresenter = null;
-                    return map;
+                    usePresenter = false;
                 }
+            }
+            if (now == null) {
+                return new MapObjs(key, js);
+            } else {
+                return new MapObjs(onlyPresenter, now, key, js);
             }
         }
     }
