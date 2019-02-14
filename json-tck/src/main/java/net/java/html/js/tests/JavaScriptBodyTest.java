@@ -21,6 +21,7 @@ package net.java.html.js.tests;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import net.java.html.json.Models;
@@ -403,7 +404,7 @@ public class JavaScriptBodyTest {
         Sum s = new Sum();
         Object[] props = Bodies.forIn(s);
 
-        Set<Object> all = new HashSet<>(Arrays.asList(props));
+        List<Object> all = Models.asList(props);
         assertEquals(0, all.size(), "No own properties: " + all);
     }
 
