@@ -41,20 +41,24 @@ import org.testng.annotations.Test;
     @Property(name = "message", type = String.class)
 })
 public class DoubleViewTest {
+    private static String set;
+
     @Function
     static void change(DoubleView model) {
-        model.setMessage("Modified");
+        assertNotNull(set);
+        model.setMessage(set);
+        set = null;
     }
-    
+
     DoubleView doubleView;
     private WebView view1;
     private WebView view2;
-    
+
     @BeforeMethod
     public void initializeViews() throws Exception {
         final JFXPanel panel = new JFXPanel();
         final JFXPanel p2 = new JFXPanel();
-        
+
         final CountDownLatch initViews = new CountDownLatch(1);
         Platform.runLater(new Runnable() {
             @Override
@@ -64,15 +68,15 @@ public class DoubleViewTest {
             }
         });
         initViews.await();
-        
+
         doubleView = new DoubleView();
         doubleView.setMessage("Initialized");
 
         final URL page = DoubleViewTest.class.getResource("double.html");
         assertNotNull(page, "double.html found");
 
-        
-        
+
+
         final CountDownLatch view1Init = new CountDownLatch(1);
         final CountDownLatch view2Init = new CountDownLatch(1);
         Platform.runLater(new Runnable() {
@@ -98,11 +102,11 @@ public class DoubleViewTest {
         view1Init.await();
         view2Init.await();
     }
-    
+
     private void displayFrame(JFXPanel panel, JFXPanel p2) {
         view1 = displayWebView(panel);
         view2 = displayWebView(p2);
-        
+
         JFrame f = new JFrame();
         f.getContentPane().setLayout(new FlowLayout());
         f.getContentPane().add(panel);
@@ -119,7 +123,7 @@ public class DoubleViewTest {
         panel.setScene(scene);
         return webView;
     }
-    
+
     @Test
     public void synchronizationOfViews() throws Throwable {
         final CountDownLatch cdl = new CountDownLatch(1);
@@ -130,6 +134,14 @@ public class DoubleViewTest {
                 try {
                     assertMessages("In view one", view1, "Initialized");
                     assertMessages("In view two", view2, "Initialized");
+                    set = "Change1";
+                    clickButton(view1);
+                    assertMessages("In view one", view1, "Change1");
+                    assertMessages("In view two", view2, "Change1");
+                    set = "Change2";
+                    clickButton(view2);
+                    assertMessages("In view one", view1, "Change2");
+                    assertMessages("In view two", view2, "Change2");
                 } catch (Throwable t) {
                     arr[0] = t;
                 } finally {
@@ -142,7 +154,7 @@ public class DoubleViewTest {
             throw arr[0];
         }
     }
-    
+
     @AfterMethod
     public void waitABit() throws Exception {
     }
@@ -153,5 +165,9 @@ public class DoubleViewTest {
 
         Object prop = v.getEngine().executeScript("document.getElementById('property').innerHTML");
         assertEquals(prop, expected, msg + " 'property' check");
+    }
+
+    private void clickButton(WebView v) {
+        v.getEngine().executeScript("document.getElementById('change').click()");
     }
 }

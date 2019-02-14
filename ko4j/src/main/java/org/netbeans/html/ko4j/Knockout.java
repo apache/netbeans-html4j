@@ -18,8 +18,11 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
 import net.java.html.json.Model;
@@ -144,7 +147,31 @@ final class Knockout  {
         funcs[index].call(data, ev);
     }
 
-    final void valueHasMutated(String propertyName, Object oldValue, Object newValue) {
+    final void valueHasMutated(final String propertyName, Object oldValue, Object newValue) {
+        for (Map.Entry<Fn.Presenter, Object> e : objs.entrySet()) {
+            Fn.Presenter p = e.getKey();
+            final Object o = e.getValue();
+            if (p != Fn.activePresenter()) {
+                if (p instanceof Executor) {
+                    ((Executor) p).execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            valueHasMutated(o, propertyName, null, null);
+                        }
+                    });
+                } else {
+                    Closeable c = Fn.activate(p);
+                    try {
+                        valueHasMutated(o, propertyName, null, null);
+                    } finally {
+                        try {
+                            c.close();
+                        } catch (IOException ex) {
+                        }
+                    }
+                }
+            }
+        }
         valueHasMutated(js(), propertyName, oldValue, newValue);
     }
 
