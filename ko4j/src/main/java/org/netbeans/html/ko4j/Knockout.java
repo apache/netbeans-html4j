@@ -61,7 +61,7 @@ final class Knockout  {
 
     private PropertyBinding[] props;
     private FunctionBinding[] funcs;
-    private final Map<Fn.Presenter,Object> objs = new HashMap<Fn.Presenter, Object>();
+    private Object objs;
     private final Object copyFrom;
     private final Object strong;
 
@@ -80,10 +80,10 @@ final class Knockout  {
 
     final Object js() {
         final Fn.Presenter c = Fn.activePresenter();
-        Object js = objs.get(c);
+        Object js = MapObjs.get(objs, c);
         if (js == null) {
             js = initObjs(c, copyFrom);
-            objs.put(c, js);
+            objs = MapObjs.put(objs, c, js);
         }
         return js;
     }
@@ -119,7 +119,9 @@ final class Knockout  {
             if (ko == null) {
                 return;
             }
-            Object js = ko.objs.remove(Fn.activePresenter());
+            Object[] both = MapObjs.remove(ko.objs, Fn.activePresenter());
+            Object js = both[0];
+            ko.objs = both[1];
             clean(js);
             ko.props = null;
             ko.funcs = null;
@@ -149,9 +151,10 @@ final class Knockout  {
     }
 
     final void valueHasMutated(final String propertyName, Object oldValue, Object newValue) {
-        for (Map.Entry<Fn.Presenter, Object> e : objs.entrySet()) {
-            Fn.Presenter p = e.getKey();
-            final Object o = e.getValue();
+        Object[] all = MapObjs.toArray(objs);
+        for (int i = 0; i < all.length; i += 2) {
+            Fn.Presenter p = (Fn.Presenter) all[i];
+            final Object o = all[i + 1];
             if (p != Fn.activePresenter()) {
                 if (p instanceof Executor) {
                     ((Executor) p).execute(new Runnable() {
