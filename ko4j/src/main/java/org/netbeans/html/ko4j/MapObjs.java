@@ -19,49 +19,91 @@
 
 package org.netbeans.html.ko4j;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 
 final class MapObjs {
+    private static final Object UNINITIALIZED = new Object();
+    private static Object onlyPresenter = UNINITIALIZED;
+
+    private final List<Object> all;
+
+    private MapObjs(Object... arr) {
+        this.all = Models.asList(arr);
+    }
+
+
     static Object put(Object now, Fn.Presenter key, Object js) {
-        Map<Fn.Presenter, Object> map = (Map<Fn.Presenter, Object>) now;
-        if (map == null) {
-            map = new HashMap<Fn.Presenter, Object>();
+        if (now instanceof MapObjs) {
+            return ((MapObjs)now).put(key, js);
+        } else {
+            if (onlyPresenter == UNINITIALIZED) {
+                onlyPresenter = key;
+                return js;
+            } else if (onlyPresenter == key) {
+                return js;
+            } else {
+                if (onlyPresenter == null) {
+                    assert now == null;
+                    return new MapObjs(key, js);
+                } else {
+                    final MapObjs map = new MapObjs(onlyPresenter, now, key, js);
+                    onlyPresenter = null;
+                    return map;
+                }
+            }
         }
-        map.put(key, js);
-        return map;
     }
 
     static Object get(Object now, Fn.Presenter key) {
-        if (now instanceof Map) {
-            Map<?,?> map = (Map<?,?>) now;
-            return map.get(key);
+        if (now instanceof MapObjs) {
+            return ((MapObjs)now).get(key);
+        }
+        return key == onlyPresenter ? now : null;
+    }
+
+    static Object[] remove(Object now, Fn.Presenter key) {
+        if (now instanceof MapObjs) {
+            return ((MapObjs)now).remove(key);
+        }
+        return new Object[] { now, null };
+    }
+
+    static Object[] toArray(Object now) {
+        if (now instanceof MapObjs) {
+            return ((MapObjs) now).all.toArray();
+        }
+        return new Object[] { onlyPresenter, now };
+    }
+
+    private Object put(Fn.Presenter key, Object js) {
+        for (int i = 0; i < all.size(); i += 2) {
+            if (all.get(i) == key) {
+                all.set(i + 1, js);
+                return this;
+            }
+        }
+        all.add(key);
+        all.add(js);
+        return this;
+    }
+
+    private Object get(Fn.Presenter key) {
+        for (int i = 0; i < all.size(); i += 2) {
+            if (all.get(i) == key) {
+                return all.get(i + 1);
+            }
         }
         return null;
     }
 
-    static Object[] remove(Object now, Fn.Presenter key) {
-        Map<?,?> map = (Map<?,?>) now;
-        Object prev = map.remove(key);
-        return new Object[] { prev, map };
-    }
-
-    static Object[] toArray(Object now) {
-        if (now instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) now;
-            Object[] res = new Object[map.size() * 2];
-            int at = 0;
-            for (Map.Entry<? extends Object, ? extends Object> entry : map.entrySet()) {
-                Object key = entry.getKey();
-                Object value = entry.getValue();
-
-                res[at] = key;
-                res[at + 1] = value;
-                at += 2;
+    private Object[] remove(Fn.Presenter key) {
+        for (int i = 0; i < all.size(); i += 2) {
+            if (all.get(i) == key) {
+                return new Object[] { all.get(i + 1), this };
             }
-            return res;
         }
-        return new Object[0];
+        return new Object[] { null, this };
     }
 }
