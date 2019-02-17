@@ -20,7 +20,6 @@ package net.java.html.boot.script;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.ObjectOutput;
 import java.io.Reader;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
@@ -72,19 +71,19 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private final Set<Class<?>> jsReady;
     private final CallbackImpl callback;
 
-    ScriptPresenter(Executor exc) {
-        this(new ScriptEngineManager().getEngineByName("javascript"), exc);
-    }
-
-    ScriptPresenter(ScriptEngine eng, Executor exc) {
+    ScriptPresenter(ScriptEngine eng, Executor exc, boolean sanitize) {
+        if (eng == null) {
+            eng = new ScriptEngineManager().getEngineByName("javascript");
+        }
         this.eng = eng;
         this.exc = exc;
         try {
-            eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
-            eng.eval("function confirm(msg) { Packages.java.lang.System.out.println(msg); return true; };");
-            eng.eval("function prompt(msg, txt) { Packages.java.lang.System.out.println(msg + ':' + txt); return txt; };");
             Object undef = new UndefinedCallback().undefined(eng);
             this.undefined = undef;
+            if (sanitize) {
+                Sanitizer.clean(eng);
+            }
+            Sanitizer.defineAlert(eng);
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
         }

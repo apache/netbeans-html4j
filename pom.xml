@@ -148,7 +148,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <artifactId>codesnippet-doclet</artifactId>
                     <version>0.23</version>
                 </docletArtifact>
-                <additionalparam>-snippetpath json/src/test -snippetpath boot-fx/src/test ${javadoc.allowjs} -hiddingannotation java.lang.Deprecated</additionalparam>
+                <additionalparam>
+                    -snippetpath boot-fx/src/test 
+                    -snippetpath boot-script/src/test
+                    -snippetpath json/src/test
+                    ${javadoc.allowjs}
+                    -hiddingannotation java.lang.Deprecated
+                </additionalparam>
               </configuration>
             </plugin>
             <plugin>
@@ -268,6 +274,8 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <testSource>1.8</testSource>
+                    <testTarget>1.8</testTarget>
                 </configuration>
               </plugin>
               <plugin>

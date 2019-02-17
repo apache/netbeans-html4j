@@ -18,52 +18,47 @@
  */
 package net.java.html.boot.script;
 
-import java.io.Closeable;
 import java.util.concurrent.Executor;
 import javax.script.ScriptEngine;
-import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
-import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 
-/** Implementations of {@link Presenter}s that delegate
+/** Builder to create a {@link Presenter} that delegates
  * to Java {@link ScriptEngine scripting} API. Initialize your presenter
  * like this:
- * 
- * <pre>
- * 
- * {@link Runnable} <em>run</em> = ...; // your own init code
- * {@link Presenter Fn.Presenter} <b>p</b> = Scripts.{@link Scripts#createPresenter()};
- * BrowserBuilder.{@link BrowserBuilder#newBrowser(java.lang.Object...) newBrowser(<b>p</b>)}.
- *      {@link BrowserBuilder#loadFinished(java.lang.Runnable) loadFinished(run)}.
- *      {@link BrowserBuilder#showAndWait()};
- * </pre>
+ * <p>
+ * {@codesnippet ScriptsTest#initViaBrowserBuilder}
  * 
  * and your runnable can make extensive use of {@link JavaScriptBody} directly or
  * indirectly via APIs using {@link JavaScriptBody such annotation} themselves.
  * <p>
  * Alternatively one can manipulate the presenter manually, which is
  * especially useful when writing tests:
- * <pre>
- * {@code @Test} public void runInASimulatedBrowser() throws Exception {
- *   {@link Presenter Fn.Presenter} <b>p</b> = Scripts.{@link Scripts#createPresenter()};
- *   try ({@link Closeable} c = {@link Fn#activate(org.netbeans.html.boot.spi.Fn.Presenter) Fn.activate}(<b>p</b>)) {
- *     // your code operating in context of <b>p</b>
- *   }
- * }
- * </pre>
- * The previous code snippet requires Java 7 language syntax, as it relies
- * on try-with-resources language syntactic sugar feature. The same block
+ * <p>
+ * {@codesnippet ScriptsTest#activatePresenterDirectly}
+ * <p>
+ * The previous code snippet relies
+ * on try-with-resources <em>Java7</em> syntax. The same block
  * of code can be used on older versions of Java, but it is slightly more
  * verbose.
  * 
  * @author Jaroslav Tulach
  */
 public final class Scripts {
+
+    private Executor exc;
+    private ScriptEngine engine;
+    private boolean sanitize = true;
+    
     private Scripts() {
     }
     
-    /** Simple implementation of {@link Presenter} that delegates
+    /** {@linkplain #sanitize(boolean) Non-sanitized} version of the presenter.
+     * Rather use following code to obtain safer version of the engine:
+     * <p> 
+     * {@codesnippet ScriptsTest#testNewPresenterNoExecutor}
+     * <p>
+     * Simple implementation of {@link Presenter} that delegates
      * to Java {@link ScriptEngine scripting} API. The presenter runs headless
      * without appropriate simulation of browser APIs. Its primary usefulness
      * is inside testing environments. The presenter implements {@link Executor}
@@ -72,12 +67,19 @@ public final class Scripts {
      * 
      * @return new instance of a presenter that is using its own
      *   {@link ScriptEngine} for <code>text/javascript</code> mimetype
+     * @deprecated use {@link #newPresenter()} builder
      */
+    @Deprecated
     public static Presenter createPresenter() {
-        return new ScriptPresenter(null);
+        return newPresenter().sanitize(false).build();
     }
 
-    /** Implementation of {@link Presenter} that delegates
+    /** {@linkplain #sanitize(boolean) Non-sanitized} version of the presenter.
+     * Rather use following code to obtain safer version of the engine:
+     * <p> 
+     * {@codesnippet Jsr223JavaScriptTest#createPresenter}
+     * <p>
+     * Implementation of {@link Presenter} that delegates
      * to Java {@link ScriptEngine scripting} API and can control execution
      * thread. The presenter runs headless
      * without appropriate simulation of browser APIs. Its primary usefulness
@@ -88,8 +90,85 @@ public final class Scripts {
      * @param exc the executor to re-schedule all asynchronous requests to
      * @return new instance of a presenter that is using its own
      *   {@link ScriptEngine} for <code>text/javascript</code> mimetype
+     * @deprecated use {@link #newPresenter()} builder
      */
+    @Deprecated
     public static Presenter createPresenter(Executor exc) {
-        return new ScriptPresenter(exc);
+        return newPresenter().sanitize(false).executor(exc).build();
+    }
+    
+    /** Creates new scripting {@link Presenter} builder. Simplest way
+     * to use is:
+     * <p>
+     * {@codesnippet ScriptsTest#testNewPresenterNoExecutor}
+     * <p>
+     * It is possible to specify own 
+     * {@link #engine(javax.script.ScriptEngine) scripting engine}
+     * and {@link #executor(java.util.concurrent.Executor)}
+     * and control the thread that executes the scripts:
+     * <p>
+     * {@codesnippet Jsr223JavaScriptTest#createPresenter}
+     * <p>
+     * By default the created presenters are {@linkplain #sanitize(boolean) sanitized}.
+     * 
+     * @return instance of the new builder
+     * @since 1.6.1
+     */
+    public static Scripts newPresenter() {
+        return new Scripts();
+    }
+    
+    /** Associates new executor.
+     * The {@linkplain #build() to be created presenter} will implement {@link Executor}
+     * interface, and passes all runnables from its own
+     * {@link Executor#execute(java.lang.Runnable)} method
+     * to here in provided {@code exc} instance of executor.
+     * 
+     * @param exc dedicated executor to use
+     * @return instance of the new builder
+     * @since 1.6.1
+     */
+    public Scripts executor(Executor exc) {
+        this.exc = exc;
+        return this;
+    }
+    
+    /** Associates a scripting engine.
+     * The engine is used to {@link #build() build} an 
+     * implementation of {@link Presenter} that delegates
+     * to Java {@link ScriptEngine scripting} API. The presenter runs headless
+     * without appropriate simulation of browser APIs. 
+     * 
+     * @param engine dedicated script engine to use
+     * @return instance of the new builder
+     * @since 1.6.1
+     */
+    public Scripts engine(ScriptEngine engine) {
+        this.engine = engine;
+        return this;
+    }
+    
+    /** Turn sandboxing of the engine on or off. When sanitization is on
+     * a special care is taken to remove all global symbols not present
+     * in the EcmaScript specification. By default the sanitization is on
+     * to increase security.
+     * 
+     * @param yesOrNo do the sanitization or not
+     * @return instance of the new builder
+     * @since 1.6.1
+     */
+    public Scripts sanitize(boolean yesOrNo) {
+        this.sanitize = yesOrNo;
+        return this;
+    }
+    
+    /** Builds new instance of the scripting presenter. Use
+     * arguments of this builder and creates new instance.
+     * 
+     * @return creates new instance of the presenter
+     * @since 1.6.1
+     */
+    public Presenter build() {
+        return new ScriptPresenter(engine, exc, sanitize);
     }
 }

@@ -84,7 +84,11 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
 
         baseUri = DynamicHTTP.initServer();
 
-        final Fn.Presenter p = new ScriptPresenter(eng, KOCase.JS);
+        final Fn.Presenter p = Scripts.newPresenter()
+            .engine(eng)
+            .sanitize(false)
+            .executor(KOCase.JS)
+            .build();
         try {
             Class.forName("java.lang.Module");
         } catch (ClassNotFoundException oldJDK) {

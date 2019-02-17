@@ -31,7 +31,7 @@
     <version>2.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <properties>
-        <netbeans.compile.on.save>NONE</netbeans.compile.on.save>
+        <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <publicPackages>net.java.html.boot.script</publicPackages>
     </properties>
     <build>
@@ -108,7 +108,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>test</scope>
-            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>

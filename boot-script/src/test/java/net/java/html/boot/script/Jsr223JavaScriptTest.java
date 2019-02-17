@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -61,10 +62,11 @@ public class Jsr223JavaScriptTest {
             ""
         );
         assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new ScriptPresenter(engine, SingleCase.JS)).
-            loadClass(Jsr223JavaScriptTest.class).
+        
+        Fn.Presenter presenter = createPresenter(engine);
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).
             loadPage("empty.html").
-            invoke("initialized");
+            loadFinished(Jsr223JavaScriptTest::initialized);
 
         Executors.newSingleThreadExecutor().submit(new Runnable() {
             @Override
@@ -73,7 +75,7 @@ public class Jsr223JavaScriptTest {
             }
         });
 
-        List<Object> res = new ArrayList<Object>();
+        List<Object> res = new ArrayList<>();
         Class<? extends Annotation> test = 
             loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
@@ -89,6 +91,16 @@ public class Jsr223JavaScriptTest {
         return res.toArray();
     }
 
+    private static Fn.Presenter createPresenter(ScriptEngine engine) {
+        final Executor someExecutor = SingleCase.JS;
+        // BEGIN: Jsr223JavaScriptTest#createPresenter
+        return Scripts.newPresenter()
+            .engine(engine)
+            .executor(someExecutor)
+            .build();
+        // END: Jsr223JavaScriptTest#createPresenter
+    }
+
     static synchronized Class<?> loadClass() throws InterruptedException {
         while (browserClass == null) {
             Jsr223JavaScriptTest.class.wait();
@@ -96,13 +108,13 @@ public class Jsr223JavaScriptTest {
         return browserClass;
     }
     
-    public static synchronized void ready(Class<?> browserCls) throws Exception {
+    private static synchronized void ready(Class<?> browserCls) {
         browserClass = browserCls;
         browserPresenter = Fn.activePresenter();
         Jsr223JavaScriptTest.class.notifyAll();
     }
     
-    public static void initialized() throws Exception {
+    private static void initialized() {
         Assert.assertSame(
             Jsr223JavaScriptTest.class.getClassLoader(),
             ClassLoader.getSystemClassLoader(),
