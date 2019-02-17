@@ -36,7 +36,14 @@ final class Dbgr {
         Object d;
         Method m;
         try {
-            d = eng.getClass().getMethod("impl_getDebugger").invoke(eng); // NOI18N
+            Method getDebugger;
+            try {
+                getDebugger = eng.getClass().getMethod("impl_getDebugger"); // NOI18N
+            } catch (NoSuchMethodException ex) {
+                getDebugger = eng.getClass().getDeclaredMethod("getDebugger"); // NOI18N
+                getDebugger.setAccessible(true);
+            }
+            d = getDebugger.invoke(eng);
             Class<?> debugger = eng.getClass().getClassLoader().loadClass("com.sun.javafx.scene.web.Debugger"); // NOI18N
             debugger.getMethod("setEnabled", boolean.class).invoke(d, true); // NOI18N
             debugger.getMethod("setMessageCallback", Callback.class).invoke(d, callback); // NOI18N
