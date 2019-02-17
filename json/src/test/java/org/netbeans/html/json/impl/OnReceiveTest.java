@@ -18,8 +18,11 @@
  */
 package org.netbeans.html.json.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import net.java.html.BrwsrCtx;
@@ -29,6 +32,8 @@ import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.json.spi.JSONCall;
 import org.netbeans.html.json.spi.Transfer;
 import static org.testng.Assert.*;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -36,14 +41,28 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach
  */
 public class OnReceiveTest {
+    private ByteArrayOutputStream err;
+    private PrintStream prevErr;
+
+    @BeforeTest
+    public void installOut() {
+        prevErr = System.out;
+        System.setErr(new PrintStream(err = new ByteArrayOutputStream()));
+    }
+
+    @AfterTest
+    public void resetOut() {
+        System.setOut(prevErr);
+    }
+
     @Test public void performJSONCall() {
         MockTrans mt = new MockTrans();
         BrwsrCtx ctx = Contexts.newBuilder().register(Transfer.class, mt, 1).build();
-        
+
         Employee e = Models.bind(new Employee(), ctx);
         e.setCall(null);
         Person p = new Person();
-        
+
         mt.result = new HashMap<String, String>();
         mt.result.put("firstName", "Jarda");
         mt.result.put("lastName", "Tulach");
@@ -74,8 +93,12 @@ public class OnReceiveTest {
         e.changePersonalities(1, 2.0, "3", p);
         final Call c = e.getCall();
         assertNull(c, "Error has been swallowed");
+
+        String errLog = err.toString();
+        assertNotEquals(errLog.indexOf("Exception: Error"), -1, errLog);
+        assertNotEquals(errLog.indexOf("OnReceiveTest.performErrorJSONCallNoHandling"), -1, errLog);
     }
-    
+
     @Test public void performErrorJSONCall() {
         MockTrans mt = new MockTrans();
         mt.err = new Exception("Error");
@@ -122,11 +145,11 @@ public class OnReceiveTest {
         assertEquals(c.getP(), p);
     }
 
-    
+
     public static class MockTrans implements Transfer {
         Map<String,String> result;
         Exception err;
-        
+
         @Override
         public void extract(Object obj, String[] props, Object[] values) {
             assertTrue(obj instanceof Map, "It is a map: " + obj);
