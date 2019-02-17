@@ -116,11 +116,9 @@ public class ScriptsTest {
         Fn.Presenter p = builder.build();
         try (Closeable c = Fn.activate(p)) {
             Object Java = p.defineFn("return typeof Java;").invoke(null);
-            Object engine = p.defineFn("return typeof engine;").invoke(null);
             Object Packages = p.defineFn("return typeof Packages;").invoke(null);
             Object alert = p.defineFn("return typeof alert;").invoke(null);
             assertEquals(Java, "object", "Java symbol found");
-            assertEquals(engine, "object", "Engine symbol found");
             assertEquals(Packages, "object", "Packages symbol found");
             assertEquals(alert, "function", "alert is defined symbol");
         }
