@@ -27,9 +27,9 @@
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent>
-      <groupId>org.apache</groupId>
-      <artifactId>apache</artifactId>
-      <version>10</version>
+      <groupId>org.apache.netbeans</groupId>
+      <artifactId>netbeans-parent</artifactId>
+      <version>1</version>
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
