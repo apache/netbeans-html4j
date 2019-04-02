@@ -40,15 +40,17 @@ public final class SingleCase implements ITest, IHookable, Runnable {
     private final Method m;
     private Object result;
     private Object inst;
+    private final String prefix;
 
-    SingleCase(Fn.Presenter p, Method m) {
+    SingleCase(String prefix, Fn.Presenter p, Method m) {
+        this.prefix = prefix;
         this.p = p;
         this.m = m;
     }
 
     @Override
     public String getTestName() {
-        return m.getName();
+        return prefix + m.getName();
     }
 
     @Test

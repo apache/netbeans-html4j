@@ -19,17 +19,33 @@
 package net.java.html.boot.script;
 
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ScriptsTest {
+    @DataProvider(name = "engines")
+    public static Object[][] primeNumbers() {
+        List<Object[]> res = new ArrayList<>();
+        final ScriptEngineManager manager = new ScriptEngineManager();
+        for (ScriptEngineFactory f : manager.getEngineFactories()) {
+            if (!Jsr223JavaScriptTest.isJavaScriptEngineFactory(f)) {
+                continue;
+            }
+            res.add(new Object[] { f.getScriptEngine() });
+        }
+        return res.toArray(new Object[0][]);
+    }
 
     public ScriptsTest() {
     }
@@ -92,9 +108,14 @@ public class ScriptsTest {
         assertSanitized(Scripts.newPresenter().sanitize(true));
     }
 
-    @Test
-    public void noSanitization() throws Exception {
-        assertNotSanitized(Scripts.newPresenter().sanitize(false));
+    @Test(dataProvider = "engines")
+    public void noSanitization(ScriptEngine eng) throws Exception {
+        boolean relaxed = "Graal.js".equals(eng.getFactory().getEngineName());
+
+        assertNotSanitized(
+            Scripts.newPresenter().engine(eng).sanitize(false),
+            relaxed
+        );
     }
 
     private void assertSanitized(Scripts newPresenter) throws Exception {
@@ -112,16 +133,26 @@ public class ScriptsTest {
         }
     }
 
-    private void assertNotSanitized(Scripts builder) throws Exception {
+    private void assertNotSanitized(Scripts builder, boolean relaxed) throws Exception {
         Fn.Presenter p = builder.build();
         try (Closeable c = Fn.activate(p)) {
             Object Java = p.defineFn("return typeof Java;").invoke(null);
             Object Packages = p.defineFn("return typeof Packages;").invoke(null);
             Object alert = p.defineFn("return typeof alert;").invoke(null);
-            assertEquals(Java, "object", "Java symbol found");
-            assertEquals(Packages, "object", "Packages symbol found");
+            assertObjectRelaxed(relaxed, Java, "Java symbol found");
+            assertObjectRelaxed(relaxed, Packages, "Packages symbol found");
             assertEquals(alert, "function", "alert is defined symbol");
         }
+    }
+
+    private static void assertObjectRelaxed(boolean relaxed, Object real, String msg) {
+        if ("object".equals(real)) {
+            return;
+        }
+        if (relaxed && "undefined".equals(real)) {
+            return;
+        }
+        assertNull(real, msg);
     }
 
     private static void awaitPresenter(Fn.Presenter p) {

@@ -22,14 +22,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
-import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 
@@ -38,57 +40,74 @@ import org.testng.annotations.Factory;
  * @author Jaroslav Tulach
  */
 public class Jsr223JavaScriptTest {
-    private static Class<?> browserClass;
-    private static Fn.Presenter browserPresenter;
-    
     public Jsr223JavaScriptTest() {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("javascript");
-        Object left = engine.eval(
-            "(function() {\n" +
-            "  var names = Object.getOwnPropertyNames(this);\n" +
-            "  for (var i = 0; i < names.length; i++) {\n" +
-            "    var n = names[i];\n" +
-            "    if (n === 'Object') continue;\n" +
-            "    if (n === 'Number') continue;\n" +
-            "    if (n === 'Boolean') continue;\n" +
-            "    if (n === 'Array') continue;\n" +
-            "    delete this[n];\n" +
-            "  }\n" +
-            "  return Object.getOwnPropertyNames(this).toString();\n" +
-            "})()\n" +
-            ""
-        );
-        assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
-        
+        List<Object> res = new ArrayList<>();
+        final ScriptEngineManager manager = new ScriptEngineManager();
+        for (ScriptEngineFactory f : manager.getEngineFactories()) {
+            if (!isJavaScriptEngineFactory(f)) {
+                continue;
+            }
+            collectTestsForEngine(f.getScriptEngine(), res);
+        }
+        return res.toArray();
+    }
+
+    static boolean isJavaScriptEngineFactory(ScriptEngineFactory f) {
+        if (f.getNames().contains("nashorn")) {
+            return true;
+        }
+        return f.getMimeTypes().contains("text/javascript");
+    }
+
+    private static void collectTestsForEngine(ScriptEngine engine, List<Object> res) throws Exception {
+        Fn.Presenter browserPresenter[] = { null };
+        CountDownLatch cdl = new CountDownLatch(1);
         Fn.Presenter presenter = createPresenter(engine);
         final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).
             loadPage("empty.html").
-            loadFinished(Jsr223JavaScriptTest::initialized);
+            loadFinished(() -> {
+                browserPresenter[0] = Fn.activePresenter();
+                cdl.countDown();
+            });
 
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                bb.showAndWait();
-            }
-        });
+        Executors.newSingleThreadExecutor().submit(bb::showAndWait);
+        cdl.await();
 
-        List<Object> res = new ArrayList<>();
-        Class<? extends Annotation> test = 
-            loadClass().getClassLoader().loadClass(KOTest.class.getName()).
-            asSubclass(Annotation.class);
+        assertNoGlobalSymbolsLeft(engine);
+        final String prefix = "[" + engine.getFactory().getEngineName() + "] ";
 
-        Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
+        Class<? extends Annotation> test = KOTest.class;
+        Class[] arr = Jsr223JavaScriptTst.tests();
         for (Class c : arr) {
             for (Method m : c.getMethods()) {
                 if (m.getAnnotation(test) != null) {
-                    res.add(new SingleCase(browserPresenter, m));
+                    res.add(new SingleCase(prefix, browserPresenter[0], m));
                 }
             }
         }
-        return res.toArray();
+
+    }
+
+    private static void assertNoGlobalSymbolsLeft(ScriptEngine engine) throws ScriptException {
+        Object left = engine.eval(
+                "(function() {\n" +
+                        "  var names = Object.getOwnPropertyNames(this);\n" +
+                        "  for (var i = 0; i < names.length; i++) {\n" +
+                        "    var n = names[i];\n" +
+                        "    if (n === 'Object') continue;\n" +
+                        "    if (n === 'Number') continue;\n" +
+                        "    if (n === 'Boolean') continue;\n" +
+                        "    if (n === 'Array') continue;\n" +
+                        "    delete this[n];\n" +
+                        "  }\n" +
+                        "  return Object.getOwnPropertyNames(this).toString();\n" +
+                        "})()\n" +
+                        ""
+        );
+        assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
     }
 
     private static Fn.Presenter createPresenter(ScriptEngine engine) {
@@ -101,25 +120,4 @@ public class Jsr223JavaScriptTest {
         // END: Jsr223JavaScriptTest#createPresenter
     }
 
-    static synchronized Class<?> loadClass() throws InterruptedException {
-        while (browserClass == null) {
-            Jsr223JavaScriptTest.class.wait();
-        }
-        return browserClass;
-    }
-    
-    private static synchronized void ready(Class<?> browserCls) {
-        browserClass = browserCls;
-        browserPresenter = Fn.activePresenter();
-        Jsr223JavaScriptTest.class.notifyAll();
-    }
-    
-    private static void initialized() {
-        Assert.assertSame(
-            Jsr223JavaScriptTest.class.getClassLoader(),
-            ClassLoader.getSystemClassLoader(),
-            "No special classloaders"
-        );
-        Jsr223JavaScriptTest.ready(Jsr223JavaScriptTst.class);
-    }
 }
