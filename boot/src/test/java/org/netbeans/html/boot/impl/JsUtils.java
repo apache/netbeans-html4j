@@ -18,7 +18,9 @@
  */
 package org.netbeans.html.boot.impl;
 
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -26,6 +28,8 @@ final class JsUtils {
     public static ScriptEngine initializeEngine() throws Exception {
         ScriptEngineManager sem = new ScriptEngineManager();
         final ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
+        Bindings bindings = eng.getBindings(ScriptContext.ENGINE_SCOPE);
+        bindings.put("polyglot.js.allowHostAccess", true); // NOI18N
 
         eng.eval("function checkArray(arr, to) {\n"
                 + "  if (to === null) {\n"
