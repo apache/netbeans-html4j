@@ -31,7 +31,9 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -75,18 +77,31 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         if (eng == null) {
             eng = new ScriptEngineManager().getEngineByName("javascript");
         }
+        IllegalStateException[] makingPolyglot = { null };
+        if (eng.getFactory().getNames().contains("Graal.js")) { // NOI18N
+            try {
+                Bindings bindings = eng.getBindings(ScriptContext.ENGINE_SCOPE);
+                bindings.put("polyglot.js.allowHostAccess", true); // NOI18N
+            } catch (IllegalStateException ex) {
+                makingPolyglot[0] = ex;
+            }
+        }
         this.eng = eng;
         this.exc = exc;
+        Object undef;
         try {
-            Object undef = new UndefinedCallback().undefined(eng);
-            this.undefined = undef;
+            undef = new UndefinedCallback().undefined(eng);
             if (sanitize) {
                 Sanitizer.clean(eng);
             }
             Sanitizer.defineAlert(eng);
         } catch (ScriptException ex) {
+            if (makingPolyglot[0] != null) {
+                throw makingPolyglot[0];
+            }
             throw new IllegalStateException(ex);
         }
+        this.undefined = undef;
         this.jsReady = new HashSet<>();
         this.callback = new CallbackImpl();
     }
@@ -420,14 +435,14 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             undefined = obj;
         }
 
-        public Object undefined(ScriptEngine eng) {
+        public Object undefined(ScriptEngine eng) throws ScriptException {
             undefined = this;
             try {
                 Object fn = eng.eval("(function(js) { js.callback(undefined); })");
                 Invocable inv = (Invocable) eng;
                 inv.invokeMethod(fn, "call", null, this);
-            } catch (NoSuchMethodException | ScriptException ex) {
-                throw new IllegalStateException(ex);
+            } catch (NoSuchMethodException ex) {
+                throw new ScriptException(ex);
             }
             if (undefined == this) {
                 throw new IllegalStateException();
