@@ -18,6 +18,7 @@
  */
 package org.netbeans.html.mojo;
 
+import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -159,7 +160,7 @@ abstract class ProcessJsAnnotations {
             if (arr.isEmpty()) {
                 f.delete();
             } else {
-                try (FileWriter w = f.writer()) {
+                try (BufferedWriter w = new BufferedWriter(f.writer())) {
                     for (String l : arr) {
                         w.write(l);
                         w.write("\n");
