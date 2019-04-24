@@ -45,8 +45,10 @@ public class DoubleViewTest {
 
     @Function
     static void change(DoubleView model) {
+        log("changing ").append(model).append(" to ").append(set);
         assertNotNull(set);
         model.setMessage(set);
+        log("changing done");
         set = null;
     }
 
@@ -54,18 +56,19 @@ public class DoubleViewTest {
     private WebView view1;
     private WebView view2;
 
+    private static final StringBuffer LOG = new StringBuffer();
+
     @BeforeMethod
     public void initializeViews() throws Exception {
+        LOG.setLength(0);
+
         final JFXPanel panel = new JFXPanel();
         final JFXPanel p2 = new JFXPanel();
 
         final CountDownLatch initViews = new CountDownLatch(1);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                displayFrame(panel, p2);
-                initViews.countDown();
-            }
+        Platform.runLater(() -> {
+            displayFrame(panel, p2);
+            initViews.countDown();
         });
         initViews.await();
 
@@ -79,28 +82,22 @@ public class DoubleViewTest {
 
         final CountDownLatch view1Init = new CountDownLatch(1);
         final CountDownLatch view2Init = new CountDownLatch(1);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                FXBrowsers.load(view1, page, new Runnable() {
-                    @Override
-                    public void run() {
-                        doubleView.applyBindings();
-                        view1Init.countDown();
-                    }
-                });
+        Platform.runLater(() -> {
+            FXBrowsers.load(view1, page, () -> {
+                doubleView.applyBindings();
+                log("applyBindings view One");
+                view1Init.countDown();
+            });
 
-                FXBrowsers.load(view2, page, new Runnable() {
-                    @Override
-                    public void run() {
-                        doubleView.applyBindings();
-                        view2Init.countDown();
-                    }
-                });
-            }
+            FXBrowsers.load(view2, page, () -> {
+                doubleView.applyBindings();
+                log("applyBindings view Two");
+                view2Init.countDown();
+            });
         });
         view1Init.await();
         view2Init.await();
+        log("initializeViews - done");
     }
 
     private void displayFrame(JFXPanel panel, JFXPanel p2) {
@@ -128,30 +125,28 @@ public class DoubleViewTest {
     public void synchronizationOfViews() throws Throwable {
         final CountDownLatch cdl = new CountDownLatch(1);
         final Throwable[] arr = new Throwable[1];
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    assertMessages("In view one", view1, "Initialized");
-                    assertMessages("In view two", view2, "Initialized");
-                    set = "Change1";
-                    clickButton(view1);
-                    assertMessages("In view one", view1, "Change1");
-                    assertMessages("In view two", view2, "Change1");
-                    set = "Change2";
-                    clickButton(view2);
-                    assertMessages("In view one", view1, "Change2");
-                    assertMessages("In view two", view2, "Change2");
-                } catch (Throwable t) {
-                    arr[0] = t;
-                } finally {
-                    cdl.countDown();
-                }
+        Platform.runLater(() -> {
+            try {
+                assertMessages("In view one", view1, "Initialized");
+                assertMessages("In view two", view2, "Initialized");
+                set = "Change1";
+                clickButton("View one", view1);
+                assertMessages("In view one", view1, "Change1");
+                assertMessages("In view two", view2, "Change1");
+                set = "Change2";
+                clickButton("View two", view2);
+                assertMessages("In view one", view1, "Change2");
+                assertMessages("In view two", view2, "Change2");
+            } catch (Throwable t) {
+                arr[0] = t;
+            } finally {
+                cdl.countDown();
             }
         });
         cdl.await();
         if (arr[0] != null) {
-            throw arr[0];
+            LOG.insert(0, arr[0].getMessage() + "\n\n");
+            throw new AssertionError(LOG.toString(), arr[0]);
         }
     }
 
@@ -161,13 +156,24 @@ public class DoubleViewTest {
 
     private void assertMessages(String msg, WebView v, String expected) {
         Object func = v.getEngine().executeScript("document.getElementById('function').innerHTML");
-        assertEquals(func, expected, msg + " 'function' check");
+        final String functionMsg = msg + " 'function' check";
+        log(functionMsg).append(" got: ").append(func);
+        assertEquals(func, expected, functionMsg);
 
         Object prop = v.getEngine().executeScript("document.getElementById('property').innerHTML");
-        assertEquals(prop, expected, msg + " 'property' check");
+        final String propertyMsg = msg + " 'property' check";
+        log(propertyMsg).append(" got: ").append(prop);
+        assertEquals(prop, expected, propertyMsg);
     }
 
-    private void clickButton(WebView v) {
+    private void clickButton(String id, WebView v) {
+        log("clickButton in ").append(id);
         v.getEngine().executeScript("document.getElementById('change').click()");
+        log("clickButton finished in ").append(id);
+    }
+
+    private static StringBuffer log(String msg) {
+        LOG.append("\n[").append(Thread.currentThread().getName()).append("] ").append(msg);
+        return LOG;
     }
 }
