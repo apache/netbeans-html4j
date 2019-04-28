@@ -401,15 +401,20 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("public final class $JsCallbacks$ {\n");
             source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
             source.append("  private final org.netbeans.html.boot.spi.Fn.Presenter p;\n");
-            source.append("  private $JsCallbacks$ last;\n");
+            source.append("  private $JsCallbacks$ next;\n");
             source.append("  private $JsCallbacks$(org.netbeans.html.boot.spi.Fn.Presenter p) {\n");
             source.append("    this.p = p;\n");
             source.append("  }\n");
-            source.append("  final $JsCallbacks$ current() {\n");
+            source.append("  synchronized final $JsCallbacks$ current() {\n");
             source.append("    org.netbeans.html.boot.spi.Fn.Presenter now = org.netbeans.html.boot.spi.Fn.activePresenter();\n");
-            source.append("    if (now == p) return this;\n");
-            source.append("    if (last != null && now == last.p) return last;\n");
-            source.append("    return last = new $JsCallbacks$(now);\n");
+            source.append("    $JsCallbacks$ thiz = this;\n");
+            source.append("    for (;;) {\n");
+            source.append("      if (now == thiz.p) return thiz;\n");
+            source.append("      if (thiz.next == null) {\n");
+            source.append("        return thiz.next = new $JsCallbacks$(now);\n");
+            source.append("      }\n");
+            source.append("      thiz = thiz.next;\n");
+            source.append("    }\n");
             source.append("  }\n");
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
