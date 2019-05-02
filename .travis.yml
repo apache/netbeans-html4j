@@ -26,9 +26,11 @@ before_script:
   - sleep 3
 script:
   - java -version
-  - mvn install -DskipTests
-  - mvn verify
+  - mvn install -DskipTests $ARGS
+  - mvn verify $ARGS
 
 os:
   - linux
 
+env:
+  - ARGS=-Dnone
