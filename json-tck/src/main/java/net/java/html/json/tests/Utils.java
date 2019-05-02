@@ -104,6 +104,18 @@ public final class Utils {
         }
         return ServiceLoader.load(KnockoutTCK.class, cl(clazz));
     }
+
+    static void exposeTypeOf(Class<?> clazz) throws Exception {
+        String s =
+          "var global = 0 || eval('this');\n" +
+          "if (!global['getTypeof']) {\n" +
+          "  global['getTypeof'] = function (o) {\n" +
+          "    return typeof o;\n" +
+          "  };\n" +
+          "}\n" +
+          "\n";
+        executeScript(clazz, s);
+    }
     
     static Object exposeHTML(Class<?> clazz, String html) throws Exception {
         String s = 

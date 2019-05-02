@@ -392,8 +392,9 @@ public final class KnockoutTest {
     }
 
     @KOTest public void nonMutableDouble() throws Exception {
+        Utils.exposeTypeOf(KnockoutTest.class);
         Utils.exposeHTML(KnockoutTest.class,
-            "Type: <input id='input' data-bind=\"value: typeof doubleValue\"></input>\n"
+            "Type: <input id='input' data-bind=\"value: getTypeof(doubleValue)\"></input>\n"
         );
 
         ConstantModel model = Models.bind(new ConstantModel(), newContext());
@@ -407,8 +408,9 @@ public final class KnockoutTest {
     }
 
     @KOTest public void nonMutableString() throws Exception {
+        Utils.exposeTypeOf(KnockoutTest.class);
         Utils.exposeHTML(KnockoutTest.class,
-            "Type: <input id='input' data-bind=\"value: typeof stringValue\"></input>\n"
+            "Type: <input id='input' data-bind=\"value: getTypeof(stringValue)\"></input>\n"
         );
 
         ConstantModel model = Models.bind(new ConstantModel(), newContext());
@@ -422,8 +424,9 @@ public final class KnockoutTest {
     }
 
     @KOTest public void nonMutableBoolean() throws Exception {
+        Utils.exposeTypeOf(KnockoutTest.class);
         Utils.exposeHTML(KnockoutTest.class,
-            "Type: <input id='input' data-bind=\"value: typeof boolValue\"></input>\n"
+            "Type: <input id='input' data-bind=\"value: getTypeof(boolValue)\"></input>\n"
         );
 
         ConstantModel model = Models.bind(new ConstantModel(), newContext());
@@ -437,8 +440,9 @@ public final class KnockoutTest {
     }
 
     @KOTest public void nonMutableIntArray() throws Exception {
+        Utils.exposeTypeOf(KnockoutTest.class);
         Utils.exposeHTML(KnockoutTest.class,
-            "Type: <input id='input' data-bind=\"value: typeof intArray\"></input>\n"
+            "Type: <input id='input' data-bind=\"value: getTypeof(intArray)\"></input>\n"
         );
 
         ConstantModel model = Models.bind(new ConstantModel(), newContext());
