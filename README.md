@@ -2,15 +2,15 @@
 
 In need of cross platform, client side interaction between Java and JavaScript?
 
-[![Travis](https://travis-ci.org/apache/incubator-netbeans-html4j.svg?branch=master)](https://travis-ci.org/apache/incubator-netbeans-html4j)
-[![Linux](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-linux)](https://builds.apache.org/job/incubator-netbeans-html4j-linux/)
-[![Windows](https://builds.apache.org/buildStatus/icon?job=incubator-netbeans-html4j-windows)](https://builds.apache.org/job/incubator-netbeans-html4j-windows)
+[![Travis](https://travis-ci.org/apache/netbeans-html4j.svg?branch=master)](https://travis-ci.org/apache/netbeans-html4j)
+[![Linux](https://builds.apache.org/buildStatus/icon?job=netbeans-html4j-linux)](https://builds.apache.org/job/netbeans-html4j-linux/)
+[![Windows](https://builds.apache.org/buildStatus/icon?job=netbeans-html4j-windows)](https://builds.apache.org/job/netbeans-html4j-windows)
 
-The HTML/Java library provides [basic building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
-as well as advanced [high level concepts](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/json/Model.html)
+The HTML/Java library provides [basic building blocks](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
+as well as advanced [high level concepts](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/json/Model.html)
 to make communication between JavaScript and Java as smooth as possible.
 
-Read more in the [latest javadoc](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/) documentation.
+Read more in the [latest javadoc](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/) documentation.
 
 ## Portable Applications
 
@@ -21,16 +21,16 @@ different one when communicating with [Android WebView](https://developer.androi
 yet another one when talking to [iOS WebView](https://developer.apple.com/documentation/uikit/uiwebview).
 
 The goal of HTML/Java API is to **unify this communication**. By providing simple
-and highly portable [building blocks](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
+and highly portable [building blocks](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/js/package-summary.html)
 one can create sophisticated APIs (like
-[UI bindings](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/json/package-summary.html),
+[UI bindings](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/json/package-summary.html),
 [charts](https://dukescript.com/javadoc/charts/),
 [maps](https://dukescript.com/javadoc/leaflet4j/),
 [canvas](https://dukescript.com/javadoc/canvas/), or
 [SnapSVG](https://dukescript.com/javadoc/libs/net/java/html/lib/snapsvg/Snap/package-summary.html))
 that can be embedded into
-[Swing or JavaFX applications](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/boot/fx/FXBrowsers.html),
-executed [headlessly on a server](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/net/java/html/boot/script/Scripts.html)
+[Swing or JavaFX applications](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/boot/fx/FXBrowsers.html),
+executed [headlessly on a server](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/net/java/html/boot/script/Scripts.html)
 or executed anywhere HTML/Java API was ported.
 
 Various ports of this rendering pipeline were built including support for
@@ -45,9 +45,9 @@ or [Bck2Brwsr VM](https://github.com/jtulach/bck2brwsr/) -
 as such you can also run the same Java application in a pluginless browser.
 
 Porting of HTML/Java rendering pipeline is as easy as implementing
-[Fn.Presenter](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/org/netbeans/html/boot/spi/Fn.Presenter.html)
+[Fn.Presenter](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/org/netbeans/html/boot/spi/Fn.Presenter.html)
 interface and successfully passing the
-[test compatibility kit](https://builds.apache.org/job/incubator-netbeans-html4j-linux/javadoc/org/netbeans/html/json/tck/package-summary.html).
+[test compatibility kit](https://builds.apache.org/job/netbeans-html4j-linux/javadoc/org/netbeans/html/json/tck/package-summary.html).
 
 ## Getting Started
 
@@ -63,7 +63,7 @@ The most comprehensive getting started guide is available from
 ## Contributing
 
 You can contribute to development of this library by forking
-its [GitHub repository](https://github.com/apache/incubator-netbeans-html4j).
+its [GitHub repository](https://github.com/apache/netbeans-html4j).
 Change, modify, test:
 
 ```bash
@@ -71,7 +71,7 @@ $ mvn clean install
 ```
 
 and create a pull request, which may then be merged into the
-official [Apache repository](https://gitbox.apache.org/repos/asf?p=incubator-netbeans-html4j.git).
+official [Apache repository](https://gitbox.apache.org/repos/asf?p=netbeans-html4j.git).
 
 ### Full History
 
@@ -82,7 +82,7 @@ independent repository. To fully understand the code you may
 want to merge the modern and ancient versions together:
 
 ```bash
-$ git clone https://github.com/apache/incubator-netbeans-html4j.git html+java+both
+$ git clone https://github.com/apache/netbeans-html4j.git html+java+both
 $ cd html+java+both
 $ git log boot/src/main/java/net/java/html/boot/BrowserBuilder.java
 ```
