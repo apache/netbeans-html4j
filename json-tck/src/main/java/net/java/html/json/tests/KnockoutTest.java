@@ -263,12 +263,10 @@ public final class KnockoutTest {
 
     private static String getSetSelected(int index, Object value) throws Exception {
         String s = "var index = arguments[0];\n"
-        + "var value = arguments[1];\n"
         + "var n = window.document.getElementById('input'); \n "
-        + "if (value != null) {\n"
-        + "  n.options[index].value = 'me'; \n"
-        + "  n.value = 'me'; \n"
-        + "  ko.dataFor(n.options[index]).archetype(value); // haven't found better way to trigger ko change yet \n"
+        + "if (index >= 0) {\n"
+        + "    n.options.selectedIndex = index; \n"
+        + "    ko.utils.triggerEvent(n, 'change'); \n"
         + "} \n "
         + "var op = n.options[n.selectedIndex]; \n"
         + "return op ? op.text : n.selectedIndex;\n";
@@ -310,7 +308,7 @@ public final class KnockoutTest {
             js.setArchetype(js.getArchetypes().get(1));
             js.applyBindings();
 
-            String v = getSetSelected(0, null);
+            String v = getSetSelected(-1, null);
             assertEquals("crud", v, "Second index (e.g. crud) is selected: " + v);
 
             String sel = getSetSelected(2, Models.toRaw(js.getArchetypes().get(2)));
