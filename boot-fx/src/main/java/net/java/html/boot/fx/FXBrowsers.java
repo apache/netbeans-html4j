@@ -25,6 +25,7 @@ import javafx.scene.web.WebView;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.context.spi.Contexts;
 import org.netbeans.html.context.spi.Contexts.Id;
 
@@ -200,6 +201,9 @@ public final class FXBrowsers {
      */
     public static void runInBrowser(WebView webView, Runnable code) {
         Object ud = webView.getUserData();
+        if (ud instanceof Fn.Ref<?>) {
+            ud = ((Fn.Ref<?>)ud).presenter();
+        }
         if (!(ud instanceof InitializeWebView)) {
             throw new IllegalArgumentException();
         }

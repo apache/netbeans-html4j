@@ -35,6 +35,7 @@ import net.java.html.boot.fx.FXBrowsers;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
+import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.junit.NbTestCase;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -63,6 +64,8 @@ public class DoubleViewTest {
 
     private static final StringBuffer LOG = new StringBuffer();
     private JFrame frame;
+    private Fn.Presenter presenter1;
+    private Fn.Presenter presenter2;
 
     @BeforeMethod
     public void initializeViews() throws Exception {
@@ -90,12 +93,14 @@ public class DoubleViewTest {
         final CountDownLatch view2Init = new CountDownLatch(1);
         Platform.runLater(() -> {
             FXBrowsers.load(view1, page, () -> {
+                presenter1 = Fn.activePresenter();
                 doubleView.applyBindings();
                 log("applyBindings view One");
                 view1Init.countDown();
             });
 
             FXBrowsers.load(view2, page, () -> {
+                presenter2 = Fn.activePresenter();
                 doubleView.applyBindings();
                 log("applyBindings view Two");
                 view2Init.countDown();
@@ -104,6 +109,8 @@ public class DoubleViewTest {
         view1Init.await();
         view2Init.await();
         log("initializeViews - done");
+        assertNotNull(presenter1, "presenter for view1 found");
+        assertNotNull(presenter2, "presenter for view2 found");
     }
 
     private void displayFrame(JFXPanel panel, JFXPanel p2) {
@@ -168,6 +175,35 @@ public class DoubleViewTest {
         });
         cdl.await();
 
+        assertGCPresenters();
+        assertGCViews();
+
+        Platform.runLater(() -> {
+            Platform.setImplicitExit(false);
+            frame.dispose();
+        });
+    }
+
+    private void assertGCPresenters() {
+        Reference<?> r1 = new WeakReference<>(presenter1);
+        Reference<?> r2 = new WeakReference<>(presenter2);
+
+        presenter1 = null;
+        presenter2 = null;
+
+        NbTestCase.assertGC("Clearing reference 1", r1);
+        NbTestCase.assertGC("Clearing reference 2", r2);
+    }
+
+    private void assertGCViews() {
+        try {
+            Class.forName("java.lang.Module");
+            // skip the test on JDK11 and more
+            return;
+        } catch (ClassNotFoundException ex) {
+            // OK on JDK8
+        }
+
         Reference<?> r1 = new WeakReference<>(view1);
         Reference<?> r2 = new WeakReference<>(view2);
 
@@ -176,11 +212,6 @@ public class DoubleViewTest {
 
         NbTestCase.assertGC("Clearing reference 1", r1);
         NbTestCase.assertGC("Clearing reference 2", r2);
-
-        Platform.runLater(() -> {
-            Platform.setImplicitExit(false);
-            frame.dispose();
-        });
     }
 
     private void assertMessages(String msg, WebView v, String expected) {
