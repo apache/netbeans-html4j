@@ -21,8 +21,6 @@ package org.netbeans.html.ko4j;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.Reference;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;

@@ -20,6 +20,7 @@ package org.netbeans.html.ko4j;
 
 import java.io.Reader;
 import java.net.URL;
+import java.util.Arrays;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
@@ -38,6 +39,12 @@ public class MapObjsTest {
         MapObjs.reset();
         p1 = new Pres();
         p2 = new Pres();
+    }
+
+    @Test
+    public void testToArrayNoPresenterYet() {
+        Object[] arr = MapObjs.toArray(null);
+        assertEquals(arr.length, 0, "Empty array: " + Arrays.toString(arr));
     }
 
     @Test

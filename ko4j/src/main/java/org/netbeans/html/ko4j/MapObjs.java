@@ -33,8 +33,8 @@ final class MapObjs {
         reset();
     }
 
-    static void reset() {
-        setOnlyPresenter(null);
+    synchronized static void reset() {
+        onlyPresenter = null;
         usePresenter = true;
     }
 
@@ -74,7 +74,7 @@ final class MapObjs {
         return key == getOnlyPresenter() ? now : null;
     }
 
-    static Object[] remove(Object now, Fn.Presenter key) {
+    synchronized static Object[] remove(Object now, Fn.Presenter key) {
         if (now instanceof MapObjs) {
             return ((MapObjs)now).remove(key);
         }
@@ -85,7 +85,11 @@ final class MapObjs {
         if (now instanceof MapObjs) {
             return ((MapObjs) now).all.toArray();
         }
-        return new Object[] { getOnlyPresenter(), now };
+        final Fn.Presenter p = getOnlyPresenter();
+        if (p == null) {
+            return new Object[0];
+        }
+        return new Object[] { p, now };
     }
 
     private Object put(Fn.Presenter key, Object js) {
@@ -127,10 +131,11 @@ final class MapObjs {
     }
 
     private static Fn.Presenter getOnlyPresenter() {
-        return onlyPresenter.get();
+        final Fn.Presenter p = onlyPresenter == null ? null : onlyPresenter.get();
+        return p;
     }
 
-    private static void setOnlyPresenter(Fn.Presenter aOnlyPresenter) {
-        onlyPresenter = new WeakReference<Fn.Presenter>(aOnlyPresenter);
+    private static void setOnlyPresenter(Fn.Presenter p) {
+        onlyPresenter = new WeakReference<Fn.Presenter>(p);
     }
 }
