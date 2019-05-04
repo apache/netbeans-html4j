@@ -62,6 +62,13 @@ public class MapObjsTest {
         assertEquals(v2.get(p2), null);
     }
 
+    @Test
+    public void cacheForNull() {
+        CacheObjs c1 = CacheObjs.find(null);
+        CacheObjs c2 = CacheObjs.find(null);
+        assertSame(c1, c2);
+    }
+
     private static final class Value {
         private Object now;
 

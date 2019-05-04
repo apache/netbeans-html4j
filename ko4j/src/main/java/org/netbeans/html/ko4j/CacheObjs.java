@@ -36,7 +36,7 @@ final class CacheObjs {
     }
 
     Fn.Presenter get() {
-        return ref.presenter();
+        return ref == null ? null : ref.presenter();
     }
 
     static synchronized CacheObjs find(Fn.Presenter key) {
