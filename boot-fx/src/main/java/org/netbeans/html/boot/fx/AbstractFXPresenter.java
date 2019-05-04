@@ -50,7 +50,7 @@ import org.netbeans.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public abstract class AbstractFXPresenter implements Fn.Presenter,
-Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
+Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Identity {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected Runnable onLoad;
@@ -62,6 +62,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     private JSObject newPOJOImpl;
     private Object undefined;
     private JavaValues values;
+    private Id id;
 
     @Override
     protected AbstractFXPresenter clone() {
@@ -72,6 +73,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             p.undefined = null;
             p.newPOJOImpl = null;
             p.values = null;
+            p.id = null;
             return p;
         } catch (CloneNotSupportedException ex) {
             throw new IllegalStateException(ex);
@@ -602,4 +604,32 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         return pojo[0];
     }
 
+    @Override
+    public synchronized Fn.Identity id() {
+        if (id == null) {
+            id = new Id(this);
+        }
+        return id;
+    }
+
+    @Override
+    public Fn.Presenter presenter() {
+        return this;
+    }
+
+    private static final class Id extends WeakReference<AbstractFXPresenter> implements Fn.Identity {
+        Id(AbstractFXPresenter referent) {
+            super(referent);
+        }
+
+        @Override
+        public Fn.Identity id() {
+            return this;
+        }
+
+        @Override
+        public Fn.Presenter presenter() {
+            return get();
+        }
+    }
 }

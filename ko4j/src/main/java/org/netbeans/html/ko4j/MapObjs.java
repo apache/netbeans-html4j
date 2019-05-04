@@ -19,14 +19,12 @@
 
 package org.netbeans.html.ko4j;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.List;
 import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 
 final class MapObjs {
-    private static Reference<Fn.Presenter> onlyPresenter;
+    private static Fn.Identity onlyPresenter;
     private static boolean usePresenter;
 
     static {
@@ -40,8 +38,12 @@ final class MapObjs {
 
     private final List<Object> all;
 
-    private MapObjs(Object... arr) {
-        this.all = Models.asList(arr);
+    private MapObjs(Fn.Identity id1, Object js) {
+        this.all = Models.asList(id1, js);
+    }
+
+    private MapObjs(Fn.Identity id1, Object js1, Fn.Identity id2, Object js2) {
+        this.all = Models.asList(id1, js1, id2, js2);
     }
 
 
@@ -60,9 +62,9 @@ final class MapObjs {
                 }
             }
             if (now == null) {
-                return new MapObjs(new WeakReference<Fn.Presenter>(key), js);
+                return new MapObjs(Fn.id(key), js);
             } else {
-                return new MapObjs(onlyPresenter, now, new WeakReference<Fn.Presenter>(key), js);
+                return new MapObjs(onlyPresenter, now, Fn.id(key), js);
             }
         }
     }
@@ -99,15 +101,15 @@ final class MapObjs {
                 return this;
             }
         }
-        all.add(new WeakReference<Fn.Presenter>(key));
+        all.add(Fn.id(key));
         all.add(js);
         return this;
     }
 
     boolean isSameKey(int index, Fn.Presenter key) {
         Object at = all.get(index);
-        if (at instanceof Reference<?>) {
-            at = ((Reference<?>)at).get();
+        if (at instanceof Fn.Identity) {
+            at = ((Fn.Identity)at).presenter();
         }
         return at == key;
     }
@@ -131,11 +133,11 @@ final class MapObjs {
     }
 
     private static Fn.Presenter getOnlyPresenter() {
-        final Fn.Presenter p = onlyPresenter == null ? null : onlyPresenter.get();
+        final Fn.Presenter p = onlyPresenter == null ? null : onlyPresenter.presenter();
         return p;
     }
 
     private static void setOnlyPresenter(Fn.Presenter p) {
-        onlyPresenter = new WeakReference<Fn.Presenter>(p);
+        onlyPresenter = Fn.id(p);
     }
 }

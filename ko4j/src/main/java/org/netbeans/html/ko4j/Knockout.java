@@ -20,7 +20,6 @@ package org.netbeans.html.ko4j;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.ref.Reference;
 import java.util.concurrent.Executor;
 import net.java.html.js.JavaScriptBody;
 import net.java.html.js.JavaScriptResource;
@@ -156,7 +155,7 @@ final class Knockout  {
             if (obj == null) {
                 return null;
             } else {
-                return (Fn.Presenter) ((Reference<?>)obj).get();
+                return ((Fn.Identity) obj).presenter();
             }
         }
     }

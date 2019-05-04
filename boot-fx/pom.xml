@@ -83,6 +83,13 @@
       <artifactId>javafx-web</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-nbjunit</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>test</scope>
+      <type>jar</type>
+    </dependency>
   </dependencies>
     <description>A presentation provider to show JavaFX WebView 
 when a Java/HTML based application is about to boot.</description>

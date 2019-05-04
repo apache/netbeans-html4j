@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +38,7 @@ import org.netbeans.html.boot.impl.FnContext;
  * @author Jaroslav Tulach
  */
 public abstract class Fn {
-    private final Reference<Presenter> presenter;
+    private final Identity presenter;
     
     /**
      * @deprecated Ineffective as of 0.6. 
@@ -58,7 +56,7 @@ public abstract class Fn {
      * @since 0.6 
      */
     protected Fn(Presenter presenter) {
-        this.presenter = new WeakReference<Presenter>(presenter);
+        this.presenter = id(presenter);
     }
 
     /** True, if currently active presenter is the same as presenter this
@@ -67,7 +65,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return FnContext.currentPresenter(false) == presenter.get();
+        return FnContext.currentPresenter(false) == presenter.presenter();
     }
     
     /** Helper method to check if the provided instance is valid function.
@@ -178,6 +176,16 @@ public abstract class Fn {
         }
         return FnContext.activate(p);
     }
+
+    public static Identity id(final Presenter p) {
+        if (p == null) {
+            return null;
+        }
+        if (p instanceof Identity) {
+            return ((Identity) p).id();
+        }
+        return new FallbackIdentity(p);
+    }
     
     /** Invokes the defined function with specified <code>this</code> and
      * appropriate arguments.
@@ -211,7 +219,7 @@ public abstract class Fn {
      * @since 0.7
      */
     protected final Presenter presenter() {
-        return presenter.get();
+        return presenter.presenter();
     }
     
     /** The representation of a <em>presenter</em> - usually a browser window.
@@ -324,8 +332,17 @@ public abstract class Fn {
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
 
+    public interface Identity {
+        public Identity id();
+        public Presenter presenter();
+        @Override
+        public int hashCode();
+        @Override
+        public boolean equals(Object obj);
+    }
+
     private static class Preload extends Fn {
-        private static Map<String, Set<Reference<Presenter>>> LOADED;
+        private static Map<String, Set<Identity>> LOADED;
         private final Fn fn;
         private final String resource;
         private final Class<?> caller;
@@ -350,21 +367,21 @@ public abstract class Fn {
         }
 
         private void loadResource() throws Exception {
-            Reference<Presenter> ref = super.presenter;
-            if (ref == null) {
-                ref = new WeakReference<Fn.Presenter>(FnContext.currentPresenter(false));
+            Identity id = super.presenter;
+            if (id == null) {
+                id = id(FnContext.currentPresenter(false));
             }
-            Fn.Presenter realPresenter = ref == null ? null : ref.get();
+            Fn.Presenter realPresenter = id == null ? null : id.presenter();
             if (realPresenter != null) {
                 if (LOADED == null) {
-                    LOADED = new HashMap<String, Set<Reference<Presenter>>>();
+                    LOADED = new HashMap<String, Set<Identity>>();
                 }
-                Set<Reference<Presenter>> there = LOADED.get(resource);
+                Set<Identity> there = LOADED.get(resource);
                 if (there == null) {
-                    there = new HashSet<Reference<Fn.Presenter>>();
+                    there = new HashSet<Identity>();
                     LOADED.put(resource, there);
                 }
-                if (addNewRef(there, ref)) {
+                if (there.add(id)) {
                     final ClassLoader l = caller.getClassLoader();
                     InputStream is = l.getResourceAsStream(resource);
                     if (is == null && resource.startsWith("/")) {
@@ -382,14 +399,6 @@ public abstract class Fn {
                 }
             }
         }
-
-        private static synchronized boolean addNewRef(Set<Reference<Presenter>> set, Reference<Presenter> ref) {
-            for (Reference<Presenter> r : set) {
-                if (r.get() == ref.get()) {
-                    return false;
-                }
-            }
-            return set.add(ref);
-        }
     }
+
 }
