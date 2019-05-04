@@ -20,7 +20,7 @@ package org.netbeans.html.boot.spi;
 
 import java.lang.ref.WeakReference;
 
-final class FallbackIdentity extends WeakReference<Fn.Presenter> implements Fn.Identity {
+final class FallbackIdentity extends WeakReference<Fn.Presenter> implements Fn.Ref {
     private final int hashCode;
 
     FallbackIdentity(Fn.Presenter p) {
@@ -29,7 +29,7 @@ final class FallbackIdentity extends WeakReference<Fn.Presenter> implements Fn.I
     }
 
     @Override
-    public Fn.Identity id() {
+    public Fn.Ref reference() {
         return this;
     }
 

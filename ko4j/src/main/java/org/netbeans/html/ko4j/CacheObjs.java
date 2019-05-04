@@ -25,14 +25,14 @@ final class CacheObjs {
     /* both @GuardedBy CacheObjs.class */
     private static final CacheObjs[] list = new CacheObjs[16];
     private static int listAt = 0;
-    private final Fn.Identity ref;
+    private final Fn.Ref<?> ref;
 
     /* both @GuardedBy presenter single threaded access */
     private Object[] jsObjects;
     private int jsIndex;
 
     private CacheObjs(Fn.Presenter p) {
-        this.ref = Fn.id(p);
+        this.ref = Fn.ref(p);
     }
 
     Fn.Presenter get() {

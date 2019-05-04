@@ -53,14 +53,16 @@ public class AbstractFXPresenterTest {
             }
         };
 
-        Fn.Identity id1 = Fn.id(p1);
-        Fn.Identity id12 = Fn.id(p1);
+        Fn.Ref<?> id1 = Fn.ref(p1);
+        Fn.Ref<?> id12 = Fn.ref(p1);
 
         assertSame(id1, id12);
         assertEquals(id1, id12);
+        assertSame(p1, id1.presenter());
 
-        Fn.Identity id2 = Fn.id(p2);
-        Fn.Identity id22 = Fn.id(p2);
+        Fn.Ref<?> id2 = Fn.ref(p2);
+        Fn.Ref<?> id22 = Fn.ref(p2);
+        assertSame(p2, id2.presenter());
 
         assertSame(id2, id22);
         assertEquals(id2, id22);
@@ -72,6 +74,6 @@ public class AbstractFXPresenterTest {
         NbTestCase.assertGC("Presenter can disappear", ref1);
 
         AbstractFXPresenter p2Clone = p2.clone();
-        Assert.assertNotEquals(p2.id(), p2Clone.id());
+        Assert.assertNotEquals(p2.reference(), p2Clone.reference());
     }
 }

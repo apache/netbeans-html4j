@@ -651,8 +651,8 @@ public final class FnUtils {
             if (name.equals(Fn.Presenter.class.getName())) {
                 return Fn.Presenter.class;
             }
-            if (name.equals(Fn.Identity.class.getName())) {
-                return Fn.Identity.class;
+            if (name.equals(Fn.Ref.class.getName())) {
+                return Fn.Ref.class;
             }
             if (name.equals(Fn.ToJavaScript.class.getName())) {
                 return Fn.ToJavaScript.class;

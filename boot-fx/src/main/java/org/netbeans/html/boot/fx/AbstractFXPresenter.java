@@ -50,7 +50,7 @@ import org.netbeans.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public abstract class AbstractFXPresenter implements Fn.Presenter,
-Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Identity {
+Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<AbstractFXPresenter> {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected Runnable onLoad;
@@ -605,7 +605,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Identi
     }
 
     @Override
-    public synchronized Fn.Identity id() {
+    public synchronized Fn.Ref<AbstractFXPresenter> reference() {
         if (id == null) {
             id = new Id(this);
         }
@@ -613,22 +613,22 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Identi
     }
 
     @Override
-    public Fn.Presenter presenter() {
+    public AbstractFXPresenter presenter() {
         return this;
     }
 
-    private static final class Id extends WeakReference<AbstractFXPresenter> implements Fn.Identity {
+    private static final class Id extends WeakReference<AbstractFXPresenter> implements Fn.Ref<AbstractFXPresenter> {
         Id(AbstractFXPresenter referent) {
             super(referent);
         }
 
         @Override
-        public Fn.Identity id() {
+        public Fn.Ref<AbstractFXPresenter> reference() {
             return this;
         }
 
         @Override
-        public Fn.Presenter presenter() {
+        public AbstractFXPresenter presenter() {
             return get();
         }
     }

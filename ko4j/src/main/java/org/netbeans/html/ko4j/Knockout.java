@@ -155,7 +155,7 @@ final class Knockout  {
             if (obj == null) {
                 return null;
             } else {
-                return ((Fn.Identity) obj).presenter();
+                return ((Fn.Ref) obj).presenter();
             }
         }
     }

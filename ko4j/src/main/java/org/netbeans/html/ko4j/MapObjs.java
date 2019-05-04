@@ -24,7 +24,7 @@ import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 
 final class MapObjs {
-    private static Fn.Identity onlyPresenter;
+    private static Fn.Ref onlyPresenter;
     private static boolean usePresenter;
 
     static {
@@ -38,11 +38,11 @@ final class MapObjs {
 
     private final List<Object> all;
 
-    private MapObjs(Fn.Identity id1, Object js) {
+    private MapObjs(Fn.Ref id1, Object js) {
         this.all = Models.asList(id1, js);
     }
 
-    private MapObjs(Fn.Identity id1, Object js1, Fn.Identity id2, Object js2) {
+    private MapObjs(Fn.Ref id1, Object js1, Fn.Ref id2, Object js2) {
         this.all = Models.asList(id1, js1, id2, js2);
     }
 
@@ -62,9 +62,9 @@ final class MapObjs {
                 }
             }
             if (now == null) {
-                return new MapObjs(Fn.id(key), js);
+                return new MapObjs(Fn.ref(key), js);
             } else {
-                return new MapObjs(onlyPresenter, now, Fn.id(key), js);
+                return new MapObjs(onlyPresenter, now, Fn.ref(key), js);
             }
         }
     }
@@ -101,15 +101,15 @@ final class MapObjs {
                 return this;
             }
         }
-        all.add(Fn.id(key));
+        all.add(Fn.ref(key));
         all.add(js);
         return this;
     }
 
     boolean isSameKey(int index, Fn.Presenter key) {
         Object at = all.get(index);
-        if (at instanceof Fn.Identity) {
-            at = ((Fn.Identity)at).presenter();
+        if (at instanceof Fn.Ref) {
+            at = ((Fn.Ref)at).presenter();
         }
         return at == key;
     }
@@ -138,6 +138,6 @@ final class MapObjs {
     }
 
     private static void setOnlyPresenter(Fn.Presenter p) {
-        onlyPresenter = Fn.id(p);
+        onlyPresenter = Fn.ref(p);
     }
 }

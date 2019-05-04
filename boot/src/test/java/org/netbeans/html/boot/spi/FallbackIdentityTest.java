@@ -24,10 +24,6 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import org.netbeans.junit.NbTestCase;
 import static org.testng.Assert.*;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class FallbackIdentityTest {
@@ -52,8 +48,8 @@ public class FallbackIdentityTest {
             }
         };
 
-        Fn.Identity id1 = Fn.id(p);
-        Fn.Identity id2 = Fn.id(p);
+        Fn.Ref<?> id1 = Fn.ref(p);
+        Fn.Ref<?> id2 = Fn.ref(p);
 
         assertNotSame(id1, id2);
         assertEquals(id1, id2);
@@ -66,7 +62,7 @@ public class FallbackIdentityTest {
 
     @Test
     public void testPresenterCanProvideItsOwnIdentity() {
-        class IdPresenter implements Fn.Presenter, Fn.Identity {
+        class IdPresenter implements Fn.Presenter, Fn.Ref {
             @Override
             public Fn defineFn(String code, String... names) {
                 return null;
@@ -81,7 +77,7 @@ public class FallbackIdentityTest {
             }
 
             @Override
-            public Fn.Identity id() {
+            public Fn.Ref reference() {
                 return this;
             }
 
@@ -92,6 +88,11 @@ public class FallbackIdentityTest {
         }
         IdPresenter p = new IdPresenter();
 
-        assertSame(p, Fn.id(p));
+        assertSame(p, Fn.ref(p));
+    }
+
+    @Test
+    public void nullYieldsNullReference() {
+        assertNull(Fn.ref(null));
     }
 }

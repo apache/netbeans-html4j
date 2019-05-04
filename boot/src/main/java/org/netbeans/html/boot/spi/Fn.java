@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +39,7 @@ import org.netbeans.html.boot.impl.FnContext;
  * @author Jaroslav Tulach
  */
 public abstract class Fn {
-    private final Identity presenter;
+    private final Ref presenter;
     
     /**
      * @deprecated Ineffective as of 0.6. 
@@ -56,7 +57,7 @@ public abstract class Fn {
      * @since 0.6 
      */
     protected Fn(Presenter presenter) {
-        this.presenter = id(presenter);
+        this.presenter = ref(presenter);
     }
 
     /** True, if currently active presenter is the same as presenter this
@@ -177,12 +178,25 @@ public abstract class Fn {
         return FnContext.activate(p);
     }
 
-    public static Identity id(final Presenter p) {
+    /** Obtains a (usually {@linkplain WeakReference weak}) reference to
+     * the presenter. Such reference is suitable for embedding in various long
+     * living structures with a life-cycle that may outspan the one of presenter.
+     *
+     * @param p the presenter
+     * @return reference to the presenter, {@code null} only if {@code p} is {@code null}
+     * @since 1.6.1
+     * @see Ref
+     */
+    public static Ref<?> ref(final Presenter p) {
         if (p == null) {
             return null;
         }
-        if (p instanceof Identity) {
-            return ((Identity) p).id();
+        if (p instanceof Ref<?>) {
+            Ref<?> r = ((Ref<?>) p).reference();
+            if (r == null) {
+                throw new NullPointerException();
+            }
+            return r;
         }
         return new FallbackIdentity(p);
     }
@@ -332,17 +346,52 @@ public abstract class Fn {
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
 
-    public interface Identity {
-        public Identity id();
-        public Presenter presenter();
+    /**
+     * Reference to a {@link Presenter}.Each implementation of a {@link Presenter}
+     * may choose a way to reference itself (usually in a {@linkplain WeakReference weak way})
+     * effectively. Various code that needs to hold a reference to a presenter
+     * is then encouraged to obtain such reference via {@link Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)}
+     * call and hold on to it. Holding a reference to an instance of {@link Presenter}
+     * is discouraged as it may lead to memory leaks.
+     * <p>
+     * Presenters willing to to represent a reference to itself effectively shall
+     * also implement the {@link Ref} interface and return reasonable reference
+     * from the {@link #reference()} method.
+     *
+     * @param <P> the type of the presenter
+     * @see Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)
+     * @since 1.6.1
+     */
+    public interface Ref<P extends Presenter> {
+        /** Creates a reference to a presenter.
+         * Rather than calling this method directly, call {@link Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)}.
+         * @return a (weak) reference to the associated presenter
+         */
+        public Ref<P> reference();
+
+        /** The associated presenter.
+         *
+         * @return the presenter or {@code null}, if it has been GCed meanwhile
+         */
+        public P presenter();
+
+        /** Reference must properly implement {@link #hashCode} and {@link #equals}.
+         *
+         * @return proper hashcode
+         */
         @Override
         public int hashCode();
+
+        /** Reference must properly implement {@link #hashCode} and {@link #equals}.
+         *
+         * @return proper equals result
+         */
         @Override
         public boolean equals(Object obj);
     }
 
     private static class Preload extends Fn {
-        private static Map<String, Set<Identity>> LOADED;
+        private static Map<String, Set<Ref>> LOADED;
         private final Fn fn;
         private final String resource;
         private final Class<?> caller;
@@ -367,18 +416,18 @@ public abstract class Fn {
         }
 
         private void loadResource() throws Exception {
-            Identity id = super.presenter;
+            Ref id = super.presenter;
             if (id == null) {
-                id = id(FnContext.currentPresenter(false));
+                id = ref(FnContext.currentPresenter(false));
             }
             Fn.Presenter realPresenter = id == null ? null : id.presenter();
             if (realPresenter != null) {
                 if (LOADED == null) {
-                    LOADED = new HashMap<String, Set<Identity>>();
+                    LOADED = new HashMap<String, Set<Ref>>();
                 }
-                Set<Identity> there = LOADED.get(resource);
+                Set<Ref> there = LOADED.get(resource);
                 if (there == null) {
-                    there = new HashSet<Identity>();
+                    there = new HashSet<Ref>();
                     LOADED.put(resource, there);
                 }
                 if (there.add(id)) {
