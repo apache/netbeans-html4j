@@ -19,11 +19,15 @@
 package org.netbeans.html.ko4j;
 
 import java.awt.FlowLayout;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javax.swing.JFrame;
@@ -31,6 +35,7 @@ import net.java.html.boot.fx.FXBrowsers;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
 import net.java.html.json.Property;
+import org.netbeans.junit.NbTestCase;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.AfterMethod;
@@ -57,6 +62,7 @@ public class DoubleViewTest {
     private WebView view2;
 
     private static final StringBuffer LOG = new StringBuffer();
+    private JFrame frame;
 
     @BeforeMethod
     public void initializeViews() throws Exception {
@@ -104,12 +110,12 @@ public class DoubleViewTest {
         view1 = displayWebView(panel);
         view2 = displayWebView(p2);
 
-        JFrame f = new JFrame();
-        f.getContentPane().setLayout(new FlowLayout());
-        f.getContentPane().add(panel);
-        f.getContentPane().add(p2);
-        f.pack();
-        f.setVisible(true);
+        frame = new JFrame();
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(panel);
+        frame.getContentPane().add(p2);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private WebView displayWebView(JFXPanel panel) {
@@ -152,6 +158,29 @@ public class DoubleViewTest {
 
     @AfterMethod
     public void waitABit() throws Exception {
+        final CountDownLatch cdl = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            Parent p1 = view1.getParent();
+            ((BorderPane)p1).setCenter(new Label("Searching for GC root"));
+            Parent p2 = view2.getParent();
+            ((BorderPane)p2).setCenter(new Label("Searching for GC root"));
+            cdl.countDown();
+        });
+        cdl.await();
+
+        Reference<?> r1 = new WeakReference<>(view1);
+        Reference<?> r2 = new WeakReference<>(view2);
+
+        view1 = null;
+        view2 = null;
+
+        NbTestCase.assertGC("Clearing reference 1", r1);
+        NbTestCase.assertGC("Clearing reference 2", r2);
+
+        Platform.runLater(() -> {
+            Platform.setImplicitExit(false);
+            frame.dispose();
+        });
     }
 
     private void assertMessages(String msg, WebView v, String expected) {

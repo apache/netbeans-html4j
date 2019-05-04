@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +40,7 @@ import org.netbeans.html.boot.impl.FnContext;
  * @author Jaroslav Tulach
  */
 public abstract class Fn {
-    private static Map<String, Set<Presenter>> LOADED;
-    private final Presenter presenter;
+    private final Reference<Presenter> presenter;
     
     /**
      * @deprecated Ineffective as of 0.6. 
@@ -57,7 +58,7 @@ public abstract class Fn {
      * @since 0.6 
      */
     protected Fn(Presenter presenter) {
-        this.presenter = presenter;
+        this.presenter = new WeakReference<Presenter>(presenter);
     }
 
     /** True, if currently active presenter is the same as presenter this
@@ -66,7 +67,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return presenter != null && FnContext.currentPresenter(false) == presenter;
+        return FnContext.currentPresenter(false) == presenter.get();
     }
     
     /** Helper method to check if the provided instance is valid function.
@@ -144,52 +145,7 @@ public abstract class Fn {
         if (fn == null) {
             return null;
         }
-        return new Fn(fn.presenter()) {
-            @Override
-            public Object invoke(Object thiz, Object... args) throws Exception {
-                loadResource();
-                return fn.invoke(thiz, args);
-            }
-
-            @Override
-            public void invokeLater(Object thiz, Object... args) throws Exception {
-                loadResource();
-                fn.invokeLater(thiz, args);
-            }
-            
-            private void loadResource() throws Exception {
-                Presenter p = presenter();
-                if (p == null) {
-                    p = FnContext.currentPresenter(false);
-                }
-                if (p != null) {
-                    if (LOADED == null) {
-                        LOADED = new HashMap<String, Set<Presenter>>();
-                    }
-                    Set<Presenter> there = LOADED.get(resource);
-                    if (there == null) {
-                        there = new HashSet<Presenter>();
-                        LOADED.put(resource, there);
-                    }
-                    if (there.add(p)) {
-                        final ClassLoader l = caller.getClassLoader();
-                        InputStream is = l.getResourceAsStream(resource);
-                        if (is == null && resource.startsWith("/")) {
-                            is = l.getResourceAsStream(resource.substring(1));
-                        }
-                        if (is == null) {
-                            throw new IOException("Cannot find " + resource + " in " + l);
-                        }
-                        try {
-                            InputStreamReader r = new InputStreamReader(is, "UTF-8");
-                            p.loadScript(r);
-                        } finally {
-                            is.close();
-                        }
-                    }
-                }
-            }
-        };
+        return new Preload(fn.presenter(), fn, resource, caller);
     }
 
     
@@ -251,7 +207,7 @@ public abstract class Fn {
      * @since 0.7
      */
     protected final Presenter presenter() {
-        return presenter;
+        return presenter.get();
     }
     
     /** The representation of a <em>presenter</em> - usually a browser window.
@@ -362,5 +318,74 @@ public abstract class Fn {
          * @return function that can be later invoked
          */
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
+    }
+
+    private static class Preload extends Fn {
+        private static Map<String, Set<Reference<Presenter>>> LOADED;
+        private final Fn fn;
+        private final String resource;
+        private final Class<?> caller;
+
+        Preload(Presenter presenter, Fn fn, String resource, Class<?> caller) {
+            super(presenter);
+            this.fn = fn;
+            this.resource = resource;
+            this.caller = caller;
+        }
+
+        @Override
+        public Object invoke(Object thiz, Object... args) throws Exception {
+            loadResource();
+            return fn.invoke(thiz, args);
+        }
+
+        @Override
+        public void invokeLater(Object thiz, Object... args) throws Exception {
+            loadResource();
+            fn.invokeLater(thiz, args);
+        }
+
+        private void loadResource() throws Exception {
+            Reference<Presenter> ref = super.presenter;
+            if (ref == null) {
+                ref = new WeakReference<Fn.Presenter>(FnContext.currentPresenter(false));
+            }
+            Fn.Presenter realPresenter = ref == null ? null : ref.get();
+            if (realPresenter != null) {
+                if (LOADED == null) {
+                    LOADED = new HashMap<String, Set<Reference<Presenter>>>();
+                }
+                Set<Reference<Presenter>> there = LOADED.get(resource);
+                if (there == null) {
+                    there = new HashSet<Reference<Fn.Presenter>>();
+                    LOADED.put(resource, there);
+                }
+                if (addNewRef(there, ref)) {
+                    final ClassLoader l = caller.getClassLoader();
+                    InputStream is = l.getResourceAsStream(resource);
+                    if (is == null && resource.startsWith("/")) {
+                        is = l.getResourceAsStream(resource.substring(1));
+                    }
+                    if (is == null) {
+                        throw new IOException("Cannot find " + resource + " in " + l);
+                    }
+                    try {
+                        InputStreamReader r = new InputStreamReader(is, "UTF-8");
+                        realPresenter.loadScript(r);
+                    } finally {
+                        is.close();
+                    }
+                }
+            }
+        }
+
+        private static synchronized boolean addNewRef(Set<Reference<Presenter>> set, Reference<Presenter> ref) {
+            for (Reference<Presenter> r : set) {
+                if (r.get() == ref.get()) {
+                    return false;
+                }
+            }
+            return set.add(ref);
+        }
     }
 }

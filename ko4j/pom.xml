@@ -130,6 +130,12 @@
         <artifactId>javax.servlet-api</artifactId>
         <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-nbjunit</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
     <description>Binds net.java.html.json APIs together with knockout.js</description>
 </project>

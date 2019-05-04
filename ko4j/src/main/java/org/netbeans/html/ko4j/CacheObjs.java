@@ -19,24 +19,26 @@
 
 package org.netbeans.html.ko4j;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import org.netbeans.html.boot.spi.Fn;
 
 final class CacheObjs {
     /* both @GuardedBy CacheObjs.class */
     private static CacheObjs[] list = new CacheObjs[16];
     private static int listAt = 0;
-    private final Fn.Presenter ref;
+    private final Reference<Fn.Presenter> ref;
 
     /* both @GuardedBy presenter single threaded access */
     private Object[] jsObjects;
     private int jsIndex;
 
     private CacheObjs(Fn.Presenter p) {
-        this.ref = p;
+        this.ref = new WeakReference<Fn.Presenter>(p);
     }
 
     Fn.Presenter get() {
-        return ref;
+        return ref.get();
     }
 
     static synchronized CacheObjs find(Fn.Presenter key) {

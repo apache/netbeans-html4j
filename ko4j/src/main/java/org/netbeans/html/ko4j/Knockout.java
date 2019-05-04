@@ -20,6 +20,7 @@ package org.netbeans.html.ko4j;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -150,10 +151,22 @@ final class Knockout  {
         funcs[index].call(data, ev);
     }
 
+    private static Fn.Presenter getPresenter(Object obj) {
+        if (obj instanceof Fn.Presenter) {
+            return (Fn.Presenter) obj;
+        } else {
+            if (obj == null) {
+                return null;
+            } else {
+                return (Fn.Presenter) ((Reference<?>)obj).get();
+            }
+        }
+    }
+
     final void valueHasMutated(final String propertyName, Object oldValue, Object newValue) {
         Object[] all = MapObjs.toArray(objs);
         for (int i = 0; i < all.length; i += 2) {
-            Fn.Presenter p = (Fn.Presenter) all[i];
+            Fn.Presenter p = getPresenter(all[i]);
             final Object o = all[i + 1];
             if (p != Fn.activePresenter()) {
                 if (p instanceof Executor) {

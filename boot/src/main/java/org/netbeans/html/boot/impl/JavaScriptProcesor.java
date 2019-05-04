@@ -400,16 +400,16 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("package ").append(pkgName).append(";\n");
             source.append("public final class $JsCallbacks$ {\n");
             source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
-            source.append("  private final org.netbeans.html.boot.spi.Fn.Presenter p;\n");
+            source.append("  private final java.lang.ref.Reference<org.netbeans.html.boot.spi.Fn.Presenter> ref;\n");
             source.append("  private $JsCallbacks$ next;\n");
             source.append("  private $JsCallbacks$(org.netbeans.html.boot.spi.Fn.Presenter p) {\n");
-            source.append("    this.p = p;\n");
+            source.append("    this.ref = new java.lang.ref.WeakReference<org.netbeans.html.boot.spi.Fn.Presenter>(p);\n");
             source.append("  }\n");
             source.append("  synchronized final $JsCallbacks$ current() {\n");
             source.append("    org.netbeans.html.boot.spi.Fn.Presenter now = org.netbeans.html.boot.spi.Fn.activePresenter();\n");
             source.append("    $JsCallbacks$ thiz = this;\n");
             source.append("    for (;;) {\n");
-            source.append("      if (now == thiz.p) return thiz;\n");
+            source.append("      if (now == thiz.ref.get()) return thiz;\n");
             source.append("      if (thiz.next == null) {\n");
             source.append("        return thiz.next = new $JsCallbacks$(now);\n");
             source.append("      }\n");
@@ -486,6 +486,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             sep = ", ";
         }
         source.append(") throws Throwable {\n");
+        source.append("    org.netbeans.html.boot.spi.Fn.Presenter p = ref.get(); \n");
         source.append(convert);
         if (useTryResources()) {
             source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) { \n");

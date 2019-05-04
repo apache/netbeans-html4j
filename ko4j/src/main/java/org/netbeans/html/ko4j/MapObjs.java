@@ -19,12 +19,14 @@
 
 package org.netbeans.html.ko4j;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 
 final class MapObjs {
-    private static Object onlyPresenter;
+    private static Reference<Fn.Presenter> onlyPresenter;
     private static boolean usePresenter;
 
     static {
@@ -32,7 +34,7 @@ final class MapObjs {
     }
 
     static void reset() {
-        onlyPresenter = null;
+        setOnlyPresenter(null);
         usePresenter = true;
     }
 
@@ -43,33 +45,33 @@ final class MapObjs {
     }
 
 
-    static Object put(Object now, Fn.Presenter key, Object js) {
+    synchronized static Object put(Object now, Fn.Presenter key, Object js) {
         if (now instanceof MapObjs) {
             return ((MapObjs)now).put(key, js);
         } else {
             if (usePresenter) {
-                if (onlyPresenter == null) {
-                    onlyPresenter = key;
+                if (getOnlyPresenter() == null) {
+                    setOnlyPresenter(key);
                     return js;
-                } else if (onlyPresenter == key) {
+                } else if (getOnlyPresenter() == key) {
                     return js;
                 } else {
                     usePresenter = false;
                 }
             }
             if (now == null) {
-                return new MapObjs(key, js);
+                return new MapObjs(new WeakReference<Fn.Presenter>(key), js);
             } else {
-                return new MapObjs(onlyPresenter, now, key, js);
+                return new MapObjs(onlyPresenter, now, new WeakReference<Fn.Presenter>(key), js);
             }
         }
     }
 
-    static Object get(Object now, Fn.Presenter key) {
+    synchronized static Object get(Object now, Fn.Presenter key) {
         if (now instanceof MapObjs) {
             return ((MapObjs)now).get(key);
         }
-        return key == onlyPresenter ? now : null;
+        return key == getOnlyPresenter() ? now : null;
     }
 
     static Object[] remove(Object now, Fn.Presenter key) {
@@ -79,28 +81,36 @@ final class MapObjs {
         return new Object[] { now, null };
     }
 
-    static Object[] toArray(Object now) {
+    synchronized static Object[] toArray(Object now) {
         if (now instanceof MapObjs) {
             return ((MapObjs) now).all.toArray();
         }
-        return new Object[] { onlyPresenter, now };
+        return new Object[] { getOnlyPresenter(), now };
     }
 
     private Object put(Fn.Presenter key, Object js) {
         for (int i = 0; i < all.size(); i += 2) {
-            if (all.get(i) == key) {
+            if (isSameKey(i, key)) {
                 all.set(i + 1, js);
                 return this;
             }
         }
-        all.add(key);
+        all.add(new WeakReference<Fn.Presenter>(key));
         all.add(js);
         return this;
     }
 
+    boolean isSameKey(int index, Fn.Presenter key) {
+        Object at = all.get(index);
+        if (at instanceof Reference<?>) {
+            at = ((Reference<?>)at).get();
+        }
+        return at == key;
+    }
+
     private Object get(Fn.Presenter key) {
         for (int i = 0; i < all.size(); i += 2) {
-            if (all.get(i) == key) {
+            if (isSameKey(i, key)) {
                 return all.get(i + 1);
             }
         }
@@ -109,10 +119,18 @@ final class MapObjs {
 
     private Object[] remove(Fn.Presenter key) {
         for (int i = 0; i < all.size(); i += 2) {
-            if (all.get(i) == key) {
+            if (isSameKey(i, key)) {
                 return new Object[] { all.get(i + 1), this };
             }
         }
         return new Object[] { null, this };
+    }
+
+    private static Fn.Presenter getOnlyPresenter() {
+        return onlyPresenter.get();
+    }
+
+    private static void setOnlyPresenter(Fn.Presenter aOnlyPresenter) {
+        onlyPresenter = new WeakReference<Fn.Presenter>(aOnlyPresenter);
     }
 }
