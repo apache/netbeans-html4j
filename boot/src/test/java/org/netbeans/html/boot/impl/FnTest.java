@@ -124,6 +124,11 @@ public class FnTest extends JsClassLoaderBase {
         methodClass = loader.loadClass(JsMethods.class.getName());
         close.close();
     }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullProcessorNPE() {
+        Fn.activate(null);
+    }
     
     @Test public void flushingPresenter() throws IOException {
         class FP implements Fn.Presenter, Flushable {

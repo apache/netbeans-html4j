@@ -169,9 +169,13 @@ public abstract class Fn {
      * 
      * @param p the presenter that should be active until closable is closed
      * @return the closable to close
+     * @throws NullPointerException if the {@code p} is {@code null}
      * @since 0.7
      */
     public static Closeable activate(Presenter p) {
+        if (p == null) {
+            throw new NullPointerException();
+        }
         return FnContext.activate(p);
     }
     
