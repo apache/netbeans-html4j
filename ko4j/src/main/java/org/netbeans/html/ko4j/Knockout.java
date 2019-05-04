@@ -37,7 +37,7 @@ import org.netbeans.html.json.spi.PropertyBinding;
  *
  * @author Jaroslav Tulach
  */
-@JavaScriptResource("knockout-3.4.0.js")
+@JavaScriptResource("knockout-3.5.0.js")
 final class Knockout  {
 
     @JavaScriptBody(args = {"object", "property"}, body =

@@ -205,7 +205,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/nb-configuration.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
-                        <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.4.0.js</exclude>
+                        <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.5.0.js</exclude>
                         <exclude>**/test/resources/org/netbeans/html/mojo/gradle*/build/**</exclude>
                     </excludes>
                     <excludeSubProjects>false</excludeSubProjects>
