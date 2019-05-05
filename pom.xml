@@ -23,7 +23,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.netbeans.html</groupId>
   <artifactId>pom</artifactId>
-  <version>2.0-SNAPSHOT</version>
+  <version>1.6.1</version>
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent>
@@ -78,7 +78,7 @@
       <connection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</connection>
       <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</developerConnection>
       <url>https://github.com/apache/netbeans-html4j/tree/${project.scm.tag}</url>
-      <tag>master</tag>
+      <tag>release-1.6.1</tag>
   </scm>
   <issueManagement>
       <system>jira</system>
