@@ -45,6 +45,7 @@ public class InitializeKnockoutTest {
     
     @BeforeClass
     public void initFX() throws Throwable {
+        Platform.setImplicitExit(false);
         new Thread("initFX") {
             @Override
             public void run() {

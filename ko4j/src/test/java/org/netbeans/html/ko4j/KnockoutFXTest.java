@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javafx.application.Platform;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -71,6 +72,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         
         URI uri = DynamicHTTP.initServer();
     
+        Platform.setImplicitExit(false);
         final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter()).loadClass(KnockoutFXTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
