@@ -66,7 +66,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return FnContext.currentPresenter(false) == presenter.presenter();
+        return FnContext.currentPresenter(false) == presenter();
     }
     
     /** Helper method to check if the provided instance is valid function.
@@ -233,7 +233,7 @@ public abstract class Fn {
      * @since 0.7
      */
     protected final Presenter presenter() {
-        return presenter.presenter();
+        return presenter == null ? null : presenter.presenter();
     }
     
     /** The representation of a <em>presenter</em> - usually a browser window.
