@@ -75,9 +75,9 @@
       <url>http://apache.org</url>
   </organization>
   <scm>
-      <connection>scm:git:https://gitbox.apache.org/repos/asf//incubator-netbeans-html4j.git</connection>
-      <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-netbeans-html4j.git</developerConnection>
-      <url>https://github.com/apache/incubator-netbeans-html4j/tree/${project.scm.tag}</url>
+      <connection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</connection>
+      <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</developerConnection>
+      <url>https://github.com/apache/netbeans-html4j/tree/${project.scm.tag}</url>
       <tag>master</tag>
   </scm>
   <issueManagement>
@@ -223,7 +223,6 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <configuration>
                     <resourceBundles>
                         <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                        <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
                     </resourceBundles>
                     <excludeGroupIds>org.netbeans.html</excludeGroupIds>
                     <resourceBundles>
