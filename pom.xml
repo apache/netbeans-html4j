@@ -219,7 +219,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-remote-resources-plugin</artifactId>
-                <version>1.4</version>
+                <version>1.6.0</version>
                 <configuration>
                     <resourceBundles>
                         <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
@@ -229,7 +229,6 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <resourceBundles>
                         <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
                     </resourceBundles>
-                    <appendedResourcesDirectory>ko4j/src/main/appended-resources</appendedResourcesDirectory>
                 </configuration>
             </plugin>
       </plugins>
