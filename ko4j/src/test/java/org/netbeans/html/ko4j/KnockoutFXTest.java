@@ -101,9 +101,20 @@ public final class KnockoutFXTest extends KnockoutTCK {
             asSubclass(Annotation.class);
         for (Method m : c.getMethods()) {
             if (m.getAnnotation(koTest) != null) {
+                if (skipUnsupported(m)) {
+                    continue;
+                }
                 res.add(new KOFx(browserContext, m));
             }
         }
+    }
+
+    private static boolean skipUnsupported(Method m) {
+        String version = System.getProperty("java.version"); // NOI18N
+        if ("1.8.0_212".equals(version) && "connectUsingWebSocket".equals(m.getName())) { // NOI18N
+            return true;
+        }
+        return false;
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
@@ -112,7 +123,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = Fn.activePresenter();

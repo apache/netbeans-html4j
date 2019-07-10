@@ -50,7 +50,7 @@ implements WSTransfer<LoadWS> {
         socket.close();
     }
 
-    @JavaScriptBody(args = {}, body = "if (window['WebSocket']) return true; else return false;")
+    @JavaScriptBody(args = {}, body = "if (typeof window === 'object' && window['WebSocket']) return true; else return false;")
     static final boolean areWebSocketsSupported() {
         return false;
     }
