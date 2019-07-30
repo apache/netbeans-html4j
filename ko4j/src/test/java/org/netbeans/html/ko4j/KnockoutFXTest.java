@@ -111,10 +111,17 @@ public final class KnockoutFXTest extends KnockoutTCK {
 
     private static boolean skipUnsupported(Method m) {
         String version = System.getProperty("java.version"); // NOI18N
-        if ("1.8.0_212".equals(version) && "connectUsingWebSocket".equals(m.getName())) { // NOI18N
+        if (brokenWebSockets(version) && "connectUsingWebSocket".equals(m.getName())) { // NOI18N
             return true;
         }
         return false;
+    }
+
+    private static boolean brokenWebSockets(String version) {
+        return 
+            "1.8.0_212".equals(version) ||
+            "1.8.0_221".equals(version) ||
+            "1.8.0_222".equals(version);
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
