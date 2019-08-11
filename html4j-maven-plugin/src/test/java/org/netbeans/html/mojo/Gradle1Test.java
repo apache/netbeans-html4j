@@ -47,14 +47,18 @@ public class Gradle1Test {
         Class<?> clazz = l.loadClass("Gradle1Check");
         Callable<?> r = (Callable<?>) clazz.newInstance();
 
-        try (Closeable c = Fn.activate(new NumberPresenter())) {
+        final NumberPresenter mockPresenter = new NumberPresenter();
+        try (Closeable c = Fn.activate(mockPresenter)) {
             Object value = r.call();
             assertTrue(value instanceof Number, "It is a number");
             assertEquals(((Number)value).intValue(), 42, "The meaning is returned");
         }
+        assertEquals(mockPresenter.loadScriptCount, 1, "One script loaded");
     }
 
     private static final class NumberPresenter implements Fn.Presenter {
+
+        private int loadScriptCount;
 
         @Override
         public Fn defineFn(String code, String... ignore) {
@@ -72,7 +76,7 @@ public class Gradle1Test {
 
         @Override
         public void loadScript(Reader reader) throws Exception {
-            throw new UnsupportedOperationException();
+            loadScriptCount++;
         }
 
     }

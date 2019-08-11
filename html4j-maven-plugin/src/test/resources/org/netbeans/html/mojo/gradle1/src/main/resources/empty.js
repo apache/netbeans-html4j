@@ -16,31 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-defaultTasks 'clean', 'build'
-
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath "org.ow2.asm:asm:5.0"
-        classpath files("../../../../../../../../target/classes/")
-    }
-}
-
-
-group 'org.netbeans.html.gradle1'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'html4j'
-
-compileJava {
-    classpath += files("src/main/resources")
-}
-
-dependencies {
-    compile fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
-}
-

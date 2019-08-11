@@ -19,7 +19,9 @@
 
 import net.java.html.js.JavaScriptBody;
 import java.util.concurrent.Callable;
+import net.java.html.js.JavaScriptResource;
 
+@JavaScriptResource("/empty.js")
 public class Gradle1Check implements Callable<Integer> {
 
     @Override
