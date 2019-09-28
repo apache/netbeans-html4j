@@ -61,6 +61,11 @@
     -->
     <module>boot-agent-test</module>
     <module>xhr4j</module>
+    <!-- presenters -->
+    <module>browser</module>
+    <module>renderer</module>
+    <module>generic</module>
+    <module>webkit</module>
   </modules>
   <licenses>
       <license>
