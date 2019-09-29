@@ -22,7 +22,7 @@ services:
 before_install:
   - sudo apt-get -qq update || echo no sudo apt-get
   - sudo apt-get install -y libwebkitgtk-3.0-0 || echo no sudo apt-get
-  - if [ -n "$URL" ]; then curl $URL -o jdk.tgz; tar fxz jdk.tgz; JAVA_HOME=`pwd`/$DIR; export JAVA_HOME; fi
+  - if [ -n "$URL" ]; then pushd /tmp; curl $URL -o jdk.tgz; tar fxz jdk.tgz; JAVA_HOME=`pwd`/$DIR; popd; export JAVA_HOME; fi
   - echo Java is $JAVA_HOME
   - ls -l $JAVA_HOME
 before_script:
