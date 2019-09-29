@@ -22,6 +22,9 @@ services:
 before_install:
   - sudo apt-get -qq update || echo no sudo apt-get
   - sudo apt-get install -y libwebkitgtk-3.0-0 || echo no sudo apt-get
+  - if [ -n "$URL" ]; then curl $URL -o jdk.tgz; tar fxz jdk.tgz; JAVA_HOME=`pwd`/$DIR; export JAVA_HOME; fi
+  - echo Java is $JAVA_HOME
+  - ls -l $JAVA_HOME
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start || echo No X11
@@ -38,6 +41,8 @@ matrix:
       jdk: openjdk8
       env:
         - ARGS=-Dnone
+        - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64
+        - URL=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64.tar.gz
     - os: linux
       dist: trusty
       jdk: openjdk11
