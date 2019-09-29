@@ -43,6 +43,13 @@ matrix:
         - ARGS=-Dnone
         - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64
         - URL=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64.tar.gz
+    - os: osx
+      osx_image: xcode9.3
+#      jdk: openjdk8
+      env:
+        - ARGS=-Dnone
+        - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-macosx_x64
+        - URL=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-fx-jdk8.0.222-macosx_x64.tar.gz
     - os: linux
       dist: trusty
       jdk: openjdk11
