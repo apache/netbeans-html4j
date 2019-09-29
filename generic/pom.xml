@@ -57,8 +57,6 @@
         <dependency>
             <groupId>com.dukescript.api</groupId>
             <artifactId>strings</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

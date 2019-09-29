@@ -73,7 +73,6 @@
             <plugin>
                 <groupId>org.netbeans.html</groupId>
                 <artifactId>html4j-maven-plugin</artifactId>
-                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <id>classes</id>
@@ -114,7 +113,6 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>${netbeans.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -148,7 +146,6 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,8 +158,6 @@
         <dependency>
             <groupId>com.dukescript.api</groupId>
             <artifactId>strings</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

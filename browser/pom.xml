@@ -72,7 +72,6 @@
             <plugin>
                 <groupId>org.netbeans.html</groupId>
                 <artifactId>html4j-maven-plugin</artifactId>
-                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <phase>process-test-classes</phase>
@@ -107,7 +106,6 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>${netbeans.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -123,7 +121,7 @@
             <version>2.3.19</version>
         </dependency>
         <dependency>
-            <groupId>com.dukescript.presenters</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>generic</artifactId>
             <version>${project.version}</version>
         </dependency>
