@@ -51,7 +51,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <subpackages>com.dukescript.presenters</subpackages>
+                    <subpackages>org.netbeans.html.presenters.webkit</subpackages>
                 </configuration>
                 <executions>
                     <execution>

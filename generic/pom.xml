@@ -85,7 +85,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <subpackages>com.dukescript.presenters.spi</subpackages>
+                    <subpackages>org.netbeans.html.presenters.spi</subpackages>
                 </configuration>
                 <executions>
                     <execution>
@@ -99,7 +99,6 @@
             <plugin>
                 <groupId>org.netbeans.html</groupId>
                 <artifactId>html4j-maven-plugin</artifactId>
-                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <id>test-classes</id>
