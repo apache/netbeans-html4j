@@ -22,9 +22,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 
-/** The <em>prototypical</em> presenter builder. Builds a {@link Fn.Presenter} based on
+/** The <em>prototypical</em> presenter builder. Builds a {@link Presenter} based on
  * top of textual protocol transferred between JVM and JavaScript engines.
  */
 public final class ProtoPresenterBuilder {
@@ -101,7 +101,7 @@ public final class ProtoPresenterBuilder {
         void prepare(OnPrepared onReady);
     }
 
-    /** Callback to make when {@link Preparator#prepare(OnPrepared)} is
+    /** Callback to make when {@link Preparator#prepare(org.netbeans.html.presenters.spi.ProtoPresenterBuilder.OnPrepared)} is
      * finished.
      */
     public static abstract class OnPrepared {
@@ -149,7 +149,7 @@ public final class ProtoPresenterBuilder {
     }
 
     /** Interface to handle displaying of a URL.
-     * Register via {@link ProtoPresenterBuilder#displayer(org.netbeans.html.presenter.spi.ProtoPresenterBuilder.Displayer)}.
+     * Register via {@link ProtoPresenterBuilder#displayer(org.netbeans.html.presenters.spi.ProtoPresenterBuilder.Displayer)}.
      */
     @FunctionalInterface
     public interface Displayer {

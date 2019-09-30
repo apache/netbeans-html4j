@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
 import org.openide.util.lookup.ServiceProvider;
 import com.dukescript.api.strings.Texts;
+import net.java.html.boot.BrowserBuilder;
 
 /** Displays using native WebKit component on Linux and Mac OS X.
  * Requires necessary native libraries to be installed. Uses GTK3 on
@@ -62,11 +63,21 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     private Pointer valueFalse;
     private String onPageApp;
 
+    /** Default constructor. Rather than dealing with this class directly,
+     * consider using it via {@link BrowserBuilder} API.
+     */
     public WebKitPresenter() {
         this(false);
     }
-    
-    WebKitPresenter(boolean headless) {
+
+    /** Visible or invisible presenter. This constructor allows one to
+     * launch the presenter in headless mode.
+     *
+     * {@codesnippet org.netbeans.html.presenters.webkit.GtkJavaScriptTest}
+     *
+     * @param headless {@code true} if the presenter shall run headless
+     */
+    public WebKitPresenter(boolean headless) {
         shell = Show.open(this, new Runnable() {
             @Override
             public void run() {

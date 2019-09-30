@@ -134,6 +134,10 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.netbeans.html.*</packages>
                   </group>
+                  <group>
+                    <title>Build Your Own Presenter!</title>
+                    <packages>org.netbeans.html.presenters.*</packages>
+                  </group>
                 </groups>
                 <links>
                     <link>http://testng.org/javadocs/</link>
@@ -150,9 +154,12 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     -snippetpath boot-fx/src/test 
                     -snippetpath boot-script/src/test
                     -snippetpath json/src/test
+                    -snippetpath webkit/src/test
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
                 </additionalparam>
+                <failOnWarnings>true</failOnWarnings>
+                <failOnError>true</failOnError>
               </configuration>
             </plugin>
             <plugin>

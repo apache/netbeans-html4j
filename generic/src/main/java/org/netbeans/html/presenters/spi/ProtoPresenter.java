@@ -20,8 +20,9 @@ package org.netbeans.html.presenters.spi;
 
 import java.io.Flushable;
 import org.netbeans.html.boot.spi.Fn;
+import org.netbeans.html.boot.spi.Fn.Presenter;
 
-/** The <em>prototypical</em> presenter. An implementation of a {@link Fn.Presenter} based on
+/** The <em>prototypical</em> presenter. An implementation of a {@link Presenter} based on
  * top of textual protocol transferred between JVM and JavaScript engines. Use
  * {@link ProtoPresenterBuilder#newBuilder()} to construct instance of this
  * interface.

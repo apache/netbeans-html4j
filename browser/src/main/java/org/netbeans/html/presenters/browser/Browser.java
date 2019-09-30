@@ -58,30 +58,13 @@ import org.netbeans.html.presenters.spi.ProtoPresenterBuilder;
 import org.openide.util.lookup.ServiceProvider;
 
 /** Browser based {@link Presenter}. It starts local server and
- * launches browser that connects to it. The actual browser to
- * be launched can be influenced by value of 
- * <code>com.dukescript.presenters.browser</code> property.
- * It can have following values:
- * <ul>
- * <li><b>GTK</b> - use Gtk WebKit implementation. Requires presence of 
- *    appropriate native libraries</li>
- * <li><b>AWT</b> - use {@link java.awt.Desktop#browse(java.net.URI)} to
- *    launch a browser</li>
- * <li><b>NONE</b> - just launches the server, useful together with
- *    <code>com.dukescript.presenters.browserPort</code> property that
- *    can specify a fixed port to open the server at
- * </li>
- * <li>any other value is interpreted as a command which is then
- *    launched on a command line with one parameter - the URL to connect to</li>
- * </ul>
- * If the property is not specified the system tries <b>GTK</b> mode first, 
- * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
- * (default LINUX command to launch a browser from a shell script).
+ * launches browser that connects to it. Use {@link Browser.Config} to
+ * configure the actual browser to be started.
  * <p>
  * To use this presenter specify following dependency:
  * <pre>
  * &lt;dependency&gt;
- *   &lt;groupId&gt;com.dukescript.presenters&lt;/groupId&gt;
+ *   &lt;groupId&gt;org.netbeans.html.browser&lt;/groupId&gt;
  *   &lt;artifactId&gt;browser&lt;/artifactId&gt;
  *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22browser%22">1.x</a>&lt;/version&gt;
  * &lt;/dependency&gt;
@@ -97,11 +80,37 @@ Executor, Closeable {
     private Runnable onPageLoad;
     private Command current;
     private final Config config;
-    
+
+    /** Default constructor. Reads configuration from properties. The actual browser to
+     * be launched can be influenced by value of
+     * <code>com.dukescript.presenters.browser</code> property.
+     * It can have following values:
+     * <ul>
+     * <li><b>GTK</b> - use Gtk WebKit implementation. Requires presence of
+     *    appropriate native libraries</li>
+     * <li><b>AWT</b> - use {@link java.awt.Desktop#browse(java.net.URI)} to
+     *    launch a browser</li>
+     * <li><b>NONE</b> - just launches the server, useful together with
+     *    <code>com.dukescript.presenters.browserPort</code> property that
+     *    can specify a fixed port to open the server at
+     * </li>
+     * <li>any other value is interpreted as a command which is then
+     *    launched on a command line with one parameter - the URL to connect to</li>
+     * </ul>
+     * If the property is not specified the system tries <b>GTK</b> mode first,
+     * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
+     * (default LINUX command to launch a browser from a shell script).
+     * @throws Exception
+     */
     public Browser() throws Exception {
         this(new Config());
     }
 
+    /**
+     * Browser configured by provided config.
+     *
+     * @param config the configuration
+     */
     public Browser(Config config) {
         this(findCalleeClassName(), config);
     }
@@ -229,13 +238,16 @@ Executor, Closeable {
 
     /** Parameters to configure {@link Browser}.
      * Create an instance and pass it 
-     * to {@link Browser#Browser(com.dukescript.presenters.Browser.Config) }
+     * to {@link Browser#Browser(org.netbeans.html.presenters.browser.Browser.Config) }
      * constructor.
      */
     public final static class Config {
         String browser;
         Integer port;
 
+        /**
+         * Default constructor.
+         */
         public Config() {
         }
 

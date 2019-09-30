@@ -18,7 +18,6 @@
  */
 package org.netbeans.html.presenters.webkit;
 
-import org.netbeans.html.presenters.webkit.WebKitPresenter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,16 +41,16 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(new WebKitPresenter(true)).loadClass(GtkJavaScriptTest.class).
-            loadPage("empty.html").
-            invoke("initialized");
+        Runnable onPageLoaded = GtkJavaScriptTest::initialized;
 
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                bb.showAndWait();
-            }
-        });
+        // BEGIN: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
+        final WebKitPresenter headlessPresenter = new WebKitPresenter(true);
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(headlessPresenter).
+            loadFinished(onPageLoaded).
+            loadPage("empty.html");
+        // END: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
+
+        Executors.newSingleThreadExecutor().submit(bb::showAndWait);
 
         List<Object> res = new ArrayList<>();
         Class<? extends Annotation> test = 
@@ -76,13 +75,13 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
         return browserClass;
     }
     
-    public static synchronized void ready(Class<?> browserCls) throws Exception {
+    public static synchronized void ready(Class<?> browserCls) {
         browserClass = browserCls;
         browserPresenter = Fn.activePresenter();
         GtkJavaScriptTest.class.notifyAll();
     }
     
-    public static void initialized() throws Exception {
+    public static void initialized() {
         BrwsrCtx b1 = BrwsrCtx.findDefault(GtkJavaScriptTest.class);
         assertNotSame(b1, BrwsrCtx.EMPTY, "Browser context is not empty");
         BrwsrCtx b2 = BrwsrCtx.findDefault(GtkJavaScriptTest.class);
