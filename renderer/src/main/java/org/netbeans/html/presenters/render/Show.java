@@ -43,7 +43,7 @@ public abstract class Show {
      */
     public static void show(String impl, URI page) throws IOException {
         try {
-            Class<?> c = Class.forName("com.dukescript.presenters.renderer." + impl);
+            Class<?> c = Class.forName(Show.class.getPackage().getName() + '.' + impl);
             Show show = (Show) c.newInstance();
             show.show(page);
         } catch (IOException ex) {
@@ -57,7 +57,7 @@ public abstract class Show {
                 impl, page.toString()
             };
             LOG.log(Level.INFO, "Launching {0}", Arrays.toString(cmdArr));
-            final Process process = Runtime.getRuntime().exec(cmdArr);
+            final Process process = new ProcessBuilder().inheritIO().command(cmdArr).start();
             try {
                 process.waitFor();
             } catch (InterruptedException ex1) {
