@@ -28,13 +28,19 @@
     </parent>
     <artifactId>webkit</artifactId>
     <name>WebKit Presenter</name>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <main.dir>${project.parent.basedir}</main.dir>
+        <publicPackages>org.netbeans.html.presenters.webkit</publicPackages>
+        <sigtestPackages/>
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

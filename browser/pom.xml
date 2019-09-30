@@ -22,7 +22,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>browser</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <parent>
         <groupId>org.netbeans.html</groupId>
         <artifactId>pom</artifactId>
@@ -31,9 +31,15 @@
     <name>DukeScript Presenter for any Browser</name>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <publicPackages>org.netbeans.html.presenters.browser</publicPackages>
+        <sigtestPackages/>
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

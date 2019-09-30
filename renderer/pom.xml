@@ -27,13 +27,26 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
     <artifactId>renderer</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Desktop Browser Renderer</name>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <publicPackages>org.netbeans.html.presenters.render</publicPackages>
+        <publicMetaInf/>
+        <sigtestPackages/>
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
+                        <Require-Capability>osgi.extender;resolution:=optional;cardinality:=multiple;resolution:=optional</Require-Capability>
+                    </instructions>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

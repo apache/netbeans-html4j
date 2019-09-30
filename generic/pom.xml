@@ -29,10 +29,13 @@
     
     <artifactId>generic</artifactId>
     <name>DukeScript Generic Presenter</name>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <version>2.0-SNAPSHOT</version>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <publicPackages>org.netbeans.html.presenters.spi</publicPackages>
+        <publicMetaInf/>
+        <sigtestPackages/>
     </properties>
 
     <dependencies>
@@ -61,6 +64,10 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

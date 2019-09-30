@@ -29,7 +29,7 @@
   <parent>
       <groupId>org.apache.netbeans</groupId>
       <artifactId>netbeans-parent</artifactId>
-      <version>1</version>
+      <version>2</version>
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,6 +40,8 @@
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
       <netbeans.compile.on.save>none</netbeans.compile.on.save>
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
+      <sigtestPackages>${publicPackages}</sigtestPackages>
+      <publicMetaInf>META-INF.services.*</publicMetaInf>
   </properties>
   <modules>
     <module>json</module>
@@ -296,7 +298,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>${publicPackages},META-INF.services.*;-noimport:=true;-split-package:=first</Export-Package>
+                        <Export-Package>${publicPackages},${publicMetaInf};-noimport:=true;-split-package:=first</Export-Package>
                         <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
@@ -512,7 +514,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                   <plugin>
                       <groupId>org.netbeans.tools</groupId>
                       <artifactId>sigtest-maven-plugin</artifactId>
-                      <version>1.0</version>
+                      <version>1.2</version>
                       <executions>
                           <execution>
                               <goals>
@@ -522,8 +524,8 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                           </execution>
                       </executions>
                       <configuration>
-                          <packages>${publicPackages}</packages>
-                          <releaseVersion>1.6</releaseVersion>
+                          <packages>${sigtestPackages}</packages>
+                          <releaseVersion>1.6.1</releaseVersion>
                       </configuration>
                   </plugin>
               </plugins>
