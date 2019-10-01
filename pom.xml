@@ -103,7 +103,7 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.4</version>
+              <version>3.1.1</version>
               <configuration>
                   <docfilessubdirs>true</docfilessubdirs>
                   <subpackages>${publicPackages}</subpackages>
@@ -152,15 +152,17 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <artifactId>codesnippet-doclet</artifactId>
                     <version>0.31</version>
                 </docletArtifact>
-                <additionalparam>
+                <additionalOptions>
                     -snippetpath boot-fx/src/test 
                     -snippetpath boot-script/src/test
                     -snippetpath json/src/test
                     -snippetpath webkit/src/test
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
-                </additionalparam>
+                </additionalOptions>
+                <!--
                 <failOnWarnings>true</failOnWarnings>
+                -->
                 <failOnError>true</failOnError>
               </configuration>
             </plugin>
