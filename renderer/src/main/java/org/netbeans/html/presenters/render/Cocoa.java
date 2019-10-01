@@ -148,7 +148,7 @@ final class Cocoa extends Show implements Callback {
     }
 
     private void process() throws Exception {
-        Closeable c = Fn.activate(presenter);
+        Closeable c = presenter == null ? null : Fn.activate(presenter);
         try {
             for (;;) {
                 Runnable r = QUEUE.poll();
@@ -158,7 +158,9 @@ final class Cocoa extends Show implements Callback {
                 r.run();
             }
         } finally {
-            c.close();
+            if (c != null) {
+                c.close();
+            }
         }
     }
 
