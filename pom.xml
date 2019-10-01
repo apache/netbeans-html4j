@@ -519,14 +519,27 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                       <version>1.2</version>
                       <executions>
                           <execution>
+                              <id>check</id>
                               <goals>
-                                  <goal>generate</goal>
                                   <goal>check</goal>
                               </goals>
+                              <phase>integration-test</phase>
+                              <configuration>
+                                  <packages>${sigtestPackages}</packages>
+                              </configuration>
+                          </execution>
+                          <execution>
+                              <id>generate</id>
+                              <goals>
+                                  <goal>generate</goal>
+                              </goals>
+                              <phase>package</phase>
+                              <configuration>
+                                  <packages>${publicPackages}</packages>
+                              </configuration>
                           </execution>
                       </executions>
                       <configuration>
-                          <packages>${sigtestPackages}</packages>
                           <releaseVersion>1.6.1</releaseVersion>
                       </configuration>
                   </plugin>
