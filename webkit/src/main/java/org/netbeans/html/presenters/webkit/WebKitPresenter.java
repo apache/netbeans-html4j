@@ -376,8 +376,12 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
     }
 
     private boolean isJavaClazz(Pointer obj) {
-        final int ret = shell.jsc().JSValueIsObjectOfClass(ctx, obj, javaClazz);
-        return ret == 1;
+        final JSC jsc = shell.jsc();
+        int type = jsc.JSValueGetType(ctx, obj);
+        if (type != 5) {
+            return false;
+        }
+        return jsc.JSValueIsObjectOfClass(ctx, obj, javaClazz);
     }
 
 

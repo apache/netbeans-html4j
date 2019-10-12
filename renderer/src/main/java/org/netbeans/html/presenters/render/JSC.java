@@ -78,7 +78,7 @@ public interface JSC extends Library {
     @param jsClass The JSClass to test against.
     @result true if value is an object and has jsClass in its class chain, otherwise false.
      */
-    int JSValueIsObjectOfClass(Pointer ctx, Pointer value, Pointer jsClass);
+    boolean JSValueIsObjectOfClass(Pointer ctx, Pointer value, Pointer jsClass);
 
     Pointer JSContextGetGlobalObject(Pointer ctx);
 
