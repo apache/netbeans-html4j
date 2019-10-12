@@ -18,7 +18,6 @@
  */
 package org.netbeans.html.presenters.webkit;
 
-import org.netbeans.html.presenters.webkit.WebKitPresenter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -53,6 +52,7 @@ import org.testng.annotations.Factory;
 public final class GtkKnockoutTest extends KnockoutTCK {
     private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
+    private static final Timeout WATCHER = new Timeout(60000);
     
     public GtkKnockoutTest() {
     }
