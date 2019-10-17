@@ -17,4 +17,4 @@
  * under the License.
  */
 
-asfStandardBuild xvfb:true cmdline:"clean install javadoc:aggregate"
+asfStandardBuild xvfb:true,cmdline:"clean install javadoc:aggregate"
