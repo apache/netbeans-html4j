@@ -29,7 +29,7 @@
   <parent>
       <groupId>org.apache.netbeans</groupId>
       <artifactId>netbeans-parent</artifactId>
-      <version>1</version>
+      <version>2</version>
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,6 +40,8 @@
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
       <netbeans.compile.on.save>none</netbeans.compile.on.save>
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
+      <sigtestPackages>${publicPackages}</sigtestPackages>
+      <publicMetaInf>META-INF.services.*</publicMetaInf>
   </properties>
   <modules>
     <module>json</module>
@@ -61,6 +63,11 @@
     -->
     <module>boot-agent-test</module>
     <module>xhr4j</module>
+    <!-- presenters -->
+    <module>browser</module>
+    <module>renderer</module>
+    <module>generic</module>
+    <module>webkit</module>
   </modules>
   <licenses>
       <license>
@@ -96,13 +103,13 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.4</version>
+              <version>3.1.1</version>
               <configuration>
                   <docfilessubdirs>true</docfilessubdirs>
                   <subpackages>${publicPackages}</subpackages>
                   <skip>false</skip>
                   <excludePackageNames>
-org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests:org.netbeans.html.xhr4j
+org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests:org.netbeans.html.xhr4j:java.lang
                   </excludePackageNames>
                 <groups>
                   <group>
@@ -129,6 +136,10 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.netbeans.html.*</packages>
                   </group>
+                  <group>
+                    <title>Build Your Own Presenter!</title>
+                    <packages>org.netbeans.html.presenters.*</packages>
+                  </group>
                 </groups>
                 <links>
                     <link>http://testng.org/javadocs/</link>
@@ -139,15 +150,20 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <docletArtifact>
                     <groupId>org.apidesign.javadoc</groupId>
                     <artifactId>codesnippet-doclet</artifactId>
-                    <version>0.23</version>
+                    <version>0.31</version>
                 </docletArtifact>
-                <additionalparam>
+                <additionalOptions>
                     -snippetpath boot-fx/src/test 
                     -snippetpath boot-script/src/test
                     -snippetpath json/src/test
+                    -snippetpath webkit/src/test
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
-                </additionalparam>
+                </additionalOptions>
+                <!--
+                <failOnWarnings>true</failOnWarnings>
+                -->
+                <failOnError>true</failOnError>
               </configuration>
             </plugin>
             <plugin>
@@ -181,7 +197,6 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <version>0.12</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -285,7 +300,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>${publicPackages},META-INF.services.*;-noimport:=true;-split-package:=first</Export-Package>
+                        <Export-Package>${publicPackages},${publicMetaInf};-noimport:=true;-split-package:=first</Export-Package>
                         <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
@@ -331,6 +346,11 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </exclusions>
         </dependency>
         <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
             <version>11</version>
@@ -345,6 +365,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <groupId>com.vaadin.external.google</groupId>
             <artifactId>android-json</artifactId>
             <version>0.0.20131108.vaadin1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dukescript.api</groupId>
+            <artifactId>strings</artifactId>
+            <version>1.6.2</version>
+            <type>jar</type>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
@@ -489,18 +516,31 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                   <plugin>
                       <groupId>org.netbeans.tools</groupId>
                       <artifactId>sigtest-maven-plugin</artifactId>
-                      <version>1.0</version>
+                      <version>1.2</version>
                       <executions>
                           <execution>
+                              <id>check</id>
                               <goals>
-                                  <goal>generate</goal>
                                   <goal>check</goal>
                               </goals>
+                              <phase>integration-test</phase>
+                              <configuration>
+                                  <packages>${sigtestPackages}</packages>
+                              </configuration>
+                          </execution>
+                          <execution>
+                              <id>generate</id>
+                              <goals>
+                                  <goal>generate</goal>
+                              </goals>
+                              <phase>package</phase>
+                              <configuration>
+                                  <packages>${publicPackages}</packages>
+                              </configuration>
                           </execution>
                       </executions>
                       <configuration>
-                          <packages>${publicPackages}</packages>
-                          <releaseVersion>1.6</releaseVersion>
+                          <releaseVersion>1.6.1</releaseVersion>
                       </configuration>
                   </plugin>
               </plugins>

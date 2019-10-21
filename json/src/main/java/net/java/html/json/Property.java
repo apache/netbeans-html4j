@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 import org.netbeans.html.context.spi.Contexts;
+import org.netbeans.html.context.spi.Contexts.Id;
 import org.netbeans.html.json.spi.Technology;
 
 /** Represents a property in a class defined with {@link Model} annotation.
@@ -63,7 +64,7 @@ public @interface Property {
      *
      * Technologies may decide to represent such non-mutable
      * property in more effective way - for
-     * example Knockout Java Bindings technology (with {@link Contexts.Id id} "ko4j")
+     * example Knockout Java Bindings technology (with {@link Id id} "ko4j")
      * uses plain JavaScript value (number, string, array, boolean) rather
      * than classical observable.
      *

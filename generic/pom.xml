@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.netbeans.html</groupId>
+        <artifactId>pom</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>generic</artifactId>
+    <name>DukeScript Generic Presenter</name>
+    <packaging>bundle</packaging>
+    <version>2.0-SNAPSHOT</version>
+    <properties>
+        <main.dir>${project.parent.basedir}</main.dir>
+        <publicPackages>org.netbeans.html.presenters.spi</publicPackages>
+        <publicMetaInf/>
+        <sigtestPackages/>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>net.java.html.boot</artifactId>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.html</groupId>
+            <artifactId>net.java.html.json.tck</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dukescript.api</groupId>
+            <artifactId>strings</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArguments>
+                        <Aversion>${project.version}</Aversion>
+                    </compilerArguments>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <testSource>1.8</testSource>
+                    <testTarget>1.8</testTarget>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <subpackages>org.netbeans.html.presenters.spi</subpackages>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.netbeans.html</groupId>
+                <artifactId>html4j-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>process-js-annotations</goal>
+                        </goals>
+                        <configuration>
+                            <classes>${project.build.directory}/test-classes</classes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>   
+        </plugins>
+    </build>
+</project>
