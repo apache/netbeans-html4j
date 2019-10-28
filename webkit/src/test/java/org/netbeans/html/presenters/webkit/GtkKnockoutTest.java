@@ -30,8 +30,11 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -74,18 +77,29 @@ public final class GtkKnockoutTest extends KnockoutTCK {
             loadPage(uri.toString()).
             invoke("initialized");
         
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
+        Future<Void> future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
             @Override
-            public void run() {
+            public Void call() {
                 bb.showAndWait();
+                return null;
             }
         });
-        
-        ClassLoader l = getClassLoader();
+
         List<Object> res = new ArrayList<>();
-        for (Class oldC : arr) {
-            Class<?> c = Class.forName(oldC.getName(), true, l);
-            seekKOTests(c, res);
+        try {
+            future.get();
+            ClassLoader l = getClassLoader();
+            for (Class oldC : arr) {
+                Class<?> c = Class.forName(oldC.getName(), true, l);
+                seekKOTests(c, res);
+            }
+        } catch (InterruptedException | ExecutionException err) {
+            err.printStackTrace();
+            if (err.getCause() instanceof LinkageError) {
+                res.add(new Skip(err.getCause().getMessage()));
+            } else {
+                res.add(new Skip(err.getMessage()));
+            }
         }
         return res.toArray();
     }

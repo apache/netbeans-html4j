@@ -22,7 +22,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
@@ -50,21 +53,38 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
             loadPage("empty.html");
         // END: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
 
-        Executors.newSingleThreadExecutor().submit(bb::showAndWait);
+        Future<Void> future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                bb.showAndWait();
+                return null;
+            }
+        });
 
         List<Object> res = new ArrayList<>();
-        Class<? extends Annotation> test = 
-            loadClass().getClassLoader().loadClass(KOTest.class.getName()).
-            asSubclass(Annotation.class);
+        try {
+            future.get();
+            Class<? extends Annotation> test =
+                loadClass().getClassLoader().loadClass(KOTest.class.getName()).
+                asSubclass(Annotation.class);
 
-        Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
-        for (Class c : arr) {
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(test) != null) {
-                    res.add(new Case(browserPresenter, m));
+            Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
+            for (Class c : arr) {
+                for (Method m : c.getMethods()) {
+                    if (m.getAnnotation(test) != null) {
+                        res.add(new Case(browserPresenter, m));
+                    }
                 }
             }
+        } catch (InterruptedException | ExecutionException err) {
+            err.printStackTrace();
+            if (err.getCause() instanceof LinkageError) {
+                res.add(new Skip(err.getCause().getMessage()));
+            } else {
+                res.add(new Skip(err.getMessage()));
+            }
         }
+
         return res.toArray();
     }
 

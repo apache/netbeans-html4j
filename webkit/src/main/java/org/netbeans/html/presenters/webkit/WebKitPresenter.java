@@ -126,8 +126,16 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
             }
 
             shell.show(page.toURI());
-        } catch (Throwable t) {
-            LOG.log(Level.SEVERE, onPageApp, t);
+        } catch (RuntimeException t) {
+            throw t;
+        } catch (Exception t) {
+            if (t.getCause() instanceof Error) {
+                throw (Error) t.getCause();
+            }
+            if (t.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) t.getCause();
+            }
+            throw new RuntimeException(t);
         }
     }
 
