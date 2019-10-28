@@ -363,12 +363,17 @@ final class GTK extends Show implements InvokeLater {
 
         Libs() {
             List<Throwable> errors = new ArrayList<Throwable>();
-            this.gtk = Libs.loadLibrary(Gtk.class, false, null);
+            this.webKit = Libs.loadLibrary(WebKit.class, false, errors);
             this.jsc = Libs.loadLibrary(JSC.class, true, errors);
+
+            if (!errors.isEmpty()) {
+                throw linkageError(errors);
+            }
+
+            this.gtk = Libs.loadLibrary(Gtk.class, false, null);
             this.g = Libs.loadLibrary(G.class, false, errors);
             this.glib = Libs.loadLibrary(GLib.class, false, errors);
             this.gdk = Libs.loadLibrary(Gdk.class, false, errors);
-            this.webKit = Libs.loadLibrary(WebKit.class, false, errors);
 
             if (!errors.isEmpty()) {
                 throw linkageError(errors);
