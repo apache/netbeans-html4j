@@ -48,6 +48,9 @@ import org.testng.annotations.Test;
 })
 public class DoubleViewTest {
     private static String set;
+    static {
+        DumpStack.initialize();
+    }
 
     @Function
     static void change(DoubleView model) {
