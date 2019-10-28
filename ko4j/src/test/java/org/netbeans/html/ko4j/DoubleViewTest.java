@@ -48,9 +48,6 @@ import org.testng.annotations.Test;
 })
 public class DoubleViewTest {
     private static String set;
-    static {
-        DumpStack.initialize();
-    }
 
     @Function
     static void change(DoubleView model) {
@@ -66,6 +63,9 @@ public class DoubleViewTest {
     private WebView view2;
 
     private static final StringBuffer LOG = new StringBuffer();
+    static {
+        DumpStack.initialize();
+    }
     private JFrame frame;
     private Fn.Presenter presenter1;
     private Fn.Presenter presenter2;
@@ -77,6 +77,7 @@ public class DoubleViewTest {
         final JFXPanel panel = new JFXPanel();
         final JFXPanel p2 = new JFXPanel();
 
+        log("Panel #1 " + panel + " and #2 " + p2);
         final CountDownLatch initViews = new CountDownLatch(1);
         Platform.runLater(() -> {
             displayFrame(panel, p2);
@@ -87,29 +88,39 @@ public class DoubleViewTest {
         doubleView = new DoubleView();
         doubleView.setMessage("Initialized");
 
+        log("DoubleView: " + doubleView);
+
         final URL page = DoubleViewTest.class.getResource("double.html");
         assertNotNull(page, "double.html found");
 
 
-
         final CountDownLatch view1Init = new CountDownLatch(1);
         final CountDownLatch view2Init = new CountDownLatch(1);
+        log("Scheduling view1");
         Platform.runLater(() -> {
+            log("Platform.runLater");
             FXBrowsers.load(view1, page, () -> {
+                log("initializing view1");
                 presenter1 = Fn.activePresenter();
                 doubleView.applyBindings();
                 log("applyBindings view One");
                 view1Init.countDown();
             });
-
+        });
+        log("Waiting for view1");
+        view1Init.await();
+        log("Scheduling view1");
+        Platform.runLater(() -> {
             FXBrowsers.load(view2, page, () -> {
+                log("initializing view2");
                 presenter2 = Fn.activePresenter();
                 doubleView.applyBindings();
                 log("applyBindings view Two");
                 view2Init.countDown();
             });
+            log("view2 load scheduled");
         });
-        view1Init.await();
+        log("Waiting for view2");
         view2Init.await();
         log("initializeViews - done");
         assertNotNull(presenter1, "presenter for view1 found");

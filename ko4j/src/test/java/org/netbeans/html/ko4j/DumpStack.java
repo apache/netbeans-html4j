@@ -44,7 +44,7 @@ final class DumpStack extends TimerTask {
     }
 
     public static void initialize() {
-        final int thirtySeconds = 30000;
-        TIMER.schedule(new DumpStack(), thirtySeconds, thirtySeconds);
+        final int fiveSec = 5000;
+        TIMER.schedule(new DumpStack(), fiveSec, 2 * fiveSec);
     }
 }
