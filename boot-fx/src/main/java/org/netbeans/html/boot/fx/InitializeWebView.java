@@ -25,7 +25,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import net.java.html.BrwsrCtx;
-import org.netbeans.html.boot.fx.AbstractFXPresenter;
 
 public final class InitializeWebView extends AbstractFXPresenter implements Runnable {
 
@@ -65,12 +64,13 @@ public final class InitializeWebView extends AbstractFXPresenter implements Runn
 
     private static class FindViewListener extends WeakReference<InitializeWebView>
     implements ChangeListener<Worker.State> {
-
+        private InitializeWebView toNotify;
         private final URL resource;
         private final Worker<Void> w;
 
         public FindViewListener(InitializeWebView view, URL resource, Worker<Void> w) {
             super(view);
+            this.toNotify = view;
             this.resource = resource;
             this.w = w;
         }
@@ -86,6 +86,7 @@ public final class InitializeWebView extends AbstractFXPresenter implements Runn
             if (newState.equals(Worker.State.SUCCEEDED)) {
                 if (checkValid(view)) {
                     view.onPageLoad();
+                    toNotify = null;
                 }
             }
             if (newState.equals(Worker.State.FAILED)) {
