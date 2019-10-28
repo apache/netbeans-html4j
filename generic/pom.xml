@@ -75,8 +75,6 @@
                     <compilerArguments>
                         <Aversion>${project.version}</Aversion>
                     </compilerArguments>
-                    <source>1.6</source>
-                    <target>1.6</target>
                     <testSource>1.8</testSource>
                     <testTarget>1.8</testTarget>
                 </configuration>
@@ -87,21 +85,6 @@
                 <configuration>
                     <skip>false</skip>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <subpackages>org.netbeans.html.presenters.spi</subpackages>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.netbeans.html</groupId>
