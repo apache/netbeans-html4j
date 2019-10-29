@@ -122,4 +122,17 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>skip-browser-tests</id>
+            <activation>
+                <property>
+                    <name>skipBrowserTests</name>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>${skipBrowserTests}</skipTests>
+            </properties>
+        </profile>
+    </profiles>
 </project>
