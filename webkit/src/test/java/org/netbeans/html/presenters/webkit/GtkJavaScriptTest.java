@@ -26,6 +26,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
@@ -63,7 +65,11 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
 
         List<Object> res = new ArrayList<>();
         try {
-            future.get();
+            try {
+                future.get(3, TimeUnit.SECONDS);
+            } catch (TimeoutException ex) {
+                // no error in given time, let's go on
+            }
             Class<? extends Annotation> test =
                 loadClass().getClassLoader().loadClass(KOTest.class.getName()).
                 asSubclass(Annotation.class);

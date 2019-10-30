@@ -35,6 +35,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -87,7 +89,11 @@ public final class GtkKnockoutTest extends KnockoutTCK {
 
         List<Object> res = new ArrayList<>();
         try {
-            future.get();
+            try {
+                future.get(3, TimeUnit.SECONDS);
+            } catch (TimeoutException ex) {
+                // no error in given time, let's go on
+            }
             ClassLoader l = getClassLoader();
             for (Class oldC : arr) {
                 Class<?> c = Class.forName(oldC.getName(), true, l);
