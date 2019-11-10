@@ -58,7 +58,10 @@ The HTML/Java API is IDE and build tool neutral. It can be used with
 [Ant](http://ant.apache.org), [Maven](http://maven.apache.org) or **Gradle**.
 It is easy to edit it with [Eclipse](https://dukescript.com/best/practices/2015/07/01/DukeScript-with-Eclipse.html),
 [IntelliJ](https://dukescript.com/best/practices/2016/04/19/IDEA.html) or
-[NetBeans](https://dukescript.com/getting_started.html).
+[NetBeans](https://dukescript.com/getting_started.html). Here is a short introductory video to get started
+with **NetBeans** 11.2 and its **Gradle** support:
+
+[![OpenJFX Lite by Geertjan](https://img.youtube.com/vi/cUSDknlhxcY/0.jpg)](https://www.youtube.com/watch?v=cUSDknlhxcY)
 
 The most comprehensive getting started guide is available from
 [the DukeScript project](https://dukescript.com/getting_started.html) website.
