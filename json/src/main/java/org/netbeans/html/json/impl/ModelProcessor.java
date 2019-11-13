@@ -94,7 +94,7 @@ import org.openide.util.lookup.ServiceProvider;
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
     private final Map<Element,String> models = new WeakHashMap<Element,String>();
-    private final Map<String,String> packages = new WeakHashMap<String,String>();
+    private final Map<String,String> packages = new HashMap<String,String>();
     private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
