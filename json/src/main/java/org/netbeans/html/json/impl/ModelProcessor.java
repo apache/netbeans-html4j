@@ -1880,7 +1880,8 @@ public final class ModelProcessor extends AbstractProcessor {
             isEnum[0] = false;
             final String simpleName = e.getSimpleName().toString();
             String pkg = packages.get(simpleName);
-            return pkg == null ? simpleName : pkg + '.' + simpleName;
+            String referencingPkg = findPkgName(p.e);
+            return pkg == null || pkg.equals(referencingPkg) ? simpleName : pkg + '.' + simpleName;
         }
 
         TypeMirror enm = processingEnv.getElementUtils().getTypeElement("java.lang.Enum").asType();
