@@ -94,10 +94,18 @@ import org.openide.util.lookup.ServiceProvider;
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
     private final Map<Element,String> models = new WeakHashMap<Element,String>();
+    private final Map<String,String> packages = new WeakHashMap<String,String>();
     private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
+        for (Element e : roundEnv.getElementsAnnotatedWith(Model.class)) {
+            Model m = e.getAnnotation(Model.class);
+            if (m == null) {
+                continue;
+            }
+            packages.put(m.className(), findPkgName(e));
+        }
         for (Element e : roundEnv.getElementsAnnotatedWith(Model.class)) {
             if (!processModel(e)) {
                 ok = false;
@@ -139,6 +147,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             verify.clear();
+            packages.clear();
         }
         return ok;
     }
@@ -1869,7 +1878,9 @@ public final class ModelProcessor extends AbstractProcessor {
         if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
             isModel[0] = true;
             isEnum[0] = false;
-            return e.getSimpleName().toString();
+            final String simpleName = e.getSimpleName().toString();
+            String pkg = packages.get(simpleName);
+            return pkg == null ? simpleName : pkg + '.' + simpleName;
         }
 
         TypeMirror enm = processingEnv.getElementUtils().getTypeElement("java.lang.Enum").asType();
