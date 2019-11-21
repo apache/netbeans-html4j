@@ -94,10 +94,23 @@ import org.openide.util.lookup.ServiceProvider;
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
     private final Map<Element,String> models = new WeakHashMap<Element,String>();
+    private final Map<String,List<String>> packages = new HashMap<String,List<String>>();
     private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
+        for (Element e : roundEnv.getElementsAnnotatedWith(Model.class)) {
+            Model m = e.getAnnotation(Model.class);
+            if (m == null) {
+                continue;
+            }
+            List<String> pkgList = packages.get(m.className());
+            if (pkgList == null) {
+                pkgList = new ArrayList<String>();
+                packages.put(m.className(), pkgList);
+            }
+            pkgList.add(findPkgName(e));
+        }
         for (Element e : roundEnv.getElementsAnnotatedWith(Model.class)) {
             if (!processModel(e)) {
                 ok = false;
@@ -139,6 +152,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
             }
             verify.clear();
+            packages.clear();
         }
         return ok;
     }
@@ -1869,7 +1883,20 @@ public final class ModelProcessor extends AbstractProcessor {
         if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
             isModel[0] = true;
             isEnum[0] = false;
-            return e.getSimpleName().toString();
+            final String simpleName = e.getSimpleName().toString();
+            List<String> knownPackages = packages.get(simpleName);
+            if (knownPackages != null && !knownPackages.isEmpty()) {
+                String referencingPkg = findPkgName(p.e);
+                String foundPkg = null;
+                for (String pkg : knownPackages) {
+                    foundPkg = pkg;
+                    if (pkg.equals(referencingPkg)) {
+                        return simpleName;
+                    }
+                }
+                return foundPkg + '.' + simpleName;
+            }
+            return simpleName;
         }
 
         TypeMirror enm = processingEnv.getElementUtils().getTypeElement("java.lang.Enum").asType();
