@@ -18,17 +18,25 @@
  */
 package org.netbeans.html.presenters.browser;
 
-import org.netbeans.html.presenters.browser.Browser;
 import org.netbeans.html.presenters.render.Show;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
@@ -76,7 +84,10 @@ public class ServerTest {
 
         server.close();
         try {
-            InputStream unavailable = connect.openStream();
+            HttpURLConnection url =  (HttpURLConnection) connect.openConnection();
+            url.setConnectTimeout(3000);
+            url.setReadTimeout(3000);
+            InputStream unavailable = url.getInputStream();
             fail("Stream can no longer be opened: " + unavailable);
         } catch (IOException ex) {
             // OK
@@ -105,27 +116,41 @@ public class ServerTest {
     private static native void closeSoon(int ms);
 
     private static void show(URI page) throws IOException {
-        IOException one, two;
+        ExecutorService background = Executors.newSingleThreadExecutor();
+        Future<Void> future = background.submit((Callable<Void>) () -> {
+            IOException one, two;
+            try {
+                String ui = System.getProperty("os.name").contains("Mac")
+                        ? "Cocoa" : "GTK";
+                Show.show(ui, page);
+                return null;
+            } catch (IOException ex) {
+                one = ex;
+            }
+            try {
+                Show.show("AWT", page);
+                return null;
+            } catch (IOException ex) {
+                two = ex;
+            }
+            try {
+                Show.show(null, page);
+            } catch (IOException ex) {
+                two.initCause(one);
+                ex.initCause(two);
+                throw ex;
+            }
+            return null;
+        });
+
         try {
-            String ui = System.getProperty("os.name").contains("Mac")
-                    ? "Cocoa" : "GTK";
-            Show.show(ui, page);
-            return;
-        } catch (IOException ex) {
-            one = ex;
-        }
-        try {
-            Show.show("AWT", page);
-            return;
-        } catch (IOException ex) {
-            two = ex;
-        }
-        try {
-            Show.show(null, page);
-        } catch (IOException ex) {
-            two.initCause(one);
-            ex.initCause(two);
-            throw ex;
+            Void ignore = future.get(2, TimeUnit.SECONDS);
+            assertNull(ignore);
+            background.shutdown();
+        } catch (InterruptedException | ExecutionException  ex) {
+            throw new AssertionError(ex);
+        } catch (TimeoutException ex) {
+            // OK
         }
     }
 }
