@@ -326,7 +326,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnBegin=  var encParams = ds(@1).toJava(null, [",
         "fnPPar=@2 p@1",
         "fnBody=]);\n" +
-            "  var v = ds(@3).toVM('c', @1, '@2', thiz ? thiz.id : null, encParams);\n" +
+            "  var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);\n" +
             "  while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {\n" +
             "    var script = v.substring(11);\n" +
             "    try {\n" +

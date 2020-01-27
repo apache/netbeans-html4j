@@ -59,6 +59,7 @@ class Testing {
 
         ScriptEngineManager sem = new ScriptEngineManager();
         eng = sem.getEngineByMimeType("text/javascript");
+        eng.getBindings(ScriptContext.ENGINE_SCOPE).put("polyglot.js.allowAllAccess", true);
         try {
             eng.eval("function alert(m) { Packages.java.lang.System.out.println(m); };");
         } catch (ScriptException ex) {
@@ -91,13 +92,17 @@ class Testing {
     public final class Clbk {
         private Clbk() {
         }
-        
-        public String pass(String method, String a1, String a2, String a3, String a4) throws Exception {
-            return presenter.js2java(method, a1, a2, a3, a4);
+
+        private String ts(Object o) {
+            return o == null ? null : o.toString();
+        }
+
+        public String pass(String method, Object a1, Object a2, Object a3, Object a4) throws Exception {
+            return presenter.js2java(method, ts(a1), ts(a2), ts(a3), ts(a4));
         }
     }
     private final Clbk clbk = new Clbk();
-    
+
     protected void callbackFn(ProtoPresenterBuilder.OnPrepared ready) {
         eng.getBindings(ScriptContext.ENGINE_SCOPE).put("jvm", clbk);
         try {
