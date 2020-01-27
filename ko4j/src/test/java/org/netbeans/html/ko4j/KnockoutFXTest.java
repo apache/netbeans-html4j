@@ -121,7 +121,8 @@ public final class KnockoutFXTest extends KnockoutTCK {
         return 
             "1.8.0_212".equals(version) ||
             "1.8.0_221".equals(version) ||
-            "1.8.0_222".equals(version);
+            "1.8.0_222".equals(version) ||
+            "1.8.0_241".equals(version);
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
