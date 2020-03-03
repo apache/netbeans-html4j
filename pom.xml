@@ -541,7 +541,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                           </execution>
                       </executions>
                       <configuration>
-                          <releaseVersion>1.6.1</releaseVersion>
+                          <releaseVersion>1.7</releaseVersion>
                       </configuration>
                   </plugin>
               </plugins>
