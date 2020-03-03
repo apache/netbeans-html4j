@@ -42,7 +42,7 @@ matrix:
       env:
         - ARGS=-Dnone
         - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64
-        - URL=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64.tar.gz
+        - URL=https://cdn.azul.com/zulu/bin/$DIR.tar.gz
     - os: linux
       dist: trusty
       jdk: openjdk11
@@ -53,4 +53,6 @@ matrix:
       jdk: openjdk11
       env:
         - ARGS=-Dnone
+        - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-macosx_x64
+        - URL=https://cdn.azul.com/zulu/bin/$DIR.tar.gz
 
