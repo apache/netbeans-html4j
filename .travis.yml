@@ -50,6 +50,12 @@ matrix:
       jdk: openjdk11
       env:
         - ARGS=-Dnone
+    - os: linux
+      name: Linux JDK14 (latest)
+      dist: trusty
+      jdk: openjdk14
+      env:
+        - ARGS=-Dnone
     - os: osx
       name: Mac JDK8
       osx_image: xcode9.3
