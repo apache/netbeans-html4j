@@ -33,6 +33,7 @@ script:
   - $JAVA_HOME/bin/java -version
   - mvn install -DskipTests $ARGS
   - mvn verify $ARGS
+  - mvn javadoc:aggregate
 
 matrix:
   include:
