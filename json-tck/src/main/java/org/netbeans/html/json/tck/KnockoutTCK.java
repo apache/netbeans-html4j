@@ -93,7 +93,14 @@ public abstract class KnockoutTCK {
         return prepareURL(content, mimeType, parameters).toString();
     }
 
-    /**
+    /** Creates a URL which later returns content with given
+     * <code>mimeType</code> and <code>content</code>. The
+     * content may be processed by the provided <code>parameters</code>.
+     *
+     * @param content content to be available
+     * @param mimeType mime type of the content
+     * @param parameters any parameters to process the content with
+     * @return URI to reference the content
      * @deprecated provide {@link #prepareWebResource(java.lang.String, java.lang.String, java.lang.String[])}
      *    implementation instead since post 1.4 version of HTML/Java API.
      */

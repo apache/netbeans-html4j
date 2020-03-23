@@ -151,7 +151,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <docletArtifact>
                     <groupId>org.apidesign.javadoc</groupId>
                     <artifactId>codesnippet-doclet</artifactId>
-                    <version>0.31</version>
+                    <version>0.54</version>
                 </docletArtifact>
                 <additionalOptions>
                     -snippetpath boot-fx/src/test 
@@ -161,9 +161,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
                 </additionalOptions>
-                <!--
                 <failOnWarnings>true</failOnWarnings>
-                -->
                 <failOnError>true</failOnError>
               </configuration>
             </plugin>

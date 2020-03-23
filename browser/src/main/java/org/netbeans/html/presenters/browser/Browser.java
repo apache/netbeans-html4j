@@ -100,9 +100,8 @@ Executor, Closeable {
      * If the property is not specified the system tries <b>GTK</b> mode first,
      * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
      * (default LINUX command to launch a browser from a shell script).
-     * @throws Exception
      */
-    public Browser() throws Exception {
+    public Browser() {
         this(new Config());
     }
 
