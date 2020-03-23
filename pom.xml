@@ -559,9 +559,9 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </properties>
       </profile>
       <profile>
-          <id>jdk13</id>
+          <id>jdk13+</id>
           <activation>
-              <jdk>13</jdk>
+              <jdk>[13,]</jdk>
           </activation>
           <properties>
               <javac.source>1.7</javac.source>
