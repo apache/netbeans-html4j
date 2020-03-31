@@ -20,6 +20,7 @@ package org.netbeans.html.presenters.browser;
 
 import org.netbeans.html.presenters.render.Show;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Flushable;
 import java.io.IOException;
@@ -31,6 +32,9 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,16 +45,9 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.glassfish.grizzly.PortRange;
-import org.glassfish.grizzly.http.server.HttpHandler;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.http.server.Response;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
-import org.glassfish.grizzly.http.util.HttpStatus;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 import org.netbeans.html.presenters.spi.ProtoPresenter;
@@ -74,12 +71,13 @@ import org.openide.util.lookup.ServiceProvider;
 public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable,
 Executor, Closeable {
     static final Logger LOG = Logger.getLogger(Browser.class.getName());
-    private final Map<String,Command> SESSIONS = new HashMap<String, Command>();
+    private final Map<String,Command> SESSIONS = new HashMap<>();
     private final String app;
-    private HttpServer s;
+    private HttpServer server;
     private Runnable onPageLoad;
     private Command current;
     private final Config config;
+    private final Supplier<HttpServer<?, ?, ?, ?>> serverProvider;
 
     /** Default constructor. Reads configuration from properties. The actual browser to
      * be launched can be influenced by value of
@@ -111,34 +109,39 @@ Executor, Closeable {
      * @param config the configuration
      */
     public Browser(Config config) {
-        this(findCalleeClassName(), config);
+        this(findCalleeClassName(), config, null);
     }
-    
-    Browser(String app, Config config) {
+
+    Browser(String app, Config config, Supplier<HttpServer<?,?,?, ?>> serverProvider) {
+        this.serverProvider = serverProvider != null ? serverProvider : GrizzlyServer::new;
         this.app = app;
         this.config = new Config(config);
     }
 
     @Override
     public final void execute(final Runnable r) {
-        current.runSafe(r, true);
+        current.execute(r);
     }
 
     @Override
     public void close() throws IOException {
-        s.shutdownNow();
+        if (server != null) {
+            server.shutdownNow();
+        }
     }
 
     HttpServer server() {
-        return s;
+        return server;
     }
 
     static HttpServer findServer(Object obj) {
-        Command c = null;
+        Command c;
         if (obj instanceof Command) {
             c = (Command) obj;
         } else if (obj instanceof ProtoPresenter) {
             c = ((ProtoPresenter) obj).lookup(Command.class);
+        } else {
+            throw new IllegalArgumentException("Cannot find server for " + obj);
         }
         return c.browser.server();
     }
@@ -199,23 +202,9 @@ Executor, Closeable {
     public void flush() throws IOException {
         throw new UnsupportedOperationException();
     }
-    
-    private static HttpServer server(RootPage r, Config config) {
-        int from = 8080;
-        int to = 65535;
-        int port = config.getPort();
-        if (port != -1) {
-            from = to = port;
-        }
-        HttpServer s = HttpServer.createSimpleServer(null, new PortRange(from, to));
-        final ServerConfiguration conf = s.getServerConfiguration();
-        conf.addHttpHandler(r, "/");
-        return s;
-    }
-    
+
     private static URI pageURL(String protocol, HttpServer server, final String page) {
-        NetworkListener listener = server.getListeners().iterator().next();
-        int port = listener.getPort();
+        int port = server.getPort();
         try {
             return new URI(protocol + "://localhost:" + port + page);
         } catch (URISyntaxException ex) {
@@ -227,22 +216,33 @@ Executor, Closeable {
     public final void displayPage(URL page, Runnable onPageLoad) {
         try {
             this.onPageLoad = onPageLoad;
-            s = server(new RootPage(page), config);
-            s.start();
-            show(pageURL("http", s, "/"));
+            this.server = serverProvider.get();
+            int from = 8080;
+            int to = 65535;
+            int port = config.getPort();
+            if (port != -1) {
+                from = to = port;
+            }
+            server.init(from, to);
+
+            this.server.addHttpHandler(new RootPage(page), "/");
+            server.start();
+
+            show(pageURL("http", server, "/"));
         } catch (IOException ex) {
             Logger.getLogger(Browser.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     /** Parameters to configure {@link Browser}.
-     * Create an instance and pass it 
+     * Create an instance and pass it
      * to {@link Browser#Browser(org.netbeans.html.presenters.browser.Browser.Config) }
      * constructor.
      */
     public final static class Config {
         String browser;
         Integer port;
+        boolean debug;
 
         /**
          * Default constructor.
@@ -253,6 +253,7 @@ Executor, Closeable {
         private Config(Config copy) {
             this.browser = copy.browser;
             this.port = copy.port;
+            this.debug = copy.debug;
         }
 
         /** The command to use when invoking a browser. Possible values:
@@ -288,7 +289,20 @@ Executor, Closeable {
             this.port = port;
             return this;
         }
-        
+
+        /** Enable or disable debugging. The default value is taken from a property
+         * {@code com.dukescript.presenters.browserDebug}. If the property is
+         * not specified, then the default value is {@code false}.
+         * 
+         * @param debug true or false
+         * @return this instance
+         * @since 1.8
+         */
+        Config debug(boolean debug) {
+            this.debug = debug;
+            return this;
+        }
+
         final String getBrowser() {
             if (browser != null) {
                 return browser;
@@ -300,40 +314,40 @@ Executor, Closeable {
             if (port != null) {
                 return port;
             }
-            String port = System.getProperty("com.dukescript.presenters.browserPort"); // NOI18N
+            String browserPort = System.getProperty("com.dukescript.presenters.browserPort"); // NOI18N
             try {
-                return Integer.parseInt(port);
+                return Integer.parseInt(browserPort);
             } catch (NumberFormatException ex) {
                 return -1;
             }
         }
     }
-    
-    static void cors(Response r) {
-        r.setCharacterEncoding("UTF-8");
-        r.addHeader("Access-Control-Allow-Origin", "*");
-        r.addHeader("Access-Control-Allow-Credentials", "true");
-        r.addHeader("Access-Control-Allow-Headers", "Content-Type");
-        r.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+
+    static <Response> void cors(HttpServer<?, Response, ?, ?> s, Response r) {
+        s.setCharacterEncoding(r, "UTF-8");
+        s.addHeader(r, "Access-Control-Allow-Origin", "*");
+        s.addHeader(r, "Access-Control-Allow-Credentials", "true");
+        s.addHeader(r, "Access-Control-Allow-Headers", "Content-Type");
+        s.addHeader(r, "Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
     }
 
-    private final class RootPage extends HttpHandler {
+    private final class RootPage extends HttpServer.Handler {
         private final URL page;
 
         public RootPage(URL page) {
             this.page = page;
         }
-        
+
         @Override
-        public void service(Request rqst, Response rspns) throws Exception {
-            String path = rqst.getRequestURI();
-            cors(rspns);
+        public <Request, Response> void service(HttpServer<Request, Response, ?, ?> server, Request rqst, Response rspns) throws IOException {
+            String path = server.getRequestURI(rqst);
+            cors(server, rspns);
             if ("/".equals(path) || "index.html".equals(path)) {
                 Reader is;
-                String prefix = "http://" + rqst.getServerName() + ":" + rqst.getServerPort() + "/";
-                Writer w = rspns.getWriter();
-                rspns.setContentType("text/html");
-                final Command cmd = new Command(Browser.this, prefix);
+                String prefix = "http://" + server.getServerName(rqst) + ":" + server.getServerPort(rqst) + "/";
+                Writer w = server.getWriter(rspns);
+                server.setContentType(rspns, "text/html");
+                final Command cmd = new Command(server, Browser.this, prefix);
                 try {
                     is = new InputStreamReader(page.openStream());
                 } catch (IOException ex) {
@@ -378,11 +392,11 @@ Executor, Closeable {
                 is.close();
                 w.close();
             } else if (path.equals("/command.js")) {
-                String id = rqst.getParameter("id");
+                String id = server.getParameter(rqst, "id");
                 Command c = SESSIONS.get(id);
                 if (c == null) {
-                    rspns.getOutputBuffer().write("No command for " + id);
-                    rspns.setStatus(HttpStatus.NOT_FOUND_404);
+                    server.getWriter(rspns).write("No command for " + id);
+                    server.setStatus(rspns, 404);
                     return;
                 }
                 c.service(rqst, rspns);
@@ -392,13 +406,39 @@ Executor, Closeable {
                 }
                 URL relative = new URL(page, path);
                 InputStream is;
+                URLConnection conn;
                 try {
-                    is = relative.openStream();
+                    conn = relative.openConnection();
+                    is = conn.getInputStream();
                 } catch (FileNotFoundException ex) {
-                    rspns.setStatus(HttpStatus.NOT_FOUND_404);
+                    server.setStatus(rspns, 404);
                     return;
                 }
-                OutputStream out = rspns.getOutputStream();
+                String found = null;
+                if (relative.getProtocol().equals("file")) {
+                    try {
+                        File file = new File(relative.toURI());
+                        found = Files.probeContentType(file.toPath());
+                    } catch (URISyntaxException | IOException ignore) {
+                    }
+                } else {
+                    found = conn.getContentType();
+                }
+                if (found == null || "content/unknown".equals(found)) {
+                    if (path.endsWith(".html")) {
+                        found = "text/html";
+                    }
+                    if (path.endsWith(".js")) {
+                        found = "text/javascript";
+                    }
+                    if (path.endsWith(".css")) {
+                        found = "text/css";
+                    }
+                }
+                if (found != null) {
+                    server.setContentType(rspns, found);
+                }
+                OutputStream out = server.getOutputStream(rspns);
                 for (;;) {
                     int b = is.read();
                     if (b == -1) {
@@ -414,13 +454,19 @@ Executor, Closeable {
         private void emitScript(Writer w, String prefix, String id) throws IOException {
             w.write("  <script id='exec' type='text/javascript'>");
             w.write("\n"
-                    + "function waitForCommand() {\n"
+                    + "function waitForCommand(counter) {\n"
                     + "  try {\n"
                     + "    if (waitForCommand.seenError) {\n"
                     + "      console.warn('Disconnected from " + prefix + "');\n"
                     + "      return;\n"
                     + "    };\n"
-                    + "    var request = new XMLHttpRequest();\n"
+                    + "    var request = new XMLHttpRequest();\n");
+            if (Browser.this.config.debug) {
+                w.write(""
+                    + "    console.log('GET[' + counter + ']....');\n"
+                );
+            }
+            w.write(""
                     + "    request.open('GET', '" + prefix + "command.js?id=" + id + "', true);\n"
                     + "    request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');\n"
                     + "    request.onerror = function(ev) {\n"
@@ -430,25 +476,71 @@ Executor, Closeable {
                     + "    request.onreadystatechange = function() {\n"
                     + "      if (this.readyState!==4) return;\n"
                     + "      try {\n"
+            );
+            if (Browser.this.config.debug) {
+                w.write(""
+                    + "        console.log('...GET[' + counter + '] got something ' + this.responseText.substring(0,80));\n"
                     + "        var cmd = document.getElementById('cmd');\n"
                     + "        if (cmd) cmd.innerHTML = this.responseText.substring(0,80);\n"
+                );
+            }
+            w.write(""
                     + "        (0 || eval)(this.responseText);\n"
                     + "      } catch (e) {\n"
                     + "        console.warn(e); \n"
                     + "      } finally {\n"
-                    + "        waitForCommand();\n"
+                    + "        waitForCommand(counter + 1);\n"
                     + "      }\n"
                     + "    };\n"
                     + "    request.send();\n"
                     + "  } catch (e) {\n"
                     + "    console.warn(e);\n"
-                    + "    waitForCommand();\n"
+                    + "    waitForCommand(counter + 1);\n"
                     + "  }\n"
                     + "}\n"
-                    + "waitForCommand();\n"
+                    + "waitForCommand(1);\n"
             );
             w.write("  </script>\n");
         }
+    }
+
+    String createCallbackFn(String prefix, String id) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
+            + "var url = '").append(prefix).append("command.js?id=").append(id).append("&name=' + name;\n"
+            + "var body = 'p0=' + encodeURIComponent(a1);\n"
+            + "body += '&p1=' + encodeURIComponent(a2);\n"
+            + "body += '&p2=' + encodeURIComponent(a3);\n"
+            + "body += '&p3=' + encodeURIComponent(a4);\n"
+            + "var request = new XMLHttpRequest();\n"
+        );
+        if (Browser.this.config.debug) {
+            sb.append(""
+            + "console.log('PUT ... ' + body.substring(0, 80));\n"
+            + "var now = new Date().getTime();\n"
+            );
+        }
+        sb.append(""
+            + "request.open('PUT', url, false);\n"
+            + "request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8');\n"
+            + "request.send(body);\n"
+            + "var txt = request.responseText;\n"
+        );
+        if (Browser.this.config.debug) {
+            sb.append(""
+            + "var then = new Date().getTime();\n"
+            + "if (txt && txt !== 'null') {\n"
+            + "  var cmd = document.getElementById('cmd');\n"
+            + "  if (cmd) cmd.innerHTML = txt.substring(0,80);\n"
+            + "}\n"
+            + "console.log('... PUT [' + (then - now) + 'ms]: ' + txt.substring(0, 80));\n"
+            );
+        }
+        sb.append(""
+            + "return txt;\n"
+            + "};\n"
+        );
+        return sb.toString();
     }
 
     private static String findCalleeClassName() {
@@ -477,22 +569,23 @@ Executor, Closeable {
         }
         return "org.netbeans.html"; // NOI18N
     }
-    
-    private static final class Command extends Object
-    implements Executor, ThreadFactory {
+
+    private static final class Command<Request, Response, Runner> extends Object
+    implements Executor {
+        private final HttpServer<Request, Response, ?, Runner> server;
         private final Queue<Object> exec;
         private final Browser browser;
         private final String id;
         private final String prefix;
-        private final Executor RUN;
-        private Thread RUNNER;
+        private Runner RUNNER;
         private Response suspended;
         private boolean initialized;
         private final ProtoPresenter presenter;
 
-        Command(Browser browser, String prefix) {
-            this.RUN = Executors.newSingleThreadExecutor(this);
+        Command(HttpServer<Request, Response, ?, Runner> s, Browser browser, String prefix) {
+            this.server = s;
             this.id = UUID.randomUUID().toString();
+            this.RUNNER = s.initializeRunner(this.id);
             this.exec = new LinkedList<>();
             this.prefix = prefix;
             this.browser = browser;
@@ -509,81 +602,54 @@ Executor, Closeable {
         }
 
         @Override
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(r, "Processor for " + id);
-            RUNNER = t;
-            return t;
+        public final void execute(final Runnable r) {
+            server.runSafe(this.RUNNER, r, this.presenter);
         }
 
-        @Override
-        public final void execute(final Runnable r) {
-            runSafe(r, true);
-        }
-        
-        final void runSafe(final Runnable r, final boolean context) {
-            class Wrap implements Runnable {
-                @Override
-                public void run() {
-                    if (context) {
-                        Closeable c = Fn.activate(Command.this.presenter);
-                        try {
-                            r.run();
-                        } finally {
-                            try {
-                                c.close();
-                            } catch (IOException ex) {
-                                // ignore
-                            }
-                        }
-                    } else {
-                        r.run();
-                    }
-                }
-            }
-            if (RUNNER == Thread.currentThread()) {
-                if (context) {
-                    Runnable w = new Wrap();
-                    w.run();
-                } else {
-                    r.run();
-                }
-            } else {
-                Runnable w = new Wrap();
-                RUN.execute(w);
-            }
-        }
-        
         final synchronized void add(Object obj) {
             if (suspended != null) {
-                try {
-                    suspended.getWriter().write(obj.toString());
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-                suspended.resume();
+                Response rqst = suspended;
+                server.resume(rqst, () -> {
+                    try (Writer w = server.getWriter(rqst)) {
+                        w.write(obj.toString());
+                    } catch (IOException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
                 suspended = null;
                 return;
             }
             exec.add(obj);
         }
-        
+
         private synchronized Object take(Response rspns) {
             Object o = exec.poll();
             if (o != null) {
                 return o;
             }
             suspended = rspns;
-            rspns.suspend();
+            server.suspend(rspns);
             return null;
         }
-        
-        void service(Request rqst, Response rspns) throws Exception {
-            final String methodName = rqst.getParameter("name");
-            Writer w = rspns.getWriter();
+
+        private synchronized boolean initialize(Response rspns) {
+            if (!initialized) {
+                initialized = true;
+                suspended = rspns;
+                server.suspend(rspns);
+                execute(browser.onPageLoad);
+                return true;
+            }
+            return false;
+        }
+
+        void service(Request rqst, Response rspns) throws IOException {
+            final String methodName = server.getParameter(rqst, "name");
+            server.setContentType(rspns, "text/javascript");
+            Writer w = server.getWriter(rspns);
             if (methodName == null) {
-                if (!initialized) {
-                    initialized = true;
-                    execute(browser.onPageLoad);
+                if (initialize(rspns)) {
+                    return;
                 }
                 // send new request
                 Object obj = take(rspns);
@@ -595,13 +661,10 @@ Executor, Closeable {
                 w.write(s);
                 LOG.log(Level.FINE, "Exec global: {0}", s);
             } else {
-                List<String> args = new ArrayList<String>();
-                for (;;) {
-                    String p = rqst.getParameter("p" + args.size());
-                    if (p == null) {
-                        break;
-                    }
-                    args.add(p);
+                List<String> args = new ArrayList<>();
+                String body = server.getBody(rqst);
+                for (String p : body.split("&")) {
+                    args.add(URLDecoder.decode(p.substring(3), "UTF-8"));
                 }
                 String res;
                 try {
@@ -623,19 +686,7 @@ Executor, Closeable {
         }
 
         void callbackFn(ProtoPresenterBuilder.OnPrepared onReady) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("this.toBrwsrSrvr = function(name, a1, a2, a3, a4) {\n"
-                + "var url = '").append(prefix).append("command.js?id=").append(id).append("&name=' + name;\n"
-                + "url += '&p0=' + encodeURIComponent(a1);\n"
-                + "url += '&p1=' + encodeURIComponent(a2);\n"
-                + "url += '&p2=' + encodeURIComponent(a3);\n"
-                + "url += '&p3=' + encodeURIComponent(a4);\n"
-                + "var request = new XMLHttpRequest();\n"
-                + "request.open('GET', url, false);\n"
-                + "request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');\n"
-                + "request.send();\n"
-                + "return request.responseText;\n"
-                + "};\n");
+            String sb = this.browser.createCallbackFn(prefix, id);
             add(sb);
             onReady.callbackIsPrepared("toBrwsrSrvr");
         }
@@ -652,7 +703,7 @@ Executor, Closeable {
             }
             return Level.FINE;
         }
-        
+
         void log(int priority, String msg, Object... args) {
             Level level = findLevel(priority);
 
@@ -668,12 +719,12 @@ Executor, Closeable {
         }
 
         void dispatch(Runnable r) {
-            runSafe(r, false);
+            server.runSafe(RUNNER, r, null);
         }
 
 
         public void displayPage(URL url, Runnable r) {
             throw new UnsupportedOperationException(url.toString());
         }
-    } // end of Command  
+    } // end of Command
 }

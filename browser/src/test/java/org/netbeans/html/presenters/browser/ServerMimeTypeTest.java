@@ -18,42 +18,29 @@
  */
 package org.netbeans.html.presenters.browser;
 
-import org.netbeans.html.presenters.render.Show;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.ServerSocket;
-import java.net.URI;
 import java.net.URL;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.net.URLConnection;
+import java.util.function.Supplier;
 import net.java.html.boot.BrowserBuilder;
 import static org.netbeans.html.presenters.browser.JavaScriptUtilities.closeSoon;
 import static org.netbeans.html.presenters.browser.JavaScriptUtilities.setLoaded;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
 
-public class ServerTest {
-    @Test
-    public void useAsAServer() throws Exception {
+public class ServerMimeTypeTest {
+    @Test(dataProviderClass = ServerFactories.class, dataProvider = "serverFactories")
+    public void checkMimeTypes(String name, Supplier<HttpServer<?,?,?,?>> serverProvider) throws Exception {
         final Thread main = Thread.currentThread();
         final int[] loaded = { 0 };
 
-        int serverPort = selectFreePort();
-
         Browser server = new Browser(
-            new Browser.Config()
-            .command("NONE")
-            .port(serverPort)
+            "test", new Browser.Config().command("NONE"), serverProvider
         );
         BrowserBuilder builder = BrowserBuilder.newBrowser(server)
             .loadPage("server.html")
@@ -63,6 +50,7 @@ public class ServerTest {
             });
         builder.showAndWait();
 
+        int serverPort = server.server().getPort();
         URL connect = new URL("http://localhost:" + serverPort);
         InputStream is = connect.openStream();
         Assert.assertNotNull(is, "Connection opened");
@@ -73,15 +61,20 @@ public class ServerTest {
         final String page = new String(arr, 0, len, "UTF-8");
         assertTrue(page.contains("<h1>Server</h1>"), "Server page loaded OK:\n" + page);
 
-        show(connect.toURI());
+        String cssType = new URL(connect, "test.css").openConnection().getContentType();
+        assertMimeType(cssType, "text/css");
 
-        awaitLoaded(1, loaded);
-        assertEquals(loaded[0], 1, "Connection has been opened");
+        String jsType = new URL(connect, "test.js").openConnection().getContentType();
+        assertMimeType(jsType, "*/javascript");
 
-        show(connect.toURI());
+        String jsMinType = new URL(connect, "test.min.js").openConnection().getContentType();
+        assertMimeType(jsMinType, "*/javascript");
 
-        awaitLoaded(2, loaded);
-        assertEquals(loaded[0], 2, "Second connection has been opened");
+        URLConnection conn = new URL(connect, "non-existing.file").openConnection();
+        assertTrue(conn instanceof HttpURLConnection, "it is HTTP connection: " + conn);
+
+        HttpURLConnection httpConn = (HttpURLConnection) conn;
+        assertEquals(httpConn.getResponseCode(), 404, "Expecting not exist status");
 
         server.close();
         try {
@@ -95,57 +88,15 @@ public class ServerTest {
         }
     }
 
-    private static int selectFreePort() throws IOException {
-        ServerSocket temp = new ServerSocket();
-        temp.bind(null);
-        int port = temp.getLocalPort();
-        temp.close();
-        return port;
-    }
-
-    private static void awaitLoaded(int expected, int[] counter) throws InterruptedException {
-        int cnt = 100;
-        while (cnt-- > 0 && counter[0] != expected) {
-            Thread.sleep(100);
+    private void assertMimeType(String type, String exp) {
+        int semicolon = type.indexOf(';');
+        if (semicolon >= 0) {
+            type = type.substring(0, semicolon);
         }
-    }
-
-    private static void show(URI page) throws IOException {
-        ExecutorService background = Executors.newSingleThreadExecutor();
-        Future<Void> future = background.submit((Callable<Void>) () -> {
-            IOException one, two;
-            try {
-                String ui = System.getProperty("os.name").contains("Mac")
-                        ? "Cocoa" : "GTK";
-                Show.show(ui, page);
-                return null;
-            } catch (IOException ex) {
-                one = ex;
-            }
-            try {
-                Show.show("AWT", page);
-                return null;
-            } catch (IOException ex) {
-                two = ex;
-            }
-            try {
-                Show.show(null, page);
-            } catch (IOException ex) {
-                two.initCause(one);
-                ex.initCause(two);
-                throw ex;
-            }
-            return null;
-        });
-
-        try {
-            Void ignore = future.get(2, TimeUnit.SECONDS);
-            assertNull(ignore);
-            background.shutdown();
-        } catch (InterruptedException | ExecutionException  ex) {
-            throw new AssertionError(ex);
-        } catch (TimeoutException ex) {
-            // OK
+        if (exp.startsWith("*")) {
+            assertTrue(type.endsWith(exp.substring(1)), "Expecting " + exp + " but was: " + type);
+        } else {
+            assertEquals(type, exp);
         }
     }
 }

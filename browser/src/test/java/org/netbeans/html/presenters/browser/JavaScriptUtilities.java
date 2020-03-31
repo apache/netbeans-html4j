@@ -18,19 +18,26 @@
  */
 package org.netbeans.html.presenters.browser;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.netbeans.html.json.tck.JavaScriptTCK;
-import org.netbeans.html.json.tck.KOTest;
-import org.testng.annotations.Factory;
+import net.java.html.js.JavaScriptBody;
 
-public class BrowserTest extends JavaScriptTCK {
-    public BrowserTest() {
+final class JavaScriptUtilities {
+    private JavaScriptUtilities() {
     }
 
-    @Factory public static Object[] compatibilityTests() throws Exception {
-        List<Object> res = new ArrayList<>();
-        ServerFactories.collect("BrowserTest", res, KOTest.class, JavaScriptTCK::testClasses);
-        return res.toArray();
-    }
+    @JavaScriptBody(args = {  }, body =
+          "var h;"
+        + "if (!!window && !!window.location && !!window.location.href)\n"
+        + "  h = window.location.href;\n"
+        + "else "
+        + "  h = null;"
+        + "return h;\n"
+    )
+    static native String findBaseURL();
+
+    @JavaScriptBody(args = {"value"}, body = "document.getElementById('loaded').innerHTML = value;")
+    static native void setLoaded(String value);
+
+    @JavaScriptBody(args = {"ms"}, body = "window.setTimeout(function() { window.close(); }, ms);")
+    static native void closeSoon(int ms);
+
 }

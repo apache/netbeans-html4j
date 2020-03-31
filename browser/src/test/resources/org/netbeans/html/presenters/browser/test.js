@@ -16,21 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.html.presenters.browser;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.netbeans.html.json.tck.JavaScriptTCK;
-import org.netbeans.html.json.tck.KOTest;
-import org.testng.annotations.Factory;
-
-public class BrowserTest extends JavaScriptTCK {
-    public BrowserTest() {
-    }
-
-    @Factory public static Object[] compatibilityTests() throws Exception {
-        List<Object> res = new ArrayList<>();
-        ServerFactories.collect("BrowserTest", res, KOTest.class, JavaScriptTCK::testClasses);
-        return res.toArray();
-    }
-}

@@ -23,43 +23,33 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.glassfish.grizzly.http.server.HttpHandler;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.http.server.Response;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
-import org.glassfish.grizzly.websockets.WebSocket;
-import org.glassfish.grizzly.websockets.WebSocketApplication;
-import org.glassfish.grizzly.websockets.WebSocketEngine;
+import org.netbeans.html.presenters.browser.HttpServer.Handler;
+import org.netbeans.html.presenters.browser.HttpServer.WebSocketApplication;
 
-final class DynamicHTTP extends HttpHandler {
+final class DynamicHTTP extends Handler {
     private static final Logger LOG = Logger.getLogger(DynamicHTTP.class.getName());
     private static int resourcesCount;
-    private List<Resource> resources = new ArrayList<Resource>();
-    private final ServerConfiguration conf;
+    private final List<Resource> resources = new ArrayList<>();
     private final HttpServer server;
     
     DynamicHTTP(HttpServer s) {
         server = s;
-        conf = s.getServerConfiguration();
     }
     
     @Override
-    public void service(Request request, Response response) throws Exception {
-        if ("/dynamic".equals(request.getRequestURI())) {
-            String mimeType = request.getParameter("mimeType");
-            List<String> params = new ArrayList<String>();
+    public <Request, Response> void service(HttpServer<Request, Response, ?, ?> s, Request request, Response response) throws IOException {
+        if ("/dynamic".equals(s.getRequestURI(request))) {
+            String mimeType = s.getParameter(request, "mimeType");
+            List<String> params = new ArrayList<>();
             boolean webSocket = false;
             for (int i = 0;; i++) {
-                String p = request.getParameter("param" + i);
+                String p = s.getParameter(request, "param" + i);
                 if (p == null) {
                     break;
                 }
@@ -69,7 +59,7 @@ final class DynamicHTTP extends HttpHandler {
                 }
                 params.add(p);
             }
-            final String cnt = request.getParameter("content");
+            final String cnt = s.getParameter(request, "content");
             String mangle = cnt.replace("%20", " ").replace("%0A", "\n");
             ByteArrayInputStream is = new ByteArrayInputStream(mangle.getBytes("UTF-8"));
             URI url;
@@ -79,36 +69,27 @@ final class DynamicHTTP extends HttpHandler {
             } else {
                 url = registerResource(res);
             }
-            response.getWriter().write(url.toString());
-            response.getWriter().write("\n");
+            server.getWriter(response).write(url.toString());
+            server.getWriter(response).write("\n");
             return;
         }
 
         for (Resource r : resources) {
-            if (r.httpPath.equals(request.getRequestURI())) {
-                response.setContentType(r.httpType);
+            if (r.httpPath.equals(s.getRequestURI(request))) {
+                server.setContentType(response, r.httpType);
                 r.httpContent.reset();
                 String[] params = null;
                 if (r.parameters.length != 0) {
                     params = new String[r.parameters.length];
                     for (int i = 0; i < r.parameters.length; i++) {
-                        params[i] = request.getParameter(r.parameters[i]);
+                        params[i] = s.getParameter(request, r.parameters[i]);
                         if (params[i] == null) {
                             if ("http.method".equals(r.parameters[i])) {
-                                params[i] = request.getMethod().toString();
+                                params[i] = s.getMethod(request);
                             } else if ("http.requestBody".equals(r.parameters[i])) {
-                                Reader rdr = request.getReader();
-                                StringBuilder sb = new StringBuilder();
-                                for (;;) {
-                                    int ch = rdr.read();
-                                    if (ch == -1) {
-                                        break;
-                                    }
-                                    sb.append((char) ch);
-                                }
-                                params[i] = sb.toString();
+                                params[i] = s.getBody(request);
                             } else if (r.parameters[i].startsWith("http.header.")) {
-                                params[i] = request.getHeader(r.parameters[i].substring(12));
+                                params[i] = s.getHeader(request, r.parameters[i].substring(12));
                             }
                         }
                         if (params[i] == null) {
@@ -117,27 +98,26 @@ final class DynamicHTTP extends HttpHandler {
                     }
                 }
 
-                copyStream(r.httpContent, response.getOutputStream(), null, params);
+                copyStream(r.httpContent, server.getOutputStream(response), null, params);
             }
         }
     }
     
     private URI registerWebSocket(Resource r) {
-        WebSocketEngine.getEngine().register("", r.httpPath, new WS(r));
+  //      WebSocketEngine.getEngine().register("", r.httpPath, new WS(r));
         return pageURL("ws", server, r.httpPath);
     }
 
     private URI registerResource(Resource r) {
         if (!resources.contains(r)) {
             resources.add(r);
-            conf.addHttpHandler(this, r.httpPath);
+            server.addHttpHandler(this, r.httpPath);
         }
         return pageURL("http", server, r.httpPath);
     }
     
     private static URI pageURL(String proto, HttpServer server, final String page) {
-        NetworkListener listener = server.getListeners().iterator().next();
-        int port = listener.getPort();
+        int port = server.getPort();
         try {
             return new URI(proto + "://localhost:" + port + page);
         } catch (URISyntaxException ex) {
@@ -193,13 +173,13 @@ final class DynamicHTTP extends HttpHandler {
         }
 
         @Override
-        public void onMessage(WebSocket socket, String text) {
+        public <WebSocket> void onMessage(HttpServer<?,?, WebSocket, ?> server, WebSocket socket, String text) {
             try {
                 r.httpContent.reset();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 copyStream(r.httpContent, out, null, text);
                 String s = new String(out.toByteArray(), "UTF-8");
-                socket.send(s);
+                server.send(socket, s);
             } catch (IOException ex) {
                 LOG.log(Level.WARNING, "Error processing message " + text, ex);
             }
