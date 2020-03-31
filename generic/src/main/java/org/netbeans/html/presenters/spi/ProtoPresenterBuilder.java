@@ -244,7 +244,7 @@ public final class ProtoPresenterBuilder {
         }
 
         @Override
-        void log(Level level, String msg, Object... args) {
+        void handleLog(Level level, String msg, Object... args) {
             if (logger != null) {
                 logger.log(level.intValue(), msg, args);
             }

@@ -18,9 +18,6 @@
  */
 package org.netbeans.html.presenters.spi;
 
-import org.netbeans.html.presenters.spi.Level;
-import org.netbeans.html.presenters.spi.Generic;
-import org.netbeans.html.presenters.spi.ProtoPresenterBuilder;
 import java.net.URL;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeMethod;
@@ -31,7 +28,7 @@ public class ValueOfTest {
     @BeforeMethod public void initInstance() {
         p = new Generic(true, true, "type", "app") {
             @Override
-            void log(Level level, String msg, Object... args) {
+            void handleLog(Level level, String msg, Object... args) {
             }
 
             @Override

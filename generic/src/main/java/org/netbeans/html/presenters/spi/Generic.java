@@ -40,11 +40,12 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.netbeans.html.boot.spi.Fn;
 
 abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
-    private String msg;
+    private StringBuilder msg;
     private Item call;
     private final NavigableSet<Exported> exported;
     private final int key;
@@ -69,7 +70,22 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         return initialized;
     }
     
-    abstract void log(Level level, String msg, Object... args);
+    final void log(Level level, String msg, Object... args) {
+        StringBuilder sb = this.msg;
+        if (sb != null) {
+            for (int i = 0; i < args.length; i++) {
+                String txt = args[i] == null ? "null" : args[i].toString();
+                msg = msg.replace("{" + i + "}", txt);
+            }
+            synchronized (lock()) {
+                sb.append('[').append(level).append("] ");
+                sb.append(msg);
+                sb.append('\n');
+            }
+        }
+        handleLog(level, msg, args);
+    }
+    abstract void handleLog(Level level, String msg, Object... args);
     
     @Texts({
         "begin=try {\n"
@@ -165,43 +181,43 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             + "\n  impl.toVM = toVM;"
             + "\n  impl.toVM('r', 'OK', 'Initialized', null, null);"
             + "\n})(this);",
-
+        "initializationProtocol=--- Initialization protocol ---\n",
         "error=Cannot initialize DukeScript: @1",
         "version=$version"
     })
     final void init() {
-        if (msg != null) {
-            for (;;) {
-                try {
-                    log(Level.FINE, "Awaiting as of {0}", msg);
-                    initialized.await();
-                    log(Level.FINE, "Waiting is over");
-                    return;
-                } catch (InterruptedException ex) {
-                    log(Level.INFO, "Interrupt", ex);
-                }
+        if (initialized.getCount() == 0) {
+            return;
+        }
+        synchronized (lock()) {
+            if (initialized.getCount() == 0) {
+                return;
+            }
+            if (msg == null) {
+                this.msg = new StringBuilder(Strings.initializationProtocol());
+                callbackFn(new ProtoPresenterBuilder.OnPrepared() {
+                    @Override
+                    public void callbackIsPrepared(String clbk) {
+                        log(Level.FINE, "callbackReady with {0}", clbk);
+                        loadJS(Strings.begin(clbk).toString());
+                        log(Level.FINE, "checking OK state");
+                        loadJS(Strings.init(key, clbk).toString());
+                    }
+                });
             }
         }
-        this.msg = "";
-        callbackFn(new ProtoPresenterBuilder.OnPrepared() {
-            @Override
-            public void callbackIsPrepared(String clbk) {
-                log(Level.FINE, "callbackReady with {0}", clbk);
-                loadJS(Strings.begin(clbk).toString());
-                log(Level.FINE, "checking OK state");
-                if (!assertOK()) {
-                    final CharSequence err = Strings.error(msg);
-                    log(Level.WARNING, "no OK: {0}", err);
-                    throw new IllegalStateException(err.toString());
+        for (int counter = 0;; counter++) {
+            try {
+                handleLog(Level.FINE, "Awaiting as of {0}", counter);
+                if (initialized.await(10, TimeUnit.SECONDS)) {
+                    handleLog(Level.FINE, "Waiting is over");
+                    return;
                 }
-                log(Level.FINE, "assertOK");
-
-                loadJS(Strings.init(key, clbk).toString());
-
-                log(Level.FINE, "callbackReady: countingDown");
-                initialized.countDown();
+                handleLog(Level.INFO, msg.toString());
+            } catch (InterruptedException ex) {
+                handleLog(Level.INFO, "Interrupt", ex);
             }
-        });
+        }
     }
 
     /** @return the name of the callback function */
@@ -589,8 +605,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             if ("OK".equals(typeof)) {
                 log(Level.FINE, "init: {0}", res);
-                this.msg = res;
                 lock().notifyAll();
+                if ("Initialized".equals(res)) {
+                    log(Level.FINE, "callbackReady: countingDown");
+                    handleLog(Level.FINE, msg.toString());
+                    msg = null;
+                    initialized.countDown();
+                }
                 return;
             }
             call.result(typeof, res);
@@ -745,19 +766,6 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             arguments.clear();
         }
         return ret;
-    }
-
-    final boolean assertOK() {
-        synchronized (lock()) {
-            if (msg == null || msg.length() == 0) {
-                try {
-                    lock().wait(10000);
-                } catch (InterruptedException ex) {
-                    // OK, go on and check
-                }
-            }
-            return "OK".equals(msg) || "Initialized".equals(msg);
-        }
     }
     
     private static Object[] adaptParams(Method toCall, List<Object> args) {

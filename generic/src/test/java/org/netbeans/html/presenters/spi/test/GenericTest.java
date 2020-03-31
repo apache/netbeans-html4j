@@ -53,7 +53,7 @@ public class GenericTest extends JavaScriptTCK {
             }
         });
 
-        List<Object> res = new ArrayList<Object>();
+        List<Object> res = new ArrayList<>();
         Class<? extends Annotation> test = 
             loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
