@@ -46,6 +46,7 @@ import org.netbeans.html.boot.spi.Fn;
 
 abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private StringBuilder msg;
+    /** @GuardedBy("this") */
     private Item call;
     private final NavigableSet<Exported> exported;
     private final int key;
@@ -614,9 +615,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 }
                 return;
             }
-            call.result(typeof, res);
-            call = call.prev;
-            lock().notifyAll();
+            final Item c = topMostCall();
+            c.result(typeof, res);
+            registerCall(c.prev);
         }
     }
 
@@ -642,15 +643,12 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             params.addAll(Arrays.asList((Object[]) valueOf(encParams)));
             Object[] converted = adaptParams(method, params);
-            boolean first = call == null;
-            log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, call});
-            call = new Item(call, method, vm, converted);
+            Item top = topMostCall();
+            boolean first = top == null;
+            log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
+            Item newItem = registerCall(new Item(top, method, vm, converted));
             if (first || synchronous) {
-                if (call != null) {
-                    dispatch(call);
-                }
-            } else {
-                lock().notifyAll();
+                dispatch(newItem);
             }
             return javaresult();
         }
@@ -667,11 +665,12 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     return ret;
                 }
                 finished[0] = false;
-                String jsToExec = call.inJavaScript(finished);
-                log(Level.FINE, "jr: {0} jsToExec: {1} finished: {2}", new Object[]{call, jsToExec, finished[0]});
+                final Item top = topMostCall();
+                String jsToExec = top.inJavaScript(finished);
+                log(Level.FINE, "jr: {0} jsToExec: {1} finished: {2}", new Object[]{topMostCall(), jsToExec, finished[0]});
                 if (jsToExec != null) {
                     if (finished[0]) {
-                        call = call.prev;
+                        registerCall(top.prev);
                     }
                     return jsToExec;
                 }
@@ -699,7 +698,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     final void deferExec(StringBuilder sb) {
         synchronized (lock()) {
-            log(Level.FINE, "deferExec: {0} empty: {1}, call: {2}", new Object[]{sb, deferred == null, call});
+            log(Level.FINE, "deferExec: {0} empty: {1}, call: {2}", new Object[]{sb, deferred == null, topMostCall()});
             if (deferred == null) {
                 deferred = sb;
             } else {
@@ -733,13 +732,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
             Item myCall;
             boolean load;
-            if (call != null) {
-                call = myCall = new Item(call, fn);
-                lock().notifyAll();
+            final Item top = topMostCall();
+            if (top != null) {
+                myCall = registerCall(new Item(top, fn));
                 load = synchronous;
                 first = false;
             } else {
-                call = myCall = new Item(null, null);
+                myCall = registerCall(new Item(null, null));
                 load = true;
                 first = true;
             }
@@ -755,8 +754,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 } catch (InterruptedException ex) {
                     log(Level.SEVERE, null, ex);
                 }
-                if (call != null) {
-                    call.inJava();
+                Item c = topMostCall();
+                if (c != null) {
+                    c.inJava();
                 }
                 lock().notifyAll();
             }
@@ -960,5 +960,17 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         void register() {
             active.add(this);
         }
+    }
+
+    private Item topMostCall() {
+        assert Thread.holdsLock(lock());
+        return call;
+    }
+
+    private Item registerCall(Item call) {
+        assert Thread.holdsLock(lock());
+        this.call = call;
+        lock().notifyAll();
+        return call;
     }
 }
