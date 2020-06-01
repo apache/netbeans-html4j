@@ -118,12 +118,12 @@ public final class KnockoutFXTest extends KnockoutTCK {
     }
 
     private static boolean brokenWebSockets(String version) {
-        return 
-            "1.8.0_212".equals(version) ||
-            "1.8.0_221".equals(version) ||
-            "1.8.0_222".equals(version) ||
-            "1.8.0_231".equals(version) ||
-            "1.8.0_241".equals(version);
+        final String prefix = "1.8.0_";
+        if (!version.startsWith(prefix)) {
+            return false;
+        }
+        int updateVersion = Integer.parseInt(version.substring(prefix.length()));
+        return updateVersion >= 212;
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
