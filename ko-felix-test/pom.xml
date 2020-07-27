@@ -32,6 +32,7 @@
     <description>Runs the TCK for Knockout in Felix OSGi Container</description>
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
+        <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
     <build>
         <plugins>

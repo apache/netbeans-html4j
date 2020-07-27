@@ -52,9 +52,10 @@
         </plugins>
     </build>
     <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <bundleSymbolicName>org.netbeans.html.ko-ws-tyrus</bundleSymbolicName>
-  </properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <bundleSymbolicName>org.netbeans.html.ko-ws-tyrus</bundleSymbolicName>
+        <skipTests>${skipJavaFXTests}</skipTests>
+    </properties>
   <dependencies>
     <!-- compile only deps -->
     <dependency>

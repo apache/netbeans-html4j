@@ -233,7 +233,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<Ab
                 throw new IllegalStateException(ex);
             }
         }
-        return (JSObject) newPOJOImpl.call("fxBrwsrId", hash, id);
+        return (JSObject) newPOJOImpl.call("fxBrwsrId", new Object[] { hash, id });
     }
 
     final Object undefined() {
@@ -244,13 +244,13 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<Ab
     }
 
     private int getArrayLength(Object val) throws JSException {
-        int length = ((Number) arraySizeFn().call("array", val, null)).intValue();
+        int length = ((Number) arraySizeFn().call("array", new Object[] { val, null })).intValue();
         return length;
     }
 
     private Object[] toArray(int length, Object val) throws JSException {
         Object[] arr = new Object[length];
-        arraySizeFn().call("array", val, arr);
+        arraySizeFn().call("array", new Object[] { val, arr });
         checkArray(arr);
         return arr;
     }
@@ -565,7 +565,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<Ab
                     synchronized (this) {
                         this.hash = -1;
                         this.id = -1;
-                        obj.call("fxBrwsrId", this);
+                        obj.call("fxBrwsrId", new Object[] { this });
                         assert this.hash != -1;
                         assert this.id != -1;
                         resultHash = this.hash;

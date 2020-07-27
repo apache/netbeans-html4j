@@ -36,6 +36,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <bundleSymbolicName>org.netbeans.html.ko4j</bundleSymbolicName>
     <netbeans.compile.on.save>none</netbeans.compile.on.save> 
+    <skipTests>${skipJavaFXTests}</skipTests>
   </properties>
   <build>
       <plugins>

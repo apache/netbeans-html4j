@@ -29,6 +29,9 @@
     <artifactId>boot-agent-test</artifactId>
     <packaging>jar</packaging>
     <name>Dynamic Boot Test</name>
+    <properties>
+        <skipTests>${skipJavaFXTests}</skipTests>
+    </properties>
     <build>
         <plugins>
             <plugin>

@@ -33,7 +33,6 @@
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <javac.source>1.6</javac.source>
       <netbeans.version>RELEASE110</netbeans.version>
       <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
@@ -43,6 +42,7 @@
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
+      <skipJavaFXTests>true</skipJavaFXTests>
   </properties>
   <modules>
     <module>json</module>
@@ -154,7 +154,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <version>0.54</version>
                 </docletArtifact>
                 <additionalOptions>
-                    -snippetpath boot-fx/src/test 
+                    -snippetpath boot-fx/src/test
                     -snippetpath boot-script/src/test
                     -snippetpath json/src/test
                     -snippetpath webkit/src/test
@@ -275,10 +275,18 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.8.1</version>
+                <dependencies>
+                    <dependency>
+                        <artifactId>compiler-maven-plugin</artifactId>
+                        <groupId>org.frgaal</groupId>
+                        <version>14.0.1</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
-                    <source>${javac.source}</source>
-                    <target>${javac.source}</target>
+                    <compilerId>frgaal</compilerId>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <testSource>1.8</testSource>
                     <testTarget>1.8</testTarget>
                 </configuration>
@@ -326,6 +334,36 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <packages>${sigtestPackages}</packages>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <packages>${publicPackages}</packages>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <releaseVersion>1.7</releaseVersion>
+                </configuration>
             </plugin>
           </plugins>
       </pluginManagement>
@@ -508,61 +546,16 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
               </file>
           </activation>
           <properties>
-            <jfxrt.jar>${java.home}/lib/ext/jfxrt.jar</jfxrt.jar>
-          </properties>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.netbeans.tools</groupId>
-                      <artifactId>sigtest-maven-plugin</artifactId>
-                      <version>1.2</version>
-                      <executions>
-                          <execution>
-                              <id>check</id>
-                              <goals>
-                                  <goal>check</goal>
-                              </goals>
-                              <phase>integration-test</phase>
-                              <configuration>
-                                  <packages>${sigtestPackages}</packages>
-                              </configuration>
-                          </execution>
-                          <execution>
-                              <id>generate</id>
-                              <goals>
-                                  <goal>generate</goal>
-                              </goals>
-                              <phase>package</phase>
-                              <configuration>
-                                  <packages>${publicPackages}</packages>
-                              </configuration>
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <releaseVersion>1.7</releaseVersion>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
-      <profile>
-          <id>jdk7</id>
-          <activation>
-              <file>
-                  <exists>${java.home}/lib/jfxrt.jar</exists>
-              </file>
-          </activation>
-          <properties>
-            <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
+              <skipJavaFXTests>false</skipJavaFXTests>
           </properties>
       </profile>
       <profile>
-          <id>jdk13+</id>
+          <id>jdk11+</id>
           <activation>
-              <jdk>[13,]</jdk>
+              <jdk>[11,]</jdk>
           </activation>
           <properties>
-              <javac.source>1.7</javac.source>
+              <skipJavaFXTests>false</skipJavaFXTests>
           </properties>
       </profile>
   </profiles>

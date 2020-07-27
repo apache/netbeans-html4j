@@ -51,7 +51,7 @@ public final class FXConsole {
     }
     
     private void registerImpl(JSObject eng, String attr, Level l) {
-        eng.call("call", null, attr, l, this);
+        eng.call("call", new Object[] { null, attr, l, this });
     }
     
     public void log(Level l, String msg) {
