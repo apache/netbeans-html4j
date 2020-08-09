@@ -179,22 +179,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             res = findPkg(e).replace('.', '/') + "/" + r.value();
         }
 
-        try {
-            FileObject os = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", res);
-            os.openInputStream().close();
-        } catch (IOException ex1) {
-            try {
-                FileObject os2 = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", res);
-                os2.openInputStream().close();
-            } catch (IOException ex2) {
-                try {
-                    FileObject os3 = processingEnv.getFiler().getResource(StandardLocation.CLASS_PATH, "", res);
-                    os3.openInputStream().close();
-                } catch (IOException ex3) {
-                    msg.printMessage(Diagnostic.Kind.ERROR, "Cannot find resource " + res, e);
-                }
-            }
-        }
+        verifyResource(res, msg, e);
 
         boolean found = false;
         for (Element mthod : e.getEnclosedElements()) {
@@ -210,6 +195,38 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             msg.printMessage(Diagnostic.Kind.ERROR, "At least one method needs @JavaScriptBody annotation. "
                     + "Otherwise it is not guaranteed the resource will ever be loaded,", e
             );
+        }
+    }
+
+    private void verifyResource(final String res, final Messager msg, Element e) {
+        Diagnostic.Kind[] missingReferenceError = { Diagnostic.Kind.ERROR };
+        IOException[] ex = { null };
+        if (verifyResourceAtPath(res, StandardLocation.SOURCE_PATH, ex, missingReferenceError)) {
+            return;
+        }
+        if (verifyResourceAtPath(res, StandardLocation.CLASS_OUTPUT, ex, missingReferenceError)) {
+            return;
+        }
+        if (verifyResourceAtPath(res, StandardLocation.CLASS_PATH, ex, missingReferenceError)) {
+            return;
+        }
+        if (ex[0] != null) {
+            ex[0].printStackTrace();
+        }
+        msg.printMessage(missingReferenceError[0], "Cannot find resource " + res, e);
+    }
+
+    private boolean verifyResourceAtPath(final String res, StandardLocation location, IOException[] exArr, Diagnostic.Kind[] missingReferenceError)  {
+        try {
+            FileObject os = processingEnv.getFiler().getResource(location, "", res);
+            os.openInputStream().close();
+            return true;
+        } catch (IOException ex) {
+            exArr[0] = ex;
+            return false;
+        } catch (Exception | Error err) {
+            missingReferenceError[0] = Diagnostic.Kind.MANDATORY_WARNING;
+            return false;
         }
     }
 
