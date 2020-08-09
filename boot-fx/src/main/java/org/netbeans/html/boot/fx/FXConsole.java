@@ -18,9 +18,15 @@
  */
 package org.netbeans.html.boot.fx;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
 /** This is an implementation package - just
@@ -31,29 +37,52 @@ import netscape.javascript.JSObject;
  *
  * @author Jaroslav Tulach
  */
-public final class FXConsole {
+public final class FXConsole implements ChangeListener<String> {
     static final Logger LOG = Logger.getLogger(FXConsole.class.getName());
-    
-    private FXConsole() {
+    private String title;
+    final WebView view;
+    final Stage stage;
+
+    private static final List<FXConsole> all = new ArrayList<FXConsole>();
+
+    FXConsole(WebView view, Stage stage) {
+        all.add(this);
+        this.view = view;
+        this.stage = stage;
     }
 
-    static void register(WebEngine eng) {
+    void register(WebEngine eng) {
         JSObject fn = (JSObject) eng.executeScript(""
-            + "(function(attr, l, c) {"
-            + "  window.console[attr] = function(msg) { c.log(l, msg); };"
+            + "(function(attr, l, FXConsole) {\n"
+            + "  window.console[attr] = function(msg) {\n"
+            + "    FXConsole.log(l, msg);\n"
+            + "  };"
             + "})"
         );
-        FXConsole c = new FXConsole();
-        c.registerImpl(fn, "log", Level.INFO);
-        c.registerImpl(fn, "info", Level.INFO);
-        c.registerImpl(fn, "warn", Level.WARNING);
-        c.registerImpl(fn, "error", Level.SEVERE);
+        registerImpl(fn, "log", Level.INFO);
+        registerImpl(fn, "info", Level.INFO);
+        registerImpl(fn, "warn", Level.WARNING);
+        registerImpl(fn, "error", Level.SEVERE);
     }
-    
+
     private void registerImpl(JSObject eng, String attr, Level l) {
         eng.call("call", new Object[] { null, attr, l, this });
     }
-    
+
+    void observeWebViewTitle() {
+        view.getEngine().titleProperty().addListener(this);
+        this.changed(null, null, null);
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends String> ov, String t, String t1) {
+        title = view.getEngine().getTitle();
+        if (title != null) {
+            stage.setTitle(title);
+        }
+    }
+
+    // called from JavaScript
     public void log(Level l, String msg) {
         LOG.log(l, msg);
     }
