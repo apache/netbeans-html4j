@@ -144,12 +144,13 @@
                   <plugin>
                       <groupId>org.thingsboard</groupId>
                       <artifactId>gradle-maven-plugin</artifactId>
-                      <version>1.0.9</version>
+                      <version>1.0.10</version>
                       <configuration>
                           <tasks>
                               <task>build</task>
                           </tasks>
                           <gradleProjectDirectory>src/test/resources/org/netbeans/html/mojo/gradle1</gradleProjectDirectory>
+                          <gradleVersion>6.3</gradleVersion>
                       </configuration>
                       <executions>
                           <execution>
