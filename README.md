@@ -77,7 +77,7 @@ $ mvn clean install
 ```
 
 and create a pull request, which may then be merged into the
-official [Apache repository](https://gitbox.apache.org/repos/asf?p=netbeans-html4j.git).
+official [Apache repository](https://gitbox.apache.org/repos/asf/netbeans-html4j.git).
 
 ### Full History
 
