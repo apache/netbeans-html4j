@@ -218,16 +218,17 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<Ab
     JSObject createPOJOWrapper(int hash, int id) {
         if (newPOJOImpl == null) {
             try {
-                newPOJOImpl = (JSObject) defineJSFn(
-                    "var k = {};\n" +
-                    "k.fxBrwsrId = function(hash, id) {\n" +
-                    "  var obj = {};\n" +
-                    "  Object.defineProperty(obj, 'fxBrwsrId', {\n" +
-                    "    value : function(callback) { callback.hashAndId(hash, id) }\n" +
-                    "  });\n" +
-                    "  return obj;\n" +
-                    "};\n" +
-                    "return k;\n", new String[] { "callback" }, null
+                newPOJOImpl = (JSObject) defineJSFn("""
+                    var k = {};
+                    k.fxBrwsrId = function(hash, id) {
+                      var obj = {};
+                      Object.defineProperty(obj, 'fxBrwsrId', {
+                        value : function(callback) { callback.hashAndId(hash, id) }
+                      });
+                      return obj;
+                    };
+                    return k;
+                    """, new String[] { "callback" }, null
                 ).invokeImpl(null, false);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);

@@ -221,9 +221,10 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static native void setProperty(Object json, String key, Object value);
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = "\n"
-        + "var f = new Function(s);\n"
-        + "return f.apply(null, args);\n"
+    @JavaScriptBody(args = { "s", "args" }, body = """
+        var f = new Function(s);
+        return f.apply(null, args);
+        """
     )
     public native Object executeScript(String script, Object[] arguments);
 

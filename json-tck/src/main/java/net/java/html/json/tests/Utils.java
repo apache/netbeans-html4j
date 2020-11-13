@@ -106,57 +106,58 @@ public final class Utils {
     }
 
     static void exposeTypeOf(Class<?> clazz) throws Exception {
-        String s =
-          "var global = 0 || eval('this');\n" +
-          "if (!global['getTypeof']) {\n" +
-          "  global['getTypeof'] = function (o) {\n" +
-          "    return typeof o;\n" +
-          "  };\n" +
-          "}\n" +
-          "\n";
+        String s = """
+          var global = 0 || eval('this');
+          if (!global['getTypeof']) {
+            global['getTypeof'] = function (o) {
+              return typeof o;
+            };
+          }
+          """;
         executeScript(clazz, s);
     }
     
     static Object exposeHTML(Class<?> clazz, String html) throws Exception {
-        String s = 
-          "var n = window.document.getElementById('ko.test.div'); \n "
-        + "if (!n) { \n"
-        + "  n = window.document.createElement('div'); \n "
-        + "  n.id = 'ko.test.div'; \n "
-        + "  var body = window.document.getElementsByTagName('body')[0];\n"
-        + "  body.appendChild(n);\n"
-        + "}\n"
-        + "n.innerHTML = arguments[0]; \n ";
+        String s = """
+          var n = window.document.getElementById('ko.test.div'); 
+           if (!n) { 
+            n = window.document.createElement('div'); 
+             n.id = 'ko.test.div'; 
+             var body = window.document.getElementsByTagName('body')[0];
+            body.appendChild(n);
+          }
+          n.innerHTML = arguments[0]; 
+           """;
         return executeScript(clazz, s, html);
     }
 
     static int countChildren(Class<?> caller, String id) throws Exception {
-        return ((Number) executeScript(caller, 
-            "var e = window.document.getElementById(arguments[0]);\n" + 
-            "if (typeof e === 'undefined') return -2;\n " + 
-            "var list = e.childNodes;\n" +
-            "var cnt = 0;\n" + 
-            "for (var i = 0; i < list.length; i++) {\n" + 
-            "  if (list[i].nodeType == 1) cnt++;\n" + 
-            "}\n" + 
-            "return cnt;\n"
-            , id
+        return ((Number) executeScript(caller, """
+            var e = window.document.getElementById(arguments[0]);
+            if (typeof e === 'undefined') return -2;
+             var list = e.childNodes;
+            var cnt = 0;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].nodeType == 1) cnt++;
+            }
+            return cnt;
+            """, id
         )).intValue();
     }
 
     static Object addChildren(Class<?> caller, String id, String field, Object value) throws Exception {
-        return executeScript(caller, 
-            "var e = window.document.getElementById(arguments[0]);\n" + 
-            "var f = arguments[1];\n" + 
-            "var v = arguments[2];\n" + 
-            "if (typeof e === 'undefined') return -2;\n " + 
-            "var c = ko.contextFor(e);\n" +
-            "var fn = c.$rawData[f];\n" +
-            "var arr = c.$rawData[f]();\n" +
-            "arr.push(v);\n" + 
-            "fn(arr);\n" + 
-            "return arr;\n"
-            , id, field, value
+        return executeScript(caller, """
+            var e = window.document.getElementById(arguments[0]);
+            var f = arguments[1];
+            var v = arguments[2];
+            if (typeof e === 'undefined') return -2;
+             var c = ko.contextFor(e);
+            var fn = c.$rawData[f];
+            var arr = c.$rawData[f]();
+            arr.push(v);
+            fn(arr);
+            return arr;
+            """, id, field, value
         );
     }
     

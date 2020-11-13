@@ -92,20 +92,20 @@ public class Jsr223JavaScriptTest {
     }
 
     private static void assertNoGlobalSymbolsLeft(ScriptEngine engine) throws ScriptException {
-        Object left = engine.eval(
-                "(function() {\n" +
-                        "  var names = Object.getOwnPropertyNames(this);\n" +
-                        "  for (var i = 0; i < names.length; i++) {\n" +
-                        "    var n = names[i];\n" +
-                        "    if (n === 'Object') continue;\n" +
-                        "    if (n === 'Number') continue;\n" +
-                        "    if (n === 'Boolean') continue;\n" +
-                        "    if (n === 'Array') continue;\n" +
-                        "    delete this[n];\n" +
-                        "  }\n" +
-                        "  return Object.getOwnPropertyNames(this).toString();\n" +
-                        "})()\n" +
-                        ""
+        Object left = engine.eval("""
+            (function() {
+              var names = Object.getOwnPropertyNames(this);
+              for (var i = 0; i < names.length; i++) {
+                var n = names[i];
+                if (n === 'Object') continue;
+                if (n === 'Number') continue;
+                if (n === 'Boolean') continue;
+                if (n === 'Array') continue;
+                delete this[n];
+              }
+              return Object.getOwnPropertyNames(this).toString();
+            })()
+            """
         );
         assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
     }
