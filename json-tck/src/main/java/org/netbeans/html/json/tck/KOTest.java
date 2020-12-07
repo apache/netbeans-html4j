@@ -23,10 +23,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Annotates method that is part of {@link KnockoutTCK test compatibility kit} 
+/** Annotates method that is part of {@link KnockoutTCK visual test compatibility kit}
+ * or {@link JavaScriptTCK headless test compatibility kit}
  * and should be executed in appropriate environment. The method annotated by
  * this annotation will be public instance method of its class 
- * with no arguments.
+ * with no arguments. A typical way to enumerate such methods is:
+ * <p>
+ * {@codesnippet net.java.html.boot.script.ScriptEngineJavaScriptTCK}
+ * and then one can execute such methods as
+ * <p>
+ * {@codesnippet net.java.html.boot.script.ScriptEngineCase#run}
  *
  * @author Jaroslav Tulach
  */

@@ -95,7 +95,9 @@ public final class KnockoutFXTest extends KnockoutTCK {
         return res.toArray();
     }
 
-    private static void seekKOTests(Class<?> c, List<Object> res) throws SecurityException, ClassNotFoundException {
+    // BEGIN: org.netbeans.html.ko4j.KnockoutFXTest
+    private static void seekKOTests(Class<?> c, List<Object> res)
+    throws ClassNotFoundException {
         Class<? extends Annotation> koTest =
             c.getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
@@ -108,6 +110,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
             }
         }
     }
+    // END: org.netbeans.html.ko4j.KnockoutFXTest
 
     private static boolean skipUnsupported(Method m) {
         String version = System.getProperty("java.version"); // NOI18N

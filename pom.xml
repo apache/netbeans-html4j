@@ -156,6 +156,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <additionalOptions>
                     -snippetpath boot-fx/src/test
                     -snippetpath boot-script/src/test
+                    -snippetpath ko4j/src/test
                     -snippetpath json/src/test
                     -snippetpath webkit/src/test
                     ${javadoc.allowjs}
