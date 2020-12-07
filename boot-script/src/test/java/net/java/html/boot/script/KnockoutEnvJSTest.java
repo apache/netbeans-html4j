@@ -70,7 +70,9 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     @Factory public static Object[] compatibilityTests() throws Exception {
         ScriptEngine eng = new ScriptEngineManager().getEngineByName("nashorn");
         if (eng == null) {
-            throw new SkipException("Nashorn engine not found. Skipping!");
+            return new Object[] {
+                new KOCase(null, null, "Nashorn engine not found. Skipping!")
+            };
         }
 
         Class[] arr = testClasses();

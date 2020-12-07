@@ -50,7 +50,7 @@ public final class KOCase implements ITest, Runnable {
 
     @Override
     public String getTestName() {
-        return m.getName();
+        return m != null ? m.getName() : skipMsg;
     }
 
     @Test

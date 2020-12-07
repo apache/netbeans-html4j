@@ -33,7 +33,8 @@
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <netbeans.version>RELEASE110</netbeans.version>
+      <netbeans.version>RELEASE121</netbeans.version>
+      <graalvm.version>20.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
       <publicPackages />
@@ -280,7 +281,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <dependency>
                         <artifactId>compiler-maven-plugin</artifactId>
                         <groupId>org.frgaal</groupId>
-                        <version>14.0.1</version>
+                        <version>15.0.0</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -534,6 +535,20 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <groupId>org.netbeans.api</groupId>
             <type>jar</type>
             <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>js</artifactId>
+            <groupId>org.graalvm.js</groupId>
+            <type>jar</type>
+            <scope>test</scope>
+            <version>${graalvm.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>js-scriptengine</artifactId>
+            <groupId>org.graalvm.js</groupId>
+            <type>jar</type>
+            <scope>test</scope>
+            <version>${graalvm.version}</version>
         </dependency>
       </dependencies>
   </dependencyManagement>
