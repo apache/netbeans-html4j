@@ -18,8 +18,6 @@
  */
 package net.java.html.boot.script;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -31,7 +29,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.json.tck.KOTest;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 
@@ -39,8 +36,8 @@ import org.testng.annotations.Factory;
  *
  * @author Jaroslav Tulach
  */
-public class Jsr223JavaScriptTest {
-    public Jsr223JavaScriptTest() {
+public class ScriptEngineTest {
+    public ScriptEngineTest() {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
@@ -79,16 +76,7 @@ public class Jsr223JavaScriptTest {
         assertNoGlobalSymbolsLeft(engine);
         final String prefix = "[" + engine.getFactory().getEngineName() + "] ";
 
-        Class<? extends Annotation> test = KOTest.class;
-        Class[] arr = Jsr223JavaScriptTst.tests();
-        for (Class c : arr) {
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(test) != null) {
-                    res.add(new SingleCase(prefix, browserPresenter[0], m));
-                }
-            }
-        }
-
+        ScriptEngineJavaScriptTCK.collectTckTests(res, (m) -> new ScriptEngineCase(prefix, browserPresenter[0], m));
     }
 
     private static void assertNoGlobalSymbolsLeft(ScriptEngine engine) throws ScriptException {
@@ -111,7 +99,7 @@ public class Jsr223JavaScriptTest {
     }
 
     private static Fn.Presenter createPresenter(ScriptEngine engine) {
-        final Executor someExecutor = SingleCase.JS;
+        final Executor someExecutor = (r) -> r.run();
         // BEGIN: Jsr223JavaScriptTest#createPresenter
         return Scripts.newPresenter()
             .engine(engine)
