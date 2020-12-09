@@ -32,7 +32,7 @@ before_script:
 script:
   - $JAVA_HOME/bin/java -version
   - mvn install -DskipTests $ARGS
-  - mvn verify $ARGS
+  - mvn -q verify $ARGS
   - mvn javadoc:aggregate
 
 matrix:

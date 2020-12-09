@@ -197,6 +197,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
+                <version>0.13</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -207,6 +208,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     </execution>
                 </executions>
                 <configuration>
+                    <parseSCMIgnoresAsExcludes>false</parseSCMIgnoresAsExcludes>
                     <excludes>
                         <exclude>release.properties</exclude>
                         <exclude>**/target/**</exclude>
