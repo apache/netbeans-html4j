@@ -160,6 +160,19 @@ public final class Utils {
         );
     }
     
+    static void scheduleClick(Class<?> clazz, String id, int delay) throws Exception {
+        String s = "var id = arguments[0]; var delay = arguments[1];"
+            + "var e = window.document.getElementById(id);\n "
+            + "var f = function() {;\n "
+            + "  var ev = window.document.createEvent('MouseEvents');\n "
+            + "  ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
+            + "  e.dispatchEvent(ev);\n"
+            + "};\n"
+            + "window.setTimeout(f, delay);";
+        Utils.executeScript(clazz, s, id, delay);
+    }
+    
+    
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
         for (KnockoutTCK tck : tcks(clazz)) {

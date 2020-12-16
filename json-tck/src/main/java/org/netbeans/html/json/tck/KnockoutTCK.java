@@ -27,6 +27,7 @@ import net.java.html.json.tests.GCKnockoutTest;
 import net.java.html.json.tests.JSONTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.MinesTest;
+import net.java.html.json.tests.ObtainAndComputeTest;
 import net.java.html.json.tests.OperationsTest;
 import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
@@ -140,6 +141,7 @@ public abstract class KnockoutTCK {
             JSONTest.class,
             KnockoutTest.class,
             MinesTest.class,
+            ObtainAndComputeTest.class,
             OperationsTest.class,
             WebSocketTest.class,
             GCKnockoutTest.class

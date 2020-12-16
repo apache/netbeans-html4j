@@ -1472,7 +1472,7 @@ public final class ModelProcessor extends AbstractProcessor {
             "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
         );
         {
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("        ").append(inPckName(clazz, false)).append(".").append(n).append("(");
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
