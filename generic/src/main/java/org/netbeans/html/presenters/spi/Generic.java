@@ -667,7 +667,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             params.addAll(Arrays.asList((Object[]) args));
             Object[] converted = adaptParams(method, params);
             Item top = topMostCall();
-            boolean first = top == null;
+            boolean first = top == null || Boolean.TRUE.equals(top.done);
             log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
             Item newItem = registerCall(new Item(nextCallId(), top, method, vm, converted));
             if (first || synchronous) {
