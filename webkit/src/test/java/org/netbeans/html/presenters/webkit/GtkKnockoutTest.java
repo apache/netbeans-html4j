@@ -58,10 +58,10 @@ public final class GtkKnockoutTest extends KnockoutTCK {
     private static Class<?> browserClass;
     private static Fn.Presenter browserContext;
     private static final Timeout WATCHER = new Timeout(60000);
-    
+
     public GtkKnockoutTest() {
     }
-    
+
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class[] arr = testClasses();
         for (int i = 0; i < arr.length; i++) {
@@ -70,22 +70,30 @@ public final class GtkKnockoutTest extends KnockoutTCK {
                 "All classes loaded by the same classloader"
             );
         }
-        
+
         URI uri = DynamicHTTP.initServer();
-    
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(
-            new WebKitPresenter(true)
-        ).loadClass(GtkKnockoutTest.class).
-            loadPage(uri.toString()).
-            invoke("initialized");
-        
-        Future<Void> future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
-            @Override
-            public Void call() {
-                bb.showAndWait();
-                return null;
-            }
-        });
+
+        Future<Void> future;
+        try {
+            final BrowserBuilder bb = BrowserBuilder.newBrowser(
+                new WebKitPresenter(true)
+            ).loadClass(GtkKnockoutTest.class).
+                loadPage(uri.toString()).
+                invoke("initialized");
+
+            future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
+                @Override
+                public Void call() {
+                    bb.showAndWait();
+                    return null;
+                }
+            });
+        } catch (LinkageError err) {
+            err.printStackTrace();
+            return new Object[]{
+                new Case(null, null, err.getMessage())
+            };
+        }
 
         List<Object> res = new ArrayList<>();
         try {
@@ -116,7 +124,7 @@ public final class GtkKnockoutTest extends KnockoutTCK {
             asSubclass(Annotation.class);
         for (Method m : c.getMethods()) {
             if (m.getAnnotation(koTest) != null) {
-                res.add(new Case(browserContext, m));
+                res.add(new Case(browserContext, m, null));
             }
         }
     }
@@ -127,13 +135,13 @@ public final class GtkKnockoutTest extends KnockoutTCK {
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = Fn.activePresenter();
         GtkKnockoutTest.class.notifyAll();
     }
-    
+
     public static void initialized() throws Exception {
         Assert.assertSame(GtkKnockoutTest.class.getClassLoader(),
             ClassLoader.getSystemClassLoader(),
@@ -142,7 +150,7 @@ public final class GtkKnockoutTest extends KnockoutTCK {
         GtkKnockoutTest.initialized(GtkKnockoutTest.class);
         browserContext = Fn.activePresenter();
     }
-    
+
     @Override
     public BrwsrCtx createContext() {
         KO4J ko4j = new KO4J();
@@ -166,7 +174,7 @@ public final class GtkKnockoutTest extends KnockoutTCK {
         }
         return json;
     }
-    
+
     @JavaScriptBody(args = {}, body = "return new Object();")
     private static native Object createJSON();
     @JavaScriptBody(args = { "json", "key", "value" }, body = "json[key] = value;")
@@ -179,7 +187,7 @@ public final class GtkKnockoutTest extends KnockoutTCK {
     )
     public native Object executeScript(String script, Object[] arguments);
 
-    @JavaScriptBody(args = {  }, body = 
+    @JavaScriptBody(args = {  }, body =
           "var h;"
         + "if (!!window && !!window.location && !!window.location.href)\n"
         + "  h = window.location.href;\n"
@@ -188,7 +196,7 @@ public final class GtkKnockoutTest extends KnockoutTCK {
         + "return h;\n"
     )
     private static native String findBaseURL();
-    
+
     @Override
     public URI prepareURL(String content, String mimeType, String[] parameters) {
         try {

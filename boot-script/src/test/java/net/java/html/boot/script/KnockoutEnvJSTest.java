@@ -166,6 +166,8 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
                 return "Does not work on JDK8, due to JDK-8046013";
             case "modifyRadioValueOnEnum":
                 return "Does not work on JDK8";
+            case "obtainAndComputeTest":
+                return "Browser doesn't support addEventListener or attachEvent";
         }
         return null;
     }
