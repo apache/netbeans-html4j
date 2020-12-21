@@ -44,9 +44,11 @@ public final class Receiver {
     }
     
     @JavaScriptBody(args = { "v" }, keepAlive = false, javacall = true, 
-        body = "return function(rec) {\n"
-        + "  rec.@net.java.html.js.tests.Receiver::set(Ljava/lang/Object;)(v);\n"
-        + "};\n")
+        body = """
+               return function(rec) {
+                 rec.@net.java.html.js.tests.Receiver::set(Ljava/lang/Object;)(v);
+               };
+               """)
     private static native Object initFn(Object v);
     
     @JavaScriptBody(args = { "fn", "thiz" }, body =
