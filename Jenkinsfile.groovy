@@ -17,4 +17,4 @@
  * under the License.
  */
 
-asfStandardBuild jdk:"jdk_11_latest",xvfb:true,cmdline:"clean install -DskipTests javadoc:aggregate site:jar"
+asfStandardBuild jdk:"jdk_11_latest",xvfb:true,cmdline:"clean -DskipTests javadoc:aggregate site:jar install"
