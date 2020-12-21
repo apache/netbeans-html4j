@@ -39,23 +39,25 @@ public final class JsGLProvider extends GLProvider<Object, Long> {
         args = { "c", "onlyOnce", "enableHighAccuracy", "timeout", "maximumAge" }, 
         javacall = true, 
         body = 
-        "var self = this;\n" +
-        "var ok = function (position) {\n" +
-        "  self.@org.netbeans.html.geo.impl.JsGLProvider::onLocation(Ljava/lang/Object;Ljava/lang/Object;)(c, position);\n" +
-        "};\n" +
-        "var fail = function (error) {\n" +
-        "  self.@org.netbeans.html.geo.impl.JsGLProvider::onError(Ljava/lang/Object;Ljava/lang/String;I)(c, error.message, error.code);\n" +
-        "};\n" +
-        "var options = {};\n" +
-        "options.enableHighAccuracy = enableHighAccuracy;\n" +
-        "if (timeout >= 0) options.timeout = timeout;\n" +
-        "if (maximumAge >= 0) options.maximumAge = maximumAge;\n" +
-        "if (onlyOnce) {\n" +
-        "  navigator.geolocation.getCurrentPosition(ok, fail, options);\n" +
-        "  return 0;\n" +
-        "} else {\n" +
-        "  return navigator.geolocation.watchPosition(ok, fail, options);\n" +
-        "}\n"
+        """
+        var self = this;
+        var ok = function (position) {
+          self.@org.netbeans.html.geo.impl.JsGLProvider::onLocation(Ljava/lang/Object;Ljava/lang/Object;)(c, position);
+        };
+        var fail = function (error) {
+          self.@org.netbeans.html.geo.impl.JsGLProvider::onError(Ljava/lang/Object;Ljava/lang/String;I)(c, error.message, error.code);
+        };
+        var options = {};
+        options.enableHighAccuracy = enableHighAccuracy;
+        if (timeout >= 0) options.timeout = timeout;
+        if (maximumAge >= 0) options.maximumAge = maximumAge;
+        if (onlyOnce) {
+          navigator.geolocation.getCurrentPosition(ok, fail, options);
+          return 0;
+        } else {
+          return navigator.geolocation.watchPosition(ok, fail, options);
+        }
+        """
     )
     private long doStart(
         Query c,

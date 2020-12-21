@@ -91,99 +91,100 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     abstract void handleLog(Level level, String msg, Object... args);
     
     @Texts({
-        "begin=try {\n"
-        + "  @1('r', -1, 'OK', 'Connected', null);\n"
-        + "} catch (e) {\n"
-        + "  console.warn(e);\n"
-        + "}\n",
-        
-        "init=(function(global) {"
-            + "\n  var fncns = new Array();"
-            + "\n  var js2j = new Array();"
-            + "\n  function jobject(id,value) {"
-            + "\n    Object.defineProperty(this, 'id', { value : id });"
-            + "\n    Object.defineProperty(this, 'v', { value : value });"
-            + "\n    return this;"
-            + "\n  };"
-            + "\n  Object.defineProperty(jobject.prototype, 'native', { value : true });"
-            + "\n  Object.defineProperty(jobject.prototype, 'valueOf', { value : function() { return this.v ? this.v : '[jobject ' + this.id + ']'; } });"
-            + "\n  Object.defineProperty(jobject.prototype, 'toString', { value : jobject.prototype.valueOf });"
-            + "\n  var toVM = global['@2'];"
-            + "\n  delete global['@2'];"
-            + "\n  if (typeof toVM !== 'function') {"
-            + "\n    throw 'toVM should be a function: ' + toVM;"
-            + "\n  }"
-            + "\n  function toJava(method, id, r) {"
-            + "\n      var t = typeof r;"
-            + "\n      if (t === 'function') t = 'object';"
-            + "\n      if (t === 'undefined' || r === null) {"
-            + "\n        t = 'null';"
-            + "\n        r = null;"
-            + "\n      } else if (t === 'object') {"
-            + "\n        if (r['native']) {"
-            + "\n          t = 'java';"
-            + "\n          r = r.id;"
-            + "\n        } else if (Object.prototype.toString.call(r) === '[object Array]') {"
-            + "\n        t = 'array';"
-            + "\n        var l = r.length + ':';"
-            + "\n        for (var i = 0; i < r.length; i++) {"
-            + "\n            var toObj = toJava(null, id, r[i]);"
-            + "\n            l += toObj.length + ':' + toObj;"
-            + "\n          }"
-            + "\n          r = l;"
-            + "\n        } else {"
-            + "\n          var size = js2j.length;"
-            + "\n          js2j.push(r);"
-            + "\n          r = size;"
-            + "\n        }"
-            + "\n      }"
-            + "\n      if (method !== null) toVM(method, id, t, r, null);"
-            + "\n      else return t + ':' + r;"
-            + "\n  }"
-            + "\n  var impl = {};"
-            + "\n  impl.key = @1;"
-            + "\n  global.ds = function(key) {"
-            + "\n    if (key != impl.key) {"
-            + "\n      impl = null;"
-            + "\n      console.warn('Surprising access to Java with ' + key);"
-            + "\n    }"
-            + "\n    return impl;"
-            + "\n  };"
-            + "\n  impl.toJava = toJava;"
-            + "\n  impl.rg = function(id, fn) {"
-            + "\n    fncns[id] = fn;"
-            + "\n  };"
-            + "\n  impl.fn = function(index, n, id, self) {"
-            + "\n    var args = Array.prototype.slice.call(arguments, 4);"
-            + "\n    try {"
-            + "\n      var fn = fncns[index];"
-            + "\n      if (typeof fn !== 'function') throw 'Cannot find function at index: ' + index + ' in ' + fn + ' apply: ' + (fn ? fn.apply : undefined);"
-            + "\n      var r = fn.apply(self, args);"
-            + "\n      if (n) toJava('r', id, r);"
-            + "\n    } catch (err) {"
-            + "\n      if (typeof console !== 'undefined') console.warn('Error ' + err + ' at:\\n' + err.stack);"
-            + "\n      if (n) toVM('r', id, 'error', '' + err + ' at:\\n' + err.stack, null, null);"
-            + "\n    }"
-            + "\n  };"
-            + "\n  impl.o = function(i) {"
-            + "\n    return js2j[i];"
-            + "\n  };"
-            + "\n  impl.j = function(n,v) {"
-            + "\n   var r = new jobject(n,v);"
-            + "\n   if (arguments.length > 2) {"
-            + "\n     for (var i = 2; i < arguments.length; i++) {"
-            + "\n       r[i - 2] = arguments[i];"
-            + "\n     }"
-            + "\n     r.length = arguments.length - 2;"
-            + "\n   }"
-            + "\n   return r;"
-            + "\n  };"
-            + "\n  impl.v = function(i) {"
-            + "\n    return fncns[i];"
-            + "\n  };"
-            + "\n  impl.toVM = toVM;"
-            + "\n  impl.toVM('r', -1, 'OK', 'Initialized', null);"
-            + "\n})(this);",
+        """
+        begin=try {
+          @1('r', -1, 'OK', 'Connected', null);
+        } catch (e) {
+          console.warn(e);
+        }
+        """, """
+             init=(function(global) {
+               var fncns = new Array();
+               var js2j = new Array();
+               function jobject(id,value) {
+                 Object.defineProperty(this, 'id', { value : id });
+                 Object.defineProperty(this, 'v', { value : value });
+                 return this;
+               };
+               Object.defineProperty(jobject.prototype, 'native', { value : true });
+               Object.defineProperty(jobject.prototype, 'valueOf', { value : function() { return this.v ? this.v : '[jobject ' + this.id + ']'; } });
+               Object.defineProperty(jobject.prototype, 'toString', { value : jobject.prototype.valueOf });
+               var toVM = global['@2'];
+               delete global['@2'];
+               if (typeof toVM !== 'function') {
+                 throw 'toVM should be a function: ' + toVM;
+               }
+               function toJava(method, id, r) {
+                   var t = typeof r;
+                   if (t === 'function') t = 'object';
+                   if (t === 'undefined' || r === null) {
+                     t = 'null';
+                     r = null;
+                   } else if (t === 'object') {
+                     if (r['native']) {
+                       t = 'java';
+                       r = r.id;
+                     } else if (Object.prototype.toString.call(r) === '[object Array]') {
+                     t = 'array';
+                     var l = r.length + ':';
+                     for (var i = 0; i < r.length; i++) {
+                         var toObj = toJava(null, id, r[i]);
+                         l += toObj.length + ':' + toObj;
+                       }
+                       r = l;
+                     } else {
+                       var size = js2j.length;
+                       js2j.push(r);
+                       r = size;
+                     }
+                   }
+                   if (method !== null) toVM(method, id, t, r, null);
+                   else return t + ':' + r;
+               }
+               var impl = {};
+               impl.key = @1;
+               global.ds = function(key) {
+                 if (key != impl.key) {
+                   impl = null;
+                   console.warn('Surprising access to Java with ' + key);
+                 }
+                 return impl;
+               };
+               impl.toJava = toJava;
+               impl.rg = function(id, fn) {
+                 fncns[id] = fn;
+               };
+               impl.fn = function(index, n, id, self) {
+                 var args = Array.prototype.slice.call(arguments, 4);
+                 try {
+                   var fn = fncns[index];
+                   if (typeof fn !== 'function') throw 'Cannot find function at index: ' + index + ' in ' + fn + ' apply: ' + (fn ? fn.apply : undefined);
+                   var r = fn.apply(self, args);
+                   if (n) toJava('r', id, r);
+                 } catch (err) {
+                   if (typeof console !== 'undefined') console.warn('Error ' + err + ' at:\\n' + err.stack);
+                   if (n) toVM('r', id, 'error', '' + err + ' at:\\n' + err.stack, null, null);
+                 }
+               };
+               impl.o = function(i) {
+                 return js2j[i];
+               };
+               impl.j = function(n,v) {
+                var r = new jobject(n,v);
+                if (arguments.length > 2) {
+                  for (var i = 2; i < arguments.length; i++) {
+                    r[i - 2] = arguments[i];
+                  }
+                  r.length = arguments.length - 2;
+                }
+                return r;
+               };
+               impl.v = function(i) {
+                 return fncns[i];
+               };
+               impl.toVM = toVM;
+               impl.toVM('r', -1, 'OK', 'Initialized', null);
+             })(this);""",
         "initializationProtocol=--- Initialization protocol ---\n",
         "error=Cannot initialize DukeScript: @1",
         "version=$version"
@@ -343,18 +344,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnParam=p@1",
         "fnClose=) {\n",
         "fnBegin=  var encParams = ds(@1).toJava(null, -1, [",
-        "fnPPar=@2 p@1",
-        "fnBody=]);\n" +
-            "  var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);\n" +
-            "  while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {\n" +
-            "    var script = v.substring(11);\n" +
-            "    try {\n" +
-            "      var r = eval.call(null, script);\n" +
-            "    } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }\n" +
-            "    v = ds(@3).toVM('jr', null, null, null, null);" +
-            "  }\n" +
-            "  return @4 ? eval('(' + v + ')') : v;\n" +
-            "};\n",
+        "fnPPar=@2 p@1", """
+                         fnBody=]);
+                           var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);
+                           while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {
+                             var script = v.substring(11);
+                             try {
+                               var r = eval.call(null, script);
+                             } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }
+                             v = ds(@3).toVM('jr', null, null, null, null);  }
+                           return @4 ? eval('(' + v + ')') : v;
+                         };
+                         """,
         
         "fnFoot=ds(@2).rg(@1, jsvm);\n"
     })

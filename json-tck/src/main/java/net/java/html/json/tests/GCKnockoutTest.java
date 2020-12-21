@@ -40,11 +40,11 @@ public class GCKnockoutTest {
 
     @KOTest public void noLongerNeededArrayElementsCanDisappear() throws Exception {
         BrwsrCtx ctx = Utils.newContext(GCKnockoutTest.class);
-        Object exp = Utils.exposeHTML(GCKnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: all'>\n"
-            + "  <li data-bind='text: firstName'/>\n"
-            + "</ul>\n"
-        );
+        Object exp = Utils.exposeHTML(GCKnockoutTest.class, """
+                                                            <ul id='ul' data-bind='foreach: all'>
+                                                              <li data-bind='text: firstName'/>
+                                                            </ul>
+                                                            """);
         try {
             GC m = Models.bind(new GC(), ctx);
             m.getAll().add(Models.bind(new Fullname("Jarda", "Tulach"), ctx));
@@ -81,12 +81,13 @@ public class GCKnockoutTest {
             if (ref.get() == null) {
                 return;
             }
-            String gc = "var max = arguments[0];\n"
-                    +  "var arr = [];\n"
-                    + "for (var i = 0; i < max; i++) {\n"
-                    + "  arr.push(i);\n"
-                    + "}\n"
-                    + "return arr.length;";
+            String gc = """
+                        var max = arguments[0];
+                        var arr = [];
+                        for (var i = 0; i < max; i++) {
+                          arr.push(i);
+                        }
+                        return arr.length;""";
             Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
             System.gc();
             System.runFinalization();
@@ -99,12 +100,13 @@ public class GCKnockoutTest {
             if (ref.get() == null) {
                 throw new IllegalStateException(msg);
             }
-            String gc = "var max = arguments[0];\n"
-                    +  "var arr = [];\n"
-                    + "for (var i = 0; i < max; i++) {\n"
-                    + "  arr.push(i);\n"
-                    + "}\n"
-                    + "return arr.length;";
+            String gc = """
+                        var max = arguments[0];
+                        var arr = [];
+                        for (var i = 0; i < max; i++) {
+                          arr.push(i);
+                        }
+                        return arr.length;""";
             Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
             System.gc();
             System.runFinalization();

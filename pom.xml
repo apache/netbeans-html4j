@@ -43,6 +43,7 @@
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
       <skipJavaFXTests>true</skipJavaFXTests>
+      <maven.compiler.source>15</maven.compiler.source>
   </properties>
   <modules>
     <module>json</module>
@@ -281,14 +282,14 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <dependency>
                         <artifactId>compiler-maven-plugin</artifactId>
                         <groupId>org.frgaal</groupId>
-                        <version>14.0.1</version>
+                        <version>15.0.0</version>
                     </dependency>
                 </dependencies>
                 <configuration>
                     <compilerId>frgaal</compilerId>
-                    <source>1.8</source>
+                    <source>15</source>
                     <target>1.8</target>
-                    <testSource>1.8</testSource>
+                    <testSource>15</testSource>
                     <testTarget>1.8</testTarget>
                 </configuration>
               </plugin>

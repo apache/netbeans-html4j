@@ -59,11 +59,12 @@ public class JsMethods {
     public static native void callback(Runnable r);
     
     @JavaScriptBody(args = { "at", "arr" }, javacall = true, body =
-          "var a = 0;\n"
-        + "for (var i = 0; i < arr.length; i++) {\n"
-        + "  a = at.@org.netbeans.html.boot.impl.Arithm::sumTwo(II)(a, arr[i]);\n"
-        + "}\n"
-        + "return a;"
+          """
+          var a = 0;
+          for (var i = 0; i < arr.length; i++) {
+            a = at.@org.netbeans.html.boot.impl.Arithm::sumTwo(II)(a, arr[i]);
+          }
+          return a;"""
     )
     private static native int sumTwo(Arithm at, int... arr);
 
@@ -72,9 +73,11 @@ public class JsMethods {
     }
 
     @JavaScriptBody(args = {"r"}, javacall = true, body =
-        "var array = new Array();\n"
-      + "array[0]=1; array[1]=2;\n"
-      + "return r.@org.netbeans.html.boot.impl.Arithm::sumArr([Ljava/lang/Object;)(array);\n"
+        """
+        var array = new Array();
+        array[0]=1; array[1]=2;
+        return r.@org.netbeans.html.boot.impl.Arithm::sumArr([Ljava/lang/Object;)(array);
+        """
     )
     private static native int sumArr(Arithm r);
 
@@ -100,10 +103,11 @@ public class JsMethods {
     @JavaScriptBody(args = "arr", body = "return arr;")
     public static native java.lang.Object[] arr(java.lang.Object[] arr);
     
-    @JavaScriptBody(args = { "useA", "useB", "a", "b" }, body = "var l = 0;"
-        + "if (useA) l += a;\n"
-        + "if (useB) l += b;\n"
-        + "return l;\n"
+    @JavaScriptBody(args = { "useA", "useB", "a", "b" }, body = """
+        var l = 0;if (useA) l += a;
+        if (useB) l += b;
+        return l;
+        """
     )
     public static native long chooseLong(boolean useA, boolean useB, long a, long b);
     

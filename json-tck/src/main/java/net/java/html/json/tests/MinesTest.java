@@ -40,23 +40,22 @@ public final class MinesTest {
     @KOTest public void paintTheGridOnClick() throws Throwable {
         if (m == null) {
             BrwsrCtx ctx = Utils.newContext(MinesTest.class);
-            Object exp = Utils.exposeHTML(MinesTest.class,
-    "            <button id='init' data-bind='click: normalSize'></button>\n" +
-    "            <table>\n" +
-    "                <tbody id='table'>\n" +
-    "                    <!-- ko foreach: rows -->\n" +
-    "                    <tr>\n" +
-    "                        <!-- ko foreach: columns -->\n" +
-    "                        <td data-bind='css: style' >\n" +
-    "                            <div data-bind='text: html'></div>\n" +
-    "                        </td>\n" +
-    "                        <!-- /ko -->\n" +
-    "                    </tr>\n" +
-    "                    <!-- /ko -->\n" +
-    "                </tbody>\n" +
-    "            </table>\n" +
-    ""
-            );
+            Object exp = Utils.exposeHTML(MinesTest.class, """
+                <button id='init' data-bind='click: normalSize'></button>
+                <table>
+                    <tbody id='table'>
+                        <!-- ko foreach: rows -->
+                        <tr>
+                            <!-- ko foreach: columns -->
+                            <td data-bind='css: style' >
+                                <div data-bind='text: html'></div>
+                            </td>
+                            <!-- /ko -->
+                        </tr>
+                        <!-- /ko -->
+                    </tbody>
+                </table>
+            """);
             m = Models.bind(new Mines(), ctx);
             m.applyBindings();
             int cnt = Utils.countChildren(MinesTest.class, "table");
