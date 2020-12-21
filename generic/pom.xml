@@ -75,7 +75,7 @@
                     <compilerArguments>
                         <Aversion>${project.version}</Aversion>
                     </compilerArguments>
-                    <testSource>1.8</testSource>
+                    <testSource>15</testSource>
                     <testTarget>1.8</testTarget>
                 </configuration>
             </plugin>

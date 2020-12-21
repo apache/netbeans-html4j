@@ -22,11 +22,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
+import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.Factory;
 
 public class GenericTest extends JavaScriptTCK {
@@ -39,8 +42,8 @@ public class GenericTest extends JavaScriptTCK {
         return createTests(new Testing());
     }
     
-    static Object[] createTests(Testing p) throws Exception {
-        Fn.Presenter presenter = p.presenter;
+    static Object[] createTests(Testing t) throws Exception {
+        Fn.Presenter presenter = t.presenter;
 
         final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(GenericTest.class).
             loadPage("empty.html").
@@ -60,13 +63,26 @@ public class GenericTest extends JavaScriptTCK {
 
         Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
         for (Class c : arr) {
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(test) != null) {
-                    res.add(new Case(presenter, m));
-                }
-            }
+            addTestMethods(c, test, res, t);
         }
         return res.toArray();
+    }
+
+    private static void addTestMethods(Class c, Class<? extends Annotation> test, List<Object> res, Testing t) throws SecurityException {
+        for (Method m : c.getMethods()) {
+            if (m.getAnnotation(test) != null) {
+                res.add(new Case(t, m));
+            }
+        }
+    }
+
+    @Override
+    public void executeNow(String script) throws Exception {
+        Testing t = Testing.MAP.get(Fn.activePresenter());
+        assertNotNull(t, "Testing framework found");
+        CountDownLatch cdl = new CountDownLatch(1);
+        t.loadJS(script, cdl);
+        cdl.await(5, TimeUnit.SECONDS);
     }
     
     public static Class[] tests() {

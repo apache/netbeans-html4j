@@ -18,9 +18,11 @@
  */
 package org.netbeans.html.json.tck;
 
+import java.io.StringReader;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
 import net.java.html.js.tests.ExposedPropertiesTest;
+import net.java.html.js.tests.JsUtils;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 
@@ -63,6 +65,11 @@ import org.netbeans.html.boot.spi.Fn.Presenter;
  * @since 0.7
  */
 public abstract class JavaScriptTCK {
+    /** Creates and registers instance of the TCK. */
+    public JavaScriptTCK() {
+        JsUtils.registerTCK(this);
+    }
+
     /** Gives you list of classes included in the TCK. Their test methods
      * are annotated by {@link KOTest} annotation. The methods are public
      * instance methods that take no arguments. The method should be
@@ -74,5 +81,18 @@ public abstract class JavaScriptTCK {
         return new Class[] {
             JavaScriptBodyTest.class, GCBodyTest.class, ExposedPropertiesTest.class
         };
+    }
+
+    /** Executes JavaScript now. Simulates that something suddenly happens
+     * in the JavaScript while Java code may already be doing something
+     * different.
+     *
+     * @param script the script to execute in the JavaScript
+     * @throws Exception if something goes wrong
+     * @since 1.7.1
+     */
+    public void executeNow(String script) throws Exception {
+        Presenter p = Fn.activePresenter();
+        p.loadScript(new StringReader(script));
     }
 }

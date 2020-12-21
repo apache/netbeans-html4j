@@ -33,14 +33,16 @@ import org.testng.annotations.Test;
 
 public final class Case implements ITest, IHookable, Runnable {
     private final Fn.Presenter p;
+    private final Testing t;
     private CountDownLatch finished;
     private final Method m;
     private Object result;
     private Object inst;
     private int cnt;
 
-    Case(Fn.Presenter p, Method m) {
-        this.p = p;
+    Case(Testing t, Method m) {
+        this.t = t;
+        this.p = t.presenter;
         this.m = m;
     }
 

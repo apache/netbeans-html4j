@@ -66,7 +66,7 @@ public final class Utils {
 
     private Utils() {
     }
-    
+
     public static void registerTCK(KnockoutTCK tck) {
         instantiatedTCK = tck;
     }
@@ -89,7 +89,7 @@ public final class Utils {
         }
         throw new AssertionError("Can't find appropriate Context in ServiceLoader!");
     }
-    static Object executeScript(Class<?> clazz, 
+    static Object executeScript(Class<?> clazz,
         String script, Object... arguments
     ) throws Exception {
         for (KnockoutTCK tck : tcks(clazz)) {
@@ -116,17 +116,17 @@ public final class Utils {
           """;
         executeScript(clazz, s);
     }
-    
+
     static Object exposeHTML(Class<?> clazz, String html) throws Exception {
         String s = """
-          var n = window.document.getElementById('ko.test.div'); 
-           if (!n) { 
-            n = window.document.createElement('div'); 
-             n.id = 'ko.test.div'; 
+          var n = window.document.getElementById('ko.test.div');
+           if (!n) {
+            n = window.document.createElement('div');
+             n.id = 'ko.test.div';
              var body = window.document.getElementsByTagName('body')[0];
             body.appendChild(n);
           }
-          n.innerHTML = arguments[0]; 
+          n.innerHTML = arguments[0];
            """;
         return executeScript(clazz, s, html);
     }
@@ -160,7 +160,7 @@ public final class Utils {
             """, id, field, value
         );
     }
-    
+
     static void scheduleClick(Class<?> clazz, String id, int delay) throws Exception {
         String s = """
             var id = arguments[0];
@@ -175,8 +175,8 @@ public final class Utils {
             """;
         Utils.executeScript(clazz, s, id, delay);
     }
-    
-    
+
+
     static String prepareURL(
         Class<?> clazz, String content, String mimeType, String... parameters) {
         for (KnockoutTCK tck : tcks(clazz)) {
@@ -197,7 +197,7 @@ public final class Utils {
         }
         return false;
     }
-    
+
     private static ClassLoader cl(Class<?> c) {
         try {
             return c.getClassLoader();
@@ -205,11 +205,11 @@ public final class Utils {
             return null;
         }
     }
-    
+
     static void fail(String msg) {
         throw new AssertionError(msg);
     }
-    
+
     static void assertTrue(boolean c, String msg) {
         if (!c) {
             throw new AssertionError(msg);
@@ -221,7 +221,7 @@ public final class Utils {
             throw new AssertionError(msg);
         }
     }
-    
+
     static void assertNull(Object o, String msg) {
         if (o != null) {
             throw new AssertionError(msg + " but was: " + o);
@@ -233,7 +233,7 @@ public final class Utils {
             throw new AssertionError(msg);
         }
     }
-    
+
     static void assertEquals(Object a, Object b, String msg) {
         if (a == b) {
             return;

@@ -18,7 +18,6 @@
  */
 package net.java.html.js.tests;
 
-import java.io.StringReader;
 import java.util.concurrent.Callable;
 import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
@@ -38,7 +37,7 @@ public class JavaScriptBodyTest {
         int res = Bodies.sumJS(5, 3);
         assertEquals(res, 8, "Expecting 8: " + res);
     }
-    
+
     @KOTest public void accessJsObject() {
         Object o = Bodies.instance(10);
         int ten = Bodies.readIntX(o);
@@ -51,13 +50,13 @@ public class JavaScriptBodyTest {
         int ten = Bodies.readIntX(o);
         assertEquals(ten, 11, "Expecting eleven: " + ten);
     }
-    
+
     @KOTest public void callbackToRunnable() {
         R run = new R();
         Bodies.callback(run);
         assertEquals(run.cnt, 1, "Can call even private implementation classes: " + run.cnt);
     }
-    
+
     private R asyncRun;
     @KOTest public void asyncCallbackToRunnable() throws InterruptedException {
         if (asyncRun == null) {
@@ -79,7 +78,7 @@ public class JavaScriptBodyTest {
         assertEquals(r.cnt, 10, "Ten calls: " + r.cnt);
         assertEquals(fourtyTwo, 42, "Meaning of the world expected: " + fourtyTwo);
     }
-    
+
     @KOTest public void typeOfCharacter() {
         String charType = Bodies.typeof('a', false);
         assertEquals("number", charType, "Expecting number type: " + charType);
@@ -91,7 +90,7 @@ public class JavaScriptBodyTest {
 
     @KOTest public void typeOfPrimitiveBoolean() {
         String booleanType = Bodies.typeof(true);
-        assertTrue("boolean".equals(booleanType) || "number".equals(booleanType), 
+        assertTrue("boolean".equals(booleanType) || "number".equals(booleanType),
             "Expecting boolean or at least number type: " + booleanType);
     }
 
@@ -109,7 +108,7 @@ public class JavaScriptBodyTest {
         String doubleType = Bodies.typeof(0.33, false);
         assertEquals("number", doubleType, "Expecting number type: " + doubleType);
     }
-    
+
     @KOTest public void typeOfBooleanValueOf() {
         String booleanType = Bodies.typeof(true, true);
         assertEquals("boolean", booleanType, "Expecting boolean type: " + booleanType);
@@ -151,7 +150,7 @@ public class JavaScriptBodyTest {
         assertEquals(sum[0], 42, "Computed OK " + sum[0]);
         assertEquals(sum[1], 42, "Computed OK too: " + sum[1]);
     }
-    
+
     @KOTest public void doubleCallbackToRunnable() {
         final R run = new R();
         final R r2 = new R();
@@ -165,7 +164,7 @@ public class JavaScriptBodyTest {
         assertEquals(run.cnt, 1, "Can call even private implementation classes: " + run.cnt);
         assertEquals(r2.cnt, 1, "Can call even private implementation classes: " + r2.cnt);
     }
-    
+
     @KOTest public void identity() {
         Object p = new Object();
         Object r = Bodies.id(p);
@@ -189,7 +188,7 @@ public class JavaScriptBodyTest {
         Object r = Bodies.id(p);
         assertEquals(r, p, "The null is the same");
     }
-    
+
     @KOTest public void callbackWithTrueResult() {
         Callable<Boolean> c = new C(true);
         String b = Bodies.yesNo(c);
@@ -201,13 +200,13 @@ public class JavaScriptBodyTest {
         String b = Bodies.yesNo(c);
         assertEquals(b, "no", "Should return false");
     }
-    
+
     @KOTest public void callbackWithParameters() throws InterruptedException {
         Sum s = new Sum();
         int res = Bodies.sumIndirect(s, 40, 2);
         assertEquals(res, 42, "Expecting 42");
     }
-    
+
     @KOTest public void selectFromStringJavaArray() {
         String[] arr = { "Ahoj", "Wo\nrld" };
         Object res = Bodies.select(arr, 1);
@@ -238,7 +237,7 @@ public class JavaScriptBodyTest {
         assertNotNull(res, "Non-null is returned");
         assertTrue(res instanceof Object[], "Returned an array: " + res);
         assertFalse(res instanceof String[], "Not returned a string array: " + res);
-        
+
         Object[] ret = (Object[]) res;
         assertEquals(arr.length, ret.length, "Same length: " + ret.length);
         assertEquals(arr[0], ret[0], "Same first elem");
@@ -269,7 +268,7 @@ public class JavaScriptBodyTest {
         assertEquals("He\nllo", arr[0], "Hello expected: " + arr[0]);
         assertEquals("Worl\nd!", arr[1], "World! expected: " + arr[1]);
     }
-    
+
     @KOTest public void sumVector() {
         double[] arr = { 1.0, 2.0, 3.0 };
         double res = Bodies.sumVector(arr);
@@ -285,32 +284,32 @@ public class JavaScriptBodyTest {
     @KOTest public void truth() {
         assertTrue(Bodies.truth(), "True is true");
     }
-    
+
     @KOTest public void factorial2() {
         assertEquals(new Factorial().factorial(2), 2);
     }
-    
+
     @KOTest public void factorial3() {
         assertEquals(new Factorial().factorial(3), 6);
     }
-    
+
     @KOTest public void factorial4() {
         assertEquals(new Factorial().factorial(4), 24);
     }
-    
+
     @KOTest public void factorial5() {
         assertEquals(new Factorial().factorial(5), 120);
     }
-    
+
     @KOTest public void factorial6() {
         assertEquals(new Factorial().factorial(6), 720);
     }
-    
+
     @KOTest public void sumArray() {
         int r = Bodies.sumArr(new Sum());
         assertEquals(r, 6, "Sum is six: " + r);
     }
-    
+
     @KOTest public void staticCallback() {
         int r = Bodies.staticCallback();
         assertEquals(r, 42, "Expecting 42: " + r);
@@ -323,12 +322,12 @@ public class JavaScriptBodyTest {
         assertTrue(r instanceof Number, "Is number " + r);
         assertEquals(((Number)r).intValue(), 42, "Expecting 42: " + r);
     }
-    
+
     @KOTest public void asyncCallFromAJSCallbackNeedToFinishBeforeReturnToJS() {
         int r = Bodies.incAsync();
         assertEquals(r, 42, "Expecting 42: " + r);
     }
-    
+
     @KOTest public void iterateArray() {
         String[] arr = { "Ahoj", "Hi", "Ciao" };
         Object[] ret = Bodies.forIn(arr);
@@ -338,7 +337,7 @@ public class JavaScriptBodyTest {
         assertEquals(ret[3], "Hi", "Expecting Hi: " + ret[1]);
         assertEquals(ret[5], "Ciao", "Expecting Ciao: " + ret[2]);
     }
-    
+
     @KOTest public void primitiveTypes() {
         String all = Bodies.primitiveTypes(new Sum());
         assertEquals("Ahojfalse12356.07.0 TheEND", all, "Valid return type: " + all);
@@ -366,7 +365,7 @@ public class JavaScriptBodyTest {
         boolean nonNull = Bodies.nonNull(s, "x");
         assertTrue(nonNull, "x property exists");
     }
-    
+
     @KOTest public void callbackUnknown() {
         Sum s = new Sum();
         boolean nonNull = Bodies.nonNull(s, "y");
@@ -388,7 +387,7 @@ public class JavaScriptBodyTest {
         int len = Math.min(orig.length(), js.length());
         for (int i = 0; i < len; i++) {
             if (orig.charAt(i) != js.charAt(i)) {
-                fail("Difference at position " + i + 
+                fail("Difference at position " + i +
                     "\norig: " +
                     orig.substring(i - 5, Math.min(i + 10, orig.length())) +
                     "\n  js: " +
@@ -404,7 +403,7 @@ public class JavaScriptBodyTest {
         boolean res = Bodies.isInArray(new Object[] { val }, val);
         assertTrue(res, "Should be in the array");
     }
-    
+
     Later l;
     @KOTest public void callLater() throws Exception{
         final Fn.Presenter p = Fn.activePresenter();
@@ -412,19 +411,25 @@ public class JavaScriptBodyTest {
             return;
         }
         if (l == null) {
-            p.loadScript(new StringReader(
+            JsUtils.executeNow(JavaScriptBodyTest.class,
                 "if (typeof window === 'undefined') window = {};"
-            ));
+            );
             l = new Later();
             l.register();
-            p.loadScript(new StringReader(
+            JsUtils.executeNow(JavaScriptBodyTest.class,
                 "window.later();"
-            ));
+            );
         }
         if (l.call != 42) {
             throw new InterruptedException();
         }
         assertEquals(l.call, 42, "Method was called: " + l.call);
+    }
+
+    @KOTest
+    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessing() {
+        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+        t.runTheWholeTest();
     }
 
     @KOTest
@@ -451,11 +456,11 @@ public class JavaScriptBodyTest {
         assertEquals(value[0], "NetBeans", "As a returned value from defining method");
         assertEquals(value[1], "NetBeans", "As read later by different method");
     }
-    
+
     private static class R implements Runnable {
         int cnt;
         private final Thread initThread;
-        
+
         public R() {
             initThread = Thread.currentThread();
         }
@@ -466,14 +471,14 @@ public class JavaScriptBodyTest {
             cnt++;
         }
     }
-    
+
     private static class C implements Callable<Boolean> {
         private final boolean ret;
 
         public C(boolean ret) {
             this.ret = ret;
         }
-        
+
         @Override
         public Boolean call() throws Exception {
             return ret;
