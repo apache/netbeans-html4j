@@ -22,17 +22,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
-import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.Factory;
 
-public class GenericTest extends JavaScriptTCK {
+public class GenericTest {
     private static Class<?> browserClass;
     
     public GenericTest() {
@@ -76,19 +72,6 @@ public class GenericTest extends JavaScriptTCK {
         }
     }
 
-    @Override
-    public void executeNow(String script) throws Exception {
-        Testing t = Testing.MAP.get(Fn.activePresenter());
-        assertNotNull(t, "Testing framework found");
-        CountDownLatch cdl = new CountDownLatch(1);
-        t.loadJS(script, cdl);
-        cdl.await(5, TimeUnit.SECONDS);
-    }
-    
-    public static Class[] tests() {
-        return testClasses();
-    }
-
     static synchronized Class<?> loadClass() throws InterruptedException {
         while (browserClass == null) {
             GenericTest.class.wait();
@@ -104,6 +87,6 @@ public class GenericTest extends JavaScriptTCK {
     public static void initialized() throws Exception {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(GenericTest.class.getName());
         Method m = classpathClass.getMethod("ready", Class.class);
-        m.invoke(null, GenericTest.class);
+        m.invoke(null, GenericTCK.class);
     }
 }

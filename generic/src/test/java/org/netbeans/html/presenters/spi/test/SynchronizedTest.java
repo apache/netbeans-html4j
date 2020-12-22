@@ -18,12 +18,44 @@
  */
 package org.netbeans.html.presenters.spi.test;
 
+import java.net.URL;
+import java.util.logging.Level;
 import static org.netbeans.html.presenters.spi.test.GenericTest.createTests;
+import static org.netbeans.html.presenters.spi.test.Testing.LOG;
 import org.testng.annotations.Factory;
 
 public class SynchronizedTest {
     @Factory public static Object[] compatibilityTests() throws Exception {
-        return createTests(new Testing.Synchronized());
+        return createTests(new Synchronized());
     }
-    
+
+    private static class Synchronized extends Testing {
+        public Synchronized() {
+            super(true, (r) -> r.run());
+        }
+
+        @Override
+        protected void loadJS(final String js) {
+            try {
+                Object res = eng.eval(js);
+                LOG.log(Level.FINE, "Result: {0}", res);
+            } catch (Throwable ex) {
+                LOG.log(Level.SEVERE, "Can't process " + js, ex);
+            }
+        }
+
+        @Override
+        public void displayPage(URL url, Runnable r) {
+            r.run();
+        }
+
+        @Override
+        public void dispatch(Runnable r) {
+            r.run();
+        }
+
+        @Override
+        void beforeTest(Class<?> declaringClass) throws Exception {
+        }
+    } // end of Synchronized
 }

@@ -19,7 +19,6 @@
 package org.netbeans.html.presenters.spi.test;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import javax.script.ScriptException;
 import static org.testng.Assert.assertEquals;
@@ -39,7 +38,7 @@ public class CallbackTest {
     private static final class CBP extends Testing {
 
         @Override
-        protected void loadJS(String js, CountDownLatch notify) {
+        protected void loadJS(String js) {
             dispatch(new Runnable () {
                 @Override
                 public void run() {
@@ -48,12 +47,10 @@ public class CallbackTest {
                         LOG.log(Level.FINE, "counter res: {0}", res);
                     } catch (ScriptException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                    } finally {
-                        notify.countDown();
                     }
                 }
             });
-            super.loadJS(js, notify);
+            super.loadJS(js);
         }
 
         @Override void beforeTest(Class<?> testClass) throws Exception {

@@ -19,9 +19,6 @@
 package org.netbeans.html.presenters.spi.test;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -39,7 +36,6 @@ class Testing {
     final ScriptEngine eng;
     final boolean sync;
     final ProtoPresenter presenter;
-    static final Map<ProtoPresenter, Testing> MAP = new HashMap<>();
 
     public Testing() {
         this(false);
@@ -55,14 +51,12 @@ class Testing {
             .app("Testing")
             .type("test")
             .dispatcher(QUEUE, false)
-            .loadJavaScript((s) -> {
-                loadJS(s, new java.util.concurrent.CountDownLatch(1));
-            }, sync)
+            .loadJavaScript(this::loadJS, sync)
             .displayer(this::displayPage)
             .preparator(this::callbackFn, true)
             .logger(this::log)
             .build();
-        MAP.put(this.presenter, this);
+        GenericTCK.INSTANCE.register(this.presenter, this);
 
         ScriptEngineManager sem = new ScriptEngineManager();
         eng = sem.getEngineByMimeType("text/javascript");
@@ -71,7 +65,8 @@ class Testing {
             eng.eval("function alert(m) { Packages.java.lang.System.out.println(m); };");
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
-        }        
+        }
+
     }
 
     protected void log(int priority, String msg, Object... args) {
@@ -127,7 +122,7 @@ class Testing {
         ready.callbackIsPrepared("testingCB");
     }
 
-    protected void loadJS(final String js, CountDownLatch notify) {
+    protected void loadJS(final String js) {
         QUEUE.execute(new Runnable() {
             public void run() {
                 try {
@@ -135,8 +130,6 @@ class Testing {
                     LOG.log(Level.FINE, "Result: {0}", res);
                 } catch (Throwable ex) {
                     LOG.log(Level.SEVERE, "Can't process " + js, ex);
-                } finally {
-                    notify.countDown();
                 }
             }
         });
@@ -152,36 +145,4 @@ class Testing {
 
     void beforeTest(Class<?> declaringClass) throws Exception {
     }
-    
-    static class Synchronized extends Testing {
-        public Synchronized() {
-            super(true, (r) -> r.run());
-        }
-
-        @Override
-        protected void loadJS(final String js, CountDownLatch notify) {
-            try {
-                Object res = eng.eval(js);
-                LOG.log(Level.FINE, "Result: {0}", res);
-            } catch (Throwable ex) {
-                LOG.log(Level.SEVERE, "Can't process " + js, ex);
-            } finally {
-                notify.countDown();
-            }
-        }
-
-        @Override
-        public void displayPage(URL url, Runnable r) {
-            r.run();
-        }
-
-        @Override
-        public void dispatch(Runnable r) {
-            r.run();
-        }
-
-        @Override
-        void beforeTest(Class<?> declaringClass) throws Exception {
-        }
-    } // end of Synchronized
 }
