@@ -345,18 +345,16 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnClose=) {\n",
         "fnBegin=  var encParams = ds(@1).toJava(null, -1, [",
         "fnPPar=@2 p@1", """
-                         fnBody=]);
-                           var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);
-                           while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {
-                             var script = v.substring(11);
-                             try {
-                               var r = eval.call(null, script);
-                             } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }
-                             v = ds(@3).toVM('jr', null, null, null, null);  }
-                           return @4 ? eval('(' + v + ')') : v;
-                         };
-                         """,
-        
+        fnBody=]);
+          var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);
+          while (v !== null && v.indexOf && v.indexOf('javascript:') === 0) {
+            var script = v.substring(11);
+            try {
+              var r = eval.call(null, script);
+            } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }
+            v = ds(@3).toVM('jr', null, null, null, null);  }
+          return @4 ? eval('(' + v + ')') : v;
+        };""",
         "fnFoot=ds(@2).rg(@1, jsvm);\n"
     })
     final Integer exportVm(Object vm) {
@@ -671,9 +669,6 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             boolean first = top == null || Boolean.TRUE.equals(top.done);
             log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
             Item newItem = registerCall(new Item(nextCallId(), top, method, vm, converted));
-            if (first || synchronous) {
-                dispatch(newItem);
-            }
             return javaresult();
         }
     }
@@ -690,6 +685,14 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 }
                 finished[0] = false;
                 final Item top = topMostCall();
+                if (top.method != null) {
+                    if (top.done == null) {
+                        dispatch(top);
+                        if (deferred != null) {
+                            continue;
+                        }
+                    }
+                }
                 String jsToExec = top.inJavaScript(finished);
                 log(Level.FINE, "jr: {0} jsToExec: {1} finished: {2}", new Object[]{topMostCall(), jsToExec, finished[0]});
                 if (jsToExec != null) {
