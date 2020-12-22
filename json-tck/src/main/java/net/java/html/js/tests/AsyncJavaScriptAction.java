@@ -50,6 +50,9 @@ final class AsyncJavaScriptAction {
         collected.add(value);
     }
 
+    @JavaScriptBody(args = {}, body = "")
+    native void flushPendingJavaScripts();
+
     int performIteration(int from) {
         for (int i = 0; i < 5; i++) {
             jsStore(from++);
@@ -68,6 +71,7 @@ final class AsyncJavaScriptAction {
         if (!successStoringLater) {
             return;
         }
+        flushPendingJavaScripts();
         assertEquals(collected.size(), 11, "11 items: " + collected);
         for (int i = 0; i < 11; i++) {
             assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
@@ -76,6 +80,7 @@ final class AsyncJavaScriptAction {
         if (!successStoringLater) {
             return;
         }
+        flushPendingJavaScripts();
         assertEquals(collected.size(), 22, "22 items: " + collected);
         for (int i = 0; i < 22; i++) {
             assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
