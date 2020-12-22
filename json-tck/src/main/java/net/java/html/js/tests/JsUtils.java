@@ -32,15 +32,25 @@ public class JsUtils {
         instantiatedJsTCK = tck;
     }
 
-    static void executeNow(Class<?> clazz, String script) throws Exception {
-        if (instantiatedJsTCK != null) {
-            instantiatedJsTCK.executeNow(script);
-        } else {
-            Fn.Presenter p = Fn.activePresenter();
-            if (p != null) {
-                p.loadScript(new StringReader(script));
+    static void execute(Class<?> clazz, String script) throws Exception {
+        Fn.Presenter p = Fn.activePresenter();
+        p.loadScript(new StringReader(script));
+    }
+
+    static boolean executeNow(Class<?> clazz, String script) {
+        try {
+            if (instantiatedJsTCK != null) {
+                return instantiatedJsTCK.executeNow(script);
+            } else {
+                execute(clazz, script);
+                return true;
             }
+        } catch (Exception ex) {
+            throw raise(RuntimeException.class, ex);
         }
     }
 
+    private static <E extends Throwable> E raise(Class<E> e, Throwable t) throws E {
+        throw (E)t;
+    }
 }

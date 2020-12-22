@@ -85,14 +85,18 @@ public abstract class JavaScriptTCK {
 
     /** Executes JavaScript now. Simulates that something suddenly happens
      * in the JavaScript while Java code may already be doing something
-     * different.
+     * different. If it is not possible to execute the JavaScript - for
+     * example the JavaScript engine is blocked by currently running request,
+     * then return {@code false} and let the TCK test terminate gracefully.
      *
      * @param script the script to execute in the JavaScript
-     * @throws Exception if something goes wrong
+     * @return {@code true} if the script was executed, {@code false} if it couldn't be
+     * @throws Exception if the script contains an error
      * @since 1.7.1
      */
-    public void executeNow(String script) throws Exception {
+    public boolean executeNow(String script) throws Exception {
         Presenter p = Fn.activePresenter();
         p.loadScript(new StringReader(script));
+        return true;
     }
 }

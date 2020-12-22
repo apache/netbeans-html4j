@@ -19,16 +19,18 @@
 package net.java.html.js.tests;
 
 import java.util.List;
+import java.util.function.Function;
 import net.java.html.js.JavaScriptBody;
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
 
 final class AsyncJavaScriptAction {
-    List<Integer> collected = new java.util.ArrayList<>();
+    private List<Integer> collected = new java.util.ArrayList<>();
+    private boolean successStoringLater;
 
     @JavaScriptBody(args = { "n" }, javacall = true, body = """
-        return this.@net.java.html.js.tests.AsyncJavaScriptAction::performTheTest(I)(n);
+        return this.@net.java.html.js.tests.AsyncJavaScriptAction::performIteration(I)(n);
     """)
-    private native int r(int n);
+    private native int enterJavaScriptAndPerformIteration(int n);
 
     @JavaScriptBody(args = {}, javacall = true, body = """
         var self = this;
@@ -48,32 +50,44 @@ final class AsyncJavaScriptAction {
         collected.add(value);
     }
 
-    int performTheTest(int from) throws Exception {
+    int performIteration(int from) {
         for (int i = 0; i < 5; i++) {
             jsStore(from++);
         }
         final String n = "" + from++;
-        JsUtils.executeNow(AsyncJavaScriptAction.class, """
-            storeLater({n});
-        """.replace("{n}", n));
+        successStoringLater = JsUtils.executeNow(AsyncJavaScriptAction.class, "storeLater(" + n + ");");
         for (int i = 6; i < 11; i++) {
             jsStore(from++);
         }
         return from;
     }
 
-    public void runTheWholeTest() {
+    private void performTheTest(Function<Integer,Integer> iteration) {
         defineStore();
-        assertEquals(r(0), 11);
+        assertEquals(iteration.apply(0), 11);
+        if (!successStoringLater) {
+            return;
+        }
         assertEquals(collected.size(), 11, "11 items: " + collected);
         for (int i = 0; i < 11; i++) {
             assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
         }
-        assertEquals(r(11), 22);
-
+        assertEquals(iteration.apply(11), 22);
+        if (!successStoringLater) {
+            return;
+        }
         assertEquals(collected.size(), 22, "22 items: " + collected);
         for (int i = 0; i < 22; i++) {
             assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
         }
     }
+
+    public void testWithCallback() {
+        performTheTest(this::enterJavaScriptAndPerformIteration);
+    }
+
+    public void testWithoutCallback() {
+        performTheTest(this::performIteration);
+    }
+
 }

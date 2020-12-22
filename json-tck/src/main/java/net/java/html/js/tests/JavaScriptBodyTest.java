@@ -411,12 +411,12 @@ public class JavaScriptBodyTest {
             return;
         }
         if (l == null) {
-            JsUtils.executeNow(JavaScriptBodyTest.class,
+            JsUtils.execute(JavaScriptBodyTest.class,
                 "if (typeof window === 'undefined') window = {};"
             );
             l = new Later();
             l.register();
-            JsUtils.executeNow(JavaScriptBodyTest.class,
+            JsUtils.execute(JavaScriptBodyTest.class,
                 "window.later();"
             );
         }
@@ -429,7 +429,13 @@ public class JavaScriptBodyTest {
     @KOTest
     public void asynchCallFromJavaScriptInMiddleOfDefferedProcessing() {
         AsyncJavaScriptAction t = new AsyncJavaScriptAction();
-        t.runTheWholeTest();
+        t.testWithoutCallback();
+    }
+
+    @KOTest
+    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessingFromCallback() {
+        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+        t.testWithCallback();
     }
 
     @KOTest
