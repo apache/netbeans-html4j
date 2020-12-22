@@ -219,6 +219,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                         <exclude>**/nb-configuration.xml</exclude>
+                        <exclude>**/nbactions.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
                         <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.5.0.js</exclude>
