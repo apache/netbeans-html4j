@@ -20,6 +20,9 @@ package org.netbeans.html.presenters.spi.test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.presenters.spi.ProtoPresenter;
@@ -36,7 +39,31 @@ final class GenericTCK extends JavaScriptTCK {
     public boolean executeNow(String script) throws Exception {
         Testing t = MAP.get(Fn.activePresenter());
         assertNotNull(t, "Testing framework found");
-        return t.sync ? t.eng.eval(script) != this : false;
+        if (t.sync) {
+            t.eng.eval(script);
+            return true;
+        } else {
+            CountDownLatch cdl = new CountDownLatch(1);
+            Exception[] error = { null };
+            boolean[] queueEntered = { false };
+            t.QUEUE.execute(() -> {
+                if (cdl.getCount() == 1) {
+                    try {
+                        queueEntered[0] = true;
+                        t.eng.eval(script);
+                    } catch (ScriptException ex) {
+                        error[0] = ex;
+                    } finally {
+                        cdl.countDown();
+                    }
+                }
+            });
+            cdl.await(3, TimeUnit.SECONDS);
+            if (error[0] != null) {
+                throw error[0];
+            }
+            return queueEntered[0];
+        }
     }
 
     public static Class[] tests() {
