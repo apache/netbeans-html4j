@@ -748,56 +748,54 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     final Object exec(int id, String fn) {
-        Object ret;
+        assert Thread.holdsLock(lock());
         boolean first;
-        synchronized (lock()) {
-            if (deferred != null) {
-                deferred.append(fn);
-                fn = deferred.toString();
-                deferred = null;
-                log(Level.FINE, "Flushing {0}", fn);
-            }
+        if (deferred != null) {
+            deferred.append(fn);
+            fn = deferred.toString();
+            deferred = null;
+            log(Level.FINE, "Flushing {0}", fn);
+        }
 
-            {
-                Item c = topMostCall();
-                if (c != null && c.method != null) {
-                    c.inJava();
-                    lock().notifyAll();
-                }
-            }
-
-            Item myCall;
-            boolean load;
-            final Item top = topMostCall();
-            if (top != null) {
-                myCall = registerCall(new Item(id, top, fn));
-                load = synchronous;
-                first = false;
-            } else {
-                myCall = registerCall(new Item(id, null, null));
-                load = true;
-                first = true;
-            }
-            if (load) {
-                loadJS(fn);
-            }
-            for (;;) {
-                if (myCall.typeof != null) {
-                    break;
-                }
-                try {
-                    lock().wait();
-                } catch (InterruptedException ex) {
-                    log(Level.SEVERE, null, ex);
-                }
-                Item c = topMostCall();
-                if (c != null) {
-                    c.inJava();
-                }
+        {
+            Item c = topMostCall();
+            if (c != null && c.method != null) {
+                c.inJava();
                 lock().notifyAll();
             }
-            ret = valueOf(myCall.typeof, (String) myCall.result);
         }
+
+        Item myCall;
+        boolean load;
+        final Item top = topMostCall();
+        if (top != null) {
+            myCall = registerCall(new Item(id, top, fn));
+            load = synchronous;
+            first = false;
+        } else {
+            myCall = registerCall(new Item(id, null, null));
+            load = true;
+            first = true;
+        }
+        if (load) {
+            loadJS(fn);
+        }
+        for (;;) {
+            if (myCall.typeof != null) {
+                break;
+            }
+            try {
+                lock().wait();
+            } catch (InterruptedException ex) {
+                log(Level.SEVERE, null, ex);
+            }
+            Item c = topMostCall();
+            if (c != null) {
+                c.inJava();
+            }
+            lock().notifyAll();
+        }
+        Object ret = valueOf(myCall.typeof, (String) myCall.result);
         if (first) {
             arguments.clear();
         }
