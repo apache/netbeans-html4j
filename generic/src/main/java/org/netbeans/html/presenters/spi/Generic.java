@@ -758,6 +758,14 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 log(Level.FINE, "Flushing {0}", fn);
             }
 
+            {
+                Item c = topMostCall();
+                if (c != null && c.method != null) {
+                    c.inJava();
+                    lock().notifyAll();
+                }
+            }
+
             Item myCall;
             boolean load;
             final Item top = topMostCall();
