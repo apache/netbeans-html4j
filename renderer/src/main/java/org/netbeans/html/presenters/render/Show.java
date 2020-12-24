@@ -48,7 +48,7 @@ public abstract class Show {
             show.show(page);
         } catch (IOException ex) {
             throw ex;
-        } catch (Exception ex) {
+        } catch (LinkageError | Exception ex) {
             if (impl == null) {
                 impl = "xdg-open";
             }

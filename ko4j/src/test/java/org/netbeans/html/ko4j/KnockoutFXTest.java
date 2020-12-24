@@ -95,7 +95,9 @@ public final class KnockoutFXTest extends KnockoutTCK {
         return res.toArray();
     }
 
-    private static void seekKOTests(Class<?> c, List<Object> res) throws SecurityException, ClassNotFoundException {
+    // BEGIN: org.netbeans.html.ko4j.KnockoutFXTest
+    private static void seekKOTests(Class<?> c, List<Object> res)
+    throws ClassNotFoundException {
         Class<? extends Annotation> koTest =
             c.getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
@@ -108,6 +110,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
             }
         }
     }
+    // END: org.netbeans.html.ko4j.KnockoutFXTest
 
     private static boolean skipUnsupported(Method m) {
         String version = System.getProperty("java.version"); // NOI18N
@@ -186,12 +189,11 @@ public final class KnockoutFXTest extends KnockoutTCK {
     public native Object executeScript(String script, Object[] arguments);
 
     @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
+          """
+          var h;if (!!window && !!window.location && !!window.location.href)
+            h = window.location.href;
+          else   h = null;return h;
+          """
     )
     private static native String findBaseURL();
     

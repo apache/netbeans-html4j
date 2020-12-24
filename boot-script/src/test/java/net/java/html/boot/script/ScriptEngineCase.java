@@ -18,10 +18,7 @@
  */
 package net.java.html.boot.script;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FnContext;
 import org.testng.IHookCallBack;
@@ -34,65 +31,31 @@ import org.testng.annotations.Test;
  *
  * @author Jaroslav Tulach
  */
-public final class SingleCase implements ITest, IHookable, Runnable {
-    static final Executor JS = Executors.newSingleThreadExecutor();
+public final class ScriptEngineCase implements ITest, IHookable {
     private final Fn.Presenter p;
-    private final Method m;
-    private Object result;
-    private Object inst;
+    private final Method method;
     private final String prefix;
 
-    SingleCase(String prefix, Fn.Presenter p, Method m) {
+    ScriptEngineCase(String prefix, Fn.Presenter p, Method m) {
         this.prefix = prefix;
         this.p = p;
-        this.m = m;
+        this.method = m;
     }
 
     @Override
     public String getTestName() {
-        return prefix + m.getName();
+        return prefix + method.getName();
     }
 
     @Test
     public synchronized void executeTest() throws Exception {
-        if (result == null) {
-            JS.execute(this);
-            wait();
-        }
-        if (result instanceof Exception) {
-            throw (Exception)result;
-        }
-        if (result instanceof Error) {
-            throw (Error)result;
-        }
-    }
-
-    @Override
-    public synchronized void run() {
-        boolean notify = true;
         try {
             FnContext.currentPresenter(p);
-            if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
-            }
-            result = m.invoke(inst);
-            if (result == null) {
-                result = this;
-            }
-        } catch (InvocationTargetException ex) {
-            Throwable r = ex.getTargetException();
-            if (r instanceof InterruptedException) {
-                notify = false;
-                JS.execute(this);
-                return;
-            }
-            result = r;
-        } catch (Exception ex) {
-            result = ex;
+            // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
+            Object instance = method.getDeclaringClass().newInstance();
+            method.invoke(instance);
+            // END: net.java.html.boot.script.ScriptEngineCase#run
         } finally {
-            if (notify) {
-                notifyAll();
-            }
             FnContext.currentPresenter(null);
         }
     }
@@ -101,5 +64,5 @@ public final class SingleCase implements ITest, IHookable, Runnable {
     public void run(IHookCallBack ihcb, ITestResult itr) {
         ihcb.runTestMethod(itr);
     }
-    
+
 }

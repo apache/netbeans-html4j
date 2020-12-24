@@ -18,8 +18,6 @@
  */
 package net.java.html.boot.script;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -31,7 +29,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.json.tck.KOTest;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Factory;
 
@@ -39,8 +36,8 @@ import org.testng.annotations.Factory;
  *
  * @author Jaroslav Tulach
  */
-public class Jsr223JavaScriptTest {
-    public Jsr223JavaScriptTest() {
+public class ScriptEngineTest {
+    public ScriptEngineTest() {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
@@ -79,39 +76,30 @@ public class Jsr223JavaScriptTest {
         assertNoGlobalSymbolsLeft(engine);
         final String prefix = "[" + engine.getFactory().getEngineName() + "] ";
 
-        Class<? extends Annotation> test = KOTest.class;
-        Class[] arr = Jsr223JavaScriptTst.tests();
-        for (Class c : arr) {
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(test) != null) {
-                    res.add(new SingleCase(prefix, browserPresenter[0], m));
-                }
-            }
-        }
-
+        ScriptEngineJavaScriptTCK.collectTckTests(res, (m) -> new ScriptEngineCase(prefix, browserPresenter[0], m));
     }
 
     private static void assertNoGlobalSymbolsLeft(ScriptEngine engine) throws ScriptException {
-        Object left = engine.eval(
-                "(function() {\n" +
-                        "  var names = Object.getOwnPropertyNames(this);\n" +
-                        "  for (var i = 0; i < names.length; i++) {\n" +
-                        "    var n = names[i];\n" +
-                        "    if (n === 'Object') continue;\n" +
-                        "    if (n === 'Number') continue;\n" +
-                        "    if (n === 'Boolean') continue;\n" +
-                        "    if (n === 'Array') continue;\n" +
-                        "    delete this[n];\n" +
-                        "  }\n" +
-                        "  return Object.getOwnPropertyNames(this).toString();\n" +
-                        "})()\n" +
-                        ""
+        Object left = engine.eval("""
+            (function() {
+              var names = Object.getOwnPropertyNames(this);
+              for (var i = 0; i < names.length; i++) {
+                var n = names[i];
+                if (n === 'Object') continue;
+                if (n === 'Number') continue;
+                if (n === 'Boolean') continue;
+                if (n === 'Array') continue;
+                delete this[n];
+              }
+              return Object.getOwnPropertyNames(this).toString();
+            })()
+            """
         );
         assertEquals(left.toString().toLowerCase().indexOf("java"), -1, "No Java symbols " + left);
     }
 
     private static Fn.Presenter createPresenter(ScriptEngine engine) {
-        final Executor someExecutor = SingleCase.JS;
+        final Executor someExecutor = (r) -> r.run();
         // BEGIN: Jsr223JavaScriptTest#createPresenter
         return Scripts.newPresenter()
             .engine(engine)

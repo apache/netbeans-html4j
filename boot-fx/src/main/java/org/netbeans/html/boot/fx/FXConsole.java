@@ -52,12 +52,11 @@ public final class FXConsole implements ChangeListener<String> {
     }
 
     void register(WebEngine eng) {
-        JSObject fn = (JSObject) eng.executeScript(""
-            + "(function(attr, l, FXConsole) {\n"
-            + "  window.console[attr] = function(msg) {\n"
-            + "    FXConsole.log(l, msg);\n"
-            + "  };"
-            + "})"
+        JSObject fn = (JSObject) eng.executeScript("""
+            (function(attr, l, FXConsole) {
+              window.console[attr] = function(msg) {
+                FXConsole.log(l, msg);
+              };})"""
         );
         registerImpl(fn, "log", Level.INFO);
         registerImpl(fn, "info", Level.INFO);

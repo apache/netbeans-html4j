@@ -27,30 +27,46 @@ import net.java.html.json.tests.GCKnockoutTest;
 import net.java.html.json.tests.JSONTest;
 import net.java.html.json.tests.KnockoutTest;
 import net.java.html.json.tests.MinesTest;
+import net.java.html.json.tests.ObtainAndComputeTest;
 import net.java.html.json.tests.OperationsTest;
 import net.java.html.json.tests.Utils;
 import net.java.html.json.tests.WebSocketTest;
 import org.netbeans.html.context.spi.Contexts.Builder;
-import org.openide.util.lookup.ServiceProvider;
 
-/** Entry point for providers of different HTML binding technologies (like
- * Knockout.js in JavaFX's WebView). Sample usage:
+/**
+ * An enhanced, visual <em>Test Compatibility Kit</em> for people providing their own
+ * implementation of {@link org.netbeans.html.boot.spi.Fn.Presenter} or any other system that understands
+ * {@link net.java.html.js.JavaScriptBody} annotation. The {@link KnockoutTCK}
+ * is an extension over {@link JavaScriptTCK} - the <em>headless</em> test
+ * compatibility kit. Once the <em>headless</em> functionality works fine,
+ * it is time to test the visual aspects - at the end the goal is to run visual
+ * <b>Java</b> applications in browser, right?
+ * <p>
+ * The {@link KnockoutTCK} shall be subclassesed and {@code abstract} methods
+ * of the class implemented to provide the necessary environment for execution.
+ * A typical way to obtain all the methods to be tested for each of {@link #testClasses} is:
+ * <p>
+ * {@codesnippet org.netbeans.html.ko4j.KnockoutFXTest}
+ * <p>
+ * The visual tests interact with browser environment and perform asynchronous
+ * network calls. That has two consequences:
+ * <ul>
+ *  <li>the test may ask you to set a server up via {@link KnockoutTCK#prepareWebResource(java.lang.String, java.lang.String, java.lang.String[])} call -
+ *    return URL which the test later connects to
+ *  <li>the test may need to wait - in such case it throws {@link InterruptedException} - wait a while
+ *    and call the test method again (while keeping the instance and its internal state)
+ * </ul>
+ * <p>
+ * The typical way to execute the visual tests requires one to perform something like:
+ * <p>
+ * {@codesnippet org.netbeans.html.ko4j.KOFx}
+ * e.g. initialize the test instance, run the test method. If it yields an
+ * {@link InterruptedException}, run the test again. Should there be no success
+ * in a fixed time, give up and fail the test. Succeed otherwise.
+ * This is more complicated than running headless {@link JavaScriptTCK} tests,
+ * but so is the behavior of typical applications in the browser with access to
+ * network.
  * 
-<pre>
-{@link ServiceProvider @ServiceProvider}(service = KnockoutTCK.class)
-public final class MyKnockoutBindingTest extends KnockoutTCK {
-    {@link Override @Override}
-    protected BrwsrCtx createContext() {
-        // use {@link Builder}.{@link Builder#build() build}();
-    }
-
-    {@code @org.testng.annotations.Factory}
-    public static Object[] create() {
-        return VMTest.newTests().withClasses({@link KnockoutTCK#testClasses}()).build();
-    }
-}
- * </pre>
- *
  * @author Jaroslav Tulach
  */
 public abstract class KnockoutTCK {
@@ -125,6 +141,7 @@ public abstract class KnockoutTCK {
             JSONTest.class,
             KnockoutTest.class,
             MinesTest.class,
+            ObtainAndComputeTest.class,
             OperationsTest.class,
             WebSocketTest.class,
             GCKnockoutTest.class

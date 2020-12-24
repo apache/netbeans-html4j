@@ -33,7 +33,7 @@
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <netbeans.version>RELEASE121</netbeans.version>
+      <netbeans.version>RELEASE122</netbeans.version>
       <graalvm.version>20.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
@@ -44,6 +44,7 @@
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
       <skipJavaFXTests>true</skipJavaFXTests>
+      <maven.compiler.source>15</maven.compiler.source>
   </properties>
   <modules>
     <module>json</module>
@@ -157,6 +158,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <additionalOptions>
                     -snippetpath boot-fx/src/test
                     -snippetpath boot-script/src/test
+                    -snippetpath ko4j/src/test
                     -snippetpath json/src/test
                     -snippetpath webkit/src/test
                     ${javadoc.allowjs}
@@ -288,9 +290,9 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 </dependencies>
                 <configuration>
                     <compilerId>frgaal</compilerId>
-                    <source>1.8</source>
+                    <source>15</source>
                     <target>1.8</target>
-                    <testSource>1.8</testSource>
+                    <testSource>15</testSource>
                     <testTarget>1.8</testTarget>
                 </configuration>
               </plugin>

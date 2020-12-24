@@ -97,7 +97,7 @@ final class TyrusDynamicHTTP extends HttpHandler {
                 params.add(p);
             }
             final String cnt = request.getParameter("content");
-            String mangle = cnt.replace("%20", " ").replace("%0A", "\n");
+            String mangle = cnt.replace("%20", " ").replace("%0A", "\n").replace("\\\"", "\"");
             ByteArrayInputStream is = new ByteArrayInputStream(mangle.getBytes("UTF-8"));
             URI url;
             final Resource res = new Resource(is, mimeType, "/dynamic/res" + ++resourcesCount, params.toArray(new String[params.size()]));

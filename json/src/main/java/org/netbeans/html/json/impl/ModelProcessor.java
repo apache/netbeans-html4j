@@ -543,19 +543,20 @@ public final class ModelProcessor extends AbstractProcessor {
                 writeClone(className, props, w);
                 String targetId = findTargetId(e);
                 if (targetId != null) {
-                    w.write("  /** Activates this model instance in the current {@link \n"
-                        + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. \n"
-                        + "In case of using Knockout technology, this means to \n"
-                        + "bind JSON like data in this model instance with Knockout tags in \n"
-                        + "the surrounding HTML page.\n"
-                    );
+                    w.write("""
+                              /** Activates this model instance in the current {@link 
+                            net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. 
+                            In case of using Knockout technology, this means to 
+                            bind JSON like data in this model instance with Knockout tags in 
+                            the surrounding HTML page.
+                            """);
                     if (targetId != null) {
                         w.write("This method binds to element '" + targetId + "' on the page\n");
                     }
-                    w.write(""
-                        + "@return <code>this</code> object\n"
-                        + "*/\n"
-                    );
+                    w.write("""
+                            @return <code>this</code> object
+                            */
+                            """);
                     w.write("  public " + className + " applyBindings() {\n");
                     w.write("    proto.applyBindings();\n");
     //                w.write("    proto.applyBindings(id);\n");
@@ -1454,11 +1455,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 1) {\n" +
-            "        Object[] ev = (Object[])data;\n"
-            );
+        body.append("""
+                            return;
+                          } else if (type == 1) {
+                            Object[] ev = (Object[])data;
+                    """);
         if (expectsList) {
             body.append(
                 "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
@@ -1472,7 +1473,7 @@ public final class ModelProcessor extends AbstractProcessor {
             "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
         );
         {
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("        ").append(inPckName(clazz, false)).append(".").append(n).append("(");
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
@@ -1481,11 +1482,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      }\n" +
-            "    }\n"
-            );
+        body.append("""
+                            return;
+                          }
+                        }
+                    """);
         method.append("    proto.loadJSONWithHeaders(" + index + ",\n        ");
         method.append(headers.length() == 0 ? "null" : headers).append(",\n        ");
         method.append(urlBefore).append(", ");
@@ -1529,11 +1530,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
         }
         body.append(");\n");
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 2) { /* on error */\n" +
-            "        Exception value = (Exception)data;\n"
-            );
+        body.append("""
+                            return;
+                          } else if (type == 2) { /* on error */
+                            Exception value = (Exception)data;
+                    """);
         if (onR.onError().isEmpty()) {
             body.append(
                 "        value.printStackTrace();\n"
@@ -1556,11 +1557,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 1) {\n" +
-            "        Object[] ev = (Object[])data;\n"
-        );
+        body.append("""
+                            return;
+                          } else if (type == 1) {
+                            Object[] ev = (Object[])data;
+                    """);
         if (expectsList) {
             body.append(
                 "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
@@ -1583,10 +1584,9 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      }"
-        );
+        body.append("""
+                            return;
+                          }""");
         if (!onR.onError().isEmpty()) {
             body.append(" else if (type == 3) { /* on close */\n");
             body.append("        ").append(inPckName(clazz, true)).append(".").append(onR.onError()).append("(");
