@@ -706,6 +706,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     private StringBuilder deferred;
+    private boolean deferredDisabled;
     private Collection<Object> arguments = new LinkedList<Object>();
 
     private StringBuilder getDeferred(boolean clear) {
@@ -713,6 +714,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         StringBuilder sb = deferred;
         if (clear) {
             deferred = null;
+            if (sb != null) {
+                deferredDisabled = true;
+            }
         }
         return sb;
     }
@@ -752,6 +756,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 final int id = nextCallId();
                 log(Level.FINE, "flush#{1}: {0}", def, id);
                 exec(id, Strings.flushExec(key, id).toString());
+            }
+            if (topMostCall() == null) {
+                deferredDisabled = false;
             }
         }
     }
@@ -931,9 +938,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             arguments.add(args);
 
             synchronized (lock()) {
+                boolean synchronizedExecution = wait4js || deferredDisabled;
                 int callId = nextCallId();
-                sb.insert(0, Strings.invokeImplFn(id, wait4js, key, callId));
-                if (wait4js) {
+                sb.insert(0, Strings.invokeImplFn(id, synchronizedExecution, key, callId));
+                if (synchronizedExecution) {
                     return exec(callId, sb.toString());
                 } else {
                     deferExec(sb);

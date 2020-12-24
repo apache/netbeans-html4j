@@ -58,7 +58,7 @@ final class GenericTCK extends JavaScriptTCK {
                     }
                 }
             });
-            cdl.await(3, TimeUnit.SECONDS);
+            cdl.await(1, TimeUnit.SECONDS);
             if (error[0] != null) {
                 throw error[0];
             }
