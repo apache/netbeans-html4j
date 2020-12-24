@@ -579,10 +579,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
         protected String sj(boolean[] finished) {
             finished[0] = false;
-            if (Boolean.TRUE.equals(done)) {
+            if (done != null) {
                 return null;
             }
-            done = true;
+            done = false;
             return "javascript:" + toExec;
         }
 
@@ -592,6 +592,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             this.typeof = typeof;
             this.result = result;
+            this.done = true;
             log(Level.FINE, "result ({0}): {1} for {2}", typeof, result, toExec);
         }
     } // end of Item
@@ -618,7 +619,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 return;
             }
             Item it = top;
-            while (it != null) {
+            while (it.prev != null) {
                 Item process = it.prev;
                 if (process.id == id) {
                     process.result(typeof, res);
@@ -1027,6 +1028,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     private Item registerCall(Item call) {
         assert Thread.holdsLock(lock());
+        while (call != null && call.method == null && Boolean.TRUE.equals(call.done)) {
+            call = call.prev;
+        }
         this.call = call;
         lock().notifyAll();
         return call;
