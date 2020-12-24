@@ -70,8 +70,8 @@ public final class ServerFactories {
             loadFinished(() -> {
                 browserPresenter[0] = Fn.activePresenter();
                 updateName[0] = Fn.define(KOScript.class,
-                    "document.getElementsByTagName('h1')[0].innerHTML='" + browserName + "@' + t;",
-                    "t"
+                    "document.getElementsByTagName('h1')[0].innerHTML='" + browserName + "@' + t + '[' + s + ']';",
+                    "t", "s"
                 );
                 cdl.countDown();
             });
@@ -85,6 +85,7 @@ public final class ServerFactories {
                 }
             }
         }
+        res.add(new KOClose(updateName[0], prefix, browserPresenter[0]));
         return browserPresenter[0];
     }
 
