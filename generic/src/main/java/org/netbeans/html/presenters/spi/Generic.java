@@ -677,18 +677,17 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             boolean[] finished = {false};
             for (;;) {
-                if (deferred != null) {
-                    deferred.insert(0, "javascript:");
-                    String ret = deferred.toString();
-                    deferred = null;
-                    return ret;
+                StringBuilder def = getDeferred(true);
+                if (def != null) {
+                    def.insert(0, "javascript:");
+                    return def.toString();
                 }
                 finished[0] = false;
                 final Item top = topMostCall();
                 if (top.method != null) {
                     if (top.done == null) {
                         dispatch(top);
-                        if (deferred != null) {
+                        if (getDeferred(false) != null) {
                             continue;
                         }
                     }
@@ -709,6 +708,26 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private StringBuilder deferred;
     private Collection<Object> arguments = new LinkedList<Object>();
 
+    private StringBuilder getDeferred(boolean clear) {
+        assert Thread.holdsLock(lock());
+        StringBuilder sb = deferred;
+        if (clear) {
+            deferred = null;
+        }
+        return sb;
+    }
+
+    final void deferExec(StringBuilder sb) {
+        synchronized (lock()) {
+            log(Level.FINE, "deferExec: {0} empty: {1}, call: {2}", new Object[]{sb, deferred == null, topMostCall()});
+            if (deferred == null) {
+                deferred = sb;
+            } else {
+                deferred.append(sb);
+            }
+        }
+    }
+
     public final void loadScript(final Reader reader) throws Exception {
         StringBuilder sb = new StringBuilder();
         char[] arr = new char[4092];
@@ -723,25 +742,15 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
 
-    final void deferExec(StringBuilder sb) {
-        synchronized (lock()) {
-            log(Level.FINE, "deferExec: {0} empty: {1}, call: {2}", new Object[]{sb, deferred == null, topMostCall()});
-            if (deferred == null) {
-                deferred = sb;
-            } else {
-                deferred.append(sb);
-            }
-        }
-    }
-
     @Texts({
         "flushExec=\n\nds(@1).toJava('r', '@2', null);\n"
     })
     void flushImpl() {
         synchronized (lock()) {
-            if (deferred != null) {
+            StringBuilder def = getDeferred(false);
+            if (def != null) {
                 final int id = nextCallId();
-                log(Level.FINE, "flush#{1}: {0}", deferred, id);
+                log(Level.FINE, "flush#{1}: {0}", def, id);
                 exec(id, Strings.flushExec(key, id).toString());
             }
         }
@@ -750,14 +759,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     final Object exec(int id, String fn) {
         assert Thread.holdsLock(lock());
         boolean first;
-        if (deferred != null) {
-            deferred.append(fn);
-            fn = deferred.toString();
-            deferred = null;
-            log(Level.FINE, "Flushing {0}", fn);
-        }
-
         {
+            StringBuilder def = getDeferred(true);
+            if (def != null) {
+                def.append(fn);
+                fn = def.toString();
+                log(Level.FINE, "Flushing {0}", fn);
+            }
             Item c = topMostCall();
             if (c != null && c.method != null) {
                 c.inJava();
