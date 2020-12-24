@@ -509,7 +509,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         void callbackReady(String name);
     }
     
-    private class Item implements Runnable {
+    private class Item {
         final int id;
         final Item prev;
         Boolean done;
@@ -554,15 +554,6 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
         }
         
-        @Override public void run() {
-            synchronized (lock()) {
-                log(Level.FINE, "run: {0}", this);
-                inJava();
-                lock().notifyAll();
-            }
-        }
-        
-
         protected String js(boolean[] finished) {
             if (Boolean.TRUE.equals(done)) {
                 StringBuilder sb = new StringBuilder();
@@ -683,14 +674,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     return def.toString();
                 }
                 finished[0] = false;
-                final Item top = topMostCall();
-                if (top.method != null) {
-                    if (top.done == null) {
-                        dispatch(top);
-                        if (getDeferred(false) != null) {
-                            continue;
-                        }
-                    }
+                final Item top = dispatchPendingItem();
+                if (top == null) {
+                    continue;
                 }
                 String jsToExec = top.inJavaScript(finished);
                 log(Level.FINE, "jr: {0} jsToExec: {1} finished: {2}", new Object[]{topMostCall(), jsToExec, finished[0]});
@@ -703,6 +689,25 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 lock().wait();
             }
         }
+    }
+
+    private Item dispatchPendingItem() {
+        final Item top = topMostCall();
+        if (top.method != null && top.done == null) {
+            dispatch(() -> {
+                synchronized (lock()) {
+                    Item pending = topMostCall();
+                    if (pending != null) {
+                        pending.inJava();
+                        lock().notifyAll();
+                    }
+                }
+            });
+            if (getDeferred(false) != null) {
+                return null;
+            }
+        }
+        return top;
     }
 
     private StringBuilder deferred;
