@@ -84,6 +84,14 @@
       <scope>test</scope>
       <type>jar</type>
     </dependency>
+    <dependency>
+        <groupId>org.graalvm.js</groupId>
+        <artifactId>js</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.graalvm.js</groupId>
+        <artifactId>js-scriptengine</artifactId>
+    </dependency>
   </dependencies>
     <description>Builder to launch your Java/HTML based application.</description>
 </project>

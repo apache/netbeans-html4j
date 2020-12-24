@@ -32,7 +32,7 @@ before_script:
 script:
   - $JAVA_HOME/bin/java -version
   - mvn install -DskipTests $ARGS
-  - mvn verify $ARGS
+  - mvn -q verify $ARGS
   - mvn javadoc:aggregate
 
 matrix:
@@ -52,9 +52,15 @@ matrix:
       env:
         - ARGS=-Dnone
     - os: linux
-      name: Linux JDK14 (latest)
+      name: Linux JDK14
       dist: trusty
       jdk: openjdk14
+      env:
+        - ARGS=-Dnone
+    - os: linux
+      name: Linux JDK15 (latest)
+      dist: trusty
+      jdk: openjdk15
       env:
         - ARGS=-Dnone
     - os: osx

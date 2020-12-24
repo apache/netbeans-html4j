@@ -82,6 +82,14 @@
       <artifactId>net.java.html</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.graalvm.js</groupId>
+      <artifactId>js</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.graalvm.js</groupId>
+      <artifactId>js-scriptengine</artifactId>
+    </dependency>
   </dependencies>
     <description>API for smooth representation of JSON objects in Java. Write your
 application in Java and
