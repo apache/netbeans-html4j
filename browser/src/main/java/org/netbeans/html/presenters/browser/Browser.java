@@ -153,32 +153,7 @@ Executor, Closeable {
         if ("none".equalsIgnoreCase(impl)) { // NOI18N
             return;
         }
-        if (impl != null) {
-            Show.show(impl, page);
-        } else {
-            IOException one, two;
-            try {
-                String ui = System.getProperty("os.name").contains("Mac") ?
-                    "Cocoa" : "GTK";
-                Show.show(ui, page);
-                return;
-            } catch (IOException ex) {
-                one = ex;
-            }
-            try {
-                Show.show("AWT", page);
-                return;
-            } catch (IOException ex) {
-                two = ex;
-            }
-            try {
-                Show.show(impl, page);
-            } catch (IOException ex) {
-                two.initCause(one);
-                ex.initCause(two);
-                throw ex;
-            }
-        }
+        Show.show(impl, page);
     }
 
     @Override

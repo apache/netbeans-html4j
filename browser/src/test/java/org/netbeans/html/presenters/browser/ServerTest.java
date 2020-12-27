@@ -114,27 +114,7 @@ public class ServerTest {
         ExecutorService background = Executors.newSingleThreadExecutor();
         Future<Void> future = background.submit((Callable<Void>) () -> {
             IOException one, two;
-            try {
-                String ui = System.getProperty("os.name").contains("Mac")
-                        ? "Cocoa" : "GTK";
-                Show.show(ui, page);
-                return null;
-            } catch (IOException ex) {
-                one = ex;
-            }
-            try {
-                Show.show("AWT", page);
-                return null;
-            } catch (IOException ex) {
-                two = ex;
-            }
-            try {
-                Show.show(null, page);
-            } catch (IOException ex) {
-                two.initCause(one);
-                ex.initCause(two);
-                throw ex;
-            }
+            Show.show(System.getProperty("com.dukescript.presenters.browser"), page);
             return null;
         });
 

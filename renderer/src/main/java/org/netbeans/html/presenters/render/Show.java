@@ -35,23 +35,53 @@ public abstract class Show {
     Show() {
     }
     
-    /** Shows a page in a browser.
+    /** Shows a page in a browser. Select default implementation
+     * suitable for current system if {@code "default"} or {@code null}.
      * 
      * @param impl the name of implementation to use, can be <code>null</code>
      * @param page the page URL
      * @throws IOException if something goes wrong
      */
     public static void show(String impl, URI page) throws IOException {
+        if (impl == null || "default".equals(impl)) { // NOI18N
+            showOneByOne(page);
+            return;
+        }
+        showOne(impl, page);
+    }
+
+    private static void showOneByOne(URI page) throws IOException {
+        IOException one, two;
+        try {
+            String ui = System.getProperty("os.name").contains("Mac")
+                    ? "Cocoa" : "GTK";
+            Show.show(ui, page);
+            return;
+        } catch (IOException ex) {
+            one = ex;
+        }
+        try {
+            Show.show("AWT", page);
+            return;
+        } catch (IOException ex) {
+            two = ex;
+        }
+        try {
+            Show.show("xdg-open", page);
+        } catch (IOException ex) {
+            two.initCause(one);
+            ex.initCause(two);
+            throw ex;
+        }
+    }
+
+    private static void showOne(String impl, URI page) throws IOException {
+        impl.getClass(); // NPE check
         try {
             Class<?> c = Class.forName(Show.class.getPackage().getName() + '.' + impl);
             Show show = (Show) c.newInstance();
             show.show(page);
-        } catch (IOException ex) {
-            throw ex;
-        } catch (LinkageError | Exception ex) {
-            if (impl == null) {
-                impl = "xdg-open";
-            }
+        } catch (ClassNotFoundException ex) {
             LOG.log(Level.INFO, "Trying command line execution of {0}", impl);
             String[] cmdArr = {
                 impl, page.toString()
@@ -63,6 +93,10 @@ public abstract class Show {
             } catch (InterruptedException ex1) {
                 throw (InterruptedIOException) new InterruptedIOException().initCause(ex1);
             }
+        } catch (IOException ex) {
+            throw ex;
+        } catch (LinkageError | Exception ex) {
+            throw new IOException(ex);
         }
     }
     
