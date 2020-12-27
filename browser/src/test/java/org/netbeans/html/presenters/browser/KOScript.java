@@ -53,7 +53,7 @@ public final class KOScript implements ITest, IHookable, Runnable {
         return prefix + ":" + m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
-    @Test
+    @Test(groups = "BrowserTest")
     public void executeTest() throws Exception {
         for (;;) {
             if (p instanceof Executor) {
