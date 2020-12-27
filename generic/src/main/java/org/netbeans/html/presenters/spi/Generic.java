@@ -67,6 +67,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         this.evalJS = evalJS;
         this.type = type;
         this.app = app;
+        this.resetDeferredDisabled();
     }
     
     final Object lock() {
@@ -764,9 +765,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 exec(id, Strings.flushExec(key, id).toString());
             }
             if (topMostCall() == null) {
-                deferredDisabled = false;
+                resetDeferredDisabled();
             }
         }
+    }
+
+    private void resetDeferredDisabled() {
+        deferredDisabled = Boolean.getBoolean("org.netbeans.html.Generic.wait4js");
     }
 
     final Object exec(int id, String fn) {

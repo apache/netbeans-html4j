@@ -32,7 +32,7 @@ before_script:
 script:
   - $JAVA_HOME/bin/java -version
   - mvn install -DskipTests $ARGS
-  - mvn -q verify $ARGS
+  - mvn -q verify $ARGS -Dorg.netbeans.html.Generic.wait4js=true
   - if [ -n "$JAVADOC" ]; then mvn javadoc:aggregate; fi
 
 matrix:

@@ -26,6 +26,9 @@ import org.netbeans.html.boot.spi.Fn.Presenter;
 
 /** The <em>prototypical</em> presenter builder. Builds a {@link Presenter} based on
  * top of textual protocol transferred between JVM and JavaScript engines.
+ * Supports one additional configuration property; by setting
+ * {@code org.netbeans.html.Generic.wait4js}
+ * to {@code true} one enables, more reliable, yet possibly slower, mode.
  */
 public final class ProtoPresenterBuilder {
     private Evaluator loadScript;

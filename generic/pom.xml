@@ -36,6 +36,7 @@
         <publicPackages>org.netbeans.html.presenters.spi</publicPackages>
         <publicMetaInf/>
         <sigtestPackages/>
+        <wait4js>false</wait4js>
     </properties>
 
     <dependencies>
@@ -91,6 +92,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.netbeans.html.Generic.wait4js>${wait4js}</org.netbeans.html.Generic.wait4js>
+                    </systemPropertyVariables>
                     <skip>false</skip>
                 </configuration>
             </plugin>
