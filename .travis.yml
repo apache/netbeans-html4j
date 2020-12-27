@@ -22,6 +22,7 @@ services:
 before_install:
   - sudo apt-get -qq update || echo no sudo apt-get
   - sudo apt-get install -y libwebkitgtk-3.0-0 || echo no sudo apt-get
+  - sudo apt-get install -y firefox || echo no sudo apt-get
   - if [ -n "$URL" ]; then pushd /tmp; curl $URL -o jdk.tgz; tar fxz jdk.tgz; JAVA_HOME=`pwd`/$DIR; popd; export JAVA_HOME; fi
   - echo Java is $JAVA_HOME
   - ls -l $JAVA_HOME
@@ -31,6 +32,7 @@ before_script:
   - sleep 3
 script:
   - $JAVA_HOME/bin/java -version
+  - if type firefox; then (firefox&); fi
   - mvn install -DskipTests $ARGS
   - mvn -q verify $ARGS -Dorg.netbeans.html.Generic.wait4js=true
   - if [ -n "$JAVADOC" ]; then mvn javadoc:aggregate; fi
@@ -42,7 +44,7 @@ matrix:
       dist: trusty
       jdk: openjdk8
       env:
-        - ARGS=-Dnone
+        - ARGS=-Dcom.dukescript.presenters.browser=firefox
         - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64
         - URL=https://cdn.azul.com/zulu/bin/$DIR.tar.gz
     - os: linux
@@ -56,7 +58,7 @@ matrix:
       dist: trusty
       jdk: openjdk15
       env:
-        - ARGS=-Dnone
+        - ARGS=-Dcom.dukescript.presenters.browser=firefox
         - JAVADOC=yes
     - os: osx
       name: Mac JDK8
