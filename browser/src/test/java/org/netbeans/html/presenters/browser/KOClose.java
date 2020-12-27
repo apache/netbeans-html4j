@@ -21,7 +21,7 @@ package org.netbeans.html.presenters.browser;
 import java.util.concurrent.Executor;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.ITest;
-import org.testng.annotations.AfterSuite;
+import org.testng.annotations.Test;
 
 public class KOClose implements ITest {
 
@@ -35,7 +35,7 @@ public class KOClose implements ITest {
         this.presenter = presenter;
     }
 
-    @AfterSuite
+    @Test(dependsOnGroups = "BrowserTest")
     public void closeWindow() {
         ((Executor)this.presenter).execute(() -> {
             try {
