@@ -696,12 +696,15 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private Item dispatchPendingItem() {
         final Item top = topMostCall();
         if (top.method != null && top.done == null) {
-            dispatch(() -> {
-                synchronized (lock()) {
-                    Item pending = topMostCall();
-                    if (pending != null) {
-                        pending.inJava();
-                        lock().notifyAll();
+            dispatch(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (lock()) {
+                        Item pending = topMostCall();
+                        if (pending != null) {
+                            pending.inJava();
+                            lock().notifyAll();
+                        }
                     }
                 }
             });
