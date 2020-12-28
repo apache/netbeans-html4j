@@ -163,6 +163,11 @@ $ mvn -f client/pom.xml process-classes exec:exec
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
         </script>
         
+        <h3>New in version 1.7.1</h3>
+        <p>
+            Bugfix release to address robustness and security issues.
+        </p>
+
         <h3>New in version 1.7</h3>
         <p>
             New modules are provided since
@@ -188,6 +193,38 @@ $ mvn -f client/pom.xml process-classes exec:exec
                 - native presenter for Linux and Mac OS X that uses WebKit via JNA
             </li>
         </ul>
+
+        <h3>What's new in older versions?</h3>
+
+        <p>
+        Click the
+        <a href="#" onclick="return showHistoric()">link</a>
+        to view even more
+        <a href="#" onclick="return showHistoric()">historic changes</a>...
+        </p>
+
+        <a name="historic.changes"></a>
+        <div id="historic.changes">
+            <script>
+            (function() {
+                var visible;
+                function showHistoric(show) {
+                    var e = document.getElementById("historic.changes");
+                    if (show === undefined) {
+                        show = !visible;
+                    }
+                    if (show) {
+                        e.style.display="block";
+                    } else {
+                        e.style.display="none";
+                    }
+                    visible = show;
+                    return false;
+                }
+                showHistoric(false);
+                this.showHistoric = showHistoric;
+            })()
+            </script>
 
         <h3>New in version 1.6.1</h3>
         <p>
@@ -261,39 +298,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
         Simplifying {@link org.netbeans.html.json.tck.KnockoutTCK} to avoid
         usage of {@link java.net.URI}, etc.
         </p>
-
-        <h3>What's new in older versions?</h3>
-
-        <p>
-        Click the
-        <a href="#" onclick="return showHistoric()">link</a>
-        to view even more
-        <a href="#" onclick="return showHistoric()">historic changes</a>...
-        </p>
-
-        <a name="historic.changes"></a>
-        <div id="historic.changes">
-            <script>
-            (function() {
-                var visible;
-                function showHistoric(show) {
-                    var e = document.getElementById("historic.changes");
-                    if (show === undefined) {
-                        show = !visible;
-                    }
-                    if (show) {
-                        e.style.display="block";
-                    } else {
-                        e.style.display="none";
-                    }
-                    visible = show;
-                    return false;
-                }
-                showHistoric(false);
-                this.showHistoric = showHistoric;
-            })()
-            </script>
-
+            
         <h3>New features in version 1.4</h3>
 
         Both values <code>null</code> and <code>undefined</code> are
@@ -543,13 +548,14 @@ $ mvn -f client/pom.xml process-classes exec:exec
         online:
         <ul>
             <li>Current <a target="_blank" href="https://bits.netbeans.org/html+java/dev/">development</a> version
+            <li>Version <a target="_blank" href="https://bits.netbeans.org/html+java/1.7.1/">1.7.1</a>
             <li>Version <a target="_blank" href="https://bits.netbeans.org/html+java/1.7/">1.7</a>
-            <li>Version <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.6/">1.6</a>
-            <li>Version <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.5.1/">1.5.1</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.5">1.5</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.4">1.4</a>
-            <li>Version <a target="_blank" href="http://bits.netbeans.org/html+java/1.3">1.3</a>
-                and historic ones (
+            <li>Historic versions
+                <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.6/">1.6</a>,
+                <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.5.1/">1.5.1</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.5">1.5</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.4">1.4</a>,
+                <a target="_blank" href="http://bits.netbeans.org/html+java/1.3">1.3</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/1.2.3">1.2.3</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/1.1">1.1</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/1.0">1.0</a>,
@@ -558,7 +564,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.2">0.8.2</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.1">0.8.1</a>,
                 <a target="_blank" href="http://bits.netbeans.org/html+java/0.8">0.8</a>, and
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>)
+                <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>
             </li>
         </ul>
     </body>
