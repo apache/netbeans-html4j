@@ -26,13 +26,13 @@
     <parent>
         <groupId>org.netbeans.html</groupId>
         <artifactId>pom</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.7.1</version>
     </parent>
     <name>DukeScript Presenter for any Browser</name>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
         <publicPackages>org.netbeans.html.presenters.browser</publicPackages>
-        <sigtestPackages/>
+        <sigtestPackages />
         <com.dukescript.presenters.browser>default</com.dukescript.presenters.browser>
     </properties>
     <build>
