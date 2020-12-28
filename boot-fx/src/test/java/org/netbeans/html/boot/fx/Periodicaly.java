@@ -57,9 +57,6 @@ public final class Periodicaly extends TimerTask {
         t.scheduleAtFixedRate(task, 0, 100);
     }
 
-    @JavaScriptBody(args = { "a", "b" }, body = "return a + b")
-    private static native int plus(int a, int b);
-
     void codeThatNeedsToBeRunInABrowserEnvironment() {
         // invokes JavaScript function in the browser environment
         counter = plus(counter, 1);
@@ -76,4 +73,7 @@ public final class Periodicaly extends TimerTask {
             Periodicaly.class.wait();
         }
     }
+
+    @JavaScriptBody(args = { "a", "b" }, body = "return a + b")
+    private static native int plus(int a, int b);
 }
