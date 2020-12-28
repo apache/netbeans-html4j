@@ -41,6 +41,7 @@
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
       <netbeans.compile.on.save>none</netbeans.compile.on.save>
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
+      <javadoc.fail>true</javadoc.fail>
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
       <skipJavaFXTests>true</skipJavaFXTests>
@@ -164,8 +165,8 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
                 </additionalOptions>
-                <failOnWarnings>true</failOnWarnings>
-                <failOnError>true</failOnError>
+                <failOnWarnings>${javadoc.fail}</failOnWarnings>
+                <failOnError>${javadoc.fail}</failOnError>
               </configuration>
             </plugin>
             <plugin>
@@ -576,6 +577,12 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </activation>
           <properties>
               <skipJavaFXTests>false</skipJavaFXTests>
+          </properties>
+      </profile>
+      <profile>
+          <id>apache-release</id>
+          <properties>
+              <javadoc.fail>false</javadoc.fail>
           </properties>
       </profile>
   </profiles>
