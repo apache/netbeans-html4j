@@ -88,11 +88,21 @@ final class AsyncJavaScriptAction {
     }
 
     public void testWithCallback() {
-        performTheTest(this::enterJavaScriptAndPerformIteration);
+        performTheTest(new Function<Integer,Integer>() {
+            @Override
+            public Integer apply(Integer t) {
+                return enterJavaScriptAndPerformIteration(t);
+            }
+        });
     }
 
     public void testWithoutCallback() {
-        performTheTest(this::performIteration);
+        performTheTest(new Function<Integer,Integer>() {
+            @Override
+            public Integer apply(Integer t) {
+                return performIteration(t);
+            }
+        });
     }
 
 }
