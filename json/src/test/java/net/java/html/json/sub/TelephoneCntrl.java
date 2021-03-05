@@ -16,27 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package net.java.html.json;
+package net.java.html.json.sub;
 
-import static org.testng.Assert.assertNotNull;
-import org.testng.annotations.Test;
-import net.java.html.json.sub.Street;
-import net.java.html.json.sub.Telephone;
-@Model(className = "Address", properties = {
-    @Property(name = "street", type = net.java.html.json.sub.Street.class)
-})
-public class AdressTest {
-    @Test
-    public void addressHoldsAPerson() {
-        Address address = new Address();
-        assertNotNull(address.getStreet(), "Street is initialized");
-    }
+import net.java.html.json.Model;
+
+@Model(className = "Telephone", properties = {})
+public class TelephoneCntrl {
     
-    @ComputedProperty
-    public static String lowerCaseStreetName(Street street){
-        return street.getName().toLowerCase();
-    }
-    
-    @OnReceive(url = "")
-    public static void getTelephone(Address model, Telephone phone){}
 }

@@ -187,7 +187,8 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateOnChange(e, propsDeps, props, className, functionDeps)) {
                 ok = false;
             }
-            if (!generateProperties(e, builderPrefix, body, className, props, propsGetSet, propsDeps, functionDeps)) {
+            Set<String> propertyFQNs = new HashSet<>();
+            if (!generateProperties(e, builderPrefix, body, className, props, propsGetSet, propsDeps, functionDeps, propertyFQNs)) {
                 ok = false;
             }
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
@@ -202,7 +203,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
             }
-            if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType)) {
+            if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType, propertyFQNs)) {
                 ok = false;
             }
             if (!generateOperation(e, body, className, e.getEnclosedElements(), functions)) {
@@ -213,6 +214,9 @@ public final class ModelProcessor extends AbstractProcessor {
             try {
                 w.append("package " + pkg + ";\n");
                 w.append("import net.java.html.json.*;\n");
+                for (String propertyFqns : propertyFQNs) {
+                    w.append("import "+propertyFqns+";\n");                   
+                }
                 final String inPckName = inPckName(e, false);
                 w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
@@ -643,12 +647,16 @@ public final class ModelProcessor extends AbstractProcessor {
         Writer w, String className, Prprt[] properties,
         List<GetSet> props,
         Map<String,Collection<String[]>> deps,
-        Map<String,Collection<String>> functionDeps
+        Map<String,Collection<String>> functionDeps,
+        Set<String> propertyFqns
     ) throws IOException {
         boolean ok = true;
         for (Prprt p : properties) {
             final String tn;
             tn = typeName(p);
+            if (tn.indexOf(".")!=-1){
+                propertyFqns.add(tn);
+            }
             String[] gs = toGetSet(p.name(), tn, p.array());
             String castTo;
 
@@ -1222,9 +1230,9 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private boolean generateReceive(
         Element clazz, StringWriter body, String className,
-        List<? extends Element> enclosedElements, StringBuilder inType
+        List<? extends Element> enclosedElements, StringBuilder inType ,Set<String> propertyFqns
     ) {
-        boolean ret = generateReceiveImpl(clazz, body, className, enclosedElements, inType);
+        boolean ret = generateReceiveImpl(clazz, body, className, enclosedElements, inType, propertyFqns);
         if (!ret) {
             inType.setLength(0);
         }
@@ -1232,7 +1240,7 @@ public final class ModelProcessor extends AbstractProcessor {
     }
     private boolean generateReceiveImpl(
         Element clazz, StringWriter body, String className,
-        List<? extends Element> enclosedElements, StringBuilder inType
+        List<? extends Element> enclosedElements, StringBuilder inType, Set<String> propertyFqns
     ) {
         inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data, Object[] params) {\n");
         inType.append("    switch (index) {\n");
@@ -1324,7 +1332,14 @@ public final class ModelProcessor extends AbstractProcessor {
                     error("Second arguments needs to be a model, String or array or List of models", e);
                     return false;
                 }
-                modelClass = modelType.toString();
+                modelClass = modelType.toString();           
+                final String simpleName = modelClass;
+                List<String> knownPackages = packages.get(simpleName);
+                if (knownPackages != null && !knownPackages.isEmpty()) {
+                    for (String pkg : knownPackages) {
+                        propertyFqns.add(pkg+"."+simpleName);
+                    }
+                }
                 if (expectsList == 1) {
                     args.add("arr");
                 } else if (expectsList == 2) {
@@ -1850,11 +1865,11 @@ public final class ModelProcessor extends AbstractProcessor {
     }
 
     private String fqn(TypeMirror pt, Element relative) {
-        if (pt.getKind() == TypeKind.ERROR) {
-            final Elements eu = processingEnv.getElementUtils();
-            PackageElement pckg = eu.getPackageOf(relative);
-            return pckg.getQualifiedName() + "." + pt.toString();
-        }
+//        if (pt.getKind() == TypeKind.ERROR) {
+//            final Elements eu = processingEnv.getElementUtils();
+//            PackageElement pckg = eu.getPackageOf(relative);
+//            return pckg.getQualifiedName() + "." + pt.toString();
+//        }
         return pt.toString();
     }
 
