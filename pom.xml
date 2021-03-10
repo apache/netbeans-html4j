@@ -147,7 +147,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 </groups>
                 <links>
                     <link>http://testng.org/javadocs/</link>
-                    <link>http://bits.netbeans.org/8.0/javadoc/org-openide-util-lookup/</link>
+                    <link>http://bits.netbeans.org/12.0/javadoc/org-openide-util-lookup/</link>
                     <link>http://docs.oracle.com/javase/8/javafx/api/</link>
                 </links>
                 <doclet>org.apidesign.javadoc.codesnippet.Doclet</doclet>
