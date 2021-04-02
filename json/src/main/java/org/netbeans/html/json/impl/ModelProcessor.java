@@ -81,7 +81,6 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach
  */
 @ServiceProvider(service=Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({
     "net.java.html.json.Model",
     "net.java.html.json.ModelOperation",
@@ -174,10 +173,10 @@ public final class ModelProcessor extends AbstractProcessor {
         try {
             StringWriter body = new StringWriter();
             StringBuilder onReceiveType = new StringBuilder();
-            List<GetSet> propsGetSet = new ArrayList<GetSet>();
-            List<Object> functions = new ArrayList<Object>();
-            Map<String, Collection<String[]>> propsDeps = new HashMap<String, Collection<String[]>>();
-            Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
+            List<GetSet> propsGetSet = new ArrayList<>();
+            List<Object> functions = new ArrayList<>();
+            Map<String, Collection<String[]>> propsDeps = new HashMap<>();
+            Map<String, Collection<String>> functionDeps = new HashMap<>();
             Prprt[] props = createProps(e, m.properties());
             final String builderPrefix = findBuilderPrefix(e, m);
 
@@ -1457,7 +1456,7 @@ public final class ModelProcessor extends AbstractProcessor {
         } else {
             int errorParamsLength = findOnError(e, ((TypeElement)clazz), onR.onError(), className);
             error = errorParamsLength < 0;
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz, false)).append(".").append(onR.onError()).append("(");
             body.append("model, ex");
             for (int i = 2; i < errorParamsLength; i++) {
                 String arg = args.get(i);
@@ -2339,6 +2338,11 @@ public final class ModelProcessor extends AbstractProcessor {
         }
         error(err, computedPropElem);
         return null;
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
     }
 
 }
