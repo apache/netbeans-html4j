@@ -46,7 +46,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -62,7 +61,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -780,6 +778,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             ExecutableElement ee = (ExecutableElement)e;
             ExecutableElement write = null;
+            boolean instance = e.getEnclosingElement().getAnnotation(Model.class).instance();
             if (!cp.write().isEmpty()) {
                 write = findWrite(ee, (TypeElement)e.getEnclosingElement(), cp.write(), className);
                 ok = write != null;
@@ -928,7 +927,7 @@ public final class ModelProcessor extends AbstractProcessor {
             } else {
                 w.write("  public void " + gs[4] + "(" + write.getParameters().get(1).asType());
                 w.write(" value) {\n");
-                w.write("    " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + write.getSimpleName() + "(this, value);\n");
+                w.write("    " + (instance ? "instance" : fqn(ee.getEnclosingElement().asType(), ee)) + '.' + write.getSimpleName() + "(this, value);\n");
                 w.write("  }\n");
 
                 props.add(new GetSet(
@@ -1088,20 +1087,20 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             for (String pn : onPC.value()) {
                 if (findPrprt(properties, pn) == null && findDerivedFrom(propDeps, pn).isEmpty()) {
-                    error("No Prprt named '" + pn + "' in the model", clazz);
+                    error("No property named '" + pn + "' in the model", clazz);
                     return false;
                 }
             }
             if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
-                error("@OnPrprtChange method needs to be static", e);
+                error("@OnPropertyChange method needs to be static", e);
                 return false;
             }
             if (e.getModifiers().contains(Modifier.PRIVATE)) {
-                error("@OnPrprtChange method cannot be private", e);
+                error("@OnPropertyChange method cannot be private", e);
                 return false;
             }
             if (e.getReturnType().getKind() != TypeKind.VOID) {
-                error("@OnPrprtChange method should return void", e);
+                error("@OnPropertyChange method should return void", e);
                 return false;
             }
             String n = e.getSimpleName().toString();
@@ -1765,7 +1764,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             error(
-                "@OnPrprtChange method can only accept String or " + className + " arguments",
+                "@OnPropertyChange method can only accept String or " + className + " arguments",
                 ee);
         }
         return params;
@@ -2286,6 +2285,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private ExecutableElement findWrite(ExecutableElement computedPropElem, TypeElement te, String name, String className) {
         String err = null;
+        boolean instance = te.getAnnotation(Model.class).instance();
         METHODS:
         for (Element e : te.getEnclosedElements()) {
             if (e.getKind() != ElementKind.METHOD) {
@@ -2297,7 +2297,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.equals(computedPropElem)) {
                 continue;
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 computedPropElem = (ExecutableElement) e;
                 err = "Would have to be static";
                 continue;
