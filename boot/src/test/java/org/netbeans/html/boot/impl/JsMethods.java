@@ -69,7 +69,7 @@ public class JsMethods {
     private static native int sumTwo(Arithm at, int... arr);
 
     public static int sumArr(int... arr) {
-        return sumTwo(new Arithm(), arr);
+        return sumTwo(Arithm.create(), arr);
     }
 
     @JavaScriptBody(args = {"r"}, javacall = true, body =
@@ -82,7 +82,7 @@ public class JsMethods {
     private static native int sumArr(Arithm r);
 
     public static int sumArr() {
-        return sumArr(new Arithm());
+        return sumArr(Arithm.create());
     }
 
     @JavaScriptBody(args = { "x", "y" }, body = "return mul(x, y);")

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -234,24 +235,148 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     public Iterable<? extends Completion> getCompletions(Element e,
         AnnotationMirror annotation, ExecutableElement member, String userText
     ) {
-        StringBuilder sb = new StringBuilder();
-        if (e.getKind() == ElementKind.METHOD && member.getSimpleName().contentEquals("args")) {
-            ExecutableElement ee = (ExecutableElement) e;
-            String sep = "";
-            sb.append("{ ");
-            for (VariableElement ve : ee.getParameters()) {
-                sb.append(sep).append('"').append(ve.getSimpleName())
-                    .append('"');
-                sep = ", ";
-            }
-            sb.append(" }");
-            return Collections.nCopies(1, Completions.of(sb.toString()));
+        if (e.getKind() == ElementKind.METHOD && member.getSimpleName().contentEquals("args")) { // NOI18N
+            return argsCompletion(e);
         }
-        return null;
+        if (e.getKind() == ElementKind.METHOD && member.getSimpleName().contentEquals("body")) { // NOI18N
+            return bodyCompletion(e, userText);
+        }
+        return Collections.emptyList();
+    }
+
+    private Iterable<? extends Completion> argsCompletion(Element e) {
+        StringBuilder sb = new StringBuilder();
+        ExecutableElement ee = (ExecutableElement) e;
+        String sep = "";
+        sb.append("{ ");
+        for (VariableElement ve : ee.getParameters()) {
+            sb.append(sep).append('"').append(ve.getSimpleName())
+                    .append('"');
+            sep = ", ";
+        }
+        sb.append(" }");
+        return Collections.nCopies(1, Completions.of(sb.toString()));
+    }
+
+    private Iterable<? extends Completion> bodyCompletion(Element e, String userText) {
+        ExecutableElement ee = (ExecutableElement) e;
+        String identifier = endsWithIdentifier(userText);
+        int preIdentifierAt = userText.length() - identifier.length() - 1;
+        if (preIdentifierAt >= 0) {
+            char preId = userText.charAt(preIdentifierAt);
+            if (preId == '.' || preId == '@') {
+                int lastAt = userText.lastIndexOf('@', preIdentifierAt + 1);
+                String maybePackageName = preIdentifierAt > lastAt ? userText.substring(lastAt + 1, preIdentifierAt) : "";
+                if (!maybePackageName.isEmpty()) {
+                    PackageElement maybePackage = processingEnv.getElementUtils().getPackageElement(maybePackageName);
+                    if (maybePackage != null) {
+                        List<Completion> offer = new ArrayList<>();
+                        for (Element ch : maybePackage.getEnclosedElements()) {
+                            final String elemName = ch.getSimpleName().toString();
+                            if (elemName.startsWith(identifier)) {
+                                final String userCompl = userText.substring(0, lastAt + 1) + maybePackageName + "." + elemName + "::"; // NOI18N
+                                offer.add(Completions.of(userCompl));
+                            }
+                        }
+                        return offer;
+                    }
+                } else {
+                    String instanceName = null;
+                    if (lastAt > 0 && userText.charAt(lastAt - 1) == '.') {
+                        instanceName = endsWithIdentifier(userText, lastAt - 1);
+                        if (instanceName.isEmpty()) {
+                            instanceName = null;
+                        }
+                    }
+                    if (instanceName != null) {
+                        for (VariableElement p : ee.getParameters()) {
+                            if (p.getSimpleName().contentEquals(instanceName)) {
+                                Element et = processingEnv.getTypeUtils().asElement(p.asType());
+                                if (et.getKind().isClass() || et.getKind().isInterface()) {
+                                    String fqn = processingEnv.getElementUtils().getBinaryName((TypeElement) et).toString();
+                                    String type = userText.substring(0, lastAt + 1) + fqn + "::";
+                                    return Collections.nCopies(1, Completions.of(type));
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (preId == ':') {
+                int lastAt = userText.lastIndexOf('@', preIdentifierAt + 1);
+                String maybeClassName = userText.substring(lastAt + 1, preIdentifierAt - 1);
+                TypeElement maybeClass = processingEnv.getElementUtils().getTypeElement(maybeClassName);
+                String instanceName = null;
+                if (lastAt > 0 && userText.charAt(lastAt - 1) == '.') {
+                    instanceName = endsWithIdentifier(userText, lastAt - 1);
+                    if (instanceName.isEmpty()) {
+                        instanceName = null;
+                    }
+                }
+                if (maybeClass != null) {
+                    List<Completion> offer = new ArrayList<>();
+                    for (Element ch : maybeClass.getEnclosedElements()) {
+                        if (ch.getKind() != ElementKind.METHOD) {
+                            continue;
+                        }
+                        final String elemName = ch.getSimpleName().toString();
+                        if (elemName.startsWith(identifier)) {
+                            ExecutableElement m = (ExecutableElement) ch;
+                            boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
+                            if (instanceName != null) {
+                                if (isStatic) {
+                                    continue;
+                                }
+                            } else {
+                                if (!isStatic) {
+                                    continue;
+                                }
+                            }
+
+                            StringBuilder invokeMethod = new StringBuilder().
+                                    append(userText.substring(0, lastAt + 1)).
+                                    append(maybeClassName).
+                                    append("::").
+                                    append(elemName).
+                                    append(findParamTypes(m)).
+                                    append("(");
+                            String sep = "";
+                            for (VariableElement p : m.getParameters()) {
+                                invokeMethod.append(sep);
+                                if (p.asType().getKind().isPrimitive()) {
+                                    invokeMethod.append("0");
+                                } else {
+                                    invokeMethod.append("null");
+                                }
+                                sep = ", ";
+                            }
+                            invokeMethod.append(")");
+                            offer.add(Completions.of(invokeMethod.toString()));
+                        }
+                    }
+                    return offer;
+                }
+            }
+        }
+        return Collections.emptyList();
     }
 
     final void wrongArrayError(TypeMirror paramType, Element method) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Don't use " + paramType + " array. Use Object[].", method);
+    }
+
+    private static String endsWithIdentifier(String text) {
+        return endsWithIdentifier(text, text.length());
+    }
+
+    private static String endsWithIdentifier(String text, int max) {
+        int at = max;
+        while (--at >= 0) {
+            char ch = text.charAt(at);
+            if (!Character.isJavaIdentifierPart(ch)) {
+                break;
+            }
+        }
+        return text.substring(at + 1, max);
     }
 
     private class VerifyCallback extends JsCallback {
@@ -306,50 +431,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 mangledOnes.put(mangled, found);
             }
             return "";
-        }
-
-        private String findParamTypes(ExecutableElement method) {
-            ExecutableType t = (ExecutableType) method.asType();
-            StringBuilder sb = new StringBuilder();
-            sb.append('(');
-            for (TypeMirror paramType : t.getParameterTypes()) {
-                TypeMirror tm = paramType;
-                boolean isArray = false;
-                while (tm.getKind() == TypeKind.ARRAY) {
-                    sb.append('[');
-                    tm = ((ArrayType) tm).getComponentType();
-                    isArray = true;
-                }
-                if (tm.getKind().isPrimitive()) {
-                    switch (tm.getKind()) {
-                        case INT: sb.append('I'); break;
-                        case BOOLEAN: sb.append('Z'); break;
-                        case BYTE: sb.append('B'); break;
-                        case CHAR: sb.append('C'); break;
-                        case SHORT: sb.append('S'); break;
-                        case DOUBLE: sb.append('D'); break;
-                        case FLOAT: sb.append('F'); break;
-                        case LONG: sb.append('J'); break;
-                        default:
-                            throw new IllegalStateException("Unknown " + tm.getKind());
-                    }
-                    if (isArray) {
-                        wrongArrayError(paramType, method);
-                    }
-                } else {
-                    sb.append('L');
-                    Types tu = processingEnv.getTypeUtils();
-                    final TypeMirror erasedType = tu.erasure(tm);
-                    TypeMirror objectType = processingEnv.getElementUtils().getTypeElement("java.lang.Object").asType();
-                    if (isArray && !processingEnv.getTypeUtils().isSameType(objectType, erasedType)) {
-                        wrongArrayError(paramType, method);
-                    }
-                    Element elm = tu.asElement(erasedType);
-                    dumpElems(sb, elm, ';');
-                }
-            }
-            sb.append(')');
-            return sb.toString();
         }
     }
 
@@ -581,6 +662,50 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             e = e.getEnclosingElement();
         }
         return ((PackageElement)e).getQualifiedName().toString();
+    }
+
+    private String findParamTypes(ExecutableElement method) {
+        ExecutableType t = (ExecutableType) method.asType();
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        for (TypeMirror paramType : t.getParameterTypes()) {
+            TypeMirror tm = paramType;
+            boolean isArray = false;
+            while (tm.getKind() == TypeKind.ARRAY) {
+                sb.append('[');
+                tm = ((ArrayType) tm).getComponentType();
+                isArray = true;
+            }
+            if (tm.getKind().isPrimitive()) {
+                switch (tm.getKind()) {
+                    case INT: sb.append('I'); break;
+                    case BOOLEAN: sb.append('Z'); break;
+                    case BYTE: sb.append('B'); break;
+                    case CHAR: sb.append('C'); break;
+                    case SHORT: sb.append('S'); break;
+                    case DOUBLE: sb.append('D'); break;
+                    case FLOAT: sb.append('F'); break;
+                    case LONG: sb.append('J'); break;
+                    default:
+                        throw new IllegalStateException("Unknown " + tm.getKind());
+                }
+                if (isArray) {
+                    wrongArrayError(paramType, method);
+                }
+            } else {
+                sb.append('L');
+                Types tu = processingEnv.getTypeUtils();
+                final TypeMirror erasedType = tu.erasure(tm);
+                TypeMirror objectType = processingEnv.getElementUtils().getTypeElement("java.lang.Object").asType();
+                if (isArray && !processingEnv.getTypeUtils().isSameType(objectType, erasedType)) {
+                    wrongArrayError(paramType, method);
+                }
+                Element elm = tu.asElement(erasedType);
+                dumpElems(sb, elm, ';');
+            }
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
 }
