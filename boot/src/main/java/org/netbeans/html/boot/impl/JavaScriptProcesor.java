@@ -241,7 +241,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         if (e.getKind() == ElementKind.METHOD && member.getSimpleName().contentEquals("body")) { // NOI18N
             return bodyCompletion(e, userText);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private Iterable<? extends Completion> argsCompletion(Element e) {
@@ -357,7 +357,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 }
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     final void wrongArrayError(TypeMirror paramType, Element method) {
