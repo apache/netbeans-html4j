@@ -53,8 +53,7 @@ import static org.testng.Assert.fail;
  * @author Jaroslav Tulach
  */
 final class Compile implements DiagnosticListener<JavaFileObject> {
-    private final List<Diagnostic<? extends JavaFileObject>> errors = 
-            new ArrayList<Diagnostic<? extends JavaFileObject>>();
+    private final List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
     private final Map<String, byte[]> classes;
     private final String pkg;
     private final String cls;
@@ -89,8 +88,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
         return getDiagnostics(Diagnostic.Kind.ERROR);
     }
     public List<Diagnostic<? extends JavaFileObject>> getDiagnostics(Diagnostic.Kind kind) {
-        List<Diagnostic<? extends JavaFileObject>> err;
-        err = new ArrayList<Diagnostic<? extends JavaFileObject>>();
+        List<Diagnostic<? extends JavaFileObject>> err = new ArrayList<>();
         for (Diagnostic<? extends JavaFileObject> diagnostic : errors) {
             if (diagnostic.getKind() == kind) {
                 err.add(diagnostic);
@@ -102,8 +100,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     private Map<String, byte[]> compile(final String html, final String code) throws IOException {
         StandardJavaFileManager sjfm = ToolProvider.getSystemJavaCompiler().getStandardFileManager(this, null, null);
 
-        final Map<String, ByteArrayOutputStream> class2BAOS;
-        class2BAOS = new HashMap<String, ByteArrayOutputStream>();
+        final Map<String, ByteArrayOutputStream> class2BAOS = new HashMap<>();
 
         JavaFileObject file = new SimpleJavaFileObject(URI.create("mem://mem"), Kind.SOURCE) {
             @Override
@@ -122,13 +119,6 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 return new ByteArrayInputStream(html.getBytes());
             }
         };
-        
-        final URI scratch;
-        try {
-            scratch = new URI("mem://mem3");
-        } catch (URISyntaxException ex) {
-            throw new IOException(ex);
-        }
         
         JavaFileManager jfm = new ForwardingJavaFileManager<JavaFileManager>(sjfm) {
             @Override
@@ -222,7 +212,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
 
         ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", "1.7"), null, Arrays.asList(file)).call();
 
-        Map<String, byte[]> result = new HashMap<String, byte[]>();
+        Map<String, byte[]> result = new HashMap<>();
 
         for (Map.Entry<String, ByteArrayOutputStream> e : class2BAOS.entrySet()) {
             result.put(e.getKey(), e.getValue().toByteArray());
