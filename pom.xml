@@ -50,6 +50,7 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
+    <module>json-ecj</module>
     <module>ko4j</module>
     <module>sound</module>
     <module>context</module>
