@@ -50,7 +50,6 @@
   <modules>
     <module>json</module>
     <module>json-tck</module>
-    <module>json-ecj</module>
     <module>ko4j</module>
     <module>sound</module>
     <module>context</module>
@@ -62,6 +61,7 @@
     <module>ko-felix-test</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
+    <module>ecj-test</module>
     <module>boot-script</module>
     <!--
     <module>boot-truffle</module>
