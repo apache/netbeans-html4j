@@ -90,9 +90,9 @@ import org.openide.util.lookup.ServiceProvider;
 })
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
-    private final Map<Element,String> models = new WeakHashMap<Element,String>();
-    private final Map<String,List<String>> packages = new HashMap<String,List<String>>();
-    private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
+    private final Map<Element,String> models = new WeakHashMap<>();
+    private final Map<String,List<String>> packages = new HashMap<>();
+    private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
@@ -103,7 +103,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             List<String> pkgList = packages.get(m.className());
             if (pkgList == null) {
-                pkgList = new ArrayList<String>();
+                pkgList = new ArrayList<>();
                 packages.put(m.className(), pkgList);
             }
             pkgList.add(findPkgName(e));
@@ -216,6 +216,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 final String inPckName = inPckName(e, false);
                 w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
+                w.append("@java.lang.SuppressWarnings(\"all\")\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private static Class<").append(inPckName).append("> modelFor() { return ").append(inPckName).append(".class; }\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
@@ -651,7 +652,7 @@ public final class ModelProcessor extends AbstractProcessor {
         for (Prprt p : properties) {
             final String tn;
             tn = typeName(p);
-            if (tn.indexOf(".")!=-1){
+            if (tn.contains(".")){
                 propertyFqns.add(tn);
             }
             String[] gs = toGetSet(p.name(), tn, p.array());
@@ -1639,7 +1640,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String toCall = null;
             String toFinish = null;
             boolean addNull = true;
-            if (ve.asType() == stringType) {
+            if (ve.asType().equals(stringType)) {
                 if (ve.getSimpleName().contentEquals("id")) {
                     params.append('"').append(id).append('"');
                     continue;
@@ -1893,10 +1894,10 @@ public final class ModelProcessor extends AbstractProcessor {
             return tm.toString();
         }
         final Element e = processingEnv.getTypeUtils().asElement(tm);
-        if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
+        if (isError(e, tm)) {
             isModel[0] = true;
             isEnum[0] = false;
-            final String simpleName = e.getSimpleName().toString();
+            final String simpleName = e != null ? e.getSimpleName().toString() : tm.toString();
             List<String> knownPackages = packages.get(simpleName);
             if (knownPackages != null && !knownPackages.isEmpty()) {
                 String referencingPkg = findPkgName(p.e);
@@ -1933,6 +1934,10 @@ public final class ModelProcessor extends AbstractProcessor {
             ret = tm.toString();
         }
         return ret;
+    }
+
+    private static boolean isError(final Element e, TypeMirror tm) {
+        return (e == null || e.getKind() == ElementKind.CLASS) && tm.getKind() == TypeKind.ERROR;
     }
 
     private static boolean findModelForMthd(Element clazz) {
@@ -2037,8 +2042,8 @@ public final class ModelProcessor extends AbstractProcessor {
             final TypeMirror tm = ex.getTypeMirror();
             String name;
             final Element te = processingEnv.getTypeUtils().asElement(tm);
-            if (te.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
-                name = te.getSimpleName().toString();
+            if (isError(te, tm)) {
+                name = te != null ? te.getSimpleName().toString() : tm.toString();
             } else {
                 name = tm.toString();
             }
@@ -2096,7 +2101,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entrySet : m.getElementValues().entrySet()) {
                     ExecutableElement key = entrySet.getKey();
                     AnnotationValue value = entrySet.getValue();
-                    if ("targetId()".equals(key.toString())) {
+                    if (key.getSimpleName().contentEquals("targetId") && key.getParameters().isEmpty()) { // NOI18N
                         return value.toString();
                     }
                 }

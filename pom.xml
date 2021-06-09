@@ -61,6 +61,7 @@
     <module>ko-felix-test</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
+    <module>ecj-test</module>
     <module>boot-script</module>
     <!--
     <module>boot-truffle</module>
