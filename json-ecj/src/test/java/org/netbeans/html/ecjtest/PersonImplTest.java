@@ -23,8 +23,10 @@ import org.testng.annotations.Test;
 
 public class PersonImplTest {
     @Test
+    @SuppressWarnings("static-method")
     public void testPerson() {
-        Person p = new Person("J", "T", PersonImpl.Sex.MALE);
+        Person p = new Person("J", "T", PersonImpl.Sex.MALE, new Address("sch", "prg"));
         assertEquals(p.applyBindings().getFirstName(), "J");
+        assertEquals(p.getAddress().getTown(), "prg");
     }
 }

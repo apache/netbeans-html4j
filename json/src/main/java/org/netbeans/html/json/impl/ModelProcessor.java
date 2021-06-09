@@ -90,9 +90,9 @@ import org.openide.util.lookup.ServiceProvider;
 })
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
-    private final Map<Element,String> models = new WeakHashMap<Element,String>();
-    private final Map<String,List<String>> packages = new HashMap<String,List<String>>();
-    private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
+    private final Map<Element,String> models = new WeakHashMap<>();
+    private final Map<String,List<String>> packages = new HashMap<>();
+    private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
@@ -216,6 +216,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 }
                 final String inPckName = inPckName(e, false);
                 w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
+                w.append("@java.lang.SuppressWarnings(\"all\")\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private static Class<").append(inPckName).append("> modelFor() { return ").append(inPckName).append(".class; }\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
@@ -2100,7 +2101,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entrySet : m.getElementValues().entrySet()) {
                     ExecutableElement key = entrySet.getKey();
                     AnnotationValue value = entrySet.getValue();
-                    if (key.getSimpleName().contentEquals("targetId")) {
+                    if (key.getSimpleName().contentEquals("targetId") && key.getParameters().isEmpty()) { // NOI18N
                         return value.toString();
                     }
                 }

@@ -25,9 +25,19 @@ import net.java.html.json.Property;
     @Property(name = "firstName", type = String.class),
     @Property(name = "lastName", type = String.class),
     @Property(name = "sex", type = PersonImpl.Sex.class),
+    @Property(name = "address", type = Address.class),
 })
 final class PersonImpl {
     public enum Sex {
         MALE, FEMALE;
+    }
+
+    @Model(className = "Address", properties = {
+        @Property(name = "street", type = String.class),
+        @Property(name = "town", type = String.class),
+    })
+    static class AddressImpl {
+        private AddressImpl() {
+        }
     }
 }

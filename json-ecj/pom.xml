@@ -57,9 +57,9 @@
                       </exclusions>
                   </dependency>
                   <dependency>
-                      <groupId>org.eclipse.jdt.core.compiler</groupId>
+                      <groupId>org.eclipse.jdt</groupId>
                       <artifactId>ecj</artifactId>
-                      <version>4.6.1</version>
+                      <version>3.25.0</version>
                   </dependency>
               </dependencies>
               <configuration>
@@ -70,6 +70,9 @@
                   <testTarget>1.8</testTarget>
                   <failOnWarning>true</failOnWarning>
                   <compilerArgs>
+                      <arg>-failOnWarning</arg>
+                      <arg>-warn:all</arg>
+                      <arg>-warn:-nls</arg>
                       <arg>-s</arg>
                       <arg>${project.build.directory}/generated-sources/annotations</arg>
                   </compilerArgs>
