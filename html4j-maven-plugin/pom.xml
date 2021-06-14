@@ -150,7 +150,7 @@
                               <task>build</task>
                           </tasks>
                           <gradleProjectDirectory>src/test/resources/org/netbeans/html/mojo/gradle1</gradleProjectDirectory>
-                          <gradleVersion>6.3</gradleVersion>
+                          <gradleVersion>7.0</gradleVersion>
                       </configuration>
                       <executions>
                           <execution>

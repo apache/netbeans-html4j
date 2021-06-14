@@ -43,7 +43,7 @@ apply plugin: 'html4j'
 def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
 
 dependencies {
-    compile jars
+    implementation jars
     annotationProcessor jars
 }
 
