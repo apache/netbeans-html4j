@@ -26,6 +26,7 @@ import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
 final class AsyncJavaScriptAction {
     private List<Integer> collected = new java.util.ArrayList<>();
     private boolean successStoringLater;
+    private AssertionError invertedVia;
 
     @JavaScriptBody(args = { "n" }, javacall = true, body = """
         return this.@net.java.html.js.tests.AsyncJavaScriptAction::performIteration(I)(n);
@@ -47,43 +48,52 @@ final class AsyncJavaScriptAction {
     private static native void jsStore(int store);
 
     void storeLater(int value) {
+        if (!collected.isEmpty()) {
+            if (collected.get(collected.size() - 1) > value) {
+                invertedVia = new AssertionError("Not in order " + value, invertedVia);
+            }
+        }
         collected.add(value);
     }
 
     @JavaScriptBody(args = {}, body = "")
     native void flushPendingJavaScripts();
 
-    int performIteration(int from) {
-        for (int i = 0; i < 5; i++) {
-            jsStore(from++);
+    int performIteration(int middle) {
+        for (int i = -5; i < 0; i++) {
+            jsStore(middle + i);
         }
-        final String n = "" + from++;
+        String n = "" + middle;
         successStoringLater = JsUtils.executeNow(AsyncJavaScriptAction.class, "storeLater(" + n + ");");
-        for (int i = 6; i < 11; i++) {
-            jsStore(from++);
+        for (int i = 1; i <= 5; i++) {
+            jsStore(middle + i);
         }
-        return from;
+        return middle + 5;
     }
 
     private void performTheTest(Function<Integer,Integer> iteration) {
         defineStore();
-        assertEquals(iteration.apply(0), 11);
+        assertEquals(iteration.apply(0), 5);
         if (!successStoringLater) {
             return;
         }
         flushPendingJavaScripts();
         assertEquals(collected.size(), 11, "11 items: " + collected);
         for (int i = 0; i < 11; i++) {
-            assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
+            final Integer atI = collected.get(i);
+            final int iMinus5 = i - 5;
+            assertEquals(atI, iMinus5, i + "th out of order: " + collected);
         }
-        assertEquals(iteration.apply(11), 22);
+        assertEquals(iteration.apply(11), 16);
         if (!successStoringLater) {
             return;
         }
         flushPendingJavaScripts();
         assertEquals(collected.size(), 22, "22 items: " + collected);
         for (int i = 0; i < 22; i++) {
-            assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
+            final Integer atI = collected.get(i);
+            final int iMinus5 = i - 5;
+            assertEquals(atI, iMinus5, i + "th out of order: " + collected);
         }
     }
 
