@@ -537,9 +537,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 return sj(finished);
             }
         }
-        protected final void inJava() {
+        protected final boolean inJava() {
             if (this.method == null) {
-                return;
+                return false;
             }
             if (done == null) {
                 done = false;
@@ -552,9 +552,12 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     done = true;
                     log(Level.FINE, "Result: {0}", result);
                 }
+                return false;
+            } else {
+                return done;
             }
         }
-        
+
         protected String js(boolean[] finished) {
             if (Boolean.TRUE.equals(done)) {
                 StringBuilder sb = new StringBuilder();
@@ -670,10 +673,16 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             boolean[] finished = {false};
             for (;;) {
-                StringBuilder def = getDeferred(true);
+                StringBuilder def = getDeferred(false);
                 if (def != null) {
-                    def.insert(0, "javascript:");
-                    return def.toString();
+                    if (synchronous) {
+                        def = getDeferred(true);
+                        def.insert(0, "javascript:");
+                        return def.toString();
+                    }
+                    lock().notifyAll();
+                    lock().wait();
+                    continue;
                 }
                 finished[0] = false;
                 final Item top = dispatchPendingItem();
@@ -766,6 +775,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 final int id = nextCallId();
                 log(Level.FINE, "flush#{1}: {0}", def, id);
                 exec(id, Strings.flushExec(key, id).toString());
+                lock().notifyAll();
             }
             if (topMostCall() == null) {
                 resetDeferredDisabled();
@@ -820,7 +830,12 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             Item c = topMostCall();
             if (c != null) {
-                c.inJava();
+                if (c.inJava()) {
+                    StringBuilder def = getDeferred(true);
+                    if (def != null) {
+                        loadJS(def.toString());
+                    }
+                }
             }
             lock().notifyAll();
         }
