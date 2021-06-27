@@ -523,7 +523,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         abstract String inJavaScript(boolean[] finished);
     }
 
-    private class Item extends Frame {
+    private class CallJavaMethod extends Frame {
         Boolean done;
 
         final Method method;
@@ -531,26 +531,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         final Object[] params;
         Object result;
 
-        Item(int id, Frame prev, Method method, Object thiz, Object[] params) {
+        CallJavaMethod(int id, Frame prev, Method method, Object thiz, Object[] params) {
             super(id, prev);
+            assert method != null;
             this.method = method;
             this.thiz = thiz;
             this.params = adaptParams(method, Arrays.asList(params));
-            this.toExec = null;
         }
 
 
-        protected final String inJavaScript(boolean[] finished) {
-            if (this.method != null) {
-                return js(finished);
-            } else {
-                return sj(finished);
-            }
-        }
+
+        @Override
         protected final void inJava() {
-            if (this.method == null) {
-                return;
-            }
             if (done == null) {
                 done = false;
                 try {
@@ -565,7 +557,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
         }
 
-        protected String js(boolean[] finished) {
+        @Override
+        protected final String inJavaScript(boolean[] finished) {
             if (Boolean.TRUE.equals(done)) {
                 StringBuilder sb = new StringBuilder();
                 encodeObject(result, false, sb, null);
@@ -574,20 +567,25 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             return null;
         }
+    }
 
-        private final String toExec;
-        private String typeof;
+    private final class EvalJavaScript extends Frame {
+        final String toExec;
+        String typeof;
+        Boolean done;
+        String result;
 
-        Item(int id, Frame prev, String toExec) {
+        EvalJavaScript(int id, Frame prev, String toExec) {
             super(id, prev);
             this.toExec = toExec;
-
-            this.method = null;
-            this.params = null;
-            this.thiz = null;
         }
 
-        protected String sj(boolean[] finished) {
+        @Override
+        void inJava() {
+        }
+
+        @Override
+        String inJavaScript(boolean[] finished) {
             finished[0] = false;
             if (done != null) {
                 return null;
@@ -596,16 +594,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             return "javascript:" + toExec;
         }
 
-        protected final void result(String typeof, String result) {
-            if (this.method != null) {
-                throw new UnsupportedOperationException();
-            }
+        final void result(String typeof, String result) {
             this.typeof = typeof;
             this.result = result;
             this.done = true;
             log(Level.FINE, "result ({0}): {1} for {2}", typeof, result, toExec);
         }
-    } // end of Item
+    }
 
     final void result(String counterId, String typeof, String res) {
         log(Level.FINE, "result#{2}@{0}: {1}", typeof, res, counterId);
@@ -624,7 +619,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             final int id = Integer.parseInt(counterId);
             final Frame top = topMostCall();
             if (top.id == id) {
-                ((Item)top).result(typeof, res);
+                ((EvalJavaScript)top).result(typeof, res);
                 registerCall(top.prev);
                 return;
             }
@@ -632,7 +627,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             while (it.prev != null) {
                 Frame process = it.prev;
                 if (process.id == id) {
-                    ((Item)process).result(typeof, res);
+                    ((EvalJavaScript)process).result(typeof, res);
                     return;
                 }
                 it = process;
@@ -668,9 +663,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             params.addAll(Arrays.asList((Object[]) args));
             Object[] converted = adaptParams(method, params);
             Frame top = topMostCall();
-            boolean first = top == null || (top instanceof Item && Boolean.TRUE.equals(((Item)top).done));
+            boolean first = top == null || (top instanceof CallJavaMethod && Boolean.TRUE.equals(((CallJavaMethod)top).done));
             log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
-            Item newItem = registerCall(new Item(nextCallId(), top, method, vm, converted));
+            CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, converted));
             return javaresult();
         }
     }
@@ -704,7 +699,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     private Frame dispatchPendingItem() {
         final Frame top = topMostCall();
-        if (top instanceof Item && ((Item)top).method != null && ((Item)top).done == null) {
+        if (top instanceof CallJavaMethod && ((CallJavaMethod)top).method != null && ((CallJavaMethod)top).done == null) {
             dispatch(new Runnable() {
                 @Override
                 public void run() {
@@ -797,21 +792,21 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 log(Level.FINE, "Flushing {0}", fn);
             }
             Frame c = topMostCall();
-            if (c instanceof Item && ((Item)c).method != null) {
+            if (c instanceof CallJavaMethod && ((CallJavaMethod)c).method != null) {
                 c.inJava();
                 lock().notifyAll();
             }
         }
 
-        Item myCall;
+        EvalJavaScript myCall;
         boolean load;
         final Frame top = topMostCall();
         if (top != null) {
-            myCall = registerCall(new Item(id, top, fn));
+            myCall = registerCall(new EvalJavaScript(id, top, fn));
             load = synchronous;
             first = false;
         } else {
-            myCall = registerCall(new Item(id, null, null));
+            myCall = registerCall(new EvalJavaScript(id, null, null));
             load = true;
             first = true;
         }
