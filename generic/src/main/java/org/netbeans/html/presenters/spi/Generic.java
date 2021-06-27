@@ -791,6 +791,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 final int id = nextCallId();
                 log(Level.FINE, "flush#{1}: {0}", topMostCall(), id);
                 exec(id, Strings.flushExec(key, id).toString());
+                lock().notifyAll();
             }
             if (topMostCall() == null) {
                 resetDeferredDisabled();
