@@ -44,7 +44,7 @@ matrix:
       dist: trusty
       jdk: openjdk8
       env:
-        - ARGS=-Dcom.dukescript.presenters.browser=firefox
+        - ARGS=-Dnone
         - DIR=zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64
         - URL=https://cdn.azul.com/zulu/bin/$DIR.tar.gz
     - os: linux
@@ -58,7 +58,7 @@ matrix:
       dist: trusty
       jdk: openjdk15
       env:
-        - ARGS=-Dcom.dukescript.presenters.browser=firefox
+        - ARGS=-Dnone
         - JAVADOC=yes
     - os: osx
       name: Mac JDK8
