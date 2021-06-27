@@ -35,6 +35,10 @@ public final class ServerFactories {
     private ServerFactories() {
     }
 
+    static {
+        DumpStack.initialize();
+    }
+
     @DataProvider(name = "serverFactories")
     public static Object[][] serverFactories() {
         Supplier<HttpServer<?,?,?,?>> grizzly = GrizzlyServer::new;
