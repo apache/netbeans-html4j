@@ -569,6 +569,28 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         }
     }
 
+    private final class DeferJavaScript extends Frame {
+        private final StringBuilder sb;
+
+        DeferJavaScript(int id, Frame prev, StringBuilder sb) {
+            super(id, prev);
+            this.sb = sb;
+        }
+
+        void append(StringBuilder sb) {
+            this.sb.append(sb);
+        }
+
+        @Override
+        void inJava() {
+        }
+
+        @Override
+        String inJavaScript(boolean[] finished) {
+            return null;
+        }
+    }
+
     private final class EvalJavaScript extends Frame {
         final String toExec;
         String typeof;
@@ -662,11 +684,19 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             }
             params.addAll(Arrays.asList((Object[]) args));
             Object[] converted = adaptParams(method, params);
-            Frame top = topMostCall();
-            boolean first = top == null || (top instanceof CallJavaMethod && Boolean.TRUE.equals(((CallJavaMethod)top).done));
-            log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
-            CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, converted));
-            return javaresult();
+            for (;;) {
+                Frame top = topMostCall();
+                if (top instanceof DeferJavaScript) {
+                    if (!synchronous) {
+                        lock().wait();
+                        continue;
+                    }
+                }
+                boolean first = top == null || (top instanceof CallJavaMethod && Boolean.TRUE.equals(((CallJavaMethod)top).done));
+                log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
+                CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, converted));
+                return javaresult();
+            }
         }
     }
 
@@ -674,10 +704,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         synchronized (lock()) {
             boolean[] finished = {false};
             for (;;) {
-                StringBuilder def = getDeferred(true);
-                if (def != null) {
-                    def.insert(0, "javascript:");
-                    return def.toString();
+                Frame def = topMostCall();
+                if (def instanceof DeferJavaScript) {
+                    final StringBuilder sb = ((DeferJavaScript) def).sb;
+
+                    sb.insert(0, "javascript:");
+                    registerCall(def.prev);
+                    return sb.toString();
                 }
                 finished[0] = false;
                 final Frame top = dispatchPendingItem();
@@ -712,7 +745,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     }
                 }
             });
-            if (getDeferred(false) != null) {
+            if (topMostCall() instanceof DeferJavaScript) {
                 return null;
             }
         }
@@ -723,29 +756,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private boolean deferredDisabled;
     private Collection<Object> arguments = new LinkedList<Object>();
 
-    private StringBuilder getDeferred(boolean clear) {
-        assert Thread.holdsLock(lock());
-        StringBuilder sb = deferred;
-        if (clear) {
-            deferred = null;
-            if (sb != null) {
-                deferredDisabled = true;
-            }
-        }
-        return sb;
-    }
-
     final void deferExec(StringBuilder sb) {
         synchronized (lock()) {
-            log(Level.FINE, "deferExec: {0} empty: {1}, call: {2}", new Object[]{sb, deferred == null, topMostCall()});
-            if (deferred == null) {
-                deferred = sb;
+            Frame c = topMostCall();
+            if (c instanceof DeferJavaScript) {
+                ((DeferJavaScript) c).append(sb);
             } else {
-                deferred.append(sb);
+                registerCall(new DeferJavaScript(nextCallId(), c, sb));
             }
         }
     }
 
+    @Override
     public final void loadScript(final Reader reader) throws Exception {
         StringBuilder sb = new StringBuilder();
         char[] arr = new char[4092];
@@ -765,10 +787,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     })
     void flushImpl() {
         synchronized (lock()) {
-            StringBuilder def = getDeferred(false);
-            if (def != null) {
+            if (topMostCall() instanceof DeferJavaScript) {
                 final int id = nextCallId();
-                log(Level.FINE, "flush#{1}: {0}", def, id);
+                log(Level.FINE, "flush#{1}: {0}", topMostCall(), id);
                 exec(id, Strings.flushExec(key, id).toString());
             }
             if (topMostCall() == null) {
@@ -785,12 +806,6 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         assert Thread.holdsLock(lock());
         boolean first;
         {
-            StringBuilder def = getDeferred(true);
-            if (def != null) {
-                def.append(fn);
-                fn = def.toString();
-                log(Level.FINE, "Flushing {0}", fn);
-            }
             Frame c = topMostCall();
             if (c instanceof CallJavaMethod && ((CallJavaMethod)c).method != null) {
                 c.inJava();
@@ -800,13 +815,18 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
         EvalJavaScript myCall;
         boolean load;
-        final Frame top = topMostCall();
+        Frame top = topMostCall();
+        if (top instanceof DeferJavaScript) {
+            ((DeferJavaScript) top).sb.append(fn);
+            fn = ((DeferJavaScript) top).sb.toString();
+            top = top.prev;
+        }
         if (top != null) {
             myCall = registerCall(new EvalJavaScript(id, top, fn));
             load = synchronous;
             first = false;
         } else {
-            myCall = registerCall(new EvalJavaScript(id, null, null));
+            myCall = registerCall(new EvalJavaScript(id, null, fn));
             load = true;
             first = true;
         }
