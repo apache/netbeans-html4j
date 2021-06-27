@@ -34,6 +34,10 @@ public class GenericTest {
     public GenericTest() {
     }
 
+    static {
+        DumpStack.initialize();
+    }
+
     @Factory public static Object[] compatibilityTests() throws Exception {
         return createTests(new Testing());
     }
