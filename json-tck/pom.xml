@@ -55,6 +55,11 @@
                   <includeDependencySources>true</includeDependencySources>
               </configuration>
           </plugin>
+          <plugin>
+              <groupId>org.apache.netbeans.modules.jackpot30</groupId>
+              <artifactId>jackpot30-maven-plugin</artifactId>
+              <version>12.3</version>
+          </plugin>
       </plugins>
   </build>
   <dependencies>
