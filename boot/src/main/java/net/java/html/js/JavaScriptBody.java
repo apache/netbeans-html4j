@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.CLASS)
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.METHOD })
 public @interface JavaScriptBody {
     /** Names of parameters for the method generated method that can
      * be referenced from {@link #body()}.
