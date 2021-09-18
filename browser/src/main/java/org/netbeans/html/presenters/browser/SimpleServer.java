@@ -69,7 +69,7 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
     private Selector connection;
     private Thread processor;
 
-    private static final Pattern PATTERN_GET = Pattern.compile("(HEAD|GET|POST|PUT|DELETE) */([^ \\?]*)(\\?[^ ]*)?");
+    private static final Pattern PATTERN_GET = Pattern.compile("(OPTIONS|HEAD|GET|POST|PUT|DELETE) */([^ \\?]*)(\\?[^ ]*)?");
     private static final Pattern PATTERN_HOST = Pattern.compile(".*^Host: *(.*):([0-9]+)$", Pattern.MULTILINE);
     private static final Pattern PATTERN_LENGTH = Pattern.compile(".*^Content-Length: ([0-9]+)$", Pattern.MULTILINE);
     static final Logger LOG = Logger.getLogger(SimpleServer.class.getName());
@@ -126,7 +126,11 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
 
     @Override
     String getBody(ReqRes r) {
-        return new String(r.body.array(), StandardCharsets.UTF_8);
+        if (r.body == null) {
+            return "";
+        } else {
+            return new String(r.body.array(), StandardCharsets.UTF_8);
+        }
     }
 
     static int endOfHeader(String header) {
@@ -597,7 +601,7 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
                 LOG.log(Level.FINER, "Written header, type {0}", mime);
                 bb = null;
 
-                if ("HEAD".equals(method)) {
+                if ("HEAD".equals(method) || "OPTIONS".equals(method)) {
                     LOG.fine("Writer flushed and closed, closing channel");
                     channel.close();
                     return;
