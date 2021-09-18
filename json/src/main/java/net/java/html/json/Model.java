@@ -110,9 +110,12 @@ import java.util.List;
  *   Lives in &lt;span data-bind="text: town"/&gt;
  * &lt;/div&gt;
  * </pre>
- * 
- * <h3>Access Raw <a target="_blank" href="http://knockoutjs.com/">Knockout</a> Observables</h3>
- * 
+ *
+ * <p>
+ * <b>Access Raw <a target="_blank" href="http://knockoutjs.com/">Knockout</a> Observables</b>
+ * </p>
+ *
+ * <p>
  * One can obtain <em>raw</em> JavaScript object representing the 
  * instance of {@link Model model class} (with appropriate
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> <b>observable</b> properties)
@@ -120,6 +123,7 @@ import java.util.List;
  * example here is a way to obtain the value of <code>fullName</code> property
  * (inefficient as it switches between Java and JavaScript back and forth, 
  * but functional and instructive) via a JavaScript call:
+ * </p>
  * <pre>
  * {@link net.java.html.js.JavaScriptBody @JavaScriptBody}(args = "raw", javacall = true, body =
  *   "return raw.fullName();" // yes, the <a target="_blank" href="http://knockoutjs.com/">Knockout</a> property is a function
@@ -129,6 +133,7 @@ import java.util.List;
  * Person p = ...;
  * String fullName = jsFullName({@link Models#toRaw(java.lang.Object) Models.toRaw(p)});
  * </pre>
+ * <p>
  * The above shows how to read a value from <a target="_blank" href="http://knockoutjs.com/">Knockout</a>
  * observable. There is a way to change the value too:
  * One can pass a parameter to the property-function and then
@@ -137,13 +142,19 @@ import java.util.List;
  * available). Everything mentioned in this paragraph applies only when 
  * <a target="_blank" href="http://knockoutjs.com/">Knockout</a> technology is active
  * other technologies may behave differently.
- * 
- * <h4>Copy to Plain JSON</h4>
+ * </p>
+ *
+ * <p>
+ * <b>Copy to Plain JSON</b>
+ * </p>
+ *
+ * <p>
  * There is a way to pass a value of a Java {@link Model model class} instance 
  * by copy and convert 
  * the {@link Model the whole object} into plain 
  * <a target="_blank" href="http://en.wikipedia.org/wiki/JSON">JSON</a>. Just
  * print it as a string and parse it in JavaScript:
+ * </p>
  * <pre>
  * {@link net.java.html.js.JavaScriptBody @JavaScriptBody}(args = { "txt" }, body =
  *   "return JSON.parse(txt);"
@@ -154,13 +165,17 @@ import java.util.List;
  *   return parseJSON(model.toString());
  * }
  * </pre>
+ * <p>
  * The newly returned instance is a one time copy of the original model and is no longer
  * connected to it. The copy based behavior is independent on any 
  * particular technology and should work
  * in <a target="_blank" href="http://knockoutjs.com/">Knockout</a> as well as other
  * technology implementations.
+ * </p>
  * 
- * <h4>References</h4>
+ * <p>
+ * <b>References</b>
+ * </p>
  * 
  * Visit an <a target="_blank" href="http://dew.apidesign.org/dew/#7510833">on-line demo</a>
  * to see a histogram driven by the {@link Model} annotation or try 

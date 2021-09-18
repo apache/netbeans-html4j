@@ -156,12 +156,11 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     public native Object executeScript(String script, Object[] arguments);
 
     @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
+          """
+          var h;if (!!window && !!window.location && !!window.location.href)
+            h = window.location.href;
+          else   h = null;return h;
+          """
     )
     private static native String findBaseURL();
     

@@ -23,6 +23,9 @@ package org.netbeans.html.boot.impl;
  * @author Jaroslav Tulach
  */
 public class Arithm {
+    private Arithm() {
+    }
+
     public int sumTwo(int a, int b) {
         return a + b;
     }
@@ -33,5 +36,9 @@ public class Arithm {
             copy[i] = ((Number)arr[i]).intValue();
         }
         return 0;
+    }
+
+    public static Arithm create() {
+        return new Arithm();
     }
 }

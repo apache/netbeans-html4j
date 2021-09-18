@@ -39,9 +39,7 @@ final class UnJarResources {
         if (jar == null) {
             return url;
         }
-        File dir = File.createTempFile(jar.getName(), ".dir");
-        dir.delete();
-        dir.mkdirs();
+        File dir = Files.createTempDirectory(jar.getName() + ".dir").toFile();
 
         Enumeration<JarEntry> en = jar.entries();
         while (en.hasMoreElements()) {

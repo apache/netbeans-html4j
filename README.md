@@ -3,8 +3,8 @@
 In need of cross platform, client side interaction between Java and JavaScript?
 
 [![Travis](https://travis-ci.org/apache/netbeans-html4j.svg?branch=master)](https://travis-ci.org/apache/netbeans-html4j)
-[![Linux](https://builds.apache.org/buildStatus/icon?job=netbeans-html4j-linux)](https://builds.apache.org/job/netbeans-html4j-linux/)
-[![Windows](https://builds.apache.org/buildStatus/icon?job=netbeans-html4j-windows)](https://builds.apache.org/job/netbeans-html4j-windows)
+[![Linux](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-linux/badge/icon)](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-linux/)
+[![Windows](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-windows/badge/icon)](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-windows/)
 
 The HTML/Java library provides [basic building blocks](https://bits.netbeans.org/html+java/dev/net/java/html/js/package-summary.html)
 as well as advanced [high level concepts](https://bits.netbeans.org/html+java/dev/net/java/html/json/Model.html)
@@ -77,7 +77,7 @@ $ mvn clean install
 ```
 
 and create a pull request, which may then be merged into the
-official [Apache repository](https://gitbox.apache.org/repos/asf?p=netbeans-html4j.git).
+official [Apache repository](https://gitbox.apache.org/repos/asf/netbeans-html4j.git).
 
 ### Full History
 

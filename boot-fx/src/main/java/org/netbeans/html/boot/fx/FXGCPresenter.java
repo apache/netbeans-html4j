@@ -54,6 +54,15 @@ public final class FXGCPresenter extends AbstractFXPresenter {
         }
     }
 
+    private final WebView[] lastWebView;
+    public FXGCPresenter() {
+        this(null);
+    }
+    
+    FXGCPresenter(WebView[] lastWebView) {
+        this.lastWebView = lastWebView;
+    }
+
     @Override
     void waitFinished() {
         FXBrwsr.waitFinished();
@@ -61,7 +70,11 @@ public final class FXGCPresenter extends AbstractFXPresenter {
 
     @Override
     WebView findView(final URL resource) {
-        return FXBrwsr.findWebView(resource, this);
+        WebView view = FXBrwsr.findWebView(resource, this);
+        if (lastWebView != null) {
+            lastWebView[0] = view;
+        }
+        return view;
     }
 
     @Override

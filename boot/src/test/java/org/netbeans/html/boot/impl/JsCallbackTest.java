@@ -30,9 +30,11 @@ public class JsCallbackTest {
     public JsCallbackTest() {
     }
     @Test public void missingTypeSpecification() {
-        String body = "console[attr] = function(msg) {\n"
-        + "  @org.netbeans.html.charts.Main::log(msg);\n"
-        + "};\n";
+        String body = """
+                      console[attr] = function(msg) {
+                        @org.netbeans.html.charts.Main::log(msg);
+                      };
+                      """;
         JsCallback instance = new JsCallbackImpl();
         try {
             String result = instance.parse(body);

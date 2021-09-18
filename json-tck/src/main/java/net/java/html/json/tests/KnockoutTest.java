@@ -88,10 +88,10 @@ public final class KnockoutTest {
 
 
     @KOTest public void modifyRadioValueOnEnum() throws Throwable {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<input id='i1' type=\"radio\" name=\"choice\" value=\"A\" data-bind=\"checked: choice\"></input>Right\n" +
-            "<input id='input' type=\"radio\" name=\"choice\" value=\"B\" data-bind=\"checked: choice\"></input>Never\n" +
-            "\n"
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+            <input id='i1' type="radio" name="choice" value="A" data-bind="checked: choice"></input>Right
+            <input id='input' type="radio" name="choice" value="B" data-bind="checked: choice"></input>Never
+            """
         );
         try {
 
@@ -184,10 +184,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void modifyComputedProperty() throws Throwable {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "Full name: <div data-bind='with:firstPerson'>\n"
-                + "<input id='input' data-bind=\"value: fullName\"></input>\n"
-                + "</div>\n"
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+            Full name: <div data-bind='with:firstPerson'>
+            <input id='input' data-bind="value: fullName"></input>
+            </div>
+            """
         );
         try {
             KnockoutModel m = new KnockoutModel();
@@ -238,10 +239,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void modifyValueAssertChangeInModel() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<h1 data-bind=\"text: helloMessage\">Loading Bck2Brwsr's Hello World...</h1>\n" +
-            "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
-            "<button id=\"hello\">Say Hello!</button>\n"
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+            <h1 data-bind="text: helloMessage">Loading Bck2Brwsr's Hello World...</h1>
+            Your name: <input id='input' data-bind="value: name"></input>
+            <button id="hello">Say Hello!</button>
+            """
         );
         try {
 
@@ -262,14 +264,16 @@ public final class KnockoutTest {
     }
 
     private static String getSetSelected(int index, Object value) throws Exception {
-        String s = "var index = arguments[0];\n"
-        + "var n = window.document.getElementById('input'); \n "
-        + "if (index >= 0) {\n"
-        + "    n.options.selectedIndex = index; \n"
-        + "    ko.utils.triggerEvent(n, 'change'); \n"
-        + "} \n "
-        + "var op = n.options[n.selectedIndex]; \n"
-        + "return op ? op.text : n.selectedIndex;\n";
+        String s = """
+                   var index = arguments[0];
+                   var n = window.document.getElementById('input'); 
+                    if (index >= 0) {
+                       n.options.selectedIndex = index; 
+                       ko.utils.triggerEvent(n, 'change'); 
+                   } 
+                    var op = n.options[n.selectedIndex]; 
+                   return op ? op.text : n.selectedIndex;
+                   """;
         Object ret = Utils.executeScript(
             KnockoutTest.class,
             s, index, value
@@ -290,13 +294,12 @@ public final class KnockoutTest {
 
     @KOTest public void selectWorksOnModels() throws Exception {
         if (js == null) {
-            Utils.exposeHTML(KnockoutTest.class,
-                "<select id='input' data-bind=\"options: archetypes,\n" +
-"                       optionsText: 'name',\n" +
-"                       value: archetype\">\n" +
-"                  </select>\n" +
-""
-            );
+            Utils.exposeHTML(KnockoutTest.class, """
+                                                 <select id='input' data-bind="options: archetypes,
+                                                                        optionsText: 'name',
+                                                                        value: archetype">
+                                                                   </select>
+                                                 """);
 
             {
                 KnockoutModel km = new KnockoutModel();
@@ -330,11 +333,11 @@ public final class KnockoutTest {
         nestedObjectEqualsChange(false);
     }
     private  void nestedObjectEqualsChange(boolean preApply) throws Exception {
-        Utils.exposeHTML(KnockoutTest.class,
-"            <div data-bind='with: archetype'>\n" +
-"                <input id='input' data-bind='value: groupId'></input>\n" +
-"            </div>\n"
-        );
+        Utils.exposeHTML(KnockoutTest.class, """
+                                                         <div data-bind='with: archetype'>
+                                                             <input id='input' data-bind='value: groupId'></input>
+                                                         </div>
+                                             """);
 
         js = Models.bind(new KnockoutModel(), newContext());
         if (preApply) {
@@ -351,11 +354,11 @@ public final class KnockoutTest {
 
     @KOTest public void modifyValueAssertAsyncChangeInModel() throws Exception {
         if (js == null) {
-            Utils.exposeHTML(KnockoutTest.class,
-                "<h1 data-bind=\"text: helloMessage\">Loading Bck2Brwsr's Hello World...</h1>\n" +
-                "Your name: <input id='input' data-bind=\"value: name\"></input>\n" +
-                "<button id=\"hello\">Say Hello!</button>\n"
-            );
+            Utils.exposeHTML(KnockoutTest.class, """
+                                                 <h1 data-bind="text: helloMessage">Loading Bck2Brwsr's Hello World...</h1>
+                                                 Your name: <input id='input' data-bind="value: name"></input>
+                                                 <button id="hello">Say Hello!</button>
+                                                 """);
 
             js = Models.bind(new KnockoutModel(), newContext());
             js.setName("Kukuc");
@@ -454,10 +457,11 @@ public final class KnockoutTest {
     }
 
     private static String getSetInput(String id, String value) throws Exception {
-        String s = "var value = arguments[0];\n"
-        + "var n = window.document.getElementById(arguments[1]); \n "
-        + "if (value != null) n['value'] = value; \n "
-        + "return n['value'];";
+        String s = """
+                   var value = arguments[0];
+                   var n = window.document.getElementById(arguments[1]); 
+                    if (value != null) n['value'] = value; 
+                    return n['value'];""";
         Object ret = Utils.executeScript(
             KnockoutTest.class,
             s, value, id
@@ -466,9 +470,9 @@ public final class KnockoutTest {
     }
 
     private static boolean isChecked(String id) throws Exception {
-        String s = ""
-        + "var n = window.document.getElementById(arguments[0]); \n "
-        + "return n['checked'];";
+        String s = """
+                   var n = window.document.getElementById(arguments[0]); 
+                    return n['checked'];""";
         Object ret = Utils.executeScript(
             KnockoutTest.class,
             s, id
@@ -485,11 +489,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void displayContentOfArray() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: results'>\n"
-            + "  <li data-bind='text: $data, click: $root.call'/>\n"
-            + "</ul>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <ul id='ul' data-bind='foreach: results'>
+                                                            <li data-bind='text: $data, click: $root.call'/>
+                                                          </ul>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.getResults().add("Ahoj");
@@ -514,11 +518,11 @@ public final class KnockoutTest {
 
     @KOTest public void displayContentOfAsyncArray() throws Exception {
         if (js == null) {
-            Utils.exposeHTML(KnockoutTest.class,
-                "<ul id='ul' data-bind='foreach: results'>\n"
-                + "  <li data-bind='text: $data, click: $root.call'/>\n"
-                + "</ul>\n"
-            );
+            Utils.exposeHTML(KnockoutTest.class, """
+                                                 <ul id='ul' data-bind='foreach: results'>
+                                                   <li data-bind='text: $data, click: $root.call'/>
+                                                 </ul>
+                                                 """);
             js = Models.bind(new KnockoutModel(), newContext());
             js.getResults().add("Ahoj");
             js.applyBindings();
@@ -551,11 +555,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void displayContentOfComputedArray() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: bothNames'>\n"
-            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
-            + "</ul>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <ul id='ul' data-bind='foreach: bothNames'>
+                                                            <li data-bind='text: $data, click: $root.assignFirstName'/>
+                                                          </ul>
+                                                          """);
         try {
             Pair m = Models.bind(new Pair("First", "Last", null), newContext());
             m.applyBindings();
@@ -582,13 +586,12 @@ public final class KnockoutTest {
     }
 
     @KOTest public void displayContentOfComputedArrayOnASubpair() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-              "<div data-bind='with: next'>\n"
-            + "<ul id='ul' data-bind='foreach: bothNames'>\n"
-            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
-            + "</ul>"
-            + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div data-bind='with: next'>
+                                                          <ul id='ul' data-bind='foreach: bothNames'>
+                                                            <li data-bind='text: $data, click: $root.assignFirstName'/>
+                                                          </ul></div>
+                                                          """);
         try {
             final BrwsrCtx ctx = newContext();
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), ctx);
@@ -608,13 +611,12 @@ public final class KnockoutTest {
     }
 
     @KOTest public void displayContentOfComputedArrayOnComputedASubpair() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-              "<div data-bind='with: nextOne'>\n"
-            + "<ul id='ul' data-bind='foreach: bothNames'>\n"
-            + "  <li data-bind='text: $data, click: $root.assignFirstName'/>\n"
-            + "</ul>"
-            + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div data-bind='with: nextOne'>
+                                                          <ul id='ul' data-bind='foreach: bothNames'>
+                                                            <li data-bind='text: $data, click: $root.assignFirstName'/>
+                                                          </ul></div>
+                                                          """);
         try {
             Pair m = Models.bind(new Pair(null, null, new Pair("First", "Last", null)), newContext());
             m.applyBindings();
@@ -651,11 +653,11 @@ public final class KnockoutTest {
 
 
     @KOTest public void displayContentOfDerivedArray() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: cmpResults'>\n"
-            + "  <li><b data-bind='text: $data'></b></li>\n"
-            + "</ul>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <ul id='ul' data-bind='foreach: cmpResults'>
+                                                            <li><b data-bind='text: $data'></b></li>
+                                                          </ul>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.getResults().add("Ahoj");
@@ -674,11 +676,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void displayContentOfArrayOfPeople() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: people'>\n"
-            + "  <li data-bind='text: $data.firstName, click: $root.removePerson'></li>\n"
-            + "</ul>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <ul id='ul' data-bind='foreach: people'>
+                                                            <li data-bind='text: $data.firstName, click: $root.removePerson'></li>
+                                                          </ul>
+                                                          """);
         try {
             final BrwsrCtx c = newContext();
             KnockoutModel m = Models.bind(new KnockoutModel(), c);
@@ -724,10 +726,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void accessFirstPersonWithOnFunction() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<p id='ul' data-bind='with: firstPerson'>\n"
-            + "  <span data-bind='text: firstName, click: changeSex'></span>\n"
-            + "</p>\n"
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+            <p id='ul' data-bind='with: firstPerson'>
+              <span data-bind='text: firstName, click: changeSex'></span>
+            </p>
+            """
         );
         try {
             trasfertToFemale();
@@ -737,10 +740,11 @@ public final class KnockoutTest {
     }
 
     @KOTest public void onPersonFunction() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-            "<ul id='ul' data-bind='foreach: people'>\n"
-            + "  <li data-bind='text: $data.firstName, click: changeSex'></li>\n"
-            + "</ul>\n"
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+            <ul id='ul' data-bind='foreach: people'>
+              <li data-bind='text: $data.firstName, click: changeSex'></li>
+            </ul>
+            """
         );
         try {
             trasfertToFemale();
@@ -770,13 +774,13 @@ public final class KnockoutTest {
     }
 
     @KOTest public void stringArrayModificationVisible() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-                "<div>\n"
-                + "<ul id='ul' data-bind='foreach: results'>\n"
-                + "  <li data-bind='text: $data'></li>\n"
-                + "</ul>\n"
-              + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div>
+                                                          <ul id='ul' data-bind='foreach: results'>
+                                                            <li data-bind='text: $data'></li>
+                                                          </ul>
+                                                          </div>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.getResults().add("Ahoj");
@@ -802,13 +806,13 @@ public final class KnockoutTest {
     }
 
     @KOTest public void intArrayModificationVisible() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-                "<div>\n"
-                + "<ul id='ul' data-bind='foreach: numbers'>\n"
-                + "  <li data-bind='text: $data'></li>\n"
-                + "</ul>\n"
-              + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div>
+                                                          <ul id='ul' data-bind='foreach: numbers'>
+                                                            <li data-bind='text: $data'></li>
+                                                          </ul>
+                                                          </div>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.getNumbers().add(1);
@@ -835,13 +839,13 @@ public final class KnockoutTest {
     }
 
     @KOTest public void derivedIntArrayModificationVisible() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-                "<div>\n"
-                + "<ul id='ul' data-bind='foreach: resultLengths'>\n"
-                + "  <li data-bind='text: $data'></li>\n"
-                + "</ul>\n"
-              + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div>
+                                                          <ul id='ul' data-bind='foreach: resultLengths'>
+                                                            <li data-bind='text: $data'></li>
+                                                          </ul>
+                                                          </div>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.getResults().add("Ahoj");
@@ -868,13 +872,13 @@ public final class KnockoutTest {
     }
 
     @KOTest public void archetypeArrayModificationVisible() throws Exception {
-        Object exp = Utils.exposeHTML(KnockoutTest.class,
-                "<div>\n"
-                + "<ul id='ul' data-bind='foreach: archetypes'>\n"
-                + "  <li data-bind='text: artifactId'></li>\n"
-                + "</ul>\n"
-              + "</div>\n"
-        );
+        Object exp = Utils.exposeHTML(KnockoutTest.class, """
+                                                          <div>
+                                                          <ul id='ul' data-bind='foreach: archetypes'>
+                                                            <li data-bind='text: artifactId'></li>
+                                                          </ul>
+                                                          </div>
+                                                          """);
         try {
             KnockoutModel m = Models.bind(new KnockoutModel(), newContext());
             m.applyBindings();
@@ -923,33 +927,36 @@ public final class KnockoutTest {
     }
 
     private static void triggerClick(String id) throws Exception {
-        String s = "var id = arguments[0];"
-            + "var e = window.document.getElementById(id);\n "
-            + "if (e.checked) throw 'It should not be checked yet: ' + e;\n "
-            + "var ev = window.document.createEvent('MouseEvents');\n "
-            + "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "e.dispatchEvent(ev);\n "
-            + "if (!e.checked) {\n"
-            + "  e.checked = true;\n "
-            + "  e.dispatchEvent(ev);\n "
-            + "}\n";
+        String s = """
+                   var id = arguments[0];var e = window.document.getElementById(id);
+                    if (e.checked) throw 'It should not be checked yet: ' + e;
+                    var ev = window.document.createEvent('MouseEvents');
+                    ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                    e.dispatchEvent(ev);
+                    if (!e.checked) {
+                     e.checked = true;
+                      e.dispatchEvent(ev);
+                    }
+                   """;
         Utils.executeScript(
             KnockoutTest.class,
             s, id);
     }
     private static void triggerChildClick(String id, int pos) throws Exception {
         String s =
-            "var id = arguments[0]; var pos = arguments[1];\n" +
-            "var e = window.document.getElementById(id);\n " +
-            "var ev = window.document.createEvent('MouseEvents');\n " +
-            "ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n " +
-            "var list = e.childNodes;\n" +
-            "var cnt = -1;\n" +
-            "for (var i = 0; i < list.length; i++) {\n" +
-            "  if (list[i].nodeType == 1) cnt++;\n" +
-            "  if (cnt == pos) return list[i].dispatchEvent(ev);\n" +
-            "}\n" +
-            "return null;\n";
+            """
+            var id = arguments[0]; var pos = arguments[1];
+            var e = window.document.getElementById(id);
+             var ev = window.document.createEvent('MouseEvents');
+             ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+             var list = e.childNodes;
+            var cnt = -1;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].nodeType == 1) cnt++;
+              if (cnt == pos) return list[i].dispatchEvent(ev);
+            }
+            return null;
+            """;
         Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);
@@ -957,15 +964,16 @@ public final class KnockoutTest {
 
     private static String childText(String id, int pos) throws Exception {
         String s =
-            "var id = arguments[0]; var pos = arguments[1];" +
-            "var e = window.document.getElementById(id);\n" +
-            "var list = e.childNodes;\n" +
-            "var cnt = -1;\n" +
-            "for (var i = 0; i < list.length; i++) {\n" +
-            "  if (list[i].nodeType == 1) cnt++;\n" +
-            "  if (cnt == pos) return list[i].innerHTML;\n" +
-            "}\n" +
-            "return null;\n";
+            """
+            var id = arguments[0]; var pos = arguments[1];var e = window.document.getElementById(id);
+            var list = e.childNodes;
+            var cnt = -1;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].nodeType == 1) cnt++;
+              if (cnt == pos) return list[i].innerHTML;
+            }
+            return null;
+            """;
         return (String)Utils.executeScript(
             KnockoutTest.class,
             s, id, pos);

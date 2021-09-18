@@ -16,16 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package net.java.html.boot.script;
+package org.netbeans.html.ecjtest;
 
-import org.netbeans.html.json.tck.JavaScriptTCK;
+import net.java.html.json.Model;
+import net.java.html.json.Property;
 
-/**
- *
- * @author Jaroslav Tulach
- */
-public final class Jsr223JavaScriptTst extends JavaScriptTCK {
-    public static Class[] tests() {
-        return testClasses();
+@Model(className = "Person", targetId = "x", properties = {
+    @Property(name = "firstName", type = String.class),
+    @Property(name = "lastName", type = String.class),
+    @Property(name = "sex", type = PersonImpl.Sex.class),
+    @Property(name = "address", type = Address.class),
+})
+final class PersonImpl {
+    public enum Sex {
+        MALE, FEMALE;
+    }
+
+    @Model(className = "Address", properties = {
+        @Property(name = "street", type = String.class),
+        @Property(name = "town", type = String.class),
+    })
+    static class AddressImpl {
+        private AddressImpl() {
+        }
     }
 }

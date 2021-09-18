@@ -133,7 +133,8 @@ final class GrizzlyServer extends HttpServer<Request, Response, Object, GrizzlyS
     }
 
     @Override
-    void resume(Response r) {
+    void resume(Response r, Runnable whenReady) {
+        whenReady.run();
         r.resume();
     }
 

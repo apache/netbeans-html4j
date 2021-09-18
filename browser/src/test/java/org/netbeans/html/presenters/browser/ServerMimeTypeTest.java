@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 public class ServerMimeTypeTest {
     @Test(dataProviderClass = ServerFactories.class, dataProvider = "serverFactories")
     public void checkMimeTypes(String name, Supplier<HttpServer<?,?,?,?>> serverProvider) throws Exception {
-        final Thread main = Thread.currentThread();
         final int[] loaded = { 0 };
 
         Browser server = new Browser(
@@ -66,6 +65,9 @@ public class ServerMimeTypeTest {
 
         String jsType = new URL(connect, "test.js").openConnection().getContentType();
         assertMimeType(jsType, "*/javascript");
+
+        String jsMinType = new URL(connect, "test.min.js").openConnection().getContentType();
+        assertMimeType(jsMinType, "*/javascript");
 
         URLConnection conn = new URL(connect, "non-existing.file").openConnection();
         assertTrue(conn instanceof HttpURLConnection, "it is HTTP connection: " + conn);

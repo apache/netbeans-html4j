@@ -229,6 +229,7 @@ public class FXBrwsr extends Application {
         }
 
         attachHandlers(view, newStage);
+        final FXConsole fxConsole = new FXConsole(view, newStage);
         bp.setCenter(view);
         final Worker<Void> w = view.getEngine().getLoadWorker();
         w.stateProperty().addListener(new ChangeListener<Worker.State>() {
@@ -238,7 +239,7 @@ public class FXBrwsr extends Application {
             public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
                 if (newState.equals(Worker.State.SUCCEEDED)) {
                     if (checkValid()) {
-                        FXConsole.register(view.getEngine());
+                        fxConsole.register(view.getEngine());
                         onLoad.onPageLoad();
                     }
                 }
@@ -257,7 +258,7 @@ public class FXBrwsr extends Application {
             }
 
         });
-        Title.observeView(view, stage);
+        fxConsole.observeWebViewTitle();
         return view;
     }
 
@@ -361,7 +362,8 @@ public class FXBrwsr extends Application {
                 stage.initOwner(owner);
                 final WebView popUpView = new WebView();
                 stage.setScene(new Scene(popUpView));
-                Title.observeView(popUpView, stage);
+                FXConsole fxConsole = new FXConsole(popUpView, stage);
+                fxConsole.observeWebViewTitle();
                 stage.show();
                 return popUpView.getEngine();
             }
@@ -396,30 +398,4 @@ public class FXBrwsr extends Application {
             }
         }
     }
-    private static class Title implements ChangeListener<String> {
-        private String title;
-        private final WebView view;
-        private final Stage stage;
-
-        private Title(WebView view, Stage stage) {
-            super();
-            this.view = view;
-            this.stage = stage;
-        }
-
-        public static void observeView(WebView view, Stage stage) {
-            Title t = new Title(view, stage);
-            view.getEngine().titleProperty().addListener(t);
-            t.changed(null, null, null);
-        }
-
-        @Override
-        public void changed(ObservableValue<? extends String> ov, String t, String t1) {
-            title = view.getEngine().getTitle();
-            if (title != null) {
-                stage.setTitle(title);
-            }
-        }
-    }
-
 }

@@ -43,8 +43,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,7 +102,7 @@ Executor, Closeable {
      *
      * @throws Exception
      */
-    public Browser() throws Exception {
+    public Browser() {
         this(new Config());
     }
 
@@ -160,32 +158,7 @@ Executor, Closeable {
         if ("none".equalsIgnoreCase(impl)) { // NOI18N
             return;
         }
-        if (impl != null) {
-            Show.show(impl, page);
-        } else {
-            IOException one, two;
-            try {
-                String ui = System.getProperty("os.name").contains("Mac") ?
-                    "Cocoa" : "GTK";
-                Show.show(ui, page);
-                return;
-            } catch (IOException ex) {
-                one = ex;
-            }
-            try {
-                Show.show("AWT", page);
-                return;
-            } catch (IOException ex) {
-                two = ex;
-            }
-            try {
-                Show.show(impl, page);
-            } catch (IOException ex) {
-                two.initCause(one);
-                ex.initCause(two);
-                throw ex;
-            }
-        }
+        Show.show(impl, page);
     }
 
     @Override
@@ -419,20 +392,29 @@ Executor, Closeable {
                     server.setStatus(rspns, 404);
                     return;
                 }
+                String found = null;
                 if (relative.getProtocol().equals("file")) {
                     try {
                         File file = new File(relative.toURI());
-                        String found = Files.probeContentType(file.toPath());
-                        if (found != null) {
-                            server.setContentType(rspns, found);
-                        }
+                        found = Files.probeContentType(file.toPath());
                     } catch (URISyntaxException | IOException ignore) {
                     }
                 } else {
-                    String type = conn.getContentType();
-                    if (type != null) {
-                        server.setContentType(rspns, type);
+                    found = conn.getContentType();
+                }
+                if (found == null || "content/unknown".equals(found)) {
+                    if (path.endsWith(".html")) {
+                        found = "text/html";
                     }
+                    if (path.endsWith(".js")) {
+                        found = "text/javascript";
+                    }
+                    if (path.endsWith(".css")) {
+                        found = "text/css";
+                    }
+                }
+                if (found != null) {
+                    server.setContentType(rspns, found);
                 }
                 OutputStream out = server.getOutputStream(rspns);
                 for (;;) {
@@ -604,12 +586,14 @@ Executor, Closeable {
 
         final synchronized void add(Object obj) {
             if (suspended != null) {
-                try (Writer w = server.getWriter(suspended)) {
-                    w.write(obj.toString());
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-                server.resume(suspended);
+                Response rqst = suspended;
+                server.resume(rqst, () -> {
+                    try (Writer w = server.getWriter(rqst)) {
+                        w.write(obj.toString());
+                    } catch (IOException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
                 suspended = null;
                 return;
             }

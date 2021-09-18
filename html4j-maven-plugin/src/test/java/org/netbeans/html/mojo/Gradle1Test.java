@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
@@ -57,6 +58,7 @@ public class Gradle1Test {
     }
 
     private static final class NumberPresenter implements Fn.Presenter {
+        private final Properties p = new Properties();
 
         private int loadScriptCount;
 
@@ -66,7 +68,11 @@ public class Gradle1Test {
                 code = code.substring(6);
             }
             code = code.replace(';', ' ').trim();
-            return new NumberFn(Integer.valueOf(code));
+            String number = p.getProperty(code);
+            if (number == null) {
+                return new NumberFn(42);
+            }
+            return new NumberFn(Integer.valueOf(number));
         }
 
         @Override
@@ -76,6 +82,7 @@ public class Gradle1Test {
 
         @Override
         public void loadScript(Reader reader) throws Exception {
+            p.load(reader);
             loadScriptCount++;
         }
 

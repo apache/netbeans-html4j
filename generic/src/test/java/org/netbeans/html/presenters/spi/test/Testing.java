@@ -56,6 +56,7 @@ class Testing {
             .preparator(this::callbackFn, true)
             .logger(this::log)
             .build();
+        GenericTCK.INSTANCE.register(this.presenter, this);
 
         ScriptEngineManager sem = new ScriptEngineManager();
         eng = sem.getEngineByMimeType("text/javascript");
@@ -64,7 +65,8 @@ class Testing {
             eng.eval("function alert(m) { Packages.java.lang.System.out.println(m); };");
         } catch (ScriptException ex) {
             throw new IllegalStateException(ex);
-        }        
+        }
+
     }
 
     protected void log(int priority, String msg, Object... args) {
@@ -143,34 +145,4 @@ class Testing {
 
     void beforeTest(Class<?> declaringClass) throws Exception {
     }
-    
-    static class Synchronized extends Testing {
-        public Synchronized() {
-            super(true, (r) -> r.run());
-        }
-
-        @Override
-        protected void loadJS(final String js) {
-            try {
-                Object res = eng.eval(js);
-                LOG.log(Level.FINE, "Result: {0}", res);
-            } catch (Throwable ex) {
-                LOG.log(Level.SEVERE, "Can't process " + js, ex);
-            }
-        }
-
-        @Override
-        public void displayPage(URL url, Runnable r) {
-            r.run();
-        }
-
-        @Override
-        public void dispatch(Runnable r) {
-            r.run();
-        }
-
-        @Override
-        void beforeTest(Class<?> declaringClass) throws Exception {
-        }
-    } // end of Synchronized
 }

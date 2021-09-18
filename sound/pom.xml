@@ -24,17 +24,18 @@
     <parent>
         <groupId>org.netbeans.html</groupId>
         <artifactId>pom</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.7.2</version>
     </parent>
     <groupId>org.netbeans.html</groupId>
     <artifactId>net.java.html.sound</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.7.2</version>
     <packaging>bundle</packaging>
     <name>Sound API via HTML</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <publicPackages>net.java.html.sound</publicPackages>
+        <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
     <build>
         <plugins>
@@ -95,6 +96,14 @@
           <groupId>org.netbeans.api</groupId>
           <artifactId>org-openide-util-lookup</artifactId>
           <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
         </dependency>
     </dependencies>
 </project>

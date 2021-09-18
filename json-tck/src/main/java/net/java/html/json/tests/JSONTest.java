@@ -51,14 +51,16 @@ public final class JSONTest {
     private String url;
 
     static {
-        try {
-            System.setProperty("file.encoding", "windows-1251");
-            Field f = Charset.class.getDeclaredField("defaultCharset");
-            f.setAccessible(true);
-            f.set(null, null);
-            assertEquals(Charset.defaultCharset().toString(), "windows-1251", "Encoding has been changed");
-        } catch (Throwable t) {
-            t.printStackTrace();
+        if (System.getProperty("java.version").startsWith("1.")) {
+            try {
+                System.setProperty("file.encoding", "windows-1251");
+                Field f = Charset.class.getDeclaredField("defaultCharset");
+                f.setAccessible(true);
+                f.set(null, null);
+                assertEquals(Charset.defaultCharset().toString(), "windows-1251", "Encoding has been changed");
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
         }
     }
 

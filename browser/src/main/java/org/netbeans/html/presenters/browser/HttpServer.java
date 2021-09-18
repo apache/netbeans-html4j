@@ -43,7 +43,7 @@ abstract class HttpServer<Request, Response, WebSocket, Runner> {
     abstract void setStatus(Response r, int i);
     abstract OutputStream getOutputStream(Response r);
     abstract void suspend(Response r);
-    abstract void resume(Response r);
+    abstract void resume(Response r, Runnable runWhenResponseIsReady);
     abstract void setCharacterEncoding(Response r, String utF8);
     abstract void addHeader(Response r, String accessControlAllowOrigin, String string);
 

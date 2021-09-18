@@ -46,22 +46,31 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
+        String skipMsg = null;
         Runnable onPageLoaded = GtkJavaScriptTest::initialized;
 
-        // BEGIN: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
-        final WebKitPresenter headlessPresenter = new WebKitPresenter(true);
-        final BrowserBuilder bb = BrowserBuilder.newBrowser(headlessPresenter).
-            loadFinished(onPageLoaded).
-            loadPage("empty.html");
-        // END: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
+        Future<Void> future;
+        try {
+            // BEGIN: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
+            final WebKitPresenter headlessPresenter = new WebKitPresenter(true);
+            final BrowserBuilder bb = BrowserBuilder.newBrowser(headlessPresenter).
+                loadFinished(onPageLoaded).
+                loadPage("empty.html");
+            // END: org.netbeans.html.presenters.webkit.GtkJavaScriptTest
 
-        Future<Void> future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                bb.showAndWait();
-                return null;
-            }
-        });
+            future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    bb.showAndWait();
+                    return null;
+                }
+            });
+        } catch (LinkageError err) {
+            err.printStackTrace();
+            return new Object[] {
+                new Case(null, null, err.getMessage())
+            };
+        }
 
         List<Object> res = new ArrayList<>();
         try {
@@ -78,7 +87,7 @@ public class GtkJavaScriptTest extends JavaScriptTCK {
             for (Class c : arr) {
                 for (Method m : c.getMethods()) {
                     if (m.getAnnotation(test) != null) {
-                        res.add(new Case(browserPresenter, m));
+                        res.add(new Case(browserPresenter, m, null));
                     }
                 }
             }

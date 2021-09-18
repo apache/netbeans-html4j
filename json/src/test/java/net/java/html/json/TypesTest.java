@@ -111,6 +111,7 @@ public class TypesTest {
     private static void assertValidJSON(String text) {
         ScriptEngineManager sem = new ScriptEngineManager();
         ScriptEngine eng = sem.getEngineByMimeType("text/javascript");
+        assertNotNull(eng, "JavaScript engine found");
         try {
             eng.eval("var obj = " + text + ";");
         } catch (ScriptException ex) {

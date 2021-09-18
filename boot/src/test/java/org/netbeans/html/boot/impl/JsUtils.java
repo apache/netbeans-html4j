@@ -31,19 +31,20 @@ final class JsUtils {
         Bindings bindings = eng.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("polyglot.js.allowHostAccess", true); // NOI18N
 
-        eng.eval("function checkArray(arr, to) {\n"
-                + "  if (to === null) {\n"
-                + "    if (Object.prototype.toString.call(arr) === '[object Array]') return arr.length;\n"
-                + "    else return -1;\n"
-                + "  } else {\n"
-                + "    var l = arr.length;\n"
-                + "    for (var i = 0; i < l; i++) {\n"
-                + "      to[i] = arr[i] === undefined ? null : arr[i];\n"
-                + "    }\n"
-                + "    return l;\n"
-                + "  }\n"
-                + "}\n"
-        );
+        eng.eval("""
+                 function checkArray(arr, to) {
+                   if (to === null) {
+                     if (Object.prototype.toString.call(arr) === '[object Array]') return arr.length;
+                     else return -1;
+                   } else {
+                     var l = arr.length;
+                     for (var i = 0; i < l; i++) {
+                       to[i] = arr[i] === undefined ? null : arr[i];
+                     }
+                     return l;
+                   }
+                 }
+                 """);
 
         return eng;
     }

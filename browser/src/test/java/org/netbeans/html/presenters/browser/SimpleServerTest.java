@@ -18,7 +18,6 @@
  */
 package org.netbeans.html.presenters.browser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -192,9 +191,14 @@ public class SimpleServerTest {
                 Browser.cors(server, rspns);
                 server.suspend(rspns);
                 exec.schedule((Callable <Void>) () -> {
-                    Writer w = server.getWriter(rspns);
-                    w.write("Finished!");
-                    server.resume(rspns);
+                    server.resume(rspns, () -> {
+                        Writer w = server.getWriter(rspns);
+                        try {
+                            w.write("Finished!");
+                        } catch (IOException ex) {
+                            throw new IllegalStateException(ex);
+                        }
+                    });
                     return null;
                 }, 1, TimeUnit.SECONDS);
             }

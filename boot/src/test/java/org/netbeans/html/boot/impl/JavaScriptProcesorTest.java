@@ -37,14 +37,17 @@ import org.testng.annotations.Test;
 public class JavaScriptProcesorTest {
     
     @Test public void detectCallbackToNonExistingClass() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
-            + "    \"r.@java.lang.Runable::run()();\"\n" // typo
-            + "  )\n"
-            + "  private static native void callback(Runnable r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall=true, body =
+                          "r.@java.lang.Runable::run()();"
+                        )
+                        private static native void callback(Runnable r);
+                      }
+                      """ // typo
+        ;
         
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -52,14 +55,16 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void detectCallbackToNonExistingMethod() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
-            + "    \"r.@java.lang.Runnable::cancel()();\"\n"
-            + "  )\n"
-            + "  private static native void callback(Runnable r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall=true, body =
+                          "r.@java.lang.Runnable::cancel()();"
+                        )
+                        private static native void callback(Runnable r);
+                      }
+                      """;
         
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -67,14 +72,16 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void detectCallbackToNonExistingParams() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
-            + "    \"r.@java.lang.Runnable::run(I)(10);\"\n"
-            + "  )\n"
-            + "  private static native void callback(Runnable r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall=true, body =
+                          "r.@java.lang.Runnable::run(I)(10);"
+                        )
+                        private static native void callback(Runnable r);
+                      }
+                      """;
         
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -82,28 +89,32 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void objectTypeParamsAreOK() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall=true, body =\n"
-            + "    \"r.@java.lang.Object::equals(Ljava/lang/Object;)(null);\"\n"
-            + "  )\n"
-            + "  private static native void testEqual(Object r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall=true, body =
+                          "r.@java.lang.Object::equals(Ljava/lang/Object;)(null);"
+                        )
+                        private static native void testEqual(Object r);
+                      }
+                      """;
         
         Compile c = Compile.create("", code);
         c.assertNoErrors();
     }
     
     @Test public void primitiveArrayGeneratesAnError() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, body =\n"
-            + "    \"return [ 1, 2 ];\"\n"
-            + "  )\n"
-            + "  private static native double[] returnPrimitive(Object r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, body =
+                          "return [ 1, 2 ];"
+                        )
+                        private static native double[] returnPrimitive(Object r);
+                      }
+                      """;
 
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -111,14 +122,16 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void nonObjectArrayGeneratesAnError() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, body =\n"
-            + "    \"return [ 1, 2 ];\"\n"
-            + "  )\n"
-            + "  private static native Double[] returnPrimitive(Object r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, body =
+                          "return [ 1, 2 ];"
+                        )
+                        private static native Double[] returnPrimitive(Object r);
+                      }
+                      """;
 
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -126,17 +139,19 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void primitiveArrayCallbackGeneratesAnError() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall = true, body =\n"
-            + "    \"return @x.y.z.X::acceptDouble([D)([ 1, 2 ]);\"\n"
-            + "  )\n"
-            + "  private static native Object[] returnPrimitive(Object r);\n"
-            + "  static double[] acceptDouble(double[] arr) {\n"
-            + "    return arr;\n"
-            + "  }\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall = true, body =
+                          "return @x.y.z.X::acceptDouble([D)([ 1, 2 ]);"
+                        )
+                        private static native Object[] returnPrimitive(Object r);
+                        static double[] acceptDouble(double[] arr) {
+                          return arr;
+                        }
+                      }
+                      """;
 
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -144,17 +159,19 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void nonObjectArrayCallbackGeneratesAnError() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\"}, javacall = true, body =\n"
-            + "    \"return @x.y.z.X::acceptDouble([Ljava/lang/Double;)([ 1, 2 ]);\"\n"
-            + "  )\n"
-            + "  private static native Object[] returnPrimitive(Object r);\n"
-            + "  static Double[] acceptDouble(Double[] arr) {\n"
-            + "    return arr;\n"
-            + "  }\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r"}, javacall = true, body =
+                          "return @x.y.z.X::acceptDouble([Ljava/lang/Double;)([ 1, 2 ]);"
+                        )
+                        private static native Object[] returnPrimitive(Object r);
+                        static Double[] acceptDouble(Double[] arr) {
+                          return arr;
+                        }
+                      }
+                      """;
 
         Compile c = Compile.create("", code);
         c.assertErrors();
@@ -162,13 +179,15 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void misorderNotified() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptBody;\n"
-            + "class X {\n"
-            + "  @JavaScriptBody(args={\"r\", \"a\", \"b\"}, body =\"\"\n"
-            + "  )\n"
-            + "  private static native void testEqual(Object p, String q, int r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptBody;
+                      class X {
+                        @JavaScriptBody(args={"r", "a", "b"}, body =""
+                        )
+                        private static native void testEqual(Object p, String q, int r);
+                      }
+                      """;
         
         Compile c = Compile.create("", code);
         List<Diagnostic<? extends JavaFileObject>> warnings = c.getDiagnostics(Diagnostic.Kind.WARNING);
@@ -182,12 +201,14 @@ public class JavaScriptProcesorTest {
     }
 
     @Test public void needJavaScriptBodyToUseResource() throws IOException {
-        String code = "package x.y.z;\n"
-            + "import net.java.html.js.JavaScriptResource;\n"
-            + "@JavaScriptResource(\"x.html\")\n"
-            + "class X {\n"
-            + "  private static native void callback(Runnable r);\n"
-            + "}\n";
+        String code = """
+                      package x.y.z;
+                      import net.java.html.js.JavaScriptResource;
+                      @JavaScriptResource("x.html")
+                      class X {
+                        private static native void callback(Runnable r);
+                      }
+                      """;
         
         Compile c = Compile.create("", code);
         c.assertErrors();

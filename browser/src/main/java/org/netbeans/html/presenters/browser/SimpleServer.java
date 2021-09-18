@@ -173,7 +173,8 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
     }
 
     @Override
-    void resume(ReqRes r) {
+    void resume(ReqRes r, Runnable whenReady) {
+        whenReady.run();
         r.suspended = false;
         r.interestOps(SelectionKey.OP_WRITE);
         connectionWakeup();

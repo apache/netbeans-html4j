@@ -240,7 +240,12 @@ public abstract class Fn {
      * Should be provided by a library included in the application and registered
      * in <code>META-INF/services</code>, for example with
      * <code>@ServiceProvider(service = Fn.Presenter.class)</code> annotation.
+     * To verify the implementation of the presenter is correct, implement
+     * associated TCK (e.g. test compatibility kit) at least the headless
+     * one as illustrated at:
      * <p>
+     * {@codesnippet net.java.html.boot.script.ScriptEngineJavaScriptTCK}
+     * 
      * Since 0.7 a presenter may implement {@link Executor} interface, in case
      * it supports single threaded execution environment. The executor's
      * {@link Executor#execute(java.lang.Runnable)} method is then supposed

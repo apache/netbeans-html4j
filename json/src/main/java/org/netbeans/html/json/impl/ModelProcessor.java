@@ -46,7 +46,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -62,7 +61,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -81,7 +79,6 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach
  */
 @ServiceProvider(service=Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({
     "net.java.html.json.Model",
     "net.java.html.json.ModelOperation",
@@ -93,9 +90,9 @@ import org.openide.util.lookup.ServiceProvider;
 })
 public final class ModelProcessor extends AbstractProcessor {
     private static final Logger LOG = Logger.getLogger(ModelProcessor.class.getName());
-    private final Map<Element,String> models = new WeakHashMap<Element,String>();
-    private final Map<String,List<String>> packages = new HashMap<String,List<String>>();
-    private final Map<Element,Prprt[]> verify = new WeakHashMap<Element,Prprt[]>();
+    private final Map<Element,String> models = new WeakHashMap<>();
+    private final Map<String,List<String>> packages = new HashMap<>();
+    private final Map<Element,Prprt[]> verify = new WeakHashMap<>();
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;
@@ -106,7 +103,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             List<String> pkgList = packages.get(m.className());
             if (pkgList == null) {
-                pkgList = new ArrayList<String>();
+                pkgList = new ArrayList<>();
                 packages.put(m.className(), pkgList);
             }
             pkgList.add(findPkgName(e));
@@ -174,10 +171,10 @@ public final class ModelProcessor extends AbstractProcessor {
         try {
             StringWriter body = new StringWriter();
             StringBuilder onReceiveType = new StringBuilder();
-            List<GetSet> propsGetSet = new ArrayList<GetSet>();
-            List<Object> functions = new ArrayList<Object>();
-            Map<String, Collection<String[]>> propsDeps = new HashMap<String, Collection<String[]>>();
-            Map<String, Collection<String>> functionDeps = new HashMap<String, Collection<String>>();
+            List<GetSet> propsGetSet = new ArrayList<>();
+            List<Object> functions = new ArrayList<>();
+            Map<String, Collection<String[]>> propsDeps = new HashMap<>();
+            Map<String, Collection<String>> functionDeps = new HashMap<>();
             Prprt[] props = createProps(e, m.properties());
             final String builderPrefix = findBuilderPrefix(e, m);
 
@@ -187,7 +184,8 @@ public final class ModelProcessor extends AbstractProcessor {
             if (!generateOnChange(e, propsDeps, props, className, functionDeps)) {
                 ok = false;
             }
-            if (!generateProperties(e, builderPrefix, body, className, props, propsGetSet, propsDeps, functionDeps)) {
+            Set<String> propertyFQNs = new HashSet<>();
+            if (!generateProperties(e, builderPrefix, body, className, props, propsGetSet, propsDeps, functionDeps, propertyFQNs)) {
                 ok = false;
             }
             if (!generateFunctions(e, body, className, e.getEnclosedElements(), functions)) {
@@ -202,7 +200,7 @@ public final class ModelProcessor extends AbstractProcessor {
                     }
                 }
             }
-            if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType)) {
+            if (!generateReceive(e, body, className, e.getEnclosedElements(), onReceiveType, propertyFQNs)) {
                 ok = false;
             }
             if (!generateOperation(e, body, className, e.getEnclosedElements(), functions)) {
@@ -213,8 +211,12 @@ public final class ModelProcessor extends AbstractProcessor {
             try {
                 w.append("package " + pkg + ";\n");
                 w.append("import net.java.html.json.*;\n");
+                for (String propertyFqns : propertyFQNs) {
+                    w.append("import "+propertyFqns+";\n");                   
+                }
                 final String inPckName = inPckName(e, false);
                 w.append("/** Generated for {@link ").append(inPckName).append("}*/\n");
+                w.append("@java.lang.SuppressWarnings(\"all\")\n");
                 w.append("public final class ").append(className).append(" implements Cloneable {\n");
                 w.append("  private static Class<").append(inPckName).append("> modelFor() { return ").append(inPckName).append(".class; }\n");
                 w.append("  private static final Html4JavaType TYPE = new Html4JavaType();\n");
@@ -543,19 +545,20 @@ public final class ModelProcessor extends AbstractProcessor {
                 writeClone(className, props, w);
                 String targetId = findTargetId(e);
                 if (targetId != null) {
-                    w.write("  /** Activates this model instance in the current {@link \n"
-                        + "net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. \n"
-                        + "In case of using Knockout technology, this means to \n"
-                        + "bind JSON like data in this model instance with Knockout tags in \n"
-                        + "the surrounding HTML page.\n"
-                    );
+                    w.write("""
+                              /** Activates this model instance in the current {@link 
+                            net.java.html.json.Models#bind(java.lang.Object, net.java.html.BrwsrCtx) browser context}. 
+                            In case of using Knockout technology, this means to 
+                            bind JSON like data in this model instance with Knockout tags in 
+                            the surrounding HTML page.
+                            """);
                     if (targetId != null) {
                         w.write("This method binds to element '" + targetId + "' on the page\n");
                     }
-                    w.write(""
-                        + "@return <code>this</code> object\n"
-                        + "*/\n"
-                    );
+                    w.write("""
+                            @return <code>this</code> object
+                            */
+                            """);
                     w.write("  public " + className + " applyBindings() {\n");
                     w.write("    proto.applyBindings();\n");
     //                w.write("    proto.applyBindings(id);\n");
@@ -642,12 +645,16 @@ public final class ModelProcessor extends AbstractProcessor {
         Writer w, String className, Prprt[] properties,
         List<GetSet> props,
         Map<String,Collection<String[]>> deps,
-        Map<String,Collection<String>> functionDeps
+        Map<String,Collection<String>> functionDeps,
+        Set<String> propertyFqns
     ) throws IOException {
         boolean ok = true;
         for (Prprt p : properties) {
             final String tn;
             tn = typeName(p);
+            if (tn.contains(".")){
+                propertyFqns.add(tn);
+            }
             String[] gs = toGetSet(p.name(), tn, p.array());
             String castTo;
 
@@ -772,6 +779,7 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             ExecutableElement ee = (ExecutableElement)e;
             ExecutableElement write = null;
+            boolean instance = e.getEnclosingElement().getAnnotation(Model.class).instance();
             if (!cp.write().isEmpty()) {
                 write = findWrite(ee, (TypeElement)e.getEnclosingElement(), cp.write(), className);
                 ok = write != null;
@@ -920,7 +928,7 @@ public final class ModelProcessor extends AbstractProcessor {
             } else {
                 w.write("  public void " + gs[4] + "(" + write.getParameters().get(1).asType());
                 w.write(" value) {\n");
-                w.write("    " + fqn(ee.getEnclosingElement().asType(), ee) + '.' + write.getSimpleName() + "(this, value);\n");
+                w.write("    " + (instance ? "instance" : fqn(ee.getEnclosingElement().asType(), ee)) + '.' + write.getSimpleName() + "(this, value);\n");
                 w.write("  }\n");
 
                 props.add(new GetSet(
@@ -1080,20 +1088,20 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             for (String pn : onPC.value()) {
                 if (findPrprt(properties, pn) == null && findDerivedFrom(propDeps, pn).isEmpty()) {
-                    error("No Prprt named '" + pn + "' in the model", clazz);
+                    error("No property named '" + pn + "' in the model", clazz);
                     return false;
                 }
             }
             if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
-                error("@OnPrprtChange method needs to be static", e);
+                error("@OnPropertyChange method needs to be static", e);
                 return false;
             }
             if (e.getModifiers().contains(Modifier.PRIVATE)) {
-                error("@OnPrprtChange method cannot be private", e);
+                error("@OnPropertyChange method cannot be private", e);
                 return false;
             }
             if (e.getReturnType().getKind() != TypeKind.VOID) {
-                error("@OnPrprtChange method should return void", e);
+                error("@OnPropertyChange method should return void", e);
                 return false;
             }
             String n = e.getSimpleName().toString();
@@ -1221,9 +1229,9 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private boolean generateReceive(
         Element clazz, StringWriter body, String className,
-        List<? extends Element> enclosedElements, StringBuilder inType
+        List<? extends Element> enclosedElements, StringBuilder inType ,Set<String> propertyFqns
     ) {
-        boolean ret = generateReceiveImpl(clazz, body, className, enclosedElements, inType);
+        boolean ret = generateReceiveImpl(clazz, body, className, enclosedElements, inType, propertyFqns);
         if (!ret) {
             inType.setLength(0);
         }
@@ -1231,7 +1239,7 @@ public final class ModelProcessor extends AbstractProcessor {
     }
     private boolean generateReceiveImpl(
         Element clazz, StringWriter body, String className,
-        List<? extends Element> enclosedElements, StringBuilder inType
+        List<? extends Element> enclosedElements, StringBuilder inType, Set<String> propertyFqns
     ) {
         inType.append("  @Override public void onMessage(").append(className).append(" model, int index, int type, Object data, Object[] params) {\n");
         inType.append("    switch (index) {\n");
@@ -1323,7 +1331,14 @@ public final class ModelProcessor extends AbstractProcessor {
                     error("Second arguments needs to be a model, String or array or List of models", e);
                     return false;
                 }
-                modelClass = modelType.toString();
+                modelClass = modelType.toString();           
+                final String simpleName = modelClass;
+                List<String> knownPackages = packages.get(simpleName);
+                if (knownPackages != null && !knownPackages.isEmpty()) {
+                    for (String pkg : knownPackages) {
+                        propertyFqns.add(pkg+"."+simpleName);
+                    }
+                }
                 if (expectsList == 1) {
                     args.add("arr");
                 } else if (expectsList == 2) {
@@ -1441,7 +1456,7 @@ public final class ModelProcessor extends AbstractProcessor {
         } else {
             int errorParamsLength = findOnError(e, ((TypeElement)clazz), onR.onError(), className);
             error = errorParamsLength < 0;
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(onR.onError()).append("(");
+            body.append("        ").append(inPckName(clazz, false)).append(".").append(onR.onError()).append("(");
             body.append("model, ex");
             for (int i = 2; i < errorParamsLength; i++) {
                 String arg = args.get(i);
@@ -1454,11 +1469,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 1) {\n" +
-            "        Object[] ev = (Object[])data;\n"
-            );
+        body.append("""
+                            return;
+                          } else if (type == 1) {
+                            Object[] ev = (Object[])data;
+                    """);
         if (expectsList) {
             body.append(
                 "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
@@ -1472,7 +1487,7 @@ public final class ModelProcessor extends AbstractProcessor {
             "        TYPE.copyJSON(model.proto.getContext(), ev, " + modelClass + ".class, arr);\n"
         );
         {
-            body.append("        ").append(clazz.getSimpleName()).append(".").append(n).append("(");
+            body.append("        ").append(inPckName(clazz, false)).append(".").append(n).append("(");
             String sep = "";
             for (String arg : args) {
                 body.append(sep);
@@ -1481,11 +1496,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      }\n" +
-            "    }\n"
-            );
+        body.append("""
+                            return;
+                          }
+                        }
+                    """);
         method.append("    proto.loadJSONWithHeaders(" + index + ",\n        ");
         method.append(headers.length() == 0 ? "null" : headers).append(",\n        ");
         method.append(urlBefore).append(", ");
@@ -1529,11 +1544,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
         }
         body.append(");\n");
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 2) { /* on error */\n" +
-            "        Exception value = (Exception)data;\n"
-            );
+        body.append("""
+                            return;
+                          } else if (type == 2) { /* on error */
+                            Exception value = (Exception)data;
+                    """);
         if (onR.onError().isEmpty()) {
             body.append(
                 "        value.printStackTrace();\n"
@@ -1556,11 +1571,11 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      } else if (type == 1) {\n" +
-            "        Object[] ev = (Object[])data;\n"
-        );
+        body.append("""
+                            return;
+                          } else if (type == 1) {
+                            Object[] ev = (Object[])data;
+                    """);
         if (expectsList) {
             body.append(
                 "        " + modelClass + "[] arr = new " + modelClass + "[ev.length];\n"
@@ -1583,10 +1598,9 @@ public final class ModelProcessor extends AbstractProcessor {
             }
             body.append(");\n");
         }
-        body.append(
-            "        return;\n" +
-            "      }"
-        );
+        body.append("""
+                            return;
+                          }""");
         if (!onR.onError().isEmpty()) {
             body.append(" else if (type == 3) { /* on close */\n");
             body.append("        ").append(inPckName(clazz, true)).append(".").append(onR.onError()).append("(");
@@ -1626,7 +1640,7 @@ public final class ModelProcessor extends AbstractProcessor {
             String toCall = null;
             String toFinish = null;
             boolean addNull = true;
-            if (ve.asType() == stringType) {
+            if (ve.asType().equals(stringType)) {
                 if (ve.getSimpleName().contentEquals("id")) {
                     params.append('"').append(id).append('"');
                     continue;
@@ -1751,7 +1765,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 continue;
             }
             error(
-                "@OnPrprtChange method can only accept String or " + className + " arguments",
+                "@OnPropertyChange method can only accept String or " + className + " arguments",
                 ee);
         }
         return params;
@@ -1850,11 +1864,11 @@ public final class ModelProcessor extends AbstractProcessor {
     }
 
     private String fqn(TypeMirror pt, Element relative) {
-        if (pt.getKind() == TypeKind.ERROR) {
-            final Elements eu = processingEnv.getElementUtils();
-            PackageElement pckg = eu.getPackageOf(relative);
-            return pckg.getQualifiedName() + "." + pt.toString();
-        }
+//        if (pt.getKind() == TypeKind.ERROR) {
+//            final Elements eu = processingEnv.getElementUtils();
+//            PackageElement pckg = eu.getPackageOf(relative);
+//            return pckg.getQualifiedName() + "." + pt.toString();
+//        }
         return pt.toString();
     }
 
@@ -1880,10 +1894,10 @@ public final class ModelProcessor extends AbstractProcessor {
             return tm.toString();
         }
         final Element e = processingEnv.getTypeUtils().asElement(tm);
-        if (e.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
+        if (isError(e, tm)) {
             isModel[0] = true;
             isEnum[0] = false;
-            final String simpleName = e.getSimpleName().toString();
+            final String simpleName = e != null ? e.getSimpleName().toString() : tm.toString();
             List<String> knownPackages = packages.get(simpleName);
             if (knownPackages != null && !knownPackages.isEmpty()) {
                 String referencingPkg = findPkgName(p.e);
@@ -1920,6 +1934,10 @@ public final class ModelProcessor extends AbstractProcessor {
             ret = tm.toString();
         }
         return ret;
+    }
+
+    private static boolean isError(final Element e, TypeMirror tm) {
+        return (e == null || e.getKind() == ElementKind.CLASS) && tm.getKind() == TypeKind.ERROR;
     }
 
     private static boolean findModelForMthd(Element clazz) {
@@ -2024,8 +2042,8 @@ public final class ModelProcessor extends AbstractProcessor {
             final TypeMirror tm = ex.getTypeMirror();
             String name;
             final Element te = processingEnv.getTypeUtils().asElement(tm);
-            if (te.getKind() == ElementKind.CLASS && tm.getKind() == TypeKind.ERROR) {
-                name = te.getSimpleName().toString();
+            if (isError(te, tm)) {
+                name = te != null ? te.getSimpleName().toString() : tm.toString();
             } else {
                 name = tm.toString();
             }
@@ -2083,7 +2101,7 @@ public final class ModelProcessor extends AbstractProcessor {
                 for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entrySet : m.getElementValues().entrySet()) {
                     ExecutableElement key = entrySet.getKey();
                     AnnotationValue value = entrySet.getValue();
-                    if ("targetId()".equals(key.toString())) {
+                    if (key.getSimpleName().contentEquals("targetId") && key.getParameters().isEmpty()) { // NOI18N
                         return value.toString();
                     }
                 }
@@ -2272,6 +2290,7 @@ public final class ModelProcessor extends AbstractProcessor {
 
     private ExecutableElement findWrite(ExecutableElement computedPropElem, TypeElement te, String name, String className) {
         String err = null;
+        boolean instance = te.getAnnotation(Model.class).instance();
         METHODS:
         for (Element e : te.getEnclosedElements()) {
             if (e.getKind() != ElementKind.METHOD) {
@@ -2283,7 +2302,7 @@ public final class ModelProcessor extends AbstractProcessor {
             if (e.equals(computedPropElem)) {
                 continue;
             }
-            if (!e.getModifiers().contains(Modifier.STATIC)) {
+            if (!instance && !e.getModifiers().contains(Modifier.STATIC)) {
                 computedPropElem = (ExecutableElement) e;
                 err = "Would have to be static";
                 continue;
@@ -2324,6 +2343,11 @@ public final class ModelProcessor extends AbstractProcessor {
         }
         error(err, computedPropElem);
         return null;
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
     }
 
 }

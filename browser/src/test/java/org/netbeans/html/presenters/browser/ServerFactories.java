@@ -35,15 +35,17 @@ public final class ServerFactories {
     private ServerFactories() {
     }
 
+    static {
+        DumpStack.initialize();
+    }
+
     @DataProvider(name = "serverFactories")
     public static Object[][] serverFactories() {
         Supplier<HttpServer<?,?,?,?>> simple = SimpleServer::new;
         Supplier<HttpServer<?,?,?,?>> grizzly = GrizzlyServer::new;
         List<Object[]> arr = new ArrayList<>();
         arr.add(new Object[] {"Simple", simple});
-        if (!System.getProperty("os.name").contains("Window")) {
-            arr.add(new Object[] { "Grizzly", grizzly});
-        }
+        arr.add(new Object[] { "Grizzly", grizzly});
         arr.add(new Object[] {"None", null});
         return arr.toArray(new Object[0][]);
     }
@@ -75,8 +77,8 @@ public final class ServerFactories {
             loadFinished(() -> {
                 browserPresenter[0] = Fn.activePresenter();
                 updateName[0] = Fn.define(KOScript.class,
-                    "document.getElementsByTagName('h1')[0].innerHTML='" + browserName + "@' + t;",
-                    "t"
+                    "document.getElementsByTagName('h1')[0].innerHTML='" + browserName + "@' + t + '[' + s + ']';",
+                    "t", "s"
                 );
                 cdl.countDown();
             });
@@ -90,6 +92,7 @@ public final class ServerFactories {
                 }
             }
         }
+        res.add(new KOClose(updateName[0], prefix, browserPresenter[0]));
         return browserPresenter[0];
     }
 

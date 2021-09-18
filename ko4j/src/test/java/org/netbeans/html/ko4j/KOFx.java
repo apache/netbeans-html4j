@@ -62,6 +62,7 @@ public final class KOFx implements ITest, Runnable {
         }
     }
 
+    // BEGIN: org.netbeans.html.ko4j.KOFx
     @Override
     public synchronized void run() {
         boolean notify = true;
@@ -102,5 +103,6 @@ public final class KOFx implements ITest, Runnable {
             }
         }
     }
+    // END: org.netbeans.html.ko4j.KOFx
     
 }

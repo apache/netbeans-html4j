@@ -30,18 +30,22 @@ public final class Sum {
     }
 
     @JavaScriptBody(args = { "a", "b" }, javacall = true, keepAlive = false, body =
-        "return {\n"
-      + "  'x' : this.@net.java.html.js.tests.Sum::sum(II)(a, b),\n"
-      + "  'y' : this\n"
-      + "}\n"
+        """
+        return {
+          'x' : this.@net.java.html.js.tests.Sum::sum(II)(a, b),
+          'y' : this
+        }
+        """
     )
     public native Object jsSum(int a, int b);
     
     @JavaScriptBody(args = { "thiz", "a", "b" }, javacall = true, keepAlive = false, body =
-        "return {\n"
-      + "  'x' : thiz.@net.java.html.js.tests.Sum::sum(II)(a, b),\n"
-      + "  'y' : thiz\n"
-      + "}\n"
+        """
+        return {
+          'x' : thiz.@net.java.html.js.tests.Sum::sum(II)(a, b),
+          'y' : thiz
+        }
+        """
     )
     public static native Object jsStaticSum(Sum thiz, int a, int b);
 

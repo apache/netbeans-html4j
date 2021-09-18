@@ -30,9 +30,10 @@ public final class Factorial {
     }
 
     @JavaScriptBody(args = { "i" }, javacall = true,body = 
-        "if (i <= 1) return 1;\n"
-      + "var im1 = this.@net.java.html.js.tests.Factorial::minusOne(I)(i);\n"
-      + "return this.@net.java.html.js.tests.Factorial::factorial(I)(im1) * i;"
+        """
+        if (i <= 1) return 1;
+        var im1 = this.@net.java.html.js.tests.Factorial::minusOne(I)(i);
+        return this.@net.java.html.js.tests.Factorial::factorial(I)(im1) * i;"""
     )
     native int factorial(int n);
 }

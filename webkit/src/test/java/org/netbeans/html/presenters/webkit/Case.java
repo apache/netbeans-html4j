@@ -28,27 +28,33 @@ import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITest;
 import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 public final class Case implements ITest, IHookable, Runnable {
     private static final Timer T = new Timer("Interrupted Exception Handler");
     private final Fn.Presenter p;
     private final Method m;
+    private final String skipMsg;
     private Object result;
     private Object inst;
 
-    Case(Fn.Presenter p, Method m) {
+    Case(Fn.Presenter p, Method m, String skipMsg) {
         this.p = p;
         this.m = m;
+        this.skipMsg = skipMsg;
     }
 
     @Override
     public String getTestName() {
-        return m.getName();
+        return m != null ? m.getName() : skipMsg;
     }
 
     @Test
     public synchronized void executeTest() throws Exception {
+        if (skipMsg != null) {
+            throw new SkipException(skipMsg);
+        }
         if (result == null) {
             Executor exec = (Executor) p;
             exec.execute(this);

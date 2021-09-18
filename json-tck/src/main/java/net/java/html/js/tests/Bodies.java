@@ -64,17 +64,19 @@ final class Bodies {
     @JavaScriptBody(args = { "o", "x" }, keepAlive = false, body = "o.x = x;")
     public static native Object setX(Object o, Object x);
 
-    @JavaScriptBody(args = { "c", "a", "b" }, keepAlive = false, javacall = true, body = 
-        "return c.@net.java.html.js.tests.Sum::sum(II)(a, b);"
-    )
+    @JavaScriptBody(args = { "c", "a", "b" }, keepAlive = false, javacall = true, body = """
+        return c.@net.java.html.js.tests.Sum::sum(II)(a, b);
+    """)
     public static native int sumIndirect(Sum c, int a, int b);
 
     @JavaScriptBody(args = { "c" }, javacall = true, body =
-        "return {\n" +
-        "  'sum' : function(a,b) {\n" +
-        "     return c.@net.java.html.js.tests.Sum::sum(II)(a, b);\n" +
-        "  }\n" +
-        "};\n"
+        """
+        return {
+          'sum' : function(a,b) {
+             return c.@net.java.html.js.tests.Sum::sum(II)(a, b);
+          }
+        };
+        """
     )
     public static native Object sumDelayed(Sum c);
 
@@ -128,22 +130,26 @@ final class Bodies {
     }
     
     @JavaScriptBody(args = { "arr" }, body = 
-        "var sum = 0;\n" +
-        "for (var i = 0; i < arr.length; i++) {\n" +
-        "  sum += arr[i];\n" +
-        "}\n" +
-        "return sum;\n"
+        """
+        var sum = 0;
+        for (var i = 0; i < arr.length; i++) {
+          sum += arr[i];
+        }
+        return sum;
+        """
     )
     public static native double sumVector(double[] arr);
     
     @JavaScriptBody(args = { "arr" }, body = 
-        "var sum = 0;\n" +
-        "for (var i = 0; i < arr.length; i++) {\n" +
-        "  for (var j = 0; j < arr[i].length; j++) {\n" +
-        "    sum += arr[i][j];\n" +
-        "  }\n" +
-        "}\n" +
-        "return sum;\n"
+        """
+        var sum = 0;
+        for (var i = 0; i < arr.length; i++) {
+          for (var j = 0; j < arr[i].length; j++) {
+            sum += arr[i][j];
+          }
+        }
+        return sum;
+        """
     )
     public static native double sumMatrix(double[][] arr);
 
@@ -159,54 +165,63 @@ final class Bodies {
     }
     
     @JavaScriptBody(args = {}, javacall = true, body = 
-        "var v = { x : 0 };\n" +
-        "@net.java.html.js.tests.Bodies::incCounter(ILjava/lang/Object;)(42, v);\n" +
-        "return v.x;\n"
+        """
+        var v = { x : 0 };
+        @net.java.html.js.tests.Bodies::incCounter(ILjava/lang/Object;)(42, v);
+        return v.x;
+        """
     )
     static native int incAsync();
     
     @JavaScriptBody(args = { "obj" }, body = 
-        "var ret = [];\n" +
-        "for (var i in obj) {\n" +
-        "  ret.push(i);\n" +
-        "  ret.push(obj[i]);\n" +
-        "}\n" +
-        "return ret;\n"
+        """
+        var ret = [];
+        for (var i in obj) {
+          ret.push(i);
+          ret.push(obj[i]);
+        }
+        return ret;
+        """
     )
     static native Object[] forIn(Object obj);
 
     @JavaScriptBody(args = { "max" }, body = 
-        "var arr = [];\n"
-      + "for (var i = 0; i < max; i++) {\n"
-      + "  arr.push(i);\n"
-      + "}\n"
-      + "return arr.length;"
+        """
+        var arr = [];
+        for (var i = 0; i < max; i++) {
+          arr.push(i);
+        }
+        return arr.length;"""
     )
     static native int gc(double max);
 
-    @JavaScriptBody(args = {}, body = ""
-        + "var o = {};\n"
-        + "return o.x;\n"
+    @JavaScriptBody(args = {}, body = """
+                                      var o = {};
+                                      return o.x;
+                                      """
     )
     static native Object unknown();
 
-    @JavaScriptBody(args = {}, body = ""
-        + "return new Array(2);\n"
+    @JavaScriptBody(args = {}, body = """
+                                      return new Array(2);
+                                      """
     )
     static native Object[] unknownArray();
 
-    @JavaScriptBody(args = { "sum" }, javacall = true, body = ""
-        + "var arr = [];\n"
-        + "arr[1] = null;\n"
-        + "arr[2] = 1;\n"
-        + "return sum.@net.java.html.js.tests.Sum::sumNonNull([Ljava/lang/Object;)(arr);\n"
+    @JavaScriptBody(args = { "sum" }, javacall = true, body = """
+                                                              var arr = [];
+                                                              arr[1] = null;
+                                                              arr[2] = 1;
+                                                              return sum.@net.java.html.js.tests.Sum::sumNonNull([Ljava/lang/Object;)(arr);
+                                                              """
     )
     static native int sumNonNull(Sum sum);
 
-    @JavaScriptBody(args = { "sum", "p" }, javacall = true, body = ""
-        + "var obj = {};\n"
-        + "obj.x = 1;\n"
-        + "return sum.@net.java.html.js.tests.Sum::checkNonNull(Ljava/lang/Object;)(obj[p]);\n"
+    @JavaScriptBody(args = { "sum", "p" }, javacall = true, body = """
+                                                                   var obj = {};
+                                                                   obj.x = 1;
+                                                                   return sum.@net.java.html.js.tests.Sum::checkNonNull(Ljava/lang/Object;)(obj[p]);
+                                                                   """
     )
     static native boolean nonNull(Sum sum, String p);
 
@@ -220,9 +235,10 @@ final class Bodies {
     )
     static native String primitiveTypes(Sum sum);
 
-    @JavaScriptBody(args = { "call" }, javacall = true, body = ""
-        + "var b = call.@java.util.concurrent.Callable::call()();\n"
-        + "return b ? 'yes' : 'no';\n"
+    @JavaScriptBody(args = { "call" }, javacall = true, body = """
+        var b = call.@java.util.concurrent.Callable::call()();
+        return b ? 'yes' : 'no';
+        """
     )
     static native String yesNo(Callable<Boolean> call);
 
@@ -236,27 +252,28 @@ final class Bodies {
     static native String readGlobal2String();
     
     static String problematicString() {
-        return "{\n" +
-"    MyViewModel: {\n" +
-"//      ViewModel: JavaViewModel,\n" +
-"\n" +
-"    }          \n" +
-"}";
+        return """
+            {
+                MyViewModel: {
+            //      ViewModel: JavaViewModel,
+                }          
+            }""";
     }
 
     @JavaScriptBody(args = { "o", "n" }, body = "return o[n];")
     static native Object get(Object o, String n);
 
-    @JavaScriptBody(args = { "o", "n", "arg" }, body = "\n" + 
-        "try {\n" +
-        "  if (arg == null) {\n" +
-        "    return o[n]();\n" +
-        "  } else {\n" +
-        "    return o[n](arg);\n" +
-        "  }\n" +
-        "} catch (e) {\n" +
-        "  return n;\n" +
-        "}\n"
+    @JavaScriptBody(args = { "o", "n", "arg" }, body = """
+        try {
+          if (arg == null) {
+            return o[n]();
+          } else {
+            return o[n](arg);
+          }
+        } catch (e) {
+          return n;
+        }
+        """
     )
     static native Object invoke(Object o, String n, Object arg);
 }

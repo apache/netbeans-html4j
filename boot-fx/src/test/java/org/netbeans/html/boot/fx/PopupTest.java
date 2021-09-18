@@ -21,6 +21,7 @@ package org.netbeans.html.boot.fx;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -65,7 +66,8 @@ public class PopupTest {
         }
         WhenInitialized when = new WhenInitialized();
 
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(PopupTest.class).
+        final WebView[] lastWebView = { null };
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter(lastWebView)).loadClass(PopupTest.class).
                 loadPage("empty.html").
                 loadFinished(when);
 
@@ -80,7 +82,8 @@ public class PopupTest {
         when.cdl.await();
         if (arr[0] != null) throw arr[0];
 
-        Stage s = FXBrwsr.findStage();
+        assertNotNull(lastWebView[0], "A WebView created");
+        Stage s = (Stage) lastWebView[0].getScene().getWindow();
         assertEquals(s.getTitle(), "FX Presenter Harness");
 
         final Object[] window = new Object[1];

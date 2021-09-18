@@ -39,7 +39,7 @@ public class ScriptsTest {
         List<Object[]> res = new ArrayList<>();
         final ScriptEngineManager manager = new ScriptEngineManager();
         for (ScriptEngineFactory f : manager.getEngineFactories()) {
-            if (!Jsr223JavaScriptTest.isJavaScriptEngineFactory(f)) {
+            if (!ScriptEngineTest.isJavaScriptEngineFactory(f)) {
                 continue;
             }
             res.add(new Object[] { f.getScriptEngine() });

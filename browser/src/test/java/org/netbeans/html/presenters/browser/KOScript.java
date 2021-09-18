@@ -53,7 +53,7 @@ public final class KOScript implements ITest, IHookable, Runnable {
         return prefix + ":" + m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
-    @Test
+    @Test(groups = "BrowserTest")
     public void executeTest() throws Exception {
         for (;;) {
             if (p instanceof Executor) {
@@ -82,7 +82,7 @@ public final class KOScript implements ITest, IHookable, Runnable {
         Closeable c = Fn.activate(p);
         try {
             if (updateName != null) {
-                updateName.invoke(null, getTestName());
+                updateName.invoke(null, getTestName(), cnt);
             }
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
@@ -90,6 +90,9 @@ public final class KOScript implements ITest, IHookable, Runnable {
             result = m.invoke(inst);
             if (result == null) {
                 result = this;
+            }
+            if (updateName != null) {
+                updateName.invoke(null, getTestName(), "Done");
             }
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();

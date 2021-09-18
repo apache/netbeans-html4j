@@ -25,22 +25,25 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.json.tck.JavaScriptTCK;
 import org.netbeans.html.json.tck.KOTest;
 import org.testng.annotations.Factory;
 
-public class GenericTest extends JavaScriptTCK {
+public class GenericTest {
     private static Class<?> browserClass;
     
     public GenericTest() {
+    }
+
+    static {
+        DumpStack.initialize();
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
         return createTests(new Testing());
     }
     
-    static Object[] createTests(Testing p) throws Exception {
-        Fn.Presenter presenter = p.presenter;
+    static Object[] createTests(Testing t) throws Exception {
+        Fn.Presenter presenter = t.presenter;
 
         final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(GenericTest.class).
             loadPage("empty.html").
@@ -60,17 +63,17 @@ public class GenericTest extends JavaScriptTCK {
 
         Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
         for (Class c : arr) {
-            for (Method m : c.getMethods()) {
-                if (m.getAnnotation(test) != null) {
-                    res.add(new Case(presenter, m));
-                }
-            }
+            addTestMethods(c, test, res, t);
         }
         return res.toArray();
     }
-    
-    public static Class[] tests() {
-        return testClasses();
+
+    private static void addTestMethods(Class c, Class<? extends Annotation> test, List<Object> res, Testing t) throws SecurityException {
+        for (Method m : c.getMethods()) {
+            if (m.getAnnotation(test) != null) {
+                res.add(new Case(t, m));
+            }
+        }
     }
 
     static synchronized Class<?> loadClass() throws InterruptedException {
@@ -88,6 +91,6 @@ public class GenericTest extends JavaScriptTCK {
     public static void initialized() throws Exception {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(GenericTest.class.getName());
         Method m = classpathClass.getMethod("ready", Class.class);
-        m.invoke(null, GenericTest.class);
+        m.invoke(null, GenericTCK.class);
     }
 }

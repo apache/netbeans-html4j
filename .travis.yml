@@ -22,6 +22,7 @@ services:
 before_install:
   - sudo apt-get -qq update || echo no sudo apt-get
   - sudo apt-get install -y libwebkitgtk-3.0-0 || echo no sudo apt-get
+  - sudo apt-get install -y firefox || echo no sudo apt-get
   - if [ -n "$URL" ]; then pushd /tmp; curl $URL -o jdk.tgz; tar fxz jdk.tgz; JAVA_HOME=`pwd`/$DIR; popd; export JAVA_HOME; fi
   - echo Java is $JAVA_HOME
   - ls -l $JAVA_HOME
@@ -31,8 +32,10 @@ before_script:
   - sleep 3
 script:
   - $JAVA_HOME/bin/java -version
+  - if type firefox; then (firefox&); fi
   - mvn install -DskipTests $ARGS
-  - mvn verify $ARGS
+  - mvn -q verify $ARGS -Dorg.netbeans.html.Generic.wait4js=true
+  - if [ -n "$JAVADOC" ]; then mvn javadoc:aggregate; fi
 
 matrix:
   include:
@@ -50,6 +53,13 @@ matrix:
       jdk: openjdk11
       env:
         - ARGS=-Dnone
+    - os: linux
+      name: Linux JDK15 (latest)
+      dist: trusty
+      jdk: openjdk15
+      env:
+        - ARGS=-Dnone
+        - JAVADOC=yes
     - os: osx
       name: Mac JDK8
       osx_image: xcode9.3
