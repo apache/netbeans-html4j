@@ -72,9 +72,12 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     public Class[] call() throws Exception {
         return testClasses();
     }
-    
-    public static void start(URI server) throws Exception {
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(KnockoutEquinoxTCKImpl.class).
+
+    private static Object presenter;
+    public static void start(URI server, BundleContext ctx) throws Exception {
+        Class<?> clazz = loadOSGiClass("org.netbeans.html.boot.fx.FXPresenter", ctx);
+        presenter = clazz.newInstance();
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(KnockoutEquinoxTCKImpl.class).
             loadPage(server.toString()).
             invoke("initialized");
 
@@ -110,7 +113,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     @Override
     public BrwsrCtx createContext() {
         try {
-            Contexts.Builder cb = Contexts.newBuilder().
+            Contexts.Builder cb = Contexts.newBuilder(presenter).
                 register(Technology.class, (Technology)osgiInstance("KOTech"), 10).
                 register(Transfer.class, (Transfer)osgiInstance("KOTransfer"), 10).
                 register(Executor.class, (Executor)browserContext, 10);

@@ -37,14 +37,17 @@ import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
 import org.netbeans.html.json.tck.KnockoutTCK;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
+import org.testng.ITest;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -59,13 +62,13 @@ public class KnockoutEquinoxIT {
             return framework;
         }
         for (FrameworkFactory ff : ServiceLoader.load(FrameworkFactory.class)) {
-            
+
             String basedir = System.getProperty("basedir");
             assertNotNull("basedir preperty provided", basedir);
             File target = new File(basedir, "target");
             dir = new File(target, "osgi");
             dir.mkdirs();
-            
+
             Map<String,String> config = new HashMap<String, String>();
             config.put(Constants.FRAMEWORK_STORAGE, dir.getPath());
             config.put(Constants.FRAMEWORK_STORAGE_CLEAN, "true");
@@ -112,7 +115,7 @@ public class KnockoutEquinoxIT {
         fail("No OSGi framework in the path");
         return null;
     }
-    
+
     @AfterClass public static void cleanUp() throws Exception {
         if (framework != null) framework.stop();
         clearUpDir(dir);
@@ -125,8 +128,8 @@ public class KnockoutEquinoxIT {
         }
         dir.delete();
     }
-    
-    
+
+
 
     private static void loadClassPathBundles(Framework f) throws IOException, BundleException {
         for (String jar : System.getProperty("java.class.path").split(File.pathSeparator)) {
@@ -145,46 +148,59 @@ public class KnockoutEquinoxIT {
                 if (name.contains("testng")) {
                     continue;
                 }
+                if (name.contains("equinox-agentclass-hook")) {
+                    continue;
+                }
                 final String path = "reference:" + file.toURI().toString();
                 try {
+                    LOG.log(Level.INFO, "Installing bundle {0}", path);
                     Bundle b = f.getBundleContext().installBundle(path);
+                    assertNotNull(b);
                 } catch (BundleException ex) {
                     LOG.log(Level.WARNING, "Cannot install " + file, ex);
                 }
             }
         }
     }
-    
+
     private static Class<?> loadOSGiClass(Class<?> c) throws Exception {
         return KnockoutEquinoxTCKImpl.loadOSGiClass(c.getName(), KnockoutEquinoxIT.framework().getBundleContext());
     }
-    
+
     private static Class<?> browserClass;
     private static Object browserContext;
-    
+
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class<?> tck = loadOSGiClass(KnockoutTCK.class);
         Class<?> peer = loadOSGiClass(KnockoutEquinoxTCKImpl.class);
         // initialize the TCK
         Callable<Class[]> inst = (Callable<Class[]>) peer.newInstance();
-        
+
         Class[] arr = inst.call();
         for (int i = 0; i < arr.length; i++) {
             if (arr[i].getClassLoader() == ClassLoader.getSystemClassLoader()) {
                 fail("Should be an OSGi class: " + arr[i]);
             }
         }
-        
+
+        final BundleContext ctx = framework.getBundleContext();
+        assertNotNull(ctx, "Bundle context found");
+
         URI uri = DynamicHTTP.initServer();
 
-        Method start = peer.getMethod("start", URI.class);
-        start.invoke(null, uri);
-        
+        Method start = peer.getMethod("start", URI.class, BundleContext.class);
+        start.invoke(null, uri, ctx);
+
         ClassLoader l = getClassLoader();
         List<Object> res = new ArrayList<Object>();
         for (int i = 0; i < arr.length; i++) {
             seekKOTests(arr[i], res);
         }
+
+        for (Bundle b : ctx.getBundles()) {
+            res.add(new BundleTest(b));
+        }
+
         return res.toArray();
     }
 
@@ -205,7 +221,7 @@ public class KnockoutEquinoxIT {
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls, Object presenter) throws Exception {
         browserClass = browserCls;
         browserContext = presenter;
@@ -217,5 +233,41 @@ public class KnockoutEquinoxIT {
         Class<?> fnClass = loadOSGiClass(Fn.class);
         Method m = fnClass.getMethod("activate", presenterClass);
         return (Closeable) m.invoke(null, presenter);
+    }
+
+    public static final class BundleTest implements ITest {
+        private final Bundle b;
+
+        BundleTest(Bundle b) {
+            this.b = b;
+        }
+        @Override
+        public String getTestName() {
+            return "Checking " + b.getSymbolicName();
+        }
+
+        @Test
+        public void checkBundleName() {
+            switch (b.getSymbolicName()) {
+                case "org.eclipse.osgi": return;
+                case "org.json": return;
+                case "com.beust.jcommander": return;
+                case "com.sun.jna": return;
+                case "javax.servlet-api": return;
+                case "equinox-agentclass-hook": return;
+                case "ko-osgi-test": return;
+                default:
+                    if (b.getSymbolicName().startsWith("org.glassfish.grizzly.")) {
+                        return;
+                    }
+                    if (b.getSymbolicName().startsWith("net.java.html")) {
+                        return;
+                    }
+                    if (b.getSymbolicName().startsWith("org.netbeans.html")) {
+                        return;
+                    }
+            }
+            fail("Unexpected OSGi bundle name: " + b.getSymbolicName());
+        }
     }
 }
