@@ -32,6 +32,7 @@
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
         <main.dir>${project.parent.basedir}</main.dir>
+        <bundleSymbolicName>org.netbeans.html.presenters.webkit</bundleSymbolicName>
         <publicPackages>org.netbeans.html.presenters.webkit</publicPackages>
         <sigtestPackages />
     </properties>
