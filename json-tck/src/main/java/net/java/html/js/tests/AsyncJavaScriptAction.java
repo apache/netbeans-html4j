@@ -18,14 +18,20 @@
  */
 package net.java.html.js.tests;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import net.java.html.js.JavaScriptBody;
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
+import static net.java.html.js.tests.JavaScriptBodyTest.assertTrue;
+import static net.java.html.js.tests.JavaScriptBodyTest.fail;
 
 final class AsyncJavaScriptAction {
     private List<Integer> collected = new java.util.ArrayList<>();
     private boolean successStoringLater;
+    private AssertionError invertedVia;
 
     @JavaScriptBody(args = { "n" }, javacall = true, body = """
         return this.@net.java.html.js.tests.AsyncJavaScriptAction::performIteration(I)(n);
@@ -47,44 +53,61 @@ final class AsyncJavaScriptAction {
     private static native void jsStore(int store);
 
     void storeLater(int value) {
+        if (!collected.isEmpty()) {
+            if (collected.get(collected.size() - 1) > value) {
+                invertedVia = new AssertionError("Not in order " + value, invertedVia);
+            }
+        }
         collected.add(value);
     }
 
     @JavaScriptBody(args = {}, body = "")
     native void flushPendingJavaScripts();
 
-    int performIteration(int from) {
-        for (int i = 0; i < 5; i++) {
-            jsStore(from++);
+    int performIteration(int middle) {
+        for (int i = -5; i < 0; i++) {
+            jsStore(middle + i);
         }
-        final String n = "" + from++;
+        String n = "" + middle;
         successStoringLater = JsUtils.executeNow(AsyncJavaScriptAction.class, "storeLater(" + n + ");");
-        for (int i = 6; i < 11; i++) {
-            jsStore(from++);
+        for (int i = 1; i <= 5; i++) {
+            jsStore(middle + i);
         }
-        return from;
+        return middle + 5;
     }
 
     private void performTheTest(Function<Integer,Integer> iteration) {
         defineStore();
-        assertEquals(iteration.apply(0), 11);
+        assertEquals(iteration.apply(0), 5);
         if (!successStoringLater) {
             return;
         }
         flushPendingJavaScripts();
         assertEquals(collected.size(), 11, "11 items: " + collected);
-        for (int i = 0; i < 11; i++) {
-            assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
-        }
-        assertEquals(iteration.apply(11), 22);
+        assertSequenceButN(collected, -5, 6, 1);
+        assertEquals(iteration.apply(11), 16);
         if (!successStoringLater) {
             return;
         }
         flushPendingJavaScripts();
-        assertEquals(collected.size(), 22, "22 items: " + collected);
-        for (int i = 0; i < 22; i++) {
-            assertEquals(collected.get(i).intValue(), i, i + "th out of order: " + collected);
+        assertSequenceButN(collected, -5, 17, 2);
+    }
+
+    private static void assertSequenceButN(List<Integer> data, int from, int upto, int allowedDisorder) {
+        int count = upto - from;
+        assertEquals(data.size(), count, "all items: " + data);
+        Set<Integer> all = new HashSet<>(data);
+        Integer prev = null;
+        for (int i = from, at = 0; i < upto; i++, at++) {
+            final Integer atI = data.get(at);
+            if (prev != null && prev < atI) {
+                if (--allowedDisorder < 0) {
+                    fail("expecting ordered data from " + from + ".." + (upto - 1) + " but too many misorders: " + data);
+                }
+            }
+            all.remove(i);
         }
+        assertTrue(all.isEmpty(), from + ".." + (upto - 1) + " in " + data);
     }
 
     public void testWithCallback() {

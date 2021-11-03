@@ -17,33 +17,26 @@
  * under the License.
  */
 
-defaultTasks 'clean', 'build'
+new java.util.ArrayList<>()
+=> 'Models.asList() is more lightweight':
+net.java.html.json.Models.asList()
+;;
 
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath "org.ow2.asm:asm:5.0"
-        classpath files("../../../../../../../../target/classes/")
-    }
-}
+new java.util.ArrayList()
+=> 'Models.asList() is more lightweight':
+net.java.html.json.Models.asList()
+;;
+
+new java.util.ArrayList<$T>()
+=> 'Models.asList() is more lightweight':
+net.java.html.json.Models.<$T>asList()
+;;
 
 
-group 'org.netbeans.html.gradle1'
-version '1.0-SNAPSHOT'
+java.util.HashSet 
+=> 'Avoid HashSet': SimpleMap.create()
+;;
 
-apply plugin: 'java'
-apply plugin: 'html4j'
-
-//compileJava {
-//    classpath += files("src/main/resources")
-//}
-
-def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
-
-dependencies {
-    implementation jars
-    annotationProcessor jars
-}
-
+java.util.HashMap
+=> 'Avoid HashMap': SimpleMap.create()
+;;

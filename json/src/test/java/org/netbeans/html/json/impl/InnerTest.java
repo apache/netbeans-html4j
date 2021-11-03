@@ -16,34 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.netbeans.html.json.impl;
 
-defaultTasks 'clean', 'build'
+import net.java.html.json.Model;
+import net.java.html.json.OnReceive;
 
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath "org.ow2.asm:asm:5.0"
-        classpath files("../../../../../../../../target/classes/")
+public class InnerTest {
+    @Model(className = "InnerModel", properties = {
+    })
+    public final static class Inner {
+        @OnReceive(url = "http://github.com/api", onError = "apiError")
+        static void apiCall(InnerModel model, String data) {
+        }
+
+        static void apiError(InnerModel model, Exception err) {
+        }
     }
 }
-
-
-group 'org.netbeans.html.gradle1'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'html4j'
-
-//compileJava {
-//    classpath += files("src/main/resources")
-//}
-
-def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
-
-dependencies {
-    implementation jars
-    annotationProcessor jars
-}
-

@@ -16,34 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.netbeans.html.ecjtest;
 
-defaultTasks 'clean', 'build'
+import net.java.html.json.Model;
+import net.java.html.json.Property;
 
-buildscript {
-    repositories {
-        mavenLocal()
+@Model(className = "Person", targetId = "x", properties = {
+    @Property(name = "firstName", type = String.class),
+    @Property(name = "lastName", type = String.class),
+    @Property(name = "sex", type = PersonImpl.Sex.class),
+    @Property(name = "address", type = Address.class),
+})
+final class PersonImpl {
+    public enum Sex {
+        MALE, FEMALE;
     }
-    dependencies {
-        classpath "org.ow2.asm:asm:5.0"
-        classpath files("../../../../../../../../target/classes/")
+
+    @Model(className = "Address", properties = {
+        @Property(name = "street", type = String.class),
+        @Property(name = "town", type = String.class),
+    })
+    static class AddressImpl {
+        private AddressImpl() {
+        }
     }
 }
-
-
-group 'org.netbeans.html.gradle1'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'html4j'
-
-//compileJava {
-//    classpath += files("src/main/resources")
-//}
-
-def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
-
-dependencies {
-    implementation jars
-    annotationProcessor jars
-}
-

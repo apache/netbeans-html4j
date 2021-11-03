@@ -163,6 +163,16 @@ $ mvn -f client/pom.xml process-classes exec:exec
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
         </script>
         
+        <h3>New in version 1.7.2</h3>
+        <p>
+            Code completions for callbacks from JavaScript to Java -
+            <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/36">PR #36</a>.
+            Support for ecj -
+            <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/37">PR #37</a>.
+            Robustness of {@link org.netbeans.html.presenters.spi.ProtoPresenter} improved -
+            <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/38">PR #38</a>.
+        </p>
+
         <h3>New in version 1.7.1</h3>
         <p>
             Bugfix release to address robustness and security issues.
@@ -288,9 +298,9 @@ $ mvn -f client/pom.xml process-classes exec:exec
         <!-- following ones were added in version 1.5 -->
 
         <p>
-        Bug fix for <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=270481">
+        Bug fix for <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=270481">
         multiple observers</a> on a single model object.
-        Better <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=270553">
+        Better <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=270553">
         GC behavior</a> specified in TCK and used in Knockout for Java implementation.
         Removing dependency on Java collection classes implementations.
         Adding {@link net.java.html.json.Models#asList} factory method to
@@ -303,16 +313,16 @@ $ mvn -f client/pom.xml process-classes exec:exec
 
         Both values <code>null</code> and <code>undefined</code> are
         <a href="net/java/html/js/package-summary.html#undefined">treated as null</a>.
-        Better behavior under <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=259132">
+        Better behavior under <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=259132">
         multi-threaded load</a>.
         <!--
         Integration with <a href="net/java/html/boot/truffle/package-summary.html">Truffle</a>.
-        <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=269549"/>
+        <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=269549"/>
         -->
         Workaround for garbage collector behavior of modern JavaFX WebView
         implementations (JDK8 u112 and newer).
         JavaFX Presenter can
-        <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=269456"/>
+        <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=269456"/>
         show popup</a> window.
         Development has switched to
         <a target="_blank" href="https://github.com/jtulach/html-java-api/"/>
@@ -320,7 +330,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
         <a target="_blank" href="http://wiki.apidesign.org/wiki/Apache"/>
         conversion by Emilian Bold</a>.
         Better support for obfuscation of knockout module
-        (bug <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=270013"/>
+        (bug <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=270013"/>
         270013</a>).
 
 
@@ -351,17 +361,17 @@ $ mvn -f client/pom.xml process-classes exec:exec
   &lt;/configuration&gt;
 &lt;/plugin&gt;
 </pre>
-        OSGi headers are now <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=256696">
+        OSGi headers are now <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=256696">
             enterprise OSGi ready</a>.
-        Switched to <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=257130">minified version 3.4.0</a>
+        Switched to <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=257130">minified version 3.4.0</a>
         of <a target="_blank" href="http://knockoutjs.com">knockout.js</a>.
-        Better support for <a target="_blank" href="https://netbeans.org/bugzilla/show_bug.cgi?id=257348">
+        Better support for <a target="_blank" href="https://bz.apache.org/netbeans/show_bug.cgi?id=257348">
         recursive @Model definitions</a>.
         New module <code>org.netbeans.html:xhr4j</code> provides implementation
         of {@link org.netbeans.html.json.spi.Transfer} with
         {@link org.netbeans.html.context.spi.Contexts.Id technology identifier}
         <b>xhr4j</b> - this module can be used to
-        <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=257849'>workaround limitations
+        <a target="_blank" href='https://bz.apache.org/netbeans/show_bug.cgi?id=257849'>workaround limitations
         of CORS</a> by handling the {@link net.java.html.json.OnReceive}
         connections in Java.
 
@@ -377,8 +387,8 @@ $ mvn -f client/pom.xml process-classes exec:exec
         just run with <code>-Dfirebug.lite=true</code> as
         <a target="_blank" href="https://www.youtube.com/watch?v=2rxwY-QJiLo">this video</a>
         demonstrates.
-        Bugfix of issues <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=250503'>250503</a>,
-        <a target="_blank" href='https://netbeans.org/bugzilla/show_bug.cgi?id=252987'>252987</a>.
+        Bugfix of issues <a target="_blank" href='https://bz.apache.org/netbeans/show_bug.cgi?id=250503'>250503</a>,
+        <a target="_blank" href='https://bz.apache.org/netbeans/show_bug.cgi?id=252987'>252987</a>.
         </p>
 
         <h3>What's New in Version 1.1?</h3>
@@ -550,22 +560,10 @@ $ mvn -f client/pom.xml process-classes exec:exec
             <li>Current <a target="_blank" href="https://bits.netbeans.org/html+java/dev/">development</a> version
             <li>Version <a target="_blank" href="https://bits.netbeans.org/html+java/1.7.1/">1.7.1</a>
             <li>Version <a target="_blank" href="https://bits.netbeans.org/html+java/1.7/">1.7</a>
+            <!--
             <li>Historic versions
-                <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.6/">1.6</a>,
-                <a target="_blank" href="https://dukescript.com/javadoc/html+java/1.5.1/">1.5.1</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.5">1.5</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.4">1.4</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.3">1.3</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.2.3">1.2.3</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.1">1.1</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/1.0">1.0</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.9">0.9</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.3">0.8.3</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.2">0.8.2</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8.1">0.8.1</a>,
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.8">0.8</a>, and
-                <a target="_blank" href="http://bits.netbeans.org/html+java/0.7.5">0.7.5</a>
             </li>
+            -->
         </ul>
     </body>
 </html>

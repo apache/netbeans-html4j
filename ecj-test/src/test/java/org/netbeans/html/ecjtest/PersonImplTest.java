@@ -16,34 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.netbeans.html.ecjtest;
 
-defaultTasks 'clean', 'build'
+import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath "org.ow2.asm:asm:5.0"
-        classpath files("../../../../../../../../target/classes/")
+public class PersonImplTest {
+    @Test
+    @SuppressWarnings("static-method")
+    public void testPerson() {
+        Person p = new Person("J", "T", PersonImpl.Sex.MALE, new Address("sch", "prg"));
+        assertEquals(p.applyBindings().getFirstName(), "J");
+        assertEquals(p.getAddress().getTown(), "prg");
     }
 }
-
-
-group 'org.netbeans.html.gradle1'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'html4j'
-
-//compileJava {
-//    classpath += files("src/main/resources")
-//}
-
-def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
-
-dependencies {
-    implementation jars
-    annotationProcessor jars
-}
-
