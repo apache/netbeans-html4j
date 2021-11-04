@@ -26,6 +26,7 @@ final class DumpStack extends TimerTask {
 
     private static final Timer TIMER = new Timer("Dump Stack Watchdog");
     private final long created = System.currentTimeMillis();
+    private int count = 5 * 12;
 
     @Override
     public void run() {
@@ -41,6 +42,10 @@ final class DumpStack extends TimerTask {
             }
         }
         System.err.println(sb.toString());
+        if (count-- < 0) {
+            System.err.println("DumpStack timeout. Exiting.");
+            System.exit(1);
+        }
     }
 
     public static void initialize() {
