@@ -31,6 +31,7 @@
     <name>Desktop Browser Renderer</name>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <bundleSymbolicName>org.netbeans.html.presenters.render</bundleSymbolicName>
         <publicPackages>org.netbeans.html.presenters.render</publicPackages>
         <publicMetaInf />
         <sigtestPackages />

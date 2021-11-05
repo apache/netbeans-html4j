@@ -33,6 +33,7 @@
     <version>2.0-SNAPSHOT</version>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <bundleSymbolicName>org.netbeans.html.presenters.spi</bundleSymbolicName>
         <publicPackages>org.netbeans.html.presenters.spi</publicPackages>
         <publicMetaInf />
         <sigtestPackages />

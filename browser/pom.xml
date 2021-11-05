@@ -31,6 +31,7 @@
     <name>DukeScript Presenter for any Browser</name>
     <properties>
         <main.dir>${project.parent.basedir}</main.dir>
+        <bundleSymbolicName>org.netbeans.html.presenters.browser</bundleSymbolicName>
         <publicPackages>org.netbeans.html.presenters.browser</publicPackages>
         <sigtestPackages />
         <com.dukescript.presenters.browser>default</com.dukescript.presenters.browser>
