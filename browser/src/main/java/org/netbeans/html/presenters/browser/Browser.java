@@ -637,7 +637,9 @@ Executor, Closeable {
                 List<String> args = new ArrayList<>();
                 String body = server.getBody(rqst);
                 for (String p : body.split("&")) {
-                    args.add(URLDecoder.decode(p.substring(3), "UTF-8"));
+                    if (p.length() >= 3) {
+                        args.add(URLDecoder.decode(p.substring(3), "UTF-8"));
+                    }
                 }
                 String res;
                 try {
