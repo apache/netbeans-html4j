@@ -315,6 +315,11 @@ Executor, Closeable {
         public <Request, Response> void service(HttpServer<Request, Response, ?, ?> server, Request rqst, Response rspns) throws IOException {
             String path = server.getRequestURI(rqst);
             cors(server, rspns);
+            if ("OPTIONS".equals(server.getMethod(rqst))) { // NOI18N
+                server.setStatus(rspns, 204);
+                server.addHeader(rspns, "Allow", "OPTIONS, GET, HEAD, POST, PUT"); // NOI18N
+                return;
+            }
             if ("/".equals(path) || "index.html".equals(path)) {
                 Reader is;
                 String prefix = "http://" + server.getServerName(rqst) + ":" + server.getServerPort(rqst) + "/";
