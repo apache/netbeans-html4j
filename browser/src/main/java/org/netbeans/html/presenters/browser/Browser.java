@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -149,11 +150,7 @@ Executor, Closeable {
      * @throws IOException if something goes wrong
      */
     void show(URI page) throws IOException {
-        String impl = config.getBrowser();
-        if ("none".equalsIgnoreCase(impl)) { // NOI18N
-            return;
-        }
-        Show.show(impl, page);
+        config.getBrowser().accept(page);
     }
 
     @Override
@@ -207,13 +204,17 @@ Executor, Closeable {
         }
     }
 
+    static <T extends Exception> T raise(Class<T> aClass, Exception ex) throws T {
+        throw (T)ex;
+    }
+
     /** Parameters to configure {@link Browser}.
      * Create an instance and pass it
      * to {@link Browser#Browser(org.netbeans.html.presenters.browser.Browser.Config) }
      * constructor.
      */
     public final static class Config {
-        String browser;
+        private Consumer<URI> browser;
         Integer port;
         boolean debug;
 
@@ -221,6 +222,7 @@ Executor, Closeable {
          * Default constructor.
          */
         public Config() {
+            command(null);
         }
 
         private Config(Config copy) {
@@ -244,12 +246,45 @@ Executor, Closeable {
          * any other value is interpreted as a command which is then launched on a command line with one parameter - the URL to connect to
          * </li>
          * </ul>
+         * Calling this method replaces any value specified previously or
+         * by the {@link #browser(java.util.function.Consumer)} method.
          *
          * @param executable browser to execute
          * @return this instance
+         *
+         * @see #browser(java.util.function.Consumer)
          */
         public Config command(String executable) {
-            this.browser = executable;
+            this.browser = (page) -> {
+                String impl = executable;
+                if (impl == null) {
+                    impl = System.getProperty("com.dukescript.presenters.browser"); // NOI18N
+                }
+                if ("none".equalsIgnoreCase(impl)) { // NOI18N
+                    return;
+                }
+                try {
+                    Show.show(impl, page);
+                } catch (IOException ex) {
+                    throw raise(RuntimeException.class, ex);
+                }
+            };
+            return this;
+        }
+
+        /** Specifies a callback to handle opening of a URI. The browser
+         * presenter sets an internal HTTP server up and then asks the
+         * {@code urlOpener} to open the initial page. Calling this
+         * method replaces previous openers as well as configuration
+         * set by {@link #command(java.lang.String)} method.
+         *
+         * @param urlOpener callback to handle opening of a URI
+         * @return this instance
+         * @since 1.7.3
+         * @see #command(java.lang.String)
+         */
+        public Config browser(Consumer<URI> urlOpener) {
+            this.browser = urlOpener;
             return this;
         }
 
@@ -266,7 +301,7 @@ Executor, Closeable {
         /** Enable or disable debugging. The default value is taken from a property
          * {@code com.dukescript.presenters.browserDebug}. If the property is
          * not specified, then the default value is {@code false}.
-         * 
+         *
          * @param debug true or false
          * @return this instance
          * @since 1.8
@@ -276,11 +311,8 @@ Executor, Closeable {
             return this;
         }
 
-        final String getBrowser() {
-            if (browser != null) {
-                return browser;
-            }
-            return System.getProperty("com.dukescript.presenters.browser"); // NOI18N
+        final Consumer<URI> getBrowser() {
+            return browser;
         }
 
         final int getPort() {
@@ -315,6 +347,11 @@ Executor, Closeable {
         public <Request, Response> void service(HttpServer<Request, Response, ?, ?> server, Request rqst, Response rspns) throws IOException {
             String path = server.getRequestURI(rqst);
             cors(server, rspns);
+            if ("OPTIONS".equals(server.getMethod(rqst))) { // NOI18N
+                server.setStatus(rspns, 204);
+                server.addHeader(rspns, "Allow", "OPTIONS, GET, HEAD, POST, PUT"); // NOI18N
+                return;
+            }
             if ("/".equals(path) || "index.html".equals(path)) {
                 Reader is;
                 String prefix = "http://" + server.getServerName(rqst) + ":" + server.getServerPort(rqst) + "/";
@@ -637,7 +674,9 @@ Executor, Closeable {
                 List<String> args = new ArrayList<>();
                 String body = server.getBody(rqst);
                 for (String p : body.split("&")) {
-                    args.add(URLDecoder.decode(p.substring(3), "UTF-8"));
+                    if (p.length() >= 3) {
+                        args.add(URLDecoder.decode(p.substring(3), "UTF-8"));
+                    }
                 }
                 String res;
                 try {
