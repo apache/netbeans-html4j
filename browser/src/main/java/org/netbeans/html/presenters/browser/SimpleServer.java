@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
@@ -380,7 +381,7 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
         throw new IllegalStateException("No mapping for " + url + " among " + maps);
     }
 
-    private static void parseArgs(final Map<String, ? super String> context, final String args) {
+    private static void parseArgs(final Map<String, ? super String> context, final String args) throws UnsupportedEncodingException {
         if (args != null) {
             for (String arg : args.substring(1).split("&")) {
                 String[] valueAndKey = arg.split("=");
@@ -388,7 +389,7 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
                     continue;
                 }
 
-                String key = valueAndKey[1].replaceAll("\\+", " ");
+                String key = URLDecoder.decode(valueAndKey[1], "US-ASCII");
                 for (int idx = 0;;) {
                     idx = key.indexOf("%", idx);
                     if (idx == -1) {
@@ -517,8 +518,8 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
 
         private final StringBuilder buffer = new StringBuilder();
 
-        final ReqRes process(SelectionKey key, ByteBuffer chunk) {
-            String text = new String(chunk.array(), 0, chunk.limit(), StandardCharsets.US_ASCII);
+        final ReqRes process(SelectionKey key, ByteBuffer chunk) throws UnsupportedEncodingException {
+            String text = new String(chunk.array(), 0, chunk.limit(), "US-ASCII");
             buffer.append(text);
             int fullHeader = buffer.indexOf("\r\n\r\n");
             if (fullHeader == -1) {
