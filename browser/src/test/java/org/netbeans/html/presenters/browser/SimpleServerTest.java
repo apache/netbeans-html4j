@@ -75,6 +75,7 @@ public class SimpleServerTest {
         final String baseUri = "http://localhost:" + realPort;
         assertURL("Ahoj John!", baseUri, "/reply/hi?name=John");
         assertURL("Ciao John!", baseUri, "/reply/tchus?name=John");
+        assertURL("Ahoj Bogus!", baseUri, "/reply/hi?name=Bogus&fsdklre");
 
         server.shutdownNow();
 
