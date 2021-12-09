@@ -86,7 +86,14 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
     private static final Pattern PATTERN_LENGTH = Pattern.compile(".*^Content-Length: ([0-9]+)$", Pattern.MULTILINE);
     static final Logger LOG = Logger.getLogger(SimpleServer.class.getName());
 
+    private final Random random;
+
     SimpleServer() {
+        this(new Random());
+    }
+
+    SimpleServer(Random random) {
+        this.random = random;
     }
 
     @Override
@@ -440,7 +447,6 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
             ServerSocketChannel s = ServerSocketChannel.open();
             s.configureBlocking(false);
 
-            Random random = new Random();
             for (int i = min; i <= max; i++) {
                 int at = min + random.nextInt(max - min + 1);
                 InetSocketAddress address = new InetSocketAddress(at);
