@@ -424,19 +424,14 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
     /**
      * Computes todays's date .
      */
-    static byte[] date(Date date) {
+    static String date(Date date) {
         return date("Date: ", date != null ? date : new Date());
     }
 
-    static byte[] date(String prefix, Date date) {
-        try {
-            DateFormat f = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.US);
-            f.setTimeZone(TimeZone.getTimeZone("GMT")); // NOI18N
-            return (prefix + f.format(date)).getBytes("utf-8");
-        } catch (UnsupportedEncodingException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
-            return new byte[0];
-        }
+    static String date(String prefix, Date date) {
+        DateFormat f = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.US);
+        f.setTimeZone(TimeZone.getTimeZone("GMT")); // NOI18N
+        return prefix + f.format(date);
     }
 
     public synchronized ServerSocketChannel getServer() throws IOException {
@@ -633,17 +628,17 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
 
             LOG.log(Level.FINE, "Serving page request {0}", url); // NOI18N
             ((Buffer) bb).clear();
-            bb.put(("HTTP/1.1 " + status + "\r\n").getBytes());
-            bb.put("Connection: close\r\n".getBytes());
-            bb.put("Server: Browser presenter\r\n".getBytes());
-            bb.put(date(null));
-            bb.put("\r\n".getBytes());
-            bb.put(("Content-Type: " + contentType + "\r\n").getBytes());
+            putString(bb, "HTTP/1.1 " + status + "\r\n");
+            putString(bb, "Connection: close\r\n");
+            putString(bb, "Server: Browser presenter\r\n");
+            putString(bb, date(null));
+            putString(bb, "\r\n");
+            putString(bb, "Content-Type: " + contentType + "\r\n");
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                bb.put((entry.getKey() + ":" + entry.getValue() + "\r\n").getBytes());
+                putString(bb, entry.getKey() + ":" + entry.getValue() + "\r\n");
             }
-            bb.put("Pragma: no-cache\r\nCache-control: no-cache\r\n".getBytes());
-            bb.put("\r\n".getBytes());
+            putString(bb, "Pragma: no-cache\r\nCache-control: no-cache\r\n");
+            putString(bb, "\r\n");
             ((Buffer) bb).flip();
 
             return new WriteReply(delegate, url, bb, ByteBuffer.wrap(toByteArray()));
@@ -702,5 +697,9 @@ final class SimpleServer extends HttpServer<SimpleServer.ReqRes, SimpleServer.Re
             }
 
         }
+    }
+
+    private static void putString(ByteBuffer bb, String text) throws UnsupportedEncodingException {
+        bb.put(text.getBytes("US-ASCII"));
     }
 }
