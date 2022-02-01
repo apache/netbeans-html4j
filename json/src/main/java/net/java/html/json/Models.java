@@ -185,8 +185,9 @@ public final class Models {
      * to changes is needed. The action can access properties of various models.
      * The set of accessed properties is recorded and whenever there is a change
      * in one of such properties, {@link Executor#execute(java.lang.Runnable) onChange.execute}
-     * method is called. Simple example that defines a state and observes it
-     * follows:
+     * method is called. The set of accessed properties is re-recorded during
+     * the latest run. Should one of them change, the whole process is repeated.
+     * Simple example that defines a state and observes it follows:
      *
      * {@codesnippet net.java.html.json.ReactionTest}
      *
