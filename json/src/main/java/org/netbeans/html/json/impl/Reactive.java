@@ -35,6 +35,10 @@ public class Reactive implements Closeable {
         proto.applyBindings();
     }
 
+    private void reactionWithRecording() {
+        reaction(true);
+    }
+
     private void reaction(boolean run) {
         proto.acquireLock("reaction");
         if (run) {
@@ -53,12 +57,12 @@ public class Reactive implements Closeable {
 
     public static Closeable react(Runnable reaction, Executor onChange) {
         Reactive r = new Reactive(reaction, onChange);
-        r.reaction(true);
+        r.reactionWithRecording();
         return r;
     }
 
     void valueHasMutated(String propertyName) {
-        onChange.execute(reaction);
+        onChange.execute(this::reactionWithRecording);
     }
 
 
