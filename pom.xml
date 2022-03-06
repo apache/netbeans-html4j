@@ -33,7 +33,7 @@
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <netbeans.version>RELEASE125</netbeans.version>
+      <netbeans.version>RELEASE130</netbeans.version>
       <graalvm.version>21.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
