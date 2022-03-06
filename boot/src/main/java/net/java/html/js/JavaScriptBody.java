@@ -125,4 +125,19 @@ public @interface JavaScriptBody {
      * @since 1.1
      */
     public boolean keepAlive() default true;
+
+    /** Should a call to Java be synchronous or asynchronous.
+     *
+     * <h5>Asynchronous Java Call</h5>
+     *
+     * All calls to Java done via the {@link #javacall() java call syntax}
+     * return JavaScript
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>.
+     * E.g. the Java call is delayed until execution of current JavaScript
+     * is over. Once the Java call is finished, the {@code Promise} is resolved.
+     *
+     * @return {@code false} if the Java call should use a <em>promise</em>
+     * @since 1.8
+     */
+    public boolean wait4java() default true;
 }

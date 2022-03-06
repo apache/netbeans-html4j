@@ -351,6 +351,29 @@ public abstract class Fn {
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
 
+    /** Represents a JavaScript Promise.
+     * XXX:
+     * @since 1.8
+     */
+    public static final class Promise {
+        private static final Fn INVOKE = Fn.define(Promise.class, """
+        return fn.call(this, result);
+        """, "fn", "result");
+        private final Object result;
+
+        public Promise(Object result) {
+            this.result = result;
+        }
+
+        public Promise then(Object fn) {
+            try {
+                return new Promise(INVOKE.invoke(this, fn, result));
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+    }
+
     /**
      * Reference to a {@link Presenter}.Each implementation of a {@link Presenter}
      * may choose a way to reference itself (usually in a {@linkplain WeakReference weak way})

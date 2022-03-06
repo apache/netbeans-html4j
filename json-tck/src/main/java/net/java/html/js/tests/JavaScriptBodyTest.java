@@ -463,6 +463,25 @@ public class JavaScriptBodyTest {
         assertEquals(value[1], "NetBeans", "As read later by different method");
     }
 
+
+    private Object objWithX;
+    @KOTest
+    public void dontWaitForJavaFactorial() throws InterruptedException {
+        if (objWithX == null) {
+            objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
+                return new Factorial().factorial(n);
+            }, () -> {});
+//            int initialValue = Bodies.readIntX(objWithX);
+//            assertEquals(-1, initialValue, "Java code shall only be called when the JavaScript ends");
+        }
+
+        int result = Bodies.readIntX(objWithX);
+        if (result < 0) {
+            throw new InterruptedException();
+        }
+        assertEquals(result, 120);
+    }
+
     private static class R implements Runnable {
         int cnt;
         private final Thread initThread;

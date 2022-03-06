@@ -90,14 +90,15 @@ public final class FnUtils {
         return new JsClassLoaderImpl(parent, f, d);
     }
 
-    static String callback(final String body) {
+    static String callback(final String body, boolean promise) {
         return new JsCallback() {
             @Override
             protected CharSequence callMethod(
-                String ident, String fqn, String method, String params
-            ) {
+                    String ident, boolean promise, String fqn, String method, String params) {
                 StringBuilder sb = new StringBuilder();
-                if (ident != null) {
+                if (promise) {
+                    sb.append("vm.promise$");
+                } else if (ident != null) {
                     sb.append("vm.raw$");
                 } else {
                     sb.append("vm.");
@@ -110,7 +111,7 @@ public final class FnUtils {
                 return sb;
             }
 
-        }.parse(body);
+        }.parse(body, promise);
     }
 
     private static final class FindInClass extends ClassVisitor {
@@ -216,8 +217,8 @@ public final class FnUtils {
                 String body;
                 List<String> args;
                 if (fia.javacall) {
-                    body = callback(fia.body);
-                    args = new ArrayList<String>(fia.args);
+                    body = callback(fia.body, !fia.wait4java);
+                    args = new ArrayList<>(fia.args);
                     args.add("vm");
                 } else {
                     body = fia.body;
@@ -485,10 +486,11 @@ public final class FnUtils {
 
             private final class FindInAnno extends AnnotationVisitor {
 
-                List<String> args = new ArrayList<String>();
+                List<String> args = new ArrayList<>();
                 String body;
                 boolean javacall = false;
                 boolean wait4js = true;
+                boolean wait4java = true;
                 boolean keepAlive = true;
 
                 public FindInAnno() {
@@ -507,6 +509,10 @@ public final class FnUtils {
                     }
                     if (name.equals("wait4js")) { // NOI18N
                         wait4js = (Boolean) value;
+                        return;
+                    }
+                    if (name.equals("wait4java")) { // NOI18N
+                        wait4java = (Boolean) value;
                         return;
                     }
                     if (name.equals("keepAlive")) { // NOI18N
@@ -620,7 +626,7 @@ public final class FnUtils {
         }
         
         private List<URL> res(String name, boolean oneIsEnough) {
-            List<URL> l = new ArrayList<URL>();
+            List<URL> l = new ArrayList<>();
             f.findResources(name, l, oneIsEnough);
             return l;
         }
@@ -653,6 +659,9 @@ public final class FnUtils {
             }
             if (name.equals(Fn.Ref.class.getName())) {
                 return Fn.Ref.class;
+            }
+            if (name.equals(Fn.Promise.class.getName())) {
+                return Fn.Promise.class;
             }
             if (name.equals(Fn.ToJavaScript.class.getName())) {
                 return Fn.ToJavaScript.class;

@@ -140,7 +140,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (jsb.javacall()) {
                 JsCallback verify = new VerifyCallback(e);
                 try {
-                    verify.parse(jsb.body());
+                    verify.parse(jsb.body(), !jsb.wait4java());
                 } catch (IllegalStateException ex) {
                     msg.printMessage(Diagnostic.Kind.ERROR, ex.getLocalizedMessage(), e);
                 }
@@ -386,7 +386,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         }
 
         @Override
-        protected CharSequence callMethod(String ident, String fqn, String method, String params) {
+        protected CharSequence callMethod(String ident, boolean promise, String fqn, String method, String params) {
             final TypeElement type = processingEnv.getElementUtils().getTypeElement(fqn);
             if (type == null) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
@@ -529,8 +529,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();
-                generateMethod(false, m, source, mangled);
-                generateMethod(true, m, source, "raw$" + mangled);
+                generateMethod(false, false, m, source, mangled);
+                generateMethod(true, false, m, source, "raw$" + mangled);
+                generateMethod(true, true, m, source, "promise$" + mangled);
             }
             source.append("}\n");
             final String srcName = pkgName + ".$JsCallbacks$";
@@ -548,7 +549,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         }
     }
 
-    private void generateMethod(boolean selfObj, final ExecutableElement m, StringBuilder source, final String mangled) {
+    private void generateMethod(boolean selfObj, boolean promise, final ExecutableElement m, StringBuilder source, final String mangled) {
         final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
         if (isStatic && selfObj) {
             return;
@@ -630,13 +631,23 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             sep = ", ";
         }
         source.append(");\n");
-        if (m.getReturnType().getKind() == TypeKind.VOID) {
-            source.append("    return null;\n");
-        } else {
+        if (m.getReturnType().getKind() != TypeKind.VOID) {
             source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
             source.append("      $ret = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
             source.append("    }\n");
-            source.append("    return $ret;\n");
+        }
+        if (!promise) {
+            if (m.getReturnType().getKind() == TypeKind.VOID) {
+                source.append("    return null;\n");
+            } else {
+                source.append("    return $ret;\n");
+            }
+        } else {
+            if (m.getReturnType().getKind() == TypeKind.VOID) {
+                source.append("    return new org.netbeans.html.boot.spi.Fn.Promise(null);\n");
+            } else {
+                source.append("    return new org.netbeans.html.boot.spi.Fn.Promise($ret);\n");
+            }
         }
         if (useTryResources()) {
             source.append("    }\n");
