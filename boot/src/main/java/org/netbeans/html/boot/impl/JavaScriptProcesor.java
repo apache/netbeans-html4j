@@ -571,6 +571,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         {
             String sep = "";
             if (!isStatic) {
+                source.append("final ");
                 if (selfObj) {
                     source.append("java.lang.Object self");
                 } else {
@@ -582,7 +583,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
             int cnt = 0;
             for (VariableElement ve : m.getParameters()) {
-                source.append(sep);
+                source.append(sep).append("final ");
                 ++cnt;
                 TypeMirror t = ve.asType();
                 if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
@@ -595,15 +596,22 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
         }
         source.append(") throws Throwable {\n");
-        source.append("    org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
-        String newLine;
+        source.append("    final org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
+        String newLine = "";
+        if (promise) {
+            source.append("    return new org.netbeans.html.boot.spi.Fn.Promise() {\n");
+            source.append("      @Override\n");
+            source.append("      protected java.lang.Object compute() throws java.lang.Throwable {\n");
+            newLine = "    ";
+        }
         if (useTryResources()) {
-            newLine =   "\n      ";
+            newLine += "      ";
             source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
         } else {
-            newLine =   "\n    ";
+            newLine += "    ";
             source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
         }
+        newLine = "\n" + newLine;
         source.append(newLine);
         if (m.getReturnType().getKind() != TypeKind.VOID) {
             source.append("java.lang.Object $ret = ");
@@ -637,18 +645,10 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
         }
         source.append(");").append(newLine);
-        if (!promise) {
-            if (m.getReturnType().getKind() == TypeKind.VOID) {
-                source.append("return null;");
-            } else {
-                source.append("return toJs(p, $ret);");
-            }
+        if (m.getReturnType().getKind() == TypeKind.VOID) {
+            source.append("return null;");
         } else {
-            if (m.getReturnType().getKind() == TypeKind.VOID) {
-                source.append("return new org.netbeans.html.boot.spi.Fn.Promise(null);\n");
-            } else {
-                source.append("return new org.netbeans.html.boot.spi.Fn.Promise(toJs(p, $ret));\n");
-            }
+            source.append("return toJs(p, $ret);");
         }
         source.append("\n");
         if (useTryResources()) {
@@ -658,6 +658,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("    } finally {\n");
             source.append("      a.close();\n");
             source.append("    }\n");
+        }
+        if (promise) {
+            source.append("    }};\n");
         }
         source.append("  }\n");
     }

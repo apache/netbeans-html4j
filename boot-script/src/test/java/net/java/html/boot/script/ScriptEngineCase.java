@@ -18,6 +18,7 @@
  */
 package net.java.html.boot.script;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FnContext;
@@ -48,16 +49,22 @@ public final class ScriptEngineCase implements ITest, IHookable {
     }
 
     @Test
-    public synchronized void executeTest() throws Exception {
-        try {
-            FnContext.currentPresenter(p);
-            // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
-            Object instance = method.getDeclaringClass().newInstance();
-            method.invoke(instance);
-            // END: net.java.html.boot.script.ScriptEngineCase#run
-        } finally {
-            FnContext.currentPresenter(null);
+    public synchronized void executeTest() throws Throwable {
+        // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
+        Object instance = method.getDeclaringClass().newInstance();;
+        for (int round = 0;; round++) {
+            try (var ctx = Fn.activate(p)) {
+                assert ctx != null;
+                method.invoke(instance);
+                return;
+            } catch (InvocationTargetException ite) {
+                if (ite.getTargetException() instanceof InterruptedException && round < 100) {
+                    continue;
+                }
+                throw ite.getTargetException();
+            }
         }
+        // END: net.java.html.boot.script.ScriptEngineCase#run
     }
 
     @Override

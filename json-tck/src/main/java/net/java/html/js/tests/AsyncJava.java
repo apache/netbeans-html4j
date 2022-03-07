@@ -25,13 +25,13 @@ public class AsyncJava {
     }
 
     @JavaScriptBody(args = { "n", "fac", "done" }, javacall = true, wait4java = false, body = """
-    let result = {
+    var result = {
         x : -1
     };
-    let facN = fac.@net.java.html.js.tests.AsyncJava.Fac::fac(I)(n);
-    facN.then((res) => {
+    var facN = fac.@net.java.html.js.tests.AsyncJava.Fac::fac(I)(n);
+    facN.then(function (res) {
         result.x = res;
-        done.@java.lang.Runnable::run()()
+        done.@java.lang.Runnable::run()();
     });
     return result;
     """)

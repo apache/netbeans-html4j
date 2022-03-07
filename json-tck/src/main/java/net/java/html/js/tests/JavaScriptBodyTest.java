@@ -471,8 +471,8 @@ public class JavaScriptBodyTest {
             objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
                 return new Factorial().factorial(n);
             }, () -> {});
-//            int initialValue = Bodies.readIntX(objWithX);
-//            assertEquals(-1, initialValue, "Java code shall only be called when the JavaScript ends");
+            int initialValue = Bodies.readIntX(objWithX);
+            assertEquals(-1, initialValue, "Java code shall only be called when the JavaScript ends");
         }
 
         int result = Bodies.readIntX(objWithX);

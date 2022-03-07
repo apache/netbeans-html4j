@@ -73,8 +73,8 @@ public final class KOCase implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        Closeable a = Fn.activate(p);
-        try {
+        try (Closeable a = Fn.activate(p)) {
+            assert a != null;
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -102,11 +102,6 @@ public final class KOCase implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
-            }
-            try {
-                a.close();
-            } catch (IOException ex) {
-                throw new IllegalStateException(ex);
             }
         }
     }

@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.html.boot.spi.Fn;
@@ -87,6 +88,16 @@ public final class FnContext implements Closeable {
         return null;
     }
 
+    private static ThreadLocal<LinkedList<Fn.Promise>> PENDING = new ThreadLocal<>();
+    public static void registerPromise(Fn.Promise promise) {
+        LinkedList<Fn.Promise> list = PENDING.get();
+        if (list == null) {
+            list = new LinkedList<>();
+            PENDING.set(list);
+        }
+        list.add(promise);
+    }
+
     private Object prev;
     private final Fn.Presenter current;
     private FnContext(Fn.Presenter prevP, Fn.Presenter newP) {
@@ -97,6 +108,18 @@ public final class FnContext implements Closeable {
     @Override
     public void close() throws IOException {
         if (prev != this) {
+            for (;;) {
+                LinkedList<Fn.Promise> list = PENDING.get();
+                Fn.Promise p = list == null ? null : list.pollFirst();
+                if (p == null) {
+                    break;
+                }
+                try {
+                    p.resolve();
+                } catch (Throwable ex) {
+                    throw new IOException(ex);
+                }
+            }
             currentPresenter((Fn.Presenter)prev);
             prev = this;
             if (current instanceof Flushable) {

@@ -27,9 +27,12 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
@@ -355,21 +358,39 @@ public abstract class Fn {
      * XXX:
      * @since 1.8
      */
-    public static final class Promise {
+    public static abstract class Promise {
         private static final Fn INVOKE = Fn.define(Promise.class, """
         return fn.call(this, result);
         """, "fn", "result");
-        private final Object result;
+        private Object result;
+        private final List<Promise> then = new LinkedList<>();
 
-        public Promise(Object result) {
-            this.result = result;
+        protected Promise() {
+            FnContext.registerPromise(this);
         }
 
+        protected abstract Object compute() throws Throwable;
+
         public Promise then(Object fn) {
-            try {
-                return new Promise(INVOKE.invoke(this, fn, result));
-            } catch (Exception ex) {
-                throw new IllegalStateException(ex);
+            final Promise previous = this;
+            final Promise promise = new Promise() {
+                @Override
+                protected Object compute() throws Throwable {
+                    return INVOKE.invoke(this, fn, previous.result);
+                }
+            };
+            if (result == null) {
+                then.add(promise);
+            }
+            return promise;
+        }
+
+        public void resolve() throws Throwable {
+            if (result == null) {
+                result = compute();
+                for (Promise p : then) {
+                    p.resolve();
+                }
             }
         }
     }
