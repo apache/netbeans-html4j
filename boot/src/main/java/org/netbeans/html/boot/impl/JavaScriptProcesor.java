@@ -50,6 +50,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
@@ -66,14 +67,15 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = Processor.class)
 public final class JavaScriptProcesor extends AbstractProcessor {
-    private final Map<String,Map<String,ExecutableElement>> javacalls =
-        new HashMap<String,Map<String,ExecutableElement>>();
-    private final Map<String,Set<TypeElement>> bodies =
-        new HashMap<String, Set<TypeElement>>();
+    private final Map<String,Map<String,ExecutableElement>> javacalls = new HashMap<>();
+    private final Map<String,Set<TypeElement>> bodies = new HashMap<>();
+
+    public JavaScriptProcesor() {
+    }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add(JavaScriptBody.class.getName());
         set.add(JavaScriptResource.class.getName());
         set.add(JavaScriptResource.Group.class.getName());
@@ -82,11 +84,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        try {
-            return SourceVersion.valueOf("RELEASE_8"); // NOI18N
-        } catch (IllegalArgumentException ex) {
-            return SourceVersion.RELEASE_7;
-        }
+        return SourceVersion.latest();
     }
 
     @Override
@@ -105,7 +103,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             } else {
                 Set<TypeElement> classes = this.bodies.get(findPkg(e));
                 if (classes == null) {
-                    classes = new HashSet<TypeElement>();
+                    classes = new HashSet<>();
                     bodies.put(findPkg(e), classes);
                 }
                 Element t = e.getEnclosingElement();
@@ -424,7 +422,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             } else {
                 Map<String,ExecutableElement> mangledOnes = javacalls.get(findPkg(e));
                 if (mangledOnes == null) {
-                    mangledOnes = new TreeMap<String, ExecutableElement>();
+                    mangledOnes = new TreeMap<>();
                     javacalls.put(findPkg(e), mangledOnes);
                 }
                 String mangled = JsCallback.mangle(fqn, method, paramTypes);
@@ -457,34 +455,31 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             FileObject all = processingEnv.getFiler().createResource(
                 StandardLocation.CLASS_OUTPUT, "", "META-INF/net.java.html.js.classes"
             );
-            PrintWriter wAll = new PrintWriter(new OutputStreamWriter(
+            try (PrintWriter wAll = new PrintWriter(new OutputStreamWriter(
                 all.openOutputStream(), "UTF-8"
-            ));
-            for (Map.Entry<String, Set<TypeElement>> entry : bodies.entrySet()) {
-                String pkg = entry.getKey();
-                Set<TypeElement> classes = entry.getValue();
+            ))) {
+                for (Map.Entry<String, Set<TypeElement>> entry : bodies.entrySet()) {
+                    String pkg = entry.getKey();
+                    Set<TypeElement> classes = entry.getValue();
 
-                FileObject out = processingEnv.getFiler().createResource(
-                    StandardLocation.CLASS_OUTPUT, pkg, "net.java.html.js.classes",
-                    classes.iterator().next()
-                );
-                OutputStream os = out.openOutputStream();
-                try {
-                    PrintWriter w = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
-                    for (TypeElement type : classes) {
-                        final Name bn = processingEnv.getElementUtils().getBinaryName(type);
-                        w.println(bn);
-                        wAll.println(bn);
+                    FileObject out = processingEnv.getFiler().createResource(
+                            StandardLocation.CLASS_OUTPUT, pkg, "net.java.html.js.classes",
+                            classes.iterator().next()
+                    );
+                    try (OutputStream os = out.openOutputStream()) {
+                        PrintWriter w = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
+                        for (TypeElement type : classes) {
+                            final Name bn = processingEnv.getElementUtils().getBinaryName(type);
+                            w.println(bn);
+                            wAll.println(bn);
+                        }
+                        w.flush();
+                        w.close();
+                    } catch (IOException x) {
+                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + entry.getKey() + ": " + x.toString());
                     }
-                    w.flush();
-                    w.close();
-                } catch (IOException x) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + entry.getKey() + ": " + x.toString());
-                } finally {
-                    os.close();
                 }
             }
-            wAll.close();
         } catch (IOException x) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to write to " + "META-INF/net.java.html.js.classes: " + x.toString());
         }
@@ -526,6 +521,18 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("      thiz = thiz.next;\n");
             source.append("    }\n");
             source.append("  }\n");
+            source.append("  private static <T> T cast(org.netbeans.html.boot.spi.Fn.Presenter p, java.lang.Class<T> clazz, java.lang.Object obj) {\n");
+            source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
+            source.append("      obj = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(obj);\n");
+            source.append("    }\n");
+            source.append("    return clazz.cast(obj);\n");
+            source.append("  }\n");
+            source.append("  private static java.lang.Object toJs(org.netbeans.html.boot.spi.Fn.Presenter p, java.lang.Object obj) {\n");
+            source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
+            source.append("      obj = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript(obj);\n");
+            source.append("    }\n");
+            source.append("    return obj;\n");
+            source.append("  }\n");
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();
@@ -536,11 +543,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("}\n");
             final String srcName = pkgName + ".$JsCallbacks$";
             try {
-                Writer w = processingEnv.getFiler().createSourceFile(srcName,
+                try (Writer w = processingEnv.getFiler().createSourceFile(srcName,
                     map.values().toArray(new Element[map.size()])
-                ).openWriter();
-                w.write(source.toString());
-                w.close();
+                ).openWriter()) {
+                    w.write(source.toString());
+                }
             } catch (IOException ex) {
                 processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR, "Can't write " + srcName + ": " + ex.getMessage()
@@ -561,50 +568,43 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 .append(mangled)
                 .append("(");
 
-        String sep = "";
-        StringBuilder convert = new StringBuilder();
-        if (!isStatic) {
-            if (selfObj) {
-                source.append("java.lang.Object self");
-                convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
-                convert.append("      self").
-                        append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(self").
-                        append(");\n");
-                convert.append("    }\n");
-            } else {
-                source.append(selfType.getQualifiedName());
-                source.append(" self");
+        {
+            String sep = "";
+            if (!isStatic) {
+                if (selfObj) {
+                    source.append("java.lang.Object self");
+                } else {
+                    source.append(selfType.getQualifiedName());
+                    source.append(" self");
+                }
+                sep = ", ";
             }
-            sep = ", ";
-        }
 
-        int cnt = 0;
-        for (VariableElement ve : m.getParameters()) {
-            source.append(sep);
-            ++cnt;
-            final TypeMirror t = ve.asType();
-            if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
-                source.append("java.lang.Object");
-                convert.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.FromJavaScript) {\n");
-                convert.append("      arg").append(cnt).
-                        append(" = ((org.netbeans.html.boot.spi.Fn.FromJavaScript)p).toJava(arg").append(cnt).
-                        append(");\n");
-                convert.append("    }\n");
-            } else {
-                source.append(t);
+            int cnt = 0;
+            for (VariableElement ve : m.getParameters()) {
+                source.append(sep);
+                ++cnt;
+                TypeMirror t = ve.asType();
+                if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
+                    source.append("java.lang.Object");
+                } else {
+                    source.append(t);
+                }
+                source.append(" arg").append(cnt);
+                sep = ", ";
             }
-            source.append(" arg").append(cnt);
-            sep = ", ";
         }
         source.append(") throws Throwable {\n");
         source.append("    org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
-        source.append(convert);
+        String newLine;
         if (useTryResources()) {
-            source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) { \n");
+            newLine =   "\n      ";
+            source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
         } else {
-            source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {\n");
+            newLine =   "\n    ";
+            source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
         }
-        source.append("    ");
+        source.append(newLine);
         if (m.getReturnType().getKind() != TypeKind.VOID) {
             source.append("java.lang.Object $ret = ");
         }
@@ -613,42 +613,44 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append('.');
         } else {
             if (selfObj) {
-                source.append("((");
+                source.append("cast(p, ");
                 source.append(selfType.getQualifiedName());
-                source.append(")self).");
+                source.append(".class, self).");
             } else {
                 source.append("self.");
             }
         }
         source.append(m.getSimpleName());
         source.append("(");
-        cnt = 0;
-        sep = "";
-        for (VariableElement ve : m.getParameters()) {
-            source.append(sep);
-            source.append("(").append(tu.erasure(ve.asType()));
-            source.append(")arg").append(++cnt);
-            sep = ", ";
+        {
+            int cnt = 0;
+            String sep = newLine + "  ";
+            for (VariableElement ve : m.getParameters()) {
+                source.append(sep);
+                TypeMirror targetType = tu.erasure(ve.asType());
+                if (targetType.getKind().isPrimitive()) {
+                    targetType = tu.boxedClass((PrimitiveType) targetType).asType();
+                }
+                source.append("cast(p, ").append(targetType);
+                source.append(".class, arg").append(++cnt).append(")");
+                sep = "," + newLine + "  ";
+            }
         }
-        source.append(");\n");
-        if (m.getReturnType().getKind() != TypeKind.VOID) {
-            source.append("    if (p instanceof org.netbeans.html.boot.spi.Fn.ToJavaScript) {\n");
-            source.append("      $ret = ((org.netbeans.html.boot.spi.Fn.ToJavaScript)p).toJavaScript($ret);\n");
-            source.append("    }\n");
-        }
+        source.append(");").append(newLine);
         if (!promise) {
             if (m.getReturnType().getKind() == TypeKind.VOID) {
-                source.append("    return null;\n");
+                source.append("return null;");
             } else {
-                source.append("    return $ret;\n");
+                source.append("return toJs(p, $ret);");
             }
         } else {
             if (m.getReturnType().getKind() == TypeKind.VOID) {
-                source.append("    return new org.netbeans.html.boot.spi.Fn.Promise(null);\n");
+                source.append("return new org.netbeans.html.boot.spi.Fn.Promise(null);\n");
             } else {
-                source.append("    return new org.netbeans.html.boot.spi.Fn.Promise($ret);\n");
+                source.append("return new org.netbeans.html.boot.spi.Fn.Promise(toJs(p, $ret));\n");
             }
         }
+        source.append("\n");
         if (useTryResources()) {
             source.append("    }\n");
         } else {
