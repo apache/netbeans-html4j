@@ -558,7 +558,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
     private void generateMethod(boolean selfObj, boolean promise, final ExecutableElement m, StringBuilder source, final String mangled) {
         final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
-        if (isStatic && selfObj) {
+        if (isStatic && selfObj && !promise) {
             return;
         }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
@@ -599,17 +599,18 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         source.append("    final org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
         String newLine = "";
         if (promise) {
-            source.append("    return new org.netbeans.html.boot.spi.Fn.Promise() {\n");
+            source.append("    return new org.netbeans.html.boot.spi.Fn.Promise(p) {\n");
             source.append("      @Override\n");
             source.append("      protected java.lang.Object compute() throws java.lang.Throwable {\n");
             newLine = "    ";
-        }
-        if (useTryResources()) {
-            newLine += "      ";
-            source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
         } else {
-            newLine += "    ";
-            source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
+            if (useTryResources()) {
+                newLine += "      ";
+                source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
+            } else {
+                newLine += "    ";
+                source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
+            }
         }
         newLine = "\n" + newLine;
         source.append(newLine);
@@ -651,16 +652,17 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("return toJs(p, $ret);");
         }
         source.append("\n");
-        if (useTryResources()) {
-            source.append("    }\n");
-        } else {
-
-            source.append("    } finally {\n");
-            source.append("      a.close();\n");
-            source.append("    }\n");
-        }
         if (promise) {
             source.append("    }}.toJsPromise();\n");
+        } else {
+            if (useTryResources()) {
+                source.append("    }\n");
+            } else {
+
+                source.append("    } finally {\n");
+                source.append("      a.close();\n");
+                source.append("    }\n");
+            }
         }
         source.append("  }\n");
     }

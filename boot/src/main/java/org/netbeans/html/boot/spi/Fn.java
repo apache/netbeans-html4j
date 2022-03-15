@@ -360,10 +360,14 @@ public abstract class Fn {
         private static Reference<Fn.Presenter> last = new WeakReference<>(null);
         private static Fn[] lastFn;
         private static synchronized Fn[] wrapAndResolve() {
-            if (lastFn != null && last.get() == Fn.activePresenter()) {
+            final Presenter ap = Fn.activePresenter();
+            if (ap == null) {
+                throw new NullPointerException("No presenter!");
+            }
+            if (lastFn != null && last.get() == ap) {
                 return lastFn;
             }
-            last = new WeakReference<>(Fn.activePresenter());
+            last = new WeakReference<>(ap);
             return lastFn = new Fn[] {
                 Fn.define(Promise.class, """
                     var arr = [null, null, null];
@@ -376,14 +380,16 @@ public abstract class Fn {
                 Fn.define(Promise.class, "fn(value);", "fn", "value")
             };
         }
+        private final Fn.Presenter presenter;
         private final Object promise;
         private final Object success;
         private final Object failure;
         private boolean resolved;
 
-        protected Promise() {
+        protected Promise(Fn.Presenter p) {
+            this.presenter = p;
             Object[] promiseSuccessFailure;
-            try {
+            try (var ctx = Fn.activate(p)) {
                 promiseSuccessFailure = (Object[]) wrapAndResolve()[0].invoke(null);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
@@ -402,12 +408,14 @@ public abstract class Fn {
 
         public void resolve() throws Throwable {
             if (!resolved) {
-                try {
-                    Object result = compute();
-                    wrapAndResolve()[1].invoke(null, success, result);
-                } catch (Exception ex) {
-                    wrapAndResolve()[1].invoke(null, failure, ex);
-                }
+                try (var ctx = Fn.activate(presenter)) {
+                    try {
+                        Object result = compute();
+                        wrapAndResolve()[1].invoke(null, success, result);
+                    } catch (Exception ex) {
+                        wrapAndResolve()[1].invoke(null, failure, ex);
+                    }
+                } 
             }
         }
 
