@@ -660,7 +660,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("    }\n");
         }
         if (promise) {
-            source.append("    }};\n");
+            source.append("    }}.toJsPromise();\n");
         }
         source.append("  }\n");
     }

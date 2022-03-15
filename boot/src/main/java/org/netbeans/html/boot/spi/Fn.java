@@ -23,16 +23,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
@@ -359,39 +357,65 @@ public abstract class Fn {
      * @since 1.8
      */
     public static abstract class Promise {
-        private static final Fn INVOKE = Fn.define(Promise.class, """
-        return fn.call(this, result);
-        """, "fn", "result");
-        private Object result;
-        private final List<Promise> then = new LinkedList<>();
+        private static Reference<Fn.Presenter> last = new WeakReference<>(null);
+        private static Fn[] lastFn;
+        private static synchronized Fn[] wrapAndResolve() {
+            if (lastFn != null && last.get() == Fn.activePresenter()) {
+                return lastFn;
+            }
+            last = new WeakReference<>(Fn.activePresenter());
+            return lastFn = new Fn[] {
+                Fn.define(Promise.class, """
+                    var arr = [null, null, null];
+                    arr[0] = new Promise(function (success, failure) {
+                        arr[1] = success;
+                        arr[2] = failure;
+                    });
+                    return arr;
+                    """),
+                Fn.define(Promise.class, "fn(value);", "fn", "value")
+            };
+        }
+        private final Object promise;
+        private final Object success;
+        private final Object failure;
+        private boolean resolved;
 
         protected Promise() {
+            Object[] promiseSuccessFailure;
+            try {
+                promiseSuccessFailure = (Object[]) wrapAndResolve()[0].invoke(null);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            this.promise = toJava(promiseSuccessFailure[0]);
+            this.success = toJava(promiseSuccessFailure[1]);
+            this.failure = toJava(promiseSuccessFailure[2]);
+        }
+
+        public Object toJsPromise() {
             FnContext.registerPromise(this);
+            return promise;
         }
 
         protected abstract Object compute() throws Throwable;
 
-        public Promise then(Object fn) {
-            final Promise previous = this;
-            final Promise promise = new Promise() {
-                @Override
-                protected Object compute() throws Throwable {
-                    return INVOKE.invoke(this, fn, previous.result);
+        public void resolve() throws Throwable {
+            if (!resolved) {
+                try {
+                    Object result = compute();
+                    wrapAndResolve()[1].invoke(null, success, result);
+                } catch (Exception ex) {
+                    wrapAndResolve()[1].invoke(null, failure, ex);
                 }
-            };
-            if (result == null) {
-                then.add(promise);
             }
-            return promise;
         }
 
-        public void resolve() throws Throwable {
-            if (result == null) {
-                result = compute();
-                for (Promise p : then) {
-                    p.resolve();
-                }
+        private Object toJava(Object js) {
+            if (Fn.activePresenter() instanceof Fn.FromJavaScript p) {
+                return p.toJava(js);
             }
+            return js;
         }
     }
 
