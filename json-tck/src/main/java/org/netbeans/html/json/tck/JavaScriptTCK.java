@@ -19,6 +19,7 @@
 package org.netbeans.html.json.tck;
 
 import java.io.StringReader;
+import net.java.html.js.tests.AsyncJavaTest;
 import net.java.html.js.tests.GCBodyTest;
 import net.java.html.js.tests.JavaScriptBodyTest;
 import net.java.html.js.tests.ExposedPropertiesTest;
@@ -79,7 +80,7 @@ public abstract class JavaScriptTCK {
      */
     protected static Class<?>[] testClasses() {
         return new Class[] {
-            JavaScriptBodyTest.class, GCBodyTest.class, ExposedPropertiesTest.class
+            JavaScriptBodyTest.class, GCBodyTest.class, ExposedPropertiesTest.class, AsyncJavaTest.class
         };
     }
 
