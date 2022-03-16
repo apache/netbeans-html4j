@@ -78,7 +78,7 @@ public final class KOFx implements ITest, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                if (count++ < 10000) {
+                if (count++ < 100) {
                     notify = false;
                     try {
                         Thread.sleep(100);
