@@ -247,17 +247,44 @@ final class Knockout  {
           """
           Object.defineProperty(ret, 'ko4j', { value : thiz });
           function normalValue(r) {
-            if (r) try { var br = r.valueOf(); } catch (err) {}
+            if (r) {
+              try {
+                var br = r.valueOf();
+              } catch (err) {
+              }
+            }
             return br === undefined ? r: br;
           }
+          function koCopyFrom(index, name, readOnly, orig) {
+            var bnd = {
+              'read': function() {
+                var r = orig();
+                return normalValue(r);;
+              },
+              'owner': ret
+            };
+            if (!readOnly) {
+              function write(val) {
+                orig(val);
+                var self = ret['ko4j'];
+                if (!self) {
+                    return;
+                }
+                var model = val ? val['ko4j'] : null;
+                self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
+              }
+              bnd['write'] = write;
+              write(orig());
+              orig.subscribe(write);
+            };
+            var cmpt = ko['computed'](bnd);
+            cmpt['valueHasMutated'] = function(val) {
+              orig(val);
+            };
+            ret[name] = cmpt;
+          }
           function koComputed(index, name, readOnly, value) {
-            var orig = copyFrom ? copyFrom[name] : null;
-            if (!ko['isObservable'](orig)) {
-              orig = null;
-              var trigger = ko['observable']()['extend']({'notify':'always'});
-            } else {
-              var trigger = orig;
-            }
+            var trigger = ko['observable']()['extend']({'notify':'always'});
             function realGetter() {
               var self = ret['ko4j'];
               try {
@@ -267,33 +294,24 @@ final class Knockout  {
                 alert("Cannot call getValue on " + self + " prop: " + name + " error: " + e);
               }
             }
-            var activeGetter = orig ? orig : function() { return value; };
+            var activeGetter = function() { return value; };
             var bnd = {
               'read': function() {
                 trigger();
-                if (orig) {
-                  var r = orig();
-                } else {
-                  var r = activeGetter();
-                  activeGetter = realGetter;
-                }
+                var r = activeGetter();
+                activeGetter = realGetter;
                 return normalValue(r);;
               },
               'owner': ret
             };
             if (!readOnly) {
               function write(val) {
-                if (orig) orig(val);
                 var self = ret['ko4j'];
                 if (!self) return;
                 var model = val ? val['ko4j'] : null;
                 self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
               };
               bnd['write'] = write;
-              if (orig) {
-                write(orig());
-                orig.subscribe(write);
-              }
             };
             var cmpt = ko['computed'](bnd);
             cmpt['valueHasMutated'] = function(val) {
@@ -303,10 +321,19 @@ final class Knockout  {
             ret[name] = cmpt;
           }
           for (var i = 0; i < propNames.length; i++) {
-            if ((propInfo[i] & 2) !== 0) {
-              ret[propNames[i]] = normalValue(propValues[i]);
+            var pName= propNames[i];
+            var isConstant = (propInfo[i] & 2) !== 0;
+            var isReadOnly = (propInfo[i] & 1) !== 0;
+
+            if (isConstant) {
+              ret[pName] = normalValue(propValues[i]);
             } else {
-              koComputed(i, propNames[i], (propInfo[i] & 1) !== 0, propValues[i]);
+              var orig = copyFrom ? copyFrom[pName] : null;
+              if (ko['isObservable'](orig)) {
+                koCopyFrom(i, pName, isReadOnly, orig);
+              } else {
+                koComputed(i, pName, isReadOnly, propValues[i]);
+              }
             }
           }
           function koExpose(index, name) {
@@ -335,7 +362,7 @@ final class Knockout  {
         for (var p in js) {
           delete js[p];
         };
-        
+
         """
     )
     private static native void clean(Object js);
