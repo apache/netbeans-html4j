@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.impl.FnContext;
 
@@ -400,7 +402,11 @@ public abstract class Fn {
         }
 
         public Object toJsPromise() {
-            FnContext.registerPromise(this);
+            try (var ctx = Fn.activate(presenter)) {
+                FnContext.registerPromise(this);
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
             return promise;
         }
 
@@ -414,6 +420,8 @@ public abstract class Fn {
                         wrapAndResolve()[1].invoke(null, success, result);
                     } catch (Exception ex) {
                         wrapAndResolve()[1].invoke(null, failure, ex);
+                    } finally {
+                        resolved = true;
                     }
                 } 
             }
