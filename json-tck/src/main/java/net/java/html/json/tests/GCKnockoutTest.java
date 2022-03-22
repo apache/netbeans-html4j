@@ -31,6 +31,8 @@ import static net.java.html.json.tests.Utils.assertEquals;
     @Property(name = "all", type = Fullname.class, array = true)
 })
 public class GCKnockoutTest {
+    private final PhaseExecutor[] phases = { null };
+
     @Model(className = "Fullname", properties = {
         @Property(name = "firstName", type = String.class),
         @Property(name = "lastName", type = String.class)
@@ -38,42 +40,55 @@ public class GCKnockoutTest {
     static class FullnameCntrl {
     }
 
-    @KOTest public void noLongerNeededArrayElementsCanDisappear() throws Exception {
-        BrwsrCtx ctx = Utils.newContext(GCKnockoutTest.class);
-        Object exp = Utils.exposeHTML(GCKnockoutTest.class, """
-                                                            <ul id='ul' data-bind='foreach: all'>
-                                                              <li data-bind='text: firstName'/>
-                                                            </ul>
-                                                            """);
-        try {
+    class Data {
+        GC m;
+        BrwsrCtx ctx;
+        Fullname removed;
+
+        Data(GC m, BrwsrCtx ctx) {
+            this.m = m;
+            this.ctx = ctx;
+        }
+    }
+
+    @KOTest
+    public void noLongerNeededArrayElementsCanDisappear() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            BrwsrCtx ctx = Utils.newContext(GCKnockoutTest.class);
+            Object exp = Utils.exposeHTML(GCKnockoutTest.class, """
+            <ul id='ul' data-bind='foreach: all'>
+              <li data-bind='text: firstName'/>
+            </ul>
+            """);
             GC m = Models.bind(new GC(), ctx);
             m.getAll().add(Models.bind(new Fullname("Jarda", "Tulach"), ctx));
             Models.applyBindings(m);
-
+            return new Data(m, ctx);
+        }).then((data) -> {
             int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 1, "One child, but was " + cnt);
 
-            m.getAll().add(Models.bind(new Fullname("HTML", "Java"), ctx));
-
-            cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
+            var m = data.m;
+            m.getAll().add(Models.bind(new Fullname("HTML", "Java"), data.ctx));
+        }).then((data) -> {
+            int cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 2, "Now two " + cnt);
 
-            Fullname removed = m.getAll().remove(0);
-
-            cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
+            data.removed = data.m.getAll().remove(0);
+        }).then((data) -> {
+            var cnt = Utils.countChildren(GCKnockoutTest.class, "ul");
             assertEquals(cnt, 1, "Again One " + cnt);
 
-            Reference<?> ref = new WeakReference<Object>(removed);
-            removed = null;
+            Reference<?> ref = new WeakReference<Object>(data.removed);
+            data.removed = null;
             assertGC(ref, "Can removed object disappear?");
 
-            ref = new WeakReference<Object>(m);
-            m = null;
+            ref = new WeakReference<Object>(data.m);
+            data.m = null;
             assertNotGC(ref, "Root model cannot GC");
-        } finally {
+        }).finalize((data) -> {
             Utils.exposeHTML(GCKnockoutTest.class, "");
-        }
-
+        }).start();
     }
 
     private void assertGC(Reference<?> ref, String msg) throws Exception {
