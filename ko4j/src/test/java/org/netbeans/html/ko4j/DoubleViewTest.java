@@ -18,17 +18,25 @@
  */
 package org.netbeans.html.ko4j;
 
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javax.swing.JFrame;
 import net.java.html.boot.fx.FXBrowsers;
@@ -73,6 +81,8 @@ public class DoubleViewTest {
     @BeforeMethod
     public void initializeViews() throws Exception {
         LOG.setLength(0);
+
+        initializeSwingAndJavaFX();
 
         final JFXPanel panel = new JFXPanel();
         final JFXPanel p2 = new JFXPanel();
@@ -125,6 +135,35 @@ public class DoubleViewTest {
         log("initializeViews - done");
         assertNotNull(presenter1, "presenter for view1 found");
         assertNotNull(presenter2, "presenter for view2 found");
+    }
+
+    private void initializeSwingAndJavaFX() throws InterruptedException {
+        log("initializeSwingAndJavaFX");
+        CountDownLatch loaded = new CountDownLatch(1);
+        EventQueue.invokeLater(() -> {
+            log("initializeSwingAndJavaFX: in EventQueue");
+            JFrame f = new JFrame("DoubleView Initializer");
+            f.setSize(300, 300);
+            f.getContentPane().setLayout(new BorderLayout());
+            final JFXPanel demo = new JFXPanel();
+            f.getContentPane().add(BorderLayout.CENTER, demo);
+            f.setVisible(true);
+            log("initializeSwingAndJavaFX: entering JavaFX");
+            Platform.runLater(() -> {
+                log("initializeSwingAndJavaFX: in JavaFX");
+                final WebEngine eng = displayWebView(demo).getEngine();
+                eng.getLoadWorker().stateProperty().addListener((___, __, newState) -> {
+                    log("initializeSwingAndJavaFX: state " + newState);
+                    if (newState == Worker.State.FAILED || newState == Worker.State.READY || newState == Worker.State.SUCCEEDED) {
+                        loaded.countDown();
+                    }
+                });
+                log("initializeSwingAndJavaFX: loading a web page");
+                eng.load("http://apidesign.org");
+            });
+        });
+        loaded.await();
+        log("Done initializeSwingAndJavaFX");
     }
 
     private void displayFrame(JFXPanel panel, JFXPanel p2) {
