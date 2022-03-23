@@ -2,7 +2,10 @@
 
 In need of cross platform, client side interaction between Java and JavaScript?
 
-[![Travis](https://travis-ci.org/apache/netbeans-html4j.svg?branch=master)](https://travis-ci.org/apache/netbeans-html4j)
+[![Linux](https://github.com/apache/netbeans-html4j/actions/workflows/linux.yml/badge.svg)](https://github.com/apache/netbeans-html4j/actions/workflows/linux.yml)
+[![Mac OS X](https://github.com/apache/netbeans-html4j/actions/workflows/mac.yml/badge.svg)](https://github.com/apache/netbeans-html4j/actions/workflows/mac.yml)
+[![Windows](https://github.com/apache/netbeans-html4j/actions/workflows/windows.yml/badge.svg)](https://github.com/apache/netbeans-html4j/actions/workflows/windows.yml)
+[![Javadoc](https://github.com/apache/netbeans-html4j/actions/workflows/javadoc.yml/badge.svg)](https://github.com/apache/netbeans-html4j/actions/workflows/javadoc.yml)
 [![Linux](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-linux/badge/icon)](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-linux/)
 [![Windows](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-windows/badge/icon)](https://ci-builds.apache.org/job/Netbeans/job/netbeans-html4j-windows/)
 

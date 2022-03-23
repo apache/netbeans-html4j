@@ -41,6 +41,7 @@
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
       <netbeans.compile.on.save>none</netbeans.compile.on.save>
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
+      <javadoc.warning.fail>true</javadoc.warning.fail>
       <javadoc.fail>true</javadoc.fail>
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
@@ -155,7 +156,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <docletArtifact>
                     <groupId>org.apidesign.javadoc</groupId>
                     <artifactId>codesnippet-doclet</artifactId>
-                    <version>0.61</version>
+                    <version>0.81</version>
                 </docletArtifact>
                 <additionalOptions>
                     -snippetpath boot-fx/src/test
@@ -166,7 +167,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     ${javadoc.allowjs}
                     -hiddingannotation java.lang.Deprecated
                 </additionalOptions>
-                <failOnWarnings>${javadoc.fail}</failOnWarnings>
+                <failOnWarnings>${javadoc.warning.fail}</failOnWarnings>
                 <failOnError>${javadoc.fail}</failOnError>
               </configuration>
             </plugin>
@@ -581,6 +582,15 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </activation>
           <properties>
               <skipJavaFXTests>false</skipJavaFXTests>
+          </properties>
+      </profile>
+      <profile>
+          <id>jdk17+</id>
+          <activation>
+              <jdk>[17,]</jdk>
+          </activation>
+          <properties>
+              <javadoc.warning.fail>false</javadoc.warning.fail>
           </properties>
       </profile>
       <profile>
