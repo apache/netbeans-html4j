@@ -252,10 +252,10 @@ public final class KnockoutTest {
         }).then((m) -> {
             String v = getSetInput("input", null);
             assertEquals("Kukuc", v, "Value is really kukuc: " + v);
-
+        }).then((m) -> {
             getSetInput("input", "Jardo");
             triggerEvent("input", "change");
-
+        }).then((m) -> {
             assertEquals("Jardo", m.getName(), "Name property updated: " + m.getName());
         }).finalize((m) -> {
             Utils.exposeHTML(KnockoutTest.class, "");
