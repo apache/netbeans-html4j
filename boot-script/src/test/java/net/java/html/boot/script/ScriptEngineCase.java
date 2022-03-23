@@ -62,10 +62,11 @@ public final class ScriptEngineCase implements ITest, IHookable {
                 method.invoke(instance);
                 return;
             } catch (InvocationTargetException ite) {
-                if (ite.getTargetException() instanceof InterruptedException && round < 100) {
+                final Throwable ex = ite.getTargetException();
+                if (ex instanceof InterruptedException && round < 100) {
                     continue;
                 }
-                throw ite.getTargetException();
+                throw ex;
             }
         }
         // END: net.java.html.boot.script.ScriptEngineCase#run

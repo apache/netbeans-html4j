@@ -127,8 +127,9 @@ public @interface JavaScriptBody {
     public boolean keepAlive() default true;
 
     /** Should a call to Java be synchronous or asynchronous.
-     *
-     * <h5>Asynchronous Java Call</h5>
+     * <p>
+     * <em>Asynchronous Java Call</em>
+     * <p>
      *
      * All calls to Java done via the {@link #javacall() java call syntax}
      * return JavaScript
