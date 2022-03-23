@@ -38,6 +38,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import net.java.html.boot.script.impl.Callback;
+import net.java.html.boot.script.impl.PromisePolyfill;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 
@@ -78,14 +79,18 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             eng = new ScriptEngineManager().getEngineByName("javascript");
         }
         IllegalStateException[] makingPolyglot = { null };
-        if (eng.getFactory().getNames().contains("Graal.js")) { // NOI18N
+        final List<String> names = eng.getFactory().getNames();
+        if (names.contains("Graal.js")) { // NOI18N
             try {
                 Bindings bindings = eng.getBindings(ScriptContext.ENGINE_SCOPE);
                 bindings.put("polyglot.js.allowHostAccess", true); // NOI18N
             } catch (IllegalStateException ex) {
                 makingPolyglot[0] = ex;
             }
+        } else if (names.contains("nashorn")) {
+            PromisePolyfill.initialize(eng, this);
         }
+
         this.eng = eng;
         this.exc = exc;
         Object undef;
@@ -383,6 +388,18 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
 
         final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
+            Object[] convertedArguments = toArguments(args, thiz, arrayChecks);
+            Object ret = ((Invocable)eng).invokeMethod(fn, "call", convertedArguments); // NOI18N
+            if (ret == fn) {
+                return null;
+            }
+            if (!arrayChecks) {
+                return ret;
+            }
+            return ((ScriptPresenter)presenter()).toJava(ret);
+        }
+
+        private Object[] toArguments(Object[] args, Object thiz, boolean arrayChecks) {
             List<Object> all = new ArrayList<>(args.length + 1);
             ScriptPresenter sp = (ScriptPresenter) presenter();
             if (thiz == null) {
@@ -394,14 +411,8 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
                 Object conv = sp.toJavaScript(args[i], arrayChecks, keepAlive == null || keepAlive[i]);
                 all.add(conv);
             }
-            Object ret = ((Invocable)eng).invokeMethod(fn, "call", all.toArray()); // NOI18N
-            if (ret == fn) {
-                return null;
-            }
-            if (!arrayChecks) {
-                return ret;
-            }
-            return ((ScriptPresenter)presenter()).toJava(ret);
+            final Object[] convertedArguments = all.toArray();
+            return convertedArguments;
         }
     }
 
