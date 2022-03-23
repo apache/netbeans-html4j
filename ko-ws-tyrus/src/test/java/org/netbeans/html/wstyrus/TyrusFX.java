@@ -64,8 +64,7 @@ public final class TyrusFX implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try {
-            FnContext.currentPresenter(p);
+        try (var ctx = Fn.activate(p)) {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -76,10 +75,10 @@ public final class TyrusFX implements ITest, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                if (count++ < 10000) {
+                if (count++ < 300) {
                     notify = false;
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(30);
                     } catch (Exception ex1) {
                         // ignore and continue
                     }
