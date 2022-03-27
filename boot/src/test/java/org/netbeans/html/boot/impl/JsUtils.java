@@ -58,6 +58,9 @@ final class JsUtils {
             if (len != null && len.intValue() >= 0) {
                 java.lang.Object[] arr = new java.lang.Object[len.intValue()];
                 ((Invocable) eng).invokeFunction("checkArray", js, arr);
+                for (int i = 0; i < arr.length; i++) {
+                    arr[i] = toJava(eng, arr[i]);
+                }
                 return arr;
             }
             return js;
