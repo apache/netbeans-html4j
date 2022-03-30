@@ -352,10 +352,14 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             var script = v.substring(11);
             try {
               var r = eval.call(null, script);
-            } catch (e) {  console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack); }
-            v = ds(@3).toVM('jr', null, null, null, null);  }
+            } catch (e) {
+              console.warn('error: ' + e + ' executing: ' + script + ' at:\\n' + e.stack);
+            }
+            v = ds(@3).toVM('jr', null, null, null, null);
+          }
           return @4 ? eval('(' + v + ')') : v;
-        };""",
+        };
+        """,
         "fnFoot=ds(@2).rg(@1, jsvm);\n"
     })
     final Integer exportVm(Object vm) {
@@ -916,7 +920,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     static final AtomicInteger COUNTER = new AtomicInteger(0);
     @Texts({
         "registerFn=ds(@2).rg(@1, function(",
-        "registerCode=) {\n@1\n});",
+        "registerCode=) {\n@1\n});\n",
         "v_vm=vm"
     })
     private final class GFn extends Fn {
