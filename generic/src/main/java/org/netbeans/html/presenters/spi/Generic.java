@@ -78,7 +78,14 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         StringBuilder sb = this.msg;
         if (sb != null) {
             for (int i = 0; i < args.length; i++) {
-                String txt = args[i] == null ? "null" : args[i].toString();
+                String txt;
+                if (args[i] == null) {
+                    txt = "null";
+                } else if (args[i] instanceof Object[] arr) {
+                    txt = Arrays.toString(arr);
+                } else {
+                    txt = args[i].toString();
+                }
                 msg = msg.replace("{" + i + "}", txt);
             }
             synchronized (lock()) {
@@ -236,7 +243,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             result(a1, a2, a3);
             return null;
         } else if ("c".equals(method)) {
-            return javacall(a1, a2, a3, a4);
+            return javacall(false, a1, a2, a3, a4);
+        } else if ("p".equals(method)) {
+            return javacall(true, a1, a2, a3, a4);
         } else if ("jr".equals(method)) {
             return javaresult();
         } else {
@@ -345,6 +354,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnParam=p@1",
         "fnClose=) {\n",
         "fnBegin=  var encParams = ds(@1).toJava(null, -1, [",
+        """
+        fnPromiseBegin=   return new Promise(function(succ, err) {
+              var encParams = ds(@1).toJava(null, -1, [
+        """,
         "fnPPar=@2 p@1", """
         fnBody=]);
           var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);
@@ -359,6 +372,11 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
           }
           return @4 ? eval('(' + v + ')') : v;
         };
+        """, """
+        fnPromiseBody=, succ, err]);
+            ds(@3).toVM('p', '@1', '@2', thiz ? thiz.id : null, encParams); /* @4 */
+          });
+        };
         """,
         "fnFoot=ds(@2).rg(@1, jsvm);\n"
     })
@@ -371,6 +389,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             if (m.getDeclaringClass() == Object.class) {
                 continue;
             }
+            final String promisePrefix = "promise$";
+            boolean promise = m.getName().startsWith(promisePrefix);
             final Class<?>[] types = m.getParameterTypes();
             boolean instanceMethod =
                 types.length > 0 &&
@@ -393,11 +413,20 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             if (!instanceMethod) {
                 sb.append(Strings.fnNoThiz());
             }
-            sb.append(Strings.fnBegin(key));
+            if (promise) {
+                sb.append(Strings.fnPromiseBegin(key));
+            } else {
+                sb.append(Strings.fnBegin(key));
+            }
             for (int i = 0; i < params; i++) {
                 sb.append(Strings.fnPPar(i, i == 0 ? "" : ","));
             }
-            sb.append(Strings.fnBody(jNumber, m.getName(), key, evalJS));
+            if (promise) {
+                final String rawName = "raw$" + m.getName().substring(promisePrefix.length());
+                sb.append(Strings.fnPromiseBody(jNumber, rawName, key, evalJS));
+            } else {
+                sb.append(Strings.fnBody(jNumber, m.getName(), key, evalJS));
+            }
         }
         sb.append(Strings.fnFoot(vmNumber, key));
         deferExec(sb);
@@ -533,14 +562,25 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         final Method method;
         final Object thiz;
         final Object[] params;
+        final Object succ;
+        final Object err;
         Object result;
 
-        CallJavaMethod(int id, Frame prev, Method method, Object thiz, Object[] params) {
+        CallJavaMethod(int id, Frame prev, Method method, Object thiz, boolean promise, Object[] params) {
             super(id, prev);
             assert method != null;
             this.method = method;
             this.thiz = thiz;
-            this.params = adaptParams(method, Arrays.asList(params));
+            if (promise) {
+                var allParams = Arrays.asList(params);
+                this.params = allParams.subList(0, allParams.size() - 2).toArray();
+                this.succ = allParams.get(allParams.size() - 2);
+                this.err = allParams.get(allParams.size() - 1);
+            } else {
+                this.params = params;
+                this.succ = null;
+                this.err = null;
+            }
         }
 
 
@@ -557,6 +597,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 } finally {
                     done = true;
                     log(Level.FINE, "Result: {0}", result);
+                    if (succ != null) {
+                        // XXX
+                        System.err.println("shall resolve to " + result);
+                    }
                 }
             }
         }
@@ -663,31 +707,13 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     final String javacall(
-            String vmNumber, String fnName, String thizId, String encParams
+        boolean promise, String vmNumber, String fnName, String thizId, String encParams
     ) throws Exception {
         synchronized (lock()) {
             Object vm = findObject(Integer.parseInt(vmNumber));
             assert vm != null;
-            final Object obj = thizId == null || "null".equals(thizId)
-                    ? null : valueOf("java", thizId);
-            Method method = null;
-            for (Method m : vm.getClass().getMethods()) {
-                if (m.getName().equals(fnName)) {
-                    method = m;
-                    break;
-                }
-            }
-            assert method != null;
-            List<Object> params = new ArrayList<Object>();
-            if (obj != null) {
-                params.add(obj);
-            }
-            final Object args = valueOf(encParams);
-            if (!(args instanceof Object[])) {
-                throw new IllegalStateException("Expecting array: " + args);
-            }
-            params.addAll(Arrays.asList((Object[]) args));
-            Object[] converted = adaptParams(method, params);
+            Method method = findVmMethod(vm, fnName);
+            Object[] converted = toMethodParameters(thizId, encParams, method);
             for (;;) {
                 Frame top = topMostCall();
                 if (top instanceof DeferJavaScript) {
@@ -697,11 +723,38 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                     }
                 }
                 boolean first = top == null || (top instanceof CallJavaMethod && Boolean.TRUE.equals(((CallJavaMethod)top).done));
-                log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, params, first, topMostCall()});
-                CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, converted));
+                log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, converted, first, topMostCall()});
+                CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, promise, converted));
                 return javaresult();
             }
         }
+    }
+
+    private Object[] toMethodParameters(String thizId, String encParams, Method method) throws IllegalStateException {
+        final Object obj = thizId == null || "null".equals(thizId)
+                ? null : valueOf("java", thizId);
+        List<Object> params = new ArrayList<>();
+        if (obj != null) {
+            params.add(obj);
+        }
+        final Object args = valueOf(encParams);
+        if (!(args instanceof Object[])) {
+            throw new IllegalStateException("Expecting array: " + args);
+        }
+        params.addAll(Arrays.asList((Object[]) args));
+        return adaptParams(method, params);
+    }
+
+    private static Method findVmMethod(Object vm, String fnName) {
+        Method method = null;
+        for (Method m : vm.getClass().getMethods()) {
+            if (m.getName().equals(fnName)) {
+                method = m;
+                break;
+            }
+        }
+        assert method != null;
+        return method;
     }
 
     final String javaresult() throws IllegalStateException, InterruptedException {
@@ -863,8 +916,11 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private static Object[] adaptParams(Method toCall, List<Object> args) {
         final Object[] arr = new Object[args.size()];
         final Class<?>[] types = toCall.getParameterTypes();
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < types.length; i++) {
             arr[i] = adaptType(types[i], args.get(i));
+        }
+        for (int i = types.length; i < arr.length; i++) {
+            arr[i] = args.get(i);
         }
         return arr;
     }
