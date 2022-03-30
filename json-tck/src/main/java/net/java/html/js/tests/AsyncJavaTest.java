@@ -19,24 +19,24 @@
 package net.java.html.js.tests;
 
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
+import net.java.html.json.tests.PhaseExecutor;
 import org.netbeans.html.json.tck.KOTest;
 
 public class AsyncJavaTest {
-    private Object objWithX;
+    private final PhaseExecutor[] phases = { null };
+
     @KOTest
-    public void dontWaitForJavaFactorial() throws InterruptedException {
-        if (objWithX == null) {
-            objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
+    public void dontWaitForJavaFactorial() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            Object objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
                 return new Factorial().factorial(n);
             }, () -> {});
             int initialValue = Bodies.readIntX(objWithX);
             assertEquals(-1, initialValue, "Java code shall only be called when the JavaScript ends");
-        }
-
-        int result = Bodies.readIntX(objWithX);
-        if (result < 0) {
-            throw new InterruptedException();
-        }
-        assertEquals(result, 120);
+            return objWithX;
+        }).then((objWithX) -> {
+            int result = Bodies.readIntX(objWithX);
+            assertEquals(result, 120);
+        }).start();
     }
 }
