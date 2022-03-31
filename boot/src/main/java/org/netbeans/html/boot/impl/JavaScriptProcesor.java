@@ -558,9 +558,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
     private void generateMethod(boolean selfObj, boolean promise, final ExecutableElement m, StringBuilder source, final String mangled) {
         final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
-        if (isStatic && selfObj && !promise) {
-            return;
-        }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
         Types tu = processingEnv.getTypeUtils();
 

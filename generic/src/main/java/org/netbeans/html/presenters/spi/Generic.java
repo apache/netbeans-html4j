@@ -57,6 +57,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private final String type;
     private final String app;
     private final CountDownLatch initialized = new CountDownLatch(1);
+    /** @GuardedBy("this") */
+    private final List<Runnable> microTasks = new ArrayList<>();
 
     Generic(
         boolean synchronous, boolean evalJS, String type, String app
@@ -174,6 +176,20 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                    if (n) toVM('r', id, 'error', '' + err + ' at:\\n' + err.stack, null, null);
                  }
                };
+               var pendings = [];
+               impl.rgp = function(resolve) {
+                  return pendings.push(resolve) - 1;
+               };
+               impl.p = function(at, value, error) {
+                  var resolve = pendings[at];
+                  delete pendings[at];
+                  for (var l = pendings.length; l >= 0; ) {
+                    if (typeof pendings[--l] === 'undefined') continue;
+                    pendings.length = l + 1;
+                    break;
+                  }
+                  resolve(value, error);
+               };
                impl.o = function(i) {
                  return js2j[i];
                };
@@ -243,9 +259,10 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             result(a1, a2, a3);
             return null;
         } else if ("c".equals(method)) {
-            return javacall(false, a1, a2, a3, a4);
+            return javacall(a1, a2, a3, a4);
         } else if ("p".equals(method)) {
-            return javacall(true, a1, a2, a3, a4);
+            registerPromise(a1, a2, a3, a4);
+            return null;
         } else if ("jr".equals(method)) {
             return javaresult();
         } else {
@@ -355,9 +372,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "fnClose=) {\n",
         "fnBegin=  var encParams = ds(@1).toJava(null, -1, [",
         """
-        fnPromiseBegin=   return new Promise(function(succ, err) {
-              var encParams = ds(@1).toJava(null, -1, [
-        """,
+        fnPromiseBegin=   return new Promise(function(resolve) {
+              var promiseId = ds(@1).rgp(resolve);
+              var encParams = ds(@1).toJava(null, -1, [""",
         "fnPPar=@2 p@1", """
         fnBody=]);
           var v = ds(@3).toVM('c', '@1', '@2', thiz ? thiz.id : null, encParams);
@@ -373,7 +390,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
           return @4 ? eval('(' + v + ')') : v;
         };
         """, """
-        fnPromiseBody=, succ, err]);
+        fnPromiseBody=, promiseId]);
             ds(@3).toVM('p', '@1', '@2', thiz ? thiz.id : null, encParams); /* @4 */
           });
         };
@@ -562,25 +579,14 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         final Method method;
         final Object thiz;
         final Object[] params;
-        final Object succ;
-        final Object err;
         Object result;
 
-        CallJavaMethod(int id, Frame prev, Method method, Object thiz, boolean promise, Object[] params) {
+        CallJavaMethod(int id, Frame prev, Method method, Object thiz, Object[] params) {
             super(id, prev);
             assert method != null;
             this.method = method;
             this.thiz = thiz;
-            if (promise) {
-                var allParams = Arrays.asList(params);
-                this.params = allParams.subList(0, allParams.size() - 2).toArray();
-                this.succ = allParams.get(allParams.size() - 2);
-                this.err = allParams.get(allParams.size() - 1);
-            } else {
-                this.params = params;
-                this.succ = null;
-                this.err = null;
-            }
+            this.params = params;
         }
 
 
@@ -597,10 +603,6 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 } finally {
                     done = true;
                     log(Level.FINE, "Result: {0}", result);
-                    if (succ != null) {
-                        // XXX
-                        System.err.println("shall resolve to " + result);
-                    }
                 }
             }
         }
@@ -707,7 +709,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     final String javacall(
-        boolean promise, String vmNumber, String fnName, String thizId, String encParams
+        String vmNumber, String fnName, String thizId, String encParams
     ) throws Exception {
         synchronized (lock()) {
             Object vm = findObject(Integer.parseInt(vmNumber));
@@ -724,10 +726,41 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
                 }
                 boolean first = top == null || (top instanceof CallJavaMethod && Boolean.TRUE.equals(((CallJavaMethod)top).done));
                 log(Level.FINE, "jc: {0}@{1}args: {2} is first: {3}, now: {4}", new Object[]{method.getName(), vm, converted, first, topMostCall()});
-                CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, promise, converted));
+                CallJavaMethod newItem = registerCall(new CallJavaMethod(nextCallId(), top, method, vm, converted));
                 return javaresult();
             }
         }
+    }
+
+    final void registerPromise(String a1, String a2, String a3, String a4) {
+        synchronized (lock()) {
+            microTasks.add(() -> {
+                javapromise(a1, a2, a3, a4);
+            });
+        }
+    }
+
+
+    final void javapromise(
+        String vmNumber, String fnName, String thizId, String encParams
+    ) {
+        var vm = findObject(Integer.parseInt(vmNumber));
+        assert vm != null;
+        var method = findVmMethod(vm, fnName);
+        var converted = toMethodParameters(thizId, encParams, method);
+        var allParams = Arrays.asList(converted);
+        var params = allParams.subList(0, allParams.size() - 1).toArray();
+        var promiseId = ((Number)allParams.get(allParams.size() - 1)).intValue();
+        var sb = new StringBuilder();
+        sb.append("ds(").append(key).append(").p(").append(promiseId).append(",");
+        try {
+            var result = method.invoke(vm, params);
+            encodeObject(result, false, sb, null);
+        } catch (Exception exception) {
+            sb.append("null, '").append(exception.getMessage().replace("'", "")).append("'");
+        }
+        sb.append(")");
+        loadJS(sb.toString());
     }
 
     private Object[] toMethodParameters(String thizId, String encParams, Method method) throws IllegalStateException {
@@ -843,6 +876,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         "flushExec=\n\nds(@1).toJava('r', '@2', null);\n"
     })
     void flushImpl() {
+        Runnable[] pendings;
         synchronized (lock()) {
             if (topMostCall() instanceof DeferJavaScript) {
                 final int id = nextCallId();
@@ -853,6 +887,11 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             if (topMostCall() == null) {
                 resetDeferredDisabled();
             }
+            pendings = microTasks.toArray(new Runnable[0]);
+            microTasks.clear();
+        }
+        for (Runnable r : pendings) {
+            r.run();
         }
     }
 
