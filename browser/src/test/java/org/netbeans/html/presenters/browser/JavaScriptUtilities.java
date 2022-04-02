@@ -26,9 +26,13 @@ final class JavaScriptUtilities {
 
     @JavaScriptBody(args = {  }, body =
           """
-          var h;if (!!window && !!window.location && !!window.location.href)
+          var h;
+          if (!!window && !!window.location && !!window.location.href) {
             h = window.location.href;
-          else   h = null;return h;
+          } else {
+            h = null;
+          }
+          return h;
           """
     )
     static native String findBaseURL();
