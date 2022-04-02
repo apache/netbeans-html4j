@@ -261,25 +261,31 @@ final class Knockout  {
               },
               'owner': ret
             };
-            if (!readOnly) {
-              function write(val) {
-                orig(val);
-                var self = ret['ko4j'];
-                if (!self) {
-                    return;
-                }
-                var model = val ? val['ko4j'] : null;
-                self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
+            function write(val) {
+              var self = ret['ko4j'];
+              if (!self) {
+                  return;
               }
+              var model = val ? val['ko4j'] : null;
+              // console.log('write with ' + val + ' begins');
+              self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
+              // .finally(function() {
+              //   console.log('write with ' + val + ' is finished');
+              // });
+            }
+            if (!readOnly) {
               bnd['write'] = write;
               write(orig());
               orig.subscribe(write);
             };
             var cmpt = ko['computed'](bnd);
             cmpt['valueHasMutated'] = function(val) {
-              if (orig() != val) {
-                orig(val);
+              // console.log('on valueHasMutated with ' + val + ' current value ' + orig());
+              if (val == orig()) {
+                  return;
               }
+              orig(val);
+              // console.log('on valueHasMutated with ' + val + ' subscribed again');
             };
             ret[name] = cmpt;
           }

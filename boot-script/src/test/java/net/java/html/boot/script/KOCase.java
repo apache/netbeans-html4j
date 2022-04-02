@@ -19,7 +19,6 @@
 package net.java.html.boot.script;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
