@@ -463,6 +463,14 @@ public class JavaScriptBodyTest {
         assertEquals(value[1], "NetBeans", "As read later by different method");
     }
 
+    @KOTest
+    public void nestedArray() {
+        Object nested = Bodies.createNested();
+        assertTrue(nested instanceof Object[], "Returns an array: " + nested);
+        Object flat = ((Object[]) nested)[0];
+        assertTrue(flat instanceof Object[], "Containing an array: " + flat);
+        assertEquals("eggs", ((Object[]) flat)[0]);
+    }
 
     private static class R implements Runnable {
         int cnt;

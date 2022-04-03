@@ -276,4 +276,7 @@ final class Bodies {
         """
     )
     static native Object invoke(Object o, String n, Object arg);
+
+    @JavaScriptBody(args = {}, body = "return [['eggs']];")
+    static native Object createNested();
 }

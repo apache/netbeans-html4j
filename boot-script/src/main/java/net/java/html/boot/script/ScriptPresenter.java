@@ -199,6 +199,9 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
         Object[] arr = new Object[length];
         fn.invokeImpl(null, false, val, arr);
+        for (int i = 0; i < length; i++) {
+            arr[i] = toJava(arr[i]);
+        }
         return arr;
     }
 
