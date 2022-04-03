@@ -37,11 +37,14 @@ import org.netbeans.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public final class FnContext implements Closeable {
-    private static final FnContext DUMMY;
-    static {
-        DUMMY = new FnContext(null, null);
-        DUMMY.prev = DUMMY;
+    private static final FnContext DUMMY = new FnContext(null, null);
+    private final Fn.Presenter current;
+    private Object prev;
+    private FnContext(Fn.Presenter prevP, Fn.Presenter newP) {
+        this.current = newP;
+        this.prev = prevP != null ? prevP : this;
     }
+
 
     public static URL isJavaScriptCapable(ClassLoader l) {
         if (l instanceof JsClassLoader) {
@@ -88,9 +91,9 @@ public final class FnContext implements Closeable {
         return null;
     }
 
-    private static ThreadLocal<LinkedList<Fn.Promise>> PENDING = new ThreadLocal<>();
-    public static void registerPromise(Fn.Promise promise) {
-        LinkedList<Fn.Promise> list = PENDING.get();
+    private static ThreadLocal<LinkedList<Runnable>> PENDING = new ThreadLocal<>();
+    public static void registerMicrotask(Runnable promise) {
+        var list = PENDING.get();
         if (list == null) {
             list = new LinkedList<>();
             PENDING.set(list);
@@ -98,27 +101,16 @@ public final class FnContext implements Closeable {
         list.add(promise);
     }
 
-    private Object prev;
-    private final Fn.Presenter current;
-    private FnContext(Fn.Presenter prevP, Fn.Presenter newP) {
-        this.current = newP;
-        this.prev = prevP;
-    }
-
     @Override
     public void close() throws IOException {
         if (prev != this) {
             for (;;) {
-                LinkedList<Fn.Promise> list = PENDING.get();
-                Fn.Promise p = list == null ? null : list.pollFirst();
+                var list = PENDING.get();
+                var p = list == null ? null : list.pollFirst();
                 if (p == null) {
                     break;
                 }
-                try {
-                    p.resolve();
-                } catch (Throwable ex) {
-                    throw new IOException(ex);
-                }
+                p.run();
             }
             currentPresenter((Fn.Presenter)prev);
             prev = this;

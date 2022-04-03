@@ -354,8 +354,11 @@ public abstract class Fn {
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
 
-    /** Represents a JavaScript Promise.
-     * XXX:
+    /** Represents a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">JavaScript Promise</a>
+     * in Java. A promise is a microtask to be executed as soon as current
+     * "runnable" finishes. At that moment the {@link #compute()} method
+     * is invoked and the result is remebered.
+     * 
      * @since 1.8
      */
     public static abstract class Promise {
@@ -388,6 +391,11 @@ public abstract class Fn {
         private final Object failure;
         private boolean resolved;
 
+        /**
+         * Constructor for subclasses.
+         * @param p the presenter to resolve promise with
+         * @since 1.8
+         */
         protected Promise(Fn.Presenter p) {
             this.presenter = p;
             Object[] promiseSuccessFailure;
@@ -401,28 +409,45 @@ public abstract class Fn {
             this.failure = toJava(promiseSuccessFailure[2]);
         }
 
-        public Object toJsPromise() {
+        /**
+         * Schedules the promise invocation and returns JavaScript representation
+         * of the promise.
+         * 
+         * @return JavaScript {@code Promise} object
+         * @since 1.8
+         */
+        public final Object schedule() {
             try (var ctx = Fn.activate(presenter)) {
-                FnContext.registerPromise(this);
+                FnContext.registerMicrotask(this::resolve);
             } catch (IOException ex) {
                 throw new IllegalStateException(ex);
             }
             return promise;
         }
 
+        /** Implement in subclasses to perform the "promised" Java operation.
+         * Once this method finishes the system resolves the
+         * {@link #schedule() scheduled promise}.
+         * 
+         * @return the value to resolve the promise with
+         * @throws Throwable the exception to resolve the promise with
+         * @since 1.8
+         */
         protected abstract Object compute() throws Throwable;
 
-        public void resolve() throws Throwable {
+        private void resolve() {
             if (!resolved) {
                 try (var ctx = Fn.activate(presenter)) {
                     try {
                         Object result = compute();
                         wrapAndResolve()[1].invoke(null, success, result);
-                    } catch (Exception ex) {
+                    } catch (Throwable ex) {
                         wrapAndResolve()[1].invoke(null, failure, ex);
                     } finally {
                         resolved = true;
                     }
+                } catch (Exception ex) {
+                    throw new IllegalStateException(ex);
                 } 
             }
         }
