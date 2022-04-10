@@ -38,13 +38,66 @@ import org.netbeans.html.boot.spi.Fn;
  */
 public final class FnContext implements Closeable {
     private static final FnContext DUMMY = new FnContext(null, null);
-    private final Fn.Presenter current;
-    private Object prev;
-    private FnContext(Fn.Presenter prevP, Fn.Presenter newP) {
-        this.current = newP;
-        this.prev = prevP != null ? prevP : this;
+    private static final ThreadLocal<FnContext> CURRENT = new ThreadLocal<>();
+
+    private final Fn.Presenter presenter;
+    private final FnContext prev;
+    private boolean closed;
+    private LinkedList<Runnable> pending;
+
+    private FnContext(FnContext prevCtx, Fn.Presenter newP) {
+        this.presenter = newP;
+        this.prev = prevCtx;
     }
 
+    public static Closeable activate(Fn.Presenter newP) {
+        var ctx = CURRENT.get();
+        if (ctx != null && ctx.presenter == newP) {
+            return DUMMY;
+        }
+        ctx = new FnContext(ctx, newP);
+        CURRENT.set(ctx);
+        return ctx;
+    }
+
+    public static Fn.Presenter currentPresenter(boolean ignore) {
+        var ctx = CURRENT.get();
+        return ctx == null ? null : ctx.presenter;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (DUMMY == this) {
+            return;
+        }
+        if (closed) {
+            return;
+        }
+        try {
+            closed = true;
+            for (;;) {
+                var p = pending == null ? null : pending.pollFirst();
+                if (p == null) {
+                    break;
+                }
+                p.run();
+            }
+            if (presenter instanceof Flushable flushable) {
+                flushable.flush();
+            }
+        } finally {
+            assert CURRENT.get() == this;
+            CURRENT.set(prev);
+        }
+    }
+
+    public static void registerMicrotask(Runnable promise) {
+        var ctx = CURRENT.get();
+        if (ctx.pending == null) {
+            ctx.pending = new LinkedList<>();
+        }
+        ctx.pending.add(promise);
+    }
 
     public static URL isJavaScriptCapable(ClassLoader l) {
         if (l instanceof JsClassLoader) {
@@ -70,7 +123,7 @@ public final class FnContext implements Closeable {
         pw.println(" - include asm-5.0.jar on runtime classpath");
         pw.println(" - post process classes, see http://bits.netbeans.org/html+java/dev/net/java/html/js/package-summary.html#post-process");
         pw.append("However following classes has not been processed from ").println(res);
-        
+
         try {
             BufferedReader r = new BufferedReader(new InputStreamReader(res.openStream()));
             for (;;) {
@@ -90,66 +143,4 @@ public final class FnContext implements Closeable {
         Logger.getLogger(FnContext.class.getName()).log(Level.SEVERE, w.toString(), t);
         return null;
     }
-
-    private static ThreadLocal<LinkedList<Runnable>> PENDING = new ThreadLocal<>();
-    public static void registerMicrotask(Runnable promise) {
-        var list = PENDING.get();
-        if (list == null) {
-            list = new LinkedList<>();
-            PENDING.set(list);
-        }
-        list.add(promise);
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (prev != this) {
-            for (;;) {
-                var list = PENDING.get();
-                var p = list == null ? null : list.pollFirst();
-                if (p == null) {
-                    break;
-                }
-                p.run();
-            }
-            currentPresenter((Fn.Presenter)prev);
-            prev = this;
-            if (current instanceof Flushable) {
-                ((Flushable)current).flush();
-            }
-        }
-    }
-/*
-    @Override
-    protected void finalize() throws Throwable {
-        if (prev != null) {
-            LOG.warning("Unclosed context!");
-        }
-    }
-*/
-    public static Closeable activate(Fn.Presenter newP) {
-        final Fn.Presenter oldP = currentPresenter(newP);
-        if (oldP == newP) {
-            return DUMMY;
-        }
-        return new FnContext(oldP, newP);
-    }
-    
-    
-    private static final ThreadLocal<Fn.Presenter> CURRENT = new ThreadLocal<Fn.Presenter>();
-
-    public static Fn.Presenter currentPresenter(Fn.Presenter p) {
-        Fn.Presenter prev = CURRENT.get();
-        CURRENT.set(p);
-        return prev;
-    }
-
-    public static Fn.Presenter currentPresenter(boolean fail) {
-        Fn.Presenter p = CURRENT.get();
-        if (p == null && fail) {
-            throw new IllegalStateException("No current WebView context around!");
-        }
-        return p;
-    }
-    
 }

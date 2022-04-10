@@ -93,7 +93,6 @@ public final class JsonFX implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
         }
     }
     

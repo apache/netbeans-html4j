@@ -59,15 +59,14 @@ public class CountFnCreationTest implements Fn.Presenter {
         }
         ClassLoader l = FnUtils.newLoader(new Res(), this, CountFnCreationTest.class.getClassLoader().getParent());
         Method m = l.loadClass(CountFnCreationTest.class.getName()).getMethod("body");
-        Closeable c = Fn.activate(this);
-        try {
+        try (var ctx = Fn.activate(this)) {
             assertEquals(cnt, 0, "No functions yet");
             m.invoke(null);
             assertEquals(cnt, 1, "One function defined");
             m.invoke(null);
             assertEquals(cnt, 1, "Still one function");
-        } finally {
-            c.close();
+            // closing twice: explicitly and implicitly
+            ctx.close();
         }
     }
 

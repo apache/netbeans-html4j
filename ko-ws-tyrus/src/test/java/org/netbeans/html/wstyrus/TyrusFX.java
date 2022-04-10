@@ -93,7 +93,6 @@ public final class TyrusFX implements ITest, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
         }
     }
     
