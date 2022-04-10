@@ -20,8 +20,9 @@ package org.netbeans.html.boot.fx;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Platform;
-import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
@@ -34,6 +35,8 @@ import org.testng.annotations.Test;
  * @author Jaroslav Tulach
  */
 public final class KOFx implements ITest, IHookable, Runnable {
+    private static final Timer SCHEDULER = new Timer("Fx Scheduler");
+    
     private final Fn.Presenter p;
     private final Method m;
     private Object result;
@@ -79,7 +82,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
                 notify = false;
-                Platform.runLater(this);
+                schedule(this, 10);
                 return;
             }
             result = r;
@@ -89,7 +92,6 @@ public final class KOFx implements ITest, IHookable, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
         }
     }
 
@@ -98,4 +100,12 @@ public final class KOFx implements ITest, IHookable, Runnable {
         ihcb.runTestMethod(itr);
     }
     
+    private static void schedule(Runnable task, long delay) {
+        SCHEDULER.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(task);
+            }
+        }, delay);
+    }
 }
