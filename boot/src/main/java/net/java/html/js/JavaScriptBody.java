@@ -126,18 +126,26 @@ public @interface JavaScriptBody {
      */
     public boolean keepAlive() default true;
 
-    /** Should a call to Java be synchronous or asynchronous.
+    /** Wait for the call to Java to finish or not. When
+     * an <em>asynchronous Java call</em> is requested
+     * via the {@link #javacall() java call syntax} the result is JavaScript
+     * <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>
+     * object.
+     * Once the Java call is finished, the {@code Promise} gets resolved.
      * <p>
-     * <em>Asynchronous Java Call</em>
-     * <p>
+     * <em>Compatibility note:</em>
+     * Whether or not the Java call is delayed and <em>performed later</em>
+     * or whether it is executed <em>immediately</em> depends on the actual 
+     * {@linkplain org.netbeans.html.boot.spi.Fn.Presenter presenter implementation}.
+     * Old <em>presenters</em> may not recognize this attribute at all -
+     * it is always preferable to wrap the call into
+     * <code>Promise.resolve(resultOfTheCallToJava)</code>
+     * to make sure the result is really JavaScript
+     * <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>
+     * object.
      *
-     * All calls to Java done via the {@link #javacall() java call syntax}
-     * return JavaScript
-     * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>.
-     * E.g. the Java call is delayed until execution of current JavaScript
-     * is over. Once the Java call is finished, the {@code Promise} is resolved.
-     *
-     * @return {@code false} if the Java call should use a <em>promise</em>
+     * @return {@code false} if the Java call should result a <em>promise</em>
+     *   object to be resolved later
      * @since 1.8
      */
     public boolean wait4java() default true;

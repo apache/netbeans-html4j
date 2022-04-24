@@ -163,6 +163,16 @@ $ mvn -f client/pom.xml process-classes exec:exec
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
         </script>
         
+        <h3>New in version 1.8</h3>
+        <p>
+            Asynchronous calls to Java - since <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/44">PR #44</a>
+            the {@link net.java.html.js.JavaScriptBody} annotation supports new
+            {@link net.java.html.js.JavaScriptBody#wait4java wait4java=false}
+            attribute. That allows one make an asynchronous call to Java. 
+            More information in the updated
+            {@link net.java.html.js Java/JavaScript interactions} page.
+        </p>
+
         <h3>New in version 1.7.3</h3>
         <p>
             Giving proper OSGi name to 
