@@ -18,6 +18,7 @@
  */
 package net.java.html.js.tests;
 
+import net.java.html.js.JavaScriptBody;
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
 import static net.java.html.js.tests.JavaScriptBodyTest.assertFalse;
 import net.java.html.json.tests.PhaseExecutor;
@@ -43,4 +44,20 @@ public class AsyncJavaTest {
             assertEquals(result, 120);
         }).start();
     }
+
+    @KOTest
+    public void initializedFromJavaScript() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            return AsyncJavaScriptAction.defineCallback();
+        }).then((action) -> {
+            AsyncJavaScriptAction.invokeCallbackLater(33);
+        }).then((action) -> {
+            assertEquals(action.getResult(), 33, "Set to 33");
+        }).then((action) -> {
+            AsyncJavaScriptAction.invokeCallbackLater(42);
+        }).then((action) -> {
+            assertEquals(action.getResult(), 42, "Set to 42");
+        }).start();
+    }
+
 }

@@ -737,6 +737,9 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             microTasks.add(() -> {
                 javapromise(a1, a2, a3, a4);
             });
+            if (topMostCall() == null) {
+                dispatch(this::flushImpl);
+            }
         }
     }
 
