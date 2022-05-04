@@ -18,114 +18,46 @@
  */
 package net.java.html.js.tests;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 import net.java.html.js.JavaScriptBody;
-import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
-import static net.java.html.js.tests.JavaScriptBodyTest.assertTrue;
-import static net.java.html.js.tests.JavaScriptBodyTest.fail;
 
 final class AsyncJavaScriptAction {
-    private List<Integer> collected = new java.util.ArrayList<>();
-    private boolean successStoringLater;
-    private AssertionError invertedVia;
+    private int result;
 
-    @JavaScriptBody(args = { "n" }, javacall = true, body = """
-        return this.@net.java.html.js.tests.AsyncJavaScriptAction::performIteration(I)(n);
-    """)
-    private native int enterJavaScriptAndPerformIteration(int n);
+    private AsyncJavaScriptAction() {
+    }
 
-    @JavaScriptBody(args = {}, javacall = true, body = """
+    static AsyncJavaScriptAction defineCallback() {
+        AsyncJavaScriptAction action = new AsyncJavaScriptAction();
+        action.defineCallbackImpl();
+        return action;
+    }
+
+    @JavaScriptBody(args = {}, javacall = true, wait4java = false, body = """
         var self = this;
         var global = (0 || eval)("this");
-        global.storeLater = function(s) {
-            self.@net.java.html.js.tests.AsyncJavaScriptAction::storeLater(I)(s);
+        global.callJava = function(s) {
+            self.@net.java.html.js.tests.AsyncJavaScriptAction::callJava(I)(s);
         };
     """)
-    private native void defineStore();
+    private native void defineCallbackImpl();
 
-    @JavaScriptBody(args = { "store" }, javacall = true, wait4js = false, body = """
-        storeLater(store);
-    """)
-    private static native void jsStore(int store);
+    void callJava(int i) {
+        this.result = i;
+    }
 
-    void storeLater(int value) {
-        if (!collected.isEmpty()) {
-            if (collected.get(collected.size() - 1) > value) {
-                invertedVia = new AssertionError("Not in order " + value, invertedVia);
+    static boolean invokeCallbackLater(int n) {
+        return JsUtils.executeNow(AsyncJavaScriptAction.class, """
+            if (typeof setTimeout === 'function') {
+                setTimeout(function() {
+                    callJava($n);
+                }, 5);
+            } else {
+                callJava($n);
             }
-        }
-        collected.add(value);
+        """.replaceAll("\\$n", "" + n));
     }
 
-    @JavaScriptBody(args = {}, body = "")
-    native void flushPendingJavaScripts();
-
-    int performIteration(int middle) {
-        for (int i = -5; i < 0; i++) {
-            jsStore(middle + i);
-        }
-        String n = "" + middle;
-        successStoringLater = JsUtils.executeNow(AsyncJavaScriptAction.class, "storeLater(" + n + ");");
-        for (int i = 1; i <= 5; i++) {
-            jsStore(middle + i);
-        }
-        return middle + 5;
+    int getResult() {
+        return result;
     }
-
-    private void performTheTest(Function<Integer,Integer> iteration) {
-        defineStore();
-        assertEquals(iteration.apply(0), 5);
-        if (!successStoringLater) {
-            return;
-        }
-        flushPendingJavaScripts();
-        assertEquals(collected.size(), 11, "11 items: " + collected);
-        assertSequenceButN(collected, -5, 6, 1);
-        assertEquals(iteration.apply(11), 16);
-        if (!successStoringLater) {
-            return;
-        }
-        flushPendingJavaScripts();
-        assertSequenceButN(collected, -5, 17, 2);
-    }
-
-    private static void assertSequenceButN(List<Integer> data, int from, int upto, int allowedDisorder) {
-        int count = upto - from;
-        assertEquals(data.size(), count, "all items: " + data);
-        Set<Integer> all = new HashSet<>(data);
-        Integer prev = null;
-        for (int i = from, at = 0; i < upto; i++, at++) {
-            final Integer atI = data.get(at);
-            if (prev != null && prev < atI) {
-                if (--allowedDisorder < 0) {
-                    fail("expecting ordered data from " + from + ".." + (upto - 1) + " but too many misorders: " + data);
-                }
-            }
-            all.remove(i);
-        }
-        assertTrue(all.isEmpty(), from + ".." + (upto - 1) + " in " + data);
-    }
-
-    public void testWithCallback() {
-        performTheTest(new Function<Integer,Integer>() {
-            @Override
-            public Integer apply(Integer t) {
-                return enterJavaScriptAndPerformIteration(t);
-            }
-        });
-    }
-
-    public void testWithoutCallback() {
-        performTheTest(new Function<Integer,Integer>() {
-            @Override
-            public Integer apply(Integer t) {
-                return performIteration(t);
-            }
-        });
-    }
-
 }

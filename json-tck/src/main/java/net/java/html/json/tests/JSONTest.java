@@ -21,8 +21,6 @@ package net.java.html.json.tests;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.Model;
 import net.java.html.json.ModelOperation;
@@ -46,30 +44,27 @@ import org.netbeans.html.json.tck.KOTest;
     @Property(name = "fetchedSex", type = Sex.class, array = true)
 })
 public final class JSONTest {
-    private JSONik js;
-    private Integer orig;
-    private String url;
+    private final PhaseExecutor[] phases = { null };
+    private static class Data {
+        final JSONik js;
+        final Integer orig;
+        final String url;
+        final BrwsrCtx ctx;
 
-    static {
-        if (System.getProperty("java.version").startsWith("1.")) {
-            try {
-                System.setProperty("file.encoding", "windows-1251");
-                Field f = Charset.class.getDeclaredField("defaultCharset");
-                f.setAccessible(true);
-                f.set(null, null);
-                assertEquals(Charset.defaultCharset().toString(), "windows-1251", "Encoding has been changed");
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
+        Data(JSONik js, Integer orig, String url, BrwsrCtx ctx) {
+            this.js = js;
+            this.orig = orig;
+            this.url = url;
+            this.ctx = ctx;
         }
     }
 
     @ModelOperation static void assignFetched(JSONik m, Person p) {
         m.setFetched(p);
     }
-    private BrwsrCtx ctx;
 
-    @KOTest public void toJSONInABrowser() throws Throwable {
+    @KOTest
+    public void toJSONInABrowser() throws Throwable {
         Person p = Models.bind(new Person(), newContext());
         p.setSex(Sex.MALE);
         p.setFirstName("Jára");
@@ -220,86 +215,83 @@ public final class JSONTest {
         model.setFetchedCount(sum);
     }
 
-    @KOTest public void loadAndParseJSON() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseJSON() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), ctx = newContext());
+            var ctx = newContext();
+            var js = Models.bind(new JSONik(), ctx);
             js.applyBindings();
 
             js.setFetched(null);
             js.fetch(url);
-        }
-
-        Person p = js.getFetched();
-        if (p == null) {
-            throw new InterruptedException();
-        }
-
-        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
-        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-
-        assertEquals(ctx, onCallback, "Context is the same");
+            return new Data(js, 0, url, ctx);
+        }).then((d) -> {
+            Person p = d.js.getFetched();
+            assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
+            assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
+            assertEquals(d.ctx, onCallback, "Context is the same");
+        }).start();
     }
 
-    @KOTest public void loadAndParsePlainText() throws Exception {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParsePlainText() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
                 "text/plain"
             );
-            js = Models.bind(new JSONik(), ctx = newContext());
+            var ctx = newContext();
+            var js = Models.bind(new JSONik(), ctx);
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchPlain(url);
-        }
-
-        String s = js.getFetchedResponse();
-        if (s == null) {
-            throw new InterruptedException();
-        }
-
-        assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
-        assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
-
-        Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
-
-        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
-        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-
-        assertEquals(ctx, onCallback, "Same context");
+            return new Data(js, 0, url, ctx);
+        }).then((data) -> {
+            String s = data.js.getFetchedResponse();
+            assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
+            assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
+            Person p = Models.parse(data.ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
+            assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
+            assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
+            assertEquals(data.ctx, onCallback, "Same context");
+        }).start();
     }
 
-    @KOTest public void loadAndParsePlainTextOnArray() throws Exception {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParsePlainTextOnArray() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "[ {'firstName': 'Sitar', 'sex': 'MALE'} ]",
                 "text/plain"
             );
-            js = Models.bind(new JSONik(), ctx = newContext());
+            var ctx = newContext();
+            var js = Models.bind(new JSONik(), ctx);
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchPlain(url);
-        }
+            return new Data(js, 0, url, ctx);
+        }).then((data) -> {
+            String s = data.js.getFetchedResponse();
+            if (s == null) {
+                throw new InterruptedException();
+            }
 
-        String s = js.getFetchedResponse();
-        if (s == null) {
-            throw new InterruptedException();
-        }
+            assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
+            assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
 
-        assertTrue(s.contains("Sitar"), "The text contains Sitar value: " + s);
-        assertTrue(s.contains("MALE"), "The text contains MALE value: " + s);
+            Person p = Models.parse(data.ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
 
-        Person p = Models.parse(ctx, Person.class, new ByteArrayInputStream(s.getBytes()));
+            assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
+            assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
 
-        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
-        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
-
-        assertEquals(ctx, onCallback, "Same context");
+            assertEquals(data.ctx, onCallback, "Same context");
+        }).start();
     }
 
     @OnReceive(url="{url}?callme={me}", jsonp = "me")
@@ -307,37 +299,37 @@ public final class JSONTest {
         model.setFetched(p);
     }
 
-    @KOTest public void loadAndParseJSONP() throws InterruptedException, Exception {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseJSONP() throws InterruptedException, Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "$0({'firstName': 'Mitar', 'sex': 'MALE'})",
                 "application/javascript",
                 "callme"
             );
-            orig = scriptElements();
+            var orig = scriptElements();
             assertTrue(orig > 0, "There should be some scripts on the page");
 
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchViaJSONP(url);
-        }
+            return new Data(js, orig, url, null);
+        }).then((data) -> {
+            Person p = data.js.getFetched();
+            if (p == null) {
+                throw new InterruptedException();
+            }
 
-        Person p = js.getFetched();
-        if (p == null) {
-            throw new InterruptedException();
-        }
+            assertEquals("Mitar", p.getFirstName(), "Unexpected: " + p.getFirstName());
+            assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
 
-        assertEquals("Mitar", p.getFirstName(), "Unexpected: " + p.getFirstName());
-        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
+            int now = scriptElements();
 
-        int now = scriptElements();
-
-        assertEquals(orig, now, "The set of elements is unchanged. Delta: " + (now - orig));
+            assertEquals(data.orig, now, "The set of elements is unchanged. Delta: " + (now - data.orig));
+        }).start();
     }
-
-
 
     @OnReceive(url="{url}", method = "PUT", data = Person.class)
     static void putPerson(JSONik model, String reply) {
@@ -345,41 +337,45 @@ public final class JSONTest {
         model.setFetchedResponse(reply);
     }
 
-    @KOTest public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void putPeopleUsesRightMethod() throws InterruptedException, Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "$0\n$1",
                 "text/plain",
                 "http.method", "http.requestBody"
             );
-            orig = scriptElements();
+            var orig = scriptElements();
             assertTrue(orig > 0, "There should be some scripts on the page");
 
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             Person p = Models.bind(new Person(), BrwsrCtx.EMPTY);
             p.setFirstName("Jarda");
             js.putPerson(url, p);
-        }
 
-        int cnt = js.getFetchedCount();
-        if (cnt == 0) {
-            throw new InterruptedException();
-        }
-        String res = js.getFetchedResponse();
-        int line = res.indexOf('\n');
-        String msg;
-        if (line >= 0) {
-            msg = res.substring(line + 1);
-            res = res.substring(0, line);
-        } else {
-            msg = res;
-        }
+            return new Data(js, orig, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            int cnt = js.getFetchedCount();
+            if (cnt == 0) {
+                throw new InterruptedException();
+            }
+            String res = js.getFetchedResponse();
+            int line = res.indexOf('\n');
+            String msg;
+            if (line >= 0) {
+                msg = res.substring(line + 1);
+                res = res.substring(0, line);
+            } else {
+                msg = res;
+            }
 
-        assertEquals("PUT", res, "Server was queried with PUT method: " + js.getFetchedResponse());
+            assertEquals("PUT", res, "Server was queried with PUT method: " + js.getFetchedResponse());
 
-        assertTrue(msg.contains("Jarda"), "Data transferred to the server: " + msg);
+            assertTrue(msg.contains("Jarda"), "Data transferred to the server: " + msg);
+        }).start();
     }
 
     private static int scriptElements() throws Exception {
@@ -394,79 +390,87 @@ public final class JSONTest {
             "return window.JSON.parse(arguments[0]);", s);
     }
 
-    @KOTest public void loadAndParseJSONSentToArray() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseJSONSentToArray() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'firstName': 'Sitar', 'sex': 'MALE'}",
                 "application/json"
             );
 
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.setFetched(null);
             js.fetchArray(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            Person p = data.js.getFetched();
+            if (p == null) {
+                throw new InterruptedException();
+            }
 
-        Person p = js.getFetched();
-        if (p == null) {
-            throw new InterruptedException();
-        }
-
-        assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
-        assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
+            assertEquals("Sitar", p.getFirstName(), "Expecting Sitar: " + p.getFirstName());
+            assertEquals(Sex.MALE, p.getSex(), "Expecting MALE: " + p.getSex());
+        }).start();
     }
 
-    @KOTest public void loadAndParseJSONArraySingle() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseJSONArraySingle() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'}]",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.setFetched(null);
             js.fetch(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            Person p = data.js.getFetched();
+            if (p == null) {
+                throw new InterruptedException();
+            }
 
-        Person p = js.getFetched();
-        if (p == null) {
-            throw new InterruptedException();
-        }
-
-        assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
-        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+            assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
+            assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+        }).start();
     }
 
-    @KOTest public void loadAndParseArrayInPeople() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseArrayInPeople() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'info':[{'firstName': 'Gitar', 'sex': 'FEMALE'}]}",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchPeople(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            if (0 == js.getFetchedCount()) {
+                throw new InterruptedException();
+            }
 
-        if (0 == js.getFetchedCount()) {
-            throw new InterruptedException();
-        }
+            assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
 
-        assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
+            Person p = js.getFetched();
 
-        Person p = js.getFetched();
-
-        assertNotNull(p, "We should get our person back: " + p);
-        assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
-        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+            assertNotNull(p, "We should get our person back: " + p);
+            assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
+            assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+        }).start();
     }
 
-    @KOTest public void loadAndParseArrayInPeopleWithHeaders() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseArrayInPeopleWithHeaders() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'info':[{'firstName': '$0$1$2$3$4', 'sex': 'FEMALE'}]}",
                 "application/json",
                 "http.header.Easy",
@@ -475,23 +479,26 @@ public final class JSONTest {
                 "http.header.Repeat*ed",
                 "http.header.Same-URL"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchPeopleWithHeaders(url, "easy", "harder", "rep");
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            var url = data.url;
+            if (0 == js.getFetchedCount()) {
+                throw new InterruptedException();
+            }
 
-        if (0 == js.getFetchedCount()) {
-            throw new InterruptedException();
-        }
+            assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
 
-        assertEquals(js.getFetchedCount(), 1, "One person loaded: " + js.getFetchedCount());
+            Person p = js.getFetched();
 
-        Person p = js.getFetched();
-
-        assertNotNull(p, "We should get our person back: " + p);
-        assertEquals("easyharderreprep" + url, p.getFirstName(), "Expecting header mess: " + p.getFirstName());
-        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+            assertNotNull(p, "We should get our person back: " + p);
+            assertEquals("easyharderreprep" + url, p.getFirstName(), "Expecting header mess: " + p.getFirstName());
+            assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+        }).start();
     }
 
     @OnReceive(url="{url}", headers={
@@ -509,23 +516,26 @@ public final class JSONTest {
         model.setFetchedCount(size);
     }
 
-    @KOTest public void loadAndParseArrayOfIntegers() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest
+    public void loadAndParseArrayOfIntegers() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'age':[1, 2, 3]}",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchPeopleAge(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            if (0 == js.getFetchedCount()) {
+                throw new InterruptedException();
+            }
 
-        if (0 == js.getFetchedCount()) {
-            throw new InterruptedException();
-        }
-
-        assertEquals(js.getFetchedCount(), 6, "1 + 2 + 3 is " + js.getFetchedCount());
+            assertEquals(js.getFetchedCount(), 6, "1 + 2 + 3 is " + js.getFetchedCount());
+        }).start();
     }
 
     @OnReceive(url="{url}")
@@ -534,71 +544,75 @@ public final class JSONTest {
         model.getFetchedSex().addAll(p.getSex());
     }
 
-    @KOTest public void loadAndParseArrayOfEnums() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest public void loadAndParseArrayOfEnums() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "{'sex':['FEMALE', 'MALE', 'MALE']}",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
 
             js.fetchPeopleSex(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            if (0 == js.getFetchedCount()) {
+                throw new InterruptedException();
+            }
 
-        if (0 == js.getFetchedCount()) {
-            throw new InterruptedException();
-        }
+            assertEquals(js.getFetchedCount(), 1, "Loaded");
 
-        assertEquals(js.getFetchedCount(), 1, "Loaded");
-
-        assertEquals(js.getFetchedSex().size(), 3, "Three values " + js.getFetchedSex());
-        assertEquals(js.getFetchedSex().get(0), Sex.FEMALE, "Female first " + js.getFetchedSex());
-        assertEquals(js.getFetchedSex().get(1), Sex.MALE, "male 2nd " + js.getFetchedSex());
-        assertEquals(js.getFetchedSex().get(2), Sex.MALE, "male 3rd " + js.getFetchedSex());
+            assertEquals(js.getFetchedSex().size(), 3, "Three values " + js.getFetchedSex());
+            assertEquals(js.getFetchedSex().get(0), Sex.FEMALE, "Female first " + js.getFetchedSex());
+            assertEquals(js.getFetchedSex().get(1), Sex.MALE, "male 2nd " + js.getFetchedSex());
+            assertEquals(js.getFetchedSex().get(2), Sex.MALE, "male 3rd " + js.getFetchedSex());
+        }).start();
     }
 
-    @KOTest public void loadAndParseJSONArray() throws InterruptedException {
-        if (js == null) {
-            url = Utils.prepareURL(
+    @KOTest public void loadAndParseJSONArray() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var url = Utils.prepareURL(
                 JSONTest.class, "[{'firstName': 'Gitar', 'sex': 'FEMALE'},"
                 + "{'firstName': 'Peter', 'sex': 'MALE'}"
                 + "]",
                 "application/json"
             );
-            js = Models.bind(new JSONik(), newContext());
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
             js.setFetched(null);
 
             js.fetchArray(url);
-        }
+            return new Data(js, 0, url, null);
+        }).then((data) -> {
+            var js = data.js;
+            Person p = js.getFetched();
+            if (p == null) {
+                throw new InterruptedException();
+            }
 
-
-        Person p = js.getFetched();
-        if (p == null) {
-            throw new InterruptedException();
-        }
-
-        assertEquals(js.getFetchedCount(), 2, "We got two values: " + js.getFetchedCount());
-        assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
-        assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+            assertEquals(js.getFetchedCount(), 2, "We got two values: " + js.getFetchedCount());
+            assertEquals("Gitar", p.getFirstName(), "Expecting Gitar: " + p.getFirstName());
+            assertEquals(Sex.FEMALE, p.getSex(), "Expecting FEMALE: " + p.getSex());
+        }).start();
     }
 
-    @KOTest public void loadError() throws InterruptedException {
-        if (js == null) {
-            js = Models.bind(new JSONik(), newContext());
+    @KOTest
+    public void loadError() throws Exception {
+        PhaseExecutor.schedule(phases, () -> {
+            var js = Models.bind(new JSONik(), newContext());
             js.applyBindings();
             js.setFetched(null);
 
             js.fetchArray("http://127.0.0.1:54253/does/not/exist.txt");
-        }
-
-
-        if (js.getFetchedResponse() == null) {
-            throw new InterruptedException();
-        }
-
-        assertEquals("Exception", js.getFetchedResponse(), "Response " + js.getFetchedResponse());
+            return new Data(js, 0, null, null);
+        }).then((data) -> {
+            var js = data.js;
+            if (js.getFetchedResponse() == null) {
+                throw new InterruptedException();
+            }
+            assertEquals("Exception", js.getFetchedResponse(), "Response " + js.getFetchedResponse());
+        }).start();
     }
 
     @Model(className = "NameAndValue", properties = {

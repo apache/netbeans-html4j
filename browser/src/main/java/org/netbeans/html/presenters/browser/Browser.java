@@ -531,9 +531,11 @@ Executor, Closeable {
             );
         }
         sb.append(""
-            + "request.open('PUT', url, false);\n"
+            + "var async = name === 'p';\n"
+            + "request.open('PUT', url, async);\n"
             + "request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8');\n"
             + "request.send(body);\n"
+            + "if (async) return '';\n"
             + "var txt = request.responseText;\n"
         );
         if (Browser.this.config.debug) {

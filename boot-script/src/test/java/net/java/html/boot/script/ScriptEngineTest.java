@@ -90,6 +90,7 @@ public class ScriptEngineTest {
                 if (n === 'Boolean') continue;
                 if (n === 'Array') continue;
                 if (n === 'eval') continue;
+                if (n === 'Promise') continue;
                 delete this[n];
               }
               return Object.getOwnPropertyNames(this).toString();

@@ -18,13 +18,17 @@
  */
 package net.java.html.boot.script;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.impl.FnContext;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITest;
 import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 /**
@@ -48,16 +52,24 @@ public final class ScriptEngineCase implements ITest, IHookable {
     }
 
     @Test
-    public synchronized void executeTest() throws Exception {
-        try {
-            FnContext.currentPresenter(p);
-            // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
-            Object instance = method.getDeclaringClass().newInstance();
-            method.invoke(instance);
-            // END: net.java.html.boot.script.ScriptEngineCase#run
-        } finally {
-            FnContext.currentPresenter(null);
+    public synchronized void executeTest() throws Throwable {
+        skipAsyncJavaTestWhenNoPromise();
+        // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
+        Object instance = method.getDeclaringClass().newInstance();;
+        for (int round = 0;; round++) {
+            try (var ctx = Fn.activate(p)) {
+                assert ctx != null;
+                method.invoke(instance);
+                return;
+            } catch (InvocationTargetException ite) {
+                final Throwable ex = ite.getTargetException();
+                if (ex instanceof InterruptedException && round < 100) {
+                    continue;
+                }
+                throw ex;
+            }
         }
+        // END: net.java.html.boot.script.ScriptEngineCase#run
     }
 
     @Override
@@ -65,4 +77,16 @@ public final class ScriptEngineCase implements ITest, IHookable {
         ihcb.runTestMethod(itr);
     }
 
+    private void skipAsyncJavaTestWhenNoPromise() throws IOException, SkipException {
+        if (method.getDeclaringClass().getSimpleName().equals("AsyncJavaTest")) {
+            try (var ctx = Fn.activate(p)) {
+                if (!typeOfPromise().equals("function")) {
+                    throw new SkipException("Skipping " + method.getName() + " no Promise found");
+                }
+            }
+        }
+    }
+
+    @JavaScriptBody(args = {}, body = "return typeof Promise")
+    private static native String typeOfPromise();
 }

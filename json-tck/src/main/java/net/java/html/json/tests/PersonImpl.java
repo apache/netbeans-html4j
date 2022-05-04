@@ -21,6 +21,7 @@ package net.java.html.json.tests;
 import net.java.html.json.ComputedProperty;
 import net.java.html.json.Function;
 import net.java.html.json.Model;
+import net.java.html.json.OnPropertyChange;
 import net.java.html.json.Property;
 
 /**
@@ -34,6 +35,15 @@ import net.java.html.json.Property;
     @Property(name = "address", type = Address.class)
 })
 final class PersonImpl {
+    @OnPropertyChange("firstName")
+    static void onFirstNameChange(Person model) {
+        // System.err.println("model updated to " + toDebug(model));
+    }
+
+    static String toDebug(Person model) {
+        return model + "@0x" + Integer.toHexString(System.identityHashCode(model));
+    }
+
     @ComputedProperty(write = "parseNames")
     public static String fullName(String firstName, String lastName) {
         return firstName + " " + lastName;
@@ -44,12 +54,12 @@ final class PersonImpl {
         p.setFirstName(arr[0]);
         p.setLastName(arr[1]);
     }
-    
+
     @ComputedProperty
     public static String sexType(Sex sex) {
         return sex == null ? "unknown" : sex.toString();
     }
-    
+
     @Function
     static void changeSex(Person p) {
         if (p.getSex() == Sex.MALE) {
@@ -58,7 +68,7 @@ final class PersonImpl {
             p.setSex(Sex.MALE);
         }
     }
-    
+
     @Model(className = "People", properties = {
         @Property(array = true, name = "info", type = Person.class),
         @Property(array = true, name = "nicknames", type = String.class),
@@ -67,7 +77,7 @@ final class PersonImpl {
     })
     public class PeopleImpl {
     }
-    
+
     @Model(className = "Address", properties = {
         @Property(name = "street", type = String.class)
     })

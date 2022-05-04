@@ -36,11 +36,13 @@ import static net.java.html.json.tests.Utils.assertEquals;
     @Property(name = "rows", type = Row.class, array = true),
 })
 public final class MinesTest {
-    Mines m;
-    @KOTest public void paintTheGridOnClick() throws Throwable {
-        if (m == null) {
+    private final PhaseExecutor[] phases = { null };
+
+    @KOTest
+    public void paintTheGridOnClick() throws Throwable {
+        PhaseExecutor.schedule(phases, () -> {
             BrwsrCtx ctx = Utils.newContext(MinesTest.class);
-            Object exp = Utils.exposeHTML(MinesTest.class, """
+            Utils.exposeHTML(MinesTest.class, """
                 <button id='init' data-bind='click: normalSize'></button>
                 <table>
                     <tbody id='table'>
@@ -56,24 +58,24 @@ public final class MinesTest {
                     </tbody>
                 </table>
             """);
-            m = Models.bind(new Mines(), ctx);
+            Mines m = Models.bind(new Mines(), ctx);
             m.applyBindings();
+            return m;
+        }).then((data) -> {
             int cnt = Utils.countChildren(MinesTest.class, "table");
             assertEquals(cnt, 0, "Table is empty: " + cnt);
-            Utils.scheduleClick(MinesTest.class, "init", 100);
-        }
-
-
-        int cnt = Utils.countChildren(MinesTest.class, "table");
-        if (cnt == 0) {
-            throw new InterruptedException();
-        }
-        assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
-
-        Utils.exposeHTML(MinesTest.class, "");
+        }).then((data) -> {
+            Utils.scheduleClick(MinesTest.class, "init", 10);
+        }).then((data) -> {
+            int cnt = Utils.countChildren(MinesTest.class, "table");
+            assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
+        }).finalize((data) -> {
+            Utils.exposeHTML(MinesTest.class, "");
+        }).start();
     }
 
-    @KOTest public void countAround() throws Exception {
+    @KOTest
+    public void countAround() throws Exception {
         Mines mines = new Mines();
         mines.init(5, 5, 0);
         mines.getRows().get(0).getColumns().get(0).setMine(true);

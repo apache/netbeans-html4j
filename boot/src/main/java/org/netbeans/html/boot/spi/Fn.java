@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
@@ -349,6 +350,112 @@ public abstract class Fn {
          * @return function that can be later invoked
          */
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
+    }
+
+    /** Represents a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">JavaScript Promise</a>
+     * in Java. A promise is a microtask to be executed as soon as current
+     * "runnable" finishes. At that moment the {@link #compute()} method
+     * is invoked and the result is remebered.
+     * 
+     * @since 1.8
+     */
+    public static abstract class Promise {
+        private static Reference<Fn.Presenter> last = new WeakReference<>(null);
+        private static Fn[] lastFn;
+        private static synchronized Fn[] wrapAndResolve() {
+            final Presenter ap = Fn.activePresenter();
+            if (ap == null) {
+                throw new NullPointerException("No presenter!");
+            }
+            if (lastFn != null && last.get() == ap) {
+                return lastFn;
+            }
+            last = new WeakReference<>(ap);
+            return lastFn = new Fn[] {
+                Fn.define(Promise.class, """
+                    var arr = [null, null, null];
+                    arr[0] = new Promise(function (success, failure) {
+                        arr[1] = success;
+                        arr[2] = failure;
+                    });
+                    return arr;
+                    """),
+                Fn.define(Promise.class, "fn(value);", "fn", "value")
+            };
+        }
+        private final Fn.Presenter presenter;
+        private final Object promise;
+        private final Object success;
+        private final Object failure;
+        private boolean resolved;
+
+        /**
+         * Constructor for subclasses.
+         * @param p the presenter to resolve promise with
+         * @since 1.8
+         */
+        protected Promise(Fn.Presenter p) {
+            this.presenter = p;
+            Object[] promiseSuccessFailure;
+            try (var ctx = Fn.activate(p)) {
+                promiseSuccessFailure = (Object[]) wrapAndResolve()[0].invoke(null);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            this.promise = toJava(promiseSuccessFailure[0]);
+            this.success = toJava(promiseSuccessFailure[1]);
+            this.failure = toJava(promiseSuccessFailure[2]);
+        }
+
+        /**
+         * Schedules the promise invocation and returns JavaScript representation
+         * of the promise.
+         * 
+         * @return JavaScript {@code Promise} object
+         * @since 1.8
+         */
+        public final Object schedule() {
+            try (var ctx = Fn.activate(presenter)) {
+                FnContext.registerMicrotask(this::resolve);
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
+            return promise;
+        }
+
+        /** Implement in subclasses to perform the "promised" Java operation.
+         * Once this method finishes the system resolves the
+         * {@link #schedule() scheduled promise}.
+         * 
+         * @return the value to resolve the promise with
+         * @throws Throwable the exception to resolve the promise with
+         * @since 1.8
+         */
+        protected abstract Object compute() throws Throwable;
+
+        private void resolve() {
+            if (!resolved) {
+                try (var ctx = Fn.activate(presenter)) {
+                    try {
+                        Object result = compute();
+                        wrapAndResolve()[1].invoke(null, success, result);
+                    } catch (Throwable ex) {
+                        wrapAndResolve()[1].invoke(null, failure, ex);
+                    } finally {
+                        resolved = true;
+                    }
+                } catch (Exception ex) {
+                    throw new IllegalStateException(ex);
+                } 
+            }
+        }
+
+        private Object toJava(Object js) {
+            if (Fn.activePresenter() instanceof Fn.FromJavaScript p) {
+                return p.toJava(js);
+            }
+            return js;
+        }
     }
 
     /**

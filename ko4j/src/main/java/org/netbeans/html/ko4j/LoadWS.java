@@ -74,7 +74,7 @@ final class LoadWS {
         call.notifyError(null);
     }
     
-    @JavaScriptBody(args = { "back", "url" }, javacall = true, body = """
+    @JavaScriptBody(args = { "back", "url" }, javacall = true, wait4java = false, body = """
         if (window.WebSocket) {
           try {
             var ws = new window.WebSocket(url);

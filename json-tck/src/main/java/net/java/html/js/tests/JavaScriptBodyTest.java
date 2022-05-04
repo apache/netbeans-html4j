@@ -427,14 +427,14 @@ public class JavaScriptBodyTest {
     }
 
     @KOTest
-    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessing() {
-        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+    public void laterCallFromJavaScriptInMiddleOfDefferedProcessing() {
+        LaterJavaScriptAction t = new LaterJavaScriptAction();
         t.testWithoutCallback();
     }
 
     @KOTest
-    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessingFromCallback() {
-        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+    public void laterCallFromJavaScriptInMiddleOfDefferedProcessingFromCallback() {
+        LaterJavaScriptAction t = new LaterJavaScriptAction();
         t.testWithCallback();
     }
 
@@ -461,6 +461,15 @@ public class JavaScriptBodyTest {
         });
         assertEquals(value[0], "NetBeans", "As a returned value from defining method");
         assertEquals(value[1], "NetBeans", "As read later by different method");
+    }
+
+    @KOTest
+    public void nestedArray() {
+        Object nested = Bodies.createNested();
+        assertTrue(nested instanceof Object[], "Returns an array: " + nested);
+        Object flat = ((Object[]) nested)[0];
+        assertTrue(flat instanceof Object[], "Containing an array: " + flat);
+        assertEquals("eggs", ((Object[]) flat)[0]);
     }
 
     private static class R implements Runnable {

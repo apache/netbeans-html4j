@@ -31,60 +31,58 @@ import static net.java.html.json.tests.Utils.assertEquals;
 import org.netbeans.html.json.tck.KOTest;
 
 public class ObtainAndComputeTest {
-    ObtainData m;
+    private PhaseExecutor[] phases = new PhaseExecutor[1];
 
     @KOTest
     public void obtainAndComputeTest() throws Throwable {
-        if (m == null) {
+        PhaseExecutor.schedule(phases, () -> {
             BrwsrCtx ctx = Utils.newContext(ObtainAndComputeTest.class);
-            Utils.exposeHTML(ObtainAndComputeTest.class,
-                "<input type=\"text\" data-bind=\"textInput: filter\">\n" +
-                "<ul id='list' data-bind=\"foreach: filteredUsers\">\n" +
-                "   <li><div data-bind=\"text: email\"></div></li>\n" +
-                "</ul>\n" +
-                "<button id='button' data-bind=\"click: nextUsers\">more...</button>"
-            );
-            String d = "{\n" +
-"    \"data\": [{\n" +
-"            \"id\": 1,\n" +
-"            \"email\": \"george.bluth@gmail.com\"\n" +
-"        }, {\n" +
-"            \"id\": 2,\n" +
-"            \"email\": \"janet.weaver@gmail.com\"\n" +
-"        }, {\n" +
-"            \"id\": 3,\n" +
-"            \"email\": \"emma.wong@gmail.com\"\n" +
-"        }, {\n" +
-"            \"email\": \"eve.holt@gmail.com\"\n" +
-"        }, {\n" +
-"            \"email\": \"charles.morris@rgmail.com\"\n" +
-"        }, {\n" +
-"            \"id\": 6,\n" +
-"            \"email\": \"tracey.ramos@gmail.com\"\n" +
-"        }]\n" +
-"}\n" +
-"";
+            Utils.exposeHTML(ObtainAndComputeTest.class, """
+            <input type="text" data-bind="textInput: filter">
+            <ul id='list' data-bind="foreach: filteredUsers">
+               <li><div data-bind="text: email"></div></li>
+            </ul>
+            <button id='button' data-bind="click: nextUsers">more...</button>""");
+            String d = """
+            {
+                "data": [{
+                        "id": 1,
+                        "email": "george.bluth@gmail.com"
+                    }, {
+                        "id": 2,
+                        "email": "janet.weaver@gmail.com"
+                    }, {
+                        "id": 3,
+                        "email": "emma.wong@gmail.com"
+                    }, {
+                        "email": "eve.holt@gmail.com"
+                    }, {
+                        "email": "charles.morris@rgmail.com"
+                    }, {
+                        "id": 6,
+                        "email": "tracey.ramos@gmail.com"
+                    }]
+            }
+            """;
             String url = Utils.prepareURL(ObtainAndComputeTest.class, d, "application/json");
 
-            m = Models.bind(new ObtainData("holt", url, false), ctx);
+            var m = Models.bind(new ObtainData("holt", url, false), ctx);
             m.applyBindings();
+            return m;
+        }).then((m) -> {
             int cnt = Utils.countChildren(ObtainAndComputeTest.class, "list");
             assertEquals(cnt, 0, "No filtered users so far: " + cnt);
             Utils.scheduleClick(ObtainAndComputeTest.class, "button", 100);
-        }
-
-        if (!m.isGotReply()) {
-            throw new InterruptedException();
-        }
-        
-        try {
+        }).then((m) -> {
+            Utils.assertTrue(m.isGotReply(), "Expecting got reply: " + m);
+        }).then((m) -> {
             assertEquals(6, m.getUsers().size(), "Expecting some users: " + m);
             assertEquals(1, m.getFilteredUsers().size(), "Only one holt matching filter: " + m);
             int cnt = Utils.countChildren(ObtainAndComputeTest.class, "list");
             assertEquals(cnt, 1, "Also one user: " + cnt);
-        } finally {
+        }).finalize((m) -> {
             Utils.exposeHTML(ObtainAndComputeTest.class, "");
-        }
+        }).start();
     }
 
     //
@@ -130,7 +128,6 @@ public class ObtainAndComputeTest {
         )
         public static class UserVMD {
         }
-
     }
 
 }

@@ -40,17 +40,16 @@ final class LoadJSON {
         }
     }
 
-    @JavaScriptBody(args = {"name", "done"}, javacall = true, body
-        = """
-          if (window[name]) return false;
-           window[name] = function(data) {
-             delete window[name];
+    @JavaScriptBody(args = {"name", "done"}, javacall = true, wait4java = false, body = """
+        if (window[name]) return false;
+        window[name] = function(data) {
+            delete window[name];
             var el = window.document.getElementById(name);
             el.parentNode.removeChild(el);
             done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);
-          };
-          return true;
-          """
+        };
+        return true;
+        """
     )
     private static boolean defineIfUnused(String name, JSONCall done) {
         return true;
@@ -61,7 +60,7 @@ final class LoadJSON {
         return s;
     }
 
-    @JavaScriptBody(args = {"url", "done", "method", "data", "hp"}, javacall = true, body = """
+    @JavaScriptBody(args = {"url", "done", "method", "data", "hp"}, javacall = true, wait4java = false, body = """
         var request = new XMLHttpRequest();
         if (!method) method = 'GET';
         request.open(method, url, true);
@@ -76,9 +75,15 @@ final class LoadJSON {
           var r = request.response || request.responseText;
           try {
             var str = r;
-            if (request.status !== 0)
-              if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;    try { r = eval('(' + r + ')'); } catch (ignore) { }    @org.netbeans.html.ko4j.KOTransfer::notifySuccess(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)(done, str, r);
-          } catch (error) {;
+            if (request.status !== 0) {
+                if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;
+            }
+            try { 
+                r = eval('(' + r + ')');
+            } catch (ignore) {
+            }
+            @org.netbeans.html.ko4j.KOTransfer::notifySuccess(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)(done, str, r);
+          } catch (error) {
             @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);
           }
         };
@@ -90,7 +95,7 @@ final class LoadJSON {
         """
     )
     static void loadJSON(
-        String url, JSONCall done, String method, String data, Object[] headerPairs
+        String url, JSONCall done, String method, String data, Object[] hp
     ) {
     }
 

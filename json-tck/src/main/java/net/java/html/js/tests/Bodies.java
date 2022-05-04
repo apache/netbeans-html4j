@@ -209,19 +209,19 @@ final class Bodies {
     static native Object[] unknownArray();
 
     @JavaScriptBody(args = { "sum" }, javacall = true, body = """
-                                                              var arr = [];
-                                                              arr[1] = null;
-                                                              arr[2] = 1;
-                                                              return sum.@net.java.html.js.tests.Sum::sumNonNull([Ljava/lang/Object;)(arr);
-                                                              """
+        var arr = [];
+        arr[1] = null;
+        arr[2] = 1;
+        return sum.@net.java.html.js.tests.Sum::sumNonNull([Ljava/lang/Object;)(arr);
+        """
     )
     static native int sumNonNull(Sum sum);
 
     @JavaScriptBody(args = { "sum", "p" }, javacall = true, body = """
-                                                                   var obj = {};
-                                                                   obj.x = 1;
-                                                                   return sum.@net.java.html.js.tests.Sum::checkNonNull(Ljava/lang/Object;)(obj[p]);
-                                                                   """
+        var obj = {};
+        obj.x = 1;
+        return sum.@net.java.html.js.tests.Sum::checkNonNull(Ljava/lang/Object;)(obj[p]);
+        """
     )
     static native boolean nonNull(Sum sum, String p);
 
@@ -276,4 +276,7 @@ final class Bodies {
         """
     )
     static native Object invoke(Object o, String n, Object arg);
+
+    @JavaScriptBody(args = {}, body = "return [['eggs']];")
+    static native Object createNested();
 }

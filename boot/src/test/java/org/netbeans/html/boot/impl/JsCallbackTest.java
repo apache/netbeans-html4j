@@ -37,7 +37,7 @@ public class JsCallbackTest {
                       """;
         JsCallback instance = new JsCallbackImpl();
         try {
-            String result = instance.parse(body);
+            String result = instance.parse(body, false);
             fail("The parsing should fail!");
         } catch (IllegalStateException ex) {
             // OK
@@ -52,7 +52,7 @@ public class JsCallbackTest {
         private String params;
         
         @Override
-        public CharSequence callMethod(String ident, String fqn, String method, String params) {
+        public CharSequence callMethod(String ident, boolean promise, String fqn, String method, String params) {
             this.ident = ident;
             this.fqn = fqn;
             this.method = method;

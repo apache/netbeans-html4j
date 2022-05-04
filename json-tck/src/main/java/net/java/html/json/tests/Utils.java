@@ -135,7 +135,7 @@ public final class Utils {
         return ((Number) executeScript(caller, """
             var e = window.document.getElementById(arguments[0]);
             if (typeof e === 'undefined') return -2;
-             var list = e.childNodes;
+            var list = e.childNodes;
             var cnt = 0;
             for (var i = 0; i < list.length; i++) {
               if (list[i].nodeType == 1) cnt++;
