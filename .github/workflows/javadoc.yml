@@ -17,7 +17,7 @@
 # under the License.
 #
 
-name: HTML/Java API Javadoc
+name: Javadoc
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [ '15', '17' ]
+        java: [ '16', '17' ]
         os: [ ubuntu-20.04 ]
 
     steps:

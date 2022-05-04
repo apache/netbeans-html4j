@@ -16,31 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.html.presenters.browser;
+package net.java.html.js.tests;
 
 import net.java.html.js.JavaScriptBody;
 
-final class JavaScriptUtilities {
-    private JavaScriptUtilities() {
+public class AsyncJava {
+    private AsyncJava() {
     }
 
-    @JavaScriptBody(args = {  }, body =
-          """
-          var h;
-          if (!!window && !!window.location && !!window.location.href) {
-            h = window.location.href;
-          } else {
-            h = null;
-          }
-          return h;
-          """
-    )
-    static native String findBaseURL();
+    @JavaScriptBody(args = { "n", "fac", "done" }, javacall = true, wait4java = false, body = """
+    var result = {
+        x : -1
+    };
+    var facN = fac.@net.java.html.js.tests.AsyncJava.Fac::fac(I)(n);
+    facN.then(function (res) {
+        result.x = res;
+        done.@java.lang.Runnable::run()();
+    });
+    return result;
+    """)
+    static native Object computeInAsyncJava(int n, Fac fac, Runnable done);
 
-    @JavaScriptBody(args = {"value"}, body = "document.getElementById('loaded').innerHTML = value;")
-    static native void setLoaded(String value);
-
-    @JavaScriptBody(args = {"ms"}, body = "window.setTimeout(function() { window.close(); }, ms);")
-    static native void closeSoon(int ms);
+    interface Fac {
+        int fac(int n);
+    }
 
 }

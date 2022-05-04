@@ -243,10 +243,9 @@ public class JsClassLoaderBase {
     }
     
    @Test public void checkTheTypeOfThrownException() throws Throwable {
-        FnContext.currentPresenter(null);
-        assertNull(Fn.activePresenter(), "No presenter is activer right now");
         java.lang.Object res = null;
-        try {
+        try (var ctx = FnContext.activate(null)) {
+            assertNull(Fn.activePresenter(), "No presenter is activer right now");
             Method st = methodClass.getMethod("plus", int.class, int.class);
             try {
                 res = st.invoke(null, 40, 2);

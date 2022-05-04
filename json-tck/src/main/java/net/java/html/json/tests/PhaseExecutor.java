@@ -22,7 +22,7 @@ import java.util.List;
 import net.java.html.json.Models;
 import static net.java.html.json.tests.Utils.fail;
 
-final class PhaseExecutor<T> {
+public final class PhaseExecutor<T> {
     private final T data;
     private int at = -1;
     private int retry = 10;
@@ -45,7 +45,7 @@ final class PhaseExecutor<T> {
     private static PhaseExecutor prev;
     */
     
-    static <T> PhaseExecutor<T> schedule(PhaseExecutor[] phases, Init<T> data) throws Exception {
+    public static <T> PhaseExecutor<T> schedule(PhaseExecutor[] phases, Init<T> data) throws Exception {
         if (phases[0] == null) {
             phases[0] = new PhaseExecutor<T>(data.initialize());
         } else {
@@ -56,21 +56,21 @@ final class PhaseExecutor<T> {
         return phases[0];
     }
 
-    PhaseExecutor<T> then(Action<T> a) {
+    public PhaseExecutor<T> then(Action<T> a) {
         if (at == -1) {
             tasks.add(a);
         }
         return this;
     }
 
-    PhaseExecutor<T> finalize(Action<T> a) {
+    public PhaseExecutor<T> finalize(Action<T> a) {
         if (at == -1) {
             clean.add(a);
         }
         return this;
     }
 
-    void start() throws Exception {
+    public void start() throws Exception {
         if (at < 0) {
             at = 0;
         }

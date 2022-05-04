@@ -43,8 +43,8 @@ implements Transfer {
 
     @Override
     public void extract(Object obj, String[] props, Object[] values) {
-        if (obj instanceof JSObjToStr) {
-            obj = ((JSObjToStr)obj).obj;
+        if (obj instanceof JSObjToStr str) {
+            obj = str.obj;
         }
         LoadJSON.extractJSON(obj, props, values);
     }

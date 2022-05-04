@@ -138,7 +138,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             if (jsb.javacall()) {
                 JsCallback verify = new VerifyCallback(e);
                 try {
-                    verify.parse(jsb.body());
+                    verify.parse(jsb.body(), !jsb.wait4java());
                 } catch (IllegalStateException ex) {
                     msg.printMessage(Diagnostic.Kind.ERROR, ex.getLocalizedMessage(), e);
                 }
@@ -384,7 +384,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         }
 
         @Override
-        protected CharSequence callMethod(String ident, String fqn, String method, String params) {
+        protected CharSequence callMethod(String ident, boolean promise, String fqn, String method, String params) {
             final TypeElement type = processingEnv.getElementUtils().getTypeElement(fqn);
             if (type == null) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
@@ -536,8 +536,9 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             for (Map.Entry<String, ExecutableElement> entry : map.entrySet()) {
                 final String mangled = entry.getKey();
                 final ExecutableElement m = entry.getValue();
-                generateMethod(false, m, source, mangled);
-                generateMethod(true, m, source, "raw$" + mangled);
+                generateMethod(false, false, m, source, mangled);
+                generateMethod(true, false, m, source, "raw$" + mangled);
+                generateMethod(true, true, m, source, "promise$" + mangled);
             }
             source.append("}\n");
             final String srcName = pkgName + ".$JsCallbacks$";
@@ -555,11 +556,8 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         }
     }
 
-    private void generateMethod(boolean selfObj, final ExecutableElement m, StringBuilder source, final String mangled) {
+    private void generateMethod(boolean selfObj, boolean promise, final ExecutableElement m, StringBuilder source, final String mangled) {
         final boolean isStatic = m.getModifiers().contains(Modifier.STATIC);
-        if (isStatic && selfObj) {
-            return;
-        }
         final TypeElement selfType = (TypeElement)m.getEnclosingElement();
         Types tu = processingEnv.getTypeUtils();
 
@@ -570,6 +568,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         {
             String sep = "";
             if (!isStatic) {
+                source.append("final ");
                 if (selfObj) {
                     source.append("java.lang.Object self");
                 } else {
@@ -581,7 +580,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
             int cnt = 0;
             for (VariableElement ve : m.getParameters()) {
-                source.append(sep);
+                source.append(sep).append("final ");
                 ++cnt;
                 TypeMirror t = ve.asType();
                 if (!t.getKind().isPrimitive() && !"java.lang.String".equals(t.toString())) { // NOI18N
@@ -594,15 +593,23 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             }
         }
         source.append(") throws Throwable {\n");
-        source.append("    org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
-        String newLine;
-        if (useTryResources()) {
-            newLine =   "\n      ";
-            source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
+        source.append("    final org.netbeans.html.boot.spi.Fn.Presenter p = ref.presenter(); \n");
+        String newLine = "";
+        if (promise) {
+            source.append("    return new org.netbeans.html.boot.spi.Fn.Promise(p) {\n");
+            source.append("      @Override\n");
+            source.append("      protected java.lang.Object compute() throws java.lang.Throwable {\n");
+            newLine = "    ";
         } else {
-            newLine =   "\n    ";
-            source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
+            if (useTryResources()) {
+                newLine += "      ";
+                source.append("    try (java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p)) {");
+            } else {
+                newLine += "    ";
+                source.append("    java.io.Closeable a = org.netbeans.html.boot.spi.Fn.activate(p); try {");
+            }
         }
+        newLine = "\n" + newLine;
         source.append(newLine);
         if (m.getReturnType().getKind() != TypeKind.VOID) {
             source.append("java.lang.Object $ret = ");
@@ -642,13 +649,17 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             source.append("return toJs(p, $ret);");
         }
         source.append("\n");
-        if (useTryResources()) {
-            source.append("    }\n");
+        if (promise) {
+            source.append("    }}.schedule();\n");
         } else {
+            if (useTryResources()) {
+                source.append("    }\n");
+            } else {
 
-            source.append("    } finally {\n");
-            source.append("      a.close();\n");
-            source.append("    }\n");
+                source.append("    } finally {\n");
+                source.append("      a.close();\n");
+                source.append("    }\n");
+            }
         }
         source.append("  }\n");
     }

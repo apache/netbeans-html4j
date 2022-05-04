@@ -140,8 +140,8 @@ final class Knockout  {
     }
 
     final void setValue(int index, Object v) {
-        if (v instanceof Knockout) {
-            v = ((Knockout)v).get();
+        if (v instanceof Knockout k) {
+            v = k.get();
         }
         props[index].setValue(v);
     }
@@ -151,8 +151,8 @@ final class Knockout  {
     }
 
     private static Fn.Presenter getPresenter(Object obj) {
-        if (obj instanceof Fn.Presenter) {
-            return (Fn.Presenter) obj;
+        if (obj instanceof Fn.Presenter p) {
+            return p;
         } else {
             if (obj == null) {
                 return null;
@@ -168,12 +168,9 @@ final class Knockout  {
             Fn.Presenter p = getPresenter(all[i]);
             final Object o = all[i + 1];
             if (p != Fn.activePresenter()) {
-                if (p instanceof Executor) {
-                    ((Executor) p).execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            valueHasMutated(o, propertyName, null, null);
-                        }
+                if (p instanceof Executor e) {
+                    e.execute(() -> {
+                        valueHasMutated(o, propertyName, null, null);
                     });
                 } else {
                     Closeable c = Fn.activate(p);
@@ -241,6 +238,7 @@ final class Knockout  {
     @JavaScriptBody(
         javacall = true,
         keepAlive = false,
+        wait4java = false,
         wait4js = false,
         args = { "thiz", "ret", "copyFrom", "propNames", "propInfo", "propValues", "funcNames" },
         body =
@@ -263,43 +261,43 @@ final class Knockout  {
               },
               'owner': ret
             };
-            if (!readOnly) {
-              function write(val) {
-                orig(val);
-                var self = ret['ko4j'];
-                if (!self) {
-                    return;
-                }
-                var model = val ? val['ko4j'] : null;
-                self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
+            function write(val) {
+              var self = ret['ko4j'];
+              if (!self) {
+                  return;
               }
+              var model = val ? val['ko4j'] : null;
+              // console.log('write with ' + val + ' begins');
+              self.@org.netbeans.html.ko4j.Knockout::setValue(ILjava/lang/Object;)(index, model ? model : val);
+              // .finally(function() {
+              //   console.log('write with ' + val + ' is finished');
+              // });
+            }
+            if (!readOnly) {
               bnd['write'] = write;
               write(orig());
               orig.subscribe(write);
             };
             var cmpt = ko['computed'](bnd);
             cmpt['valueHasMutated'] = function(val) {
+              // console.log('on valueHasMutated with ' + val + ' current value ' + orig());
+              if (val == orig()) {
+                  return;
+              }
               orig(val);
+              // console.log('on valueHasMutated with ' + val + ' subscribed again');
             };
             ret[name] = cmpt;
           }
           function koComputed(index, name, readOnly, value) {
-            var trigger = ko['observable']()['extend']({'notify':'always'});
-            function realGetter() {
-              var self = ret['ko4j'];
-              try {
-                var v = self ? self.@org.netbeans.html.ko4j.Knockout::getValue(I)(index) : null;
-                return v;
-              } catch (e) {
-                alert("Cannot call getValue on " + self + " prop: " + name + " error: " + e);
-              }
+            function activeGetter() {
+                return value;
             }
-            var activeGetter = function() { return value; };
+            var trigger = ko['observable']()['extend']({'notify':'always'});
             var bnd = {
               'read': function() {
                 trigger();
                 var r = activeGetter();
-                activeGetter = realGetter;
                 return normalValue(r);;
               },
               'owner': ret
@@ -315,8 +313,25 @@ final class Knockout  {
             };
             var cmpt = ko['computed'](bnd);
             cmpt['valueHasMutated'] = function(val) {
-              if (arguments.length === 1) activeGetter = function() { return val; };
-              trigger(val);
+              if (arguments.length === 1) {
+                value = val;
+                trigger(val);
+              } else {
+                var self = ret['ko4j'];
+                if (self) {
+                  var futureValue = self.@org.netbeans.html.ko4j.Knockout::getValue(I)(index);
+                  Promise.resolve(futureValue).then(function(val, e) {
+                    if (e) {
+                      alert("Cannot call getValue on " + self + " prop: " + name + " error: " + e);
+                    } else {
+                      if (value != val) {
+                        value = val;
+                        trigger(val);
+                      }
+                    }
+                  });
+                }
+              }
             };
             ret[name] = cmpt;
           }
@@ -368,11 +383,11 @@ final class Knockout  {
     private static native void clean(Object js);
 
     @JavaScriptBody(args = { "o" }, body = "return o['ko4j'] ? o['ko4j'] : o;")
-    private static native Object toModelImpl(Object wrapper);
+    private static native Object toModelImpl(Object o);
     static Object toModel(Object wrapper) {
         Object o = toModelImpl(wrapper);
-        if (o instanceof Knockout) {
-            return ((Knockout)o).get();
+        if (o instanceof Knockout k) {
+            return k.get();
         } else {
             return o;
         }

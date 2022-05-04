@@ -32,6 +32,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
@@ -54,7 +55,7 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
             public MyCL(ClassLoader parent) {
                 super(parent, null, null);
             }
-            
+
             @Override
             protected URL findResource(String name) {
                 return ul.getResource(name);
@@ -122,16 +123,21 @@ public class JsClassLoaderTest extends JsClassLoaderBase{
             }
         }
 ;
-        
+
         MyCL l = new MyCL(parent);
         Closeable close = FnContext.activate(l);
         methodClass = l.loadClass(JsMethods.class.getName());
         close.close();
         loader = l;
     }
-    
+
+    private Closeable ctx;
     @BeforeMethod public void initPresenter() {
-        FnContext.currentPresenter(loader);
+        ctx = Fn.activate(loader);
+    }
+
+    @AfterMethod public void closePresener() throws Exception {
+        ctx.close();
     }
 
     @AfterClass

@@ -427,14 +427,14 @@ public class JavaScriptBodyTest {
     }
 
     @KOTest
-    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessing() {
-        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+    public void laterCallFromJavaScriptInMiddleOfDefferedProcessing() {
+        LaterJavaScriptAction t = new LaterJavaScriptAction();
         t.testWithoutCallback();
     }
 
     @KOTest
-    public void asynchCallFromJavaScriptInMiddleOfDefferedProcessingFromCallback() {
-        AsyncJavaScriptAction t = new AsyncJavaScriptAction();
+    public void laterCallFromJavaScriptInMiddleOfDefferedProcessingFromCallback() {
+        LaterJavaScriptAction t = new LaterJavaScriptAction();
         t.testWithCallback();
     }
 

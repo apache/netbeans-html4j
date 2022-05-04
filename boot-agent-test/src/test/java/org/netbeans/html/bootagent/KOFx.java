@@ -66,8 +66,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        try {
-            FnContext.currentPresenter(p);
+        try (var ctx = Fn.activate(p)) {
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -89,7 +88,6 @@ public final class KOFx implements ITest, IHookable, Runnable {
             if (notify) {
                 notifyAll();
             }
-            FnContext.currentPresenter(null);
         }
     }
 
