@@ -209,15 +209,26 @@ public final class FnUtils {
                         varr.visit(null, argName);
                     }
                     varr.visitEnd();
-                    va.visit("javacall", fia.javacall);
                     va.visit("body", fia.body);
+                    if (fia.javacall != null) {
+                        va.visit("javacall", fia.javacall);
+                    }
+                    if (fia.wait4js != null) {
+                        va.visit("wait4js", fia.wait4js);
+                    }
+                    if (fia.wait4java != null) {
+                        va.visit("wait4java", fia.wait4java);
+                    }
+                    if (fia.keepAlive != null) {
+                        va.visit("keepAlive", fia.keepAlive);
+                    }
                     va.visitEnd();
                 }
                 
                 String body;
                 List<String> args;
-                if (fia.javacall) {
-                    body = callback(fia.body, !fia.wait4java);
+                if ((fia.javacall())) {
+                    body = callback(fia.body, fia.usePromise());
                     args = new ArrayList<>(fia.args);
                     args.add("vm");
                 } else {
@@ -242,7 +253,7 @@ public final class FnUtils {
                 // init Fn
                 super.visitInsn(Opcodes.POP);
                 super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
-                super.visitInsn(fia.keepAlive ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
+                super.visitInsn(fia.keepAlive() ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
                 super.visitLdcInsn(body);
                 super.visitIntInsn(Opcodes.SIPUSH, args.size());
                 super.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
@@ -412,7 +423,7 @@ public final class FnUtils {
                     FindInMethod.super.visitInsn(Opcodes.AASTORE);
                 }
 
-                if (fia.wait4js) {
+                if (!fia.asyncJavaScript()) {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "org/netbeans/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
                     );
@@ -488,10 +499,10 @@ public final class FnUtils {
 
                 List<String> args = new ArrayList<>();
                 String body;
-                boolean javacall = false;
-                boolean wait4js = true;
-                boolean wait4java = true;
-                boolean keepAlive = true;
+                Boolean javacall;
+                Boolean wait4js;
+                Boolean wait4java;
+                Boolean keepAlive;
 
                 public FindInAnno() {
                     super(Opcodes.ASM5);
@@ -533,6 +544,22 @@ public final class FnUtils {
                     if (body != null) {
                         generateJSBody(this);
                     }
+                }
+
+                boolean usePromise() {
+                    return Boolean.FALSE.equals(wait4java);
+                }
+
+                boolean javacall() {
+                    return Boolean.TRUE.equals(javacall);
+                }
+
+                boolean asyncJavaScript() {
+                    return Boolean.FALSE.equals(wait4js);
+                }
+
+                boolean keepAlive() {
+                    return !Boolean.FALSE.equals(keepAlive);
                 }
             }
         }
