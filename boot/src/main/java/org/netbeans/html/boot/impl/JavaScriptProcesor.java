@@ -302,7 +302,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             } else if (preId == ':') {
                 int lastAt = userText.lastIndexOf('@', preIdentifierAt + 1);
                 String maybeClassName = userText.substring(lastAt + 1, preIdentifierAt - 1);
-                TypeElement maybeClass = processingEnv.getElementUtils().getTypeElement(maybeClassName);
+                TypeElement maybeClass = findClass(maybeClassName);
                 String instanceName = null;
                 if (lastAt > 0 && userText.charAt(lastAt - 1) == '.') {
                     instanceName = endsWithIdentifier(userText, lastAt - 1);
@@ -358,6 +358,37 @@ public final class JavaScriptProcesor extends AbstractProcessor {
         return Collections.emptyList();
     }
 
+    final TypeElement findClass(String classname) {
+        if (classname == null) {
+            return null;
+        }
+        TypeElement clazz = processingEnv.getElementUtils().getTypeElement(classname);
+        if (clazz != null) {
+            return clazz;
+        }
+        int dolar = classname.indexOf('$');
+        if (dolar == -1) {
+            return null;
+        }
+        final String parentName = classname.substring(0, dolar);
+        TypeElement parent = processingEnv.getElementUtils().getTypeElement(parentName);
+        if (parent != null) {
+            String rest = classname.substring(dolar + 1);
+            for (Element e : parent.getEnclosedElements()) {
+                if (!e.getKind().isClass() && !e.getKind().isInterface()) {
+                    continue;
+                }
+                if (rest.equals(e.getSimpleName().toString())) {
+                    clazz = (TypeElement) e;
+                    break;
+                }
+            }
+        }
+        String binaryClassName = classname.replace('$', '.');
+        clazz = processingEnv.getElementUtils().getTypeElement(binaryClassName);
+        return clazz;
+    }
+
     final void wrongArrayError(TypeMirror paramType, Element method) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Don't use " + paramType + " array. Use Object[].", method);
     }
@@ -385,13 +416,19 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
         @Override
         protected CharSequence callMethod(String ident, boolean promise, String fqn, String method, String params) {
-            final TypeElement type = processingEnv.getElementUtils().getTypeElement(fqn);
+            final TypeElement type = findClass(fqn);
             if (type == null) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                     "Callback to non-existing class " + fqn, e
                 );
                 return "";
             }
+            String binName = processingEnv.getElementUtils().getBinaryName(type).toString();
+            if (!fqn.equals(binName)) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "Use binary classname " + binName + " in the callback", e);
+            }
+
             ExecutableElement found = null;
             String paramTypes = null;
             StringBuilder foundParams = new StringBuilder();

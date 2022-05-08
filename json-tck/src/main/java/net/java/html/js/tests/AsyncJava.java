@@ -28,7 +28,7 @@ public class AsyncJava {
     var result = {
         x : -1
     };
-    var facN = fac.@net.java.html.js.tests.AsyncJava.Fac::fac(I)(n);
+    var facN = fac.@net.java.html.js.tests.AsyncJava$Fac::fac(I)(n);
     facN.then(function (res) {
         result.x = res;
         done.@java.lang.Runnable::run()();
