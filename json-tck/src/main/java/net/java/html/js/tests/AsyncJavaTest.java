@@ -18,9 +18,7 @@
  */
 package net.java.html.js.tests;
 
-import net.java.html.js.JavaScriptBody;
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
-import static net.java.html.js.tests.JavaScriptBodyTest.assertFalse;
 import net.java.html.json.tests.PhaseExecutor;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -32,12 +30,10 @@ public class AsyncJavaTest {
         PhaseExecutor.schedule(phases, () -> {
             boolean[] javaExecuted = { false };
             Object objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
-                javaExecuted[0] = true;
                 return new Factorial().factorial(n);
             }, () -> {});
             int initialValue = Bodies.readIntX(objWithX);
-            assertFalse(javaExecuted[0], "Java code shall only be called when the JavaScript ends");
-            assertEquals(-1, initialValue, "Promise shall only be resolved 1when the JavaScript ends");
+            assertEquals(-1, initialValue, "Promise.then shall only be called when the code ends");
             return objWithX;
         }).then((objWithX) -> {
             int result = Bodies.readIntX(objWithX);
