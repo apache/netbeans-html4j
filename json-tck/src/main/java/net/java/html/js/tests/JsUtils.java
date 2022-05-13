@@ -19,6 +19,8 @@
 package net.java.html.js.tests;
 
 import java.io.StringReader;
+import java.util.ServiceLoader;
+import net.java.html.json.Models;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.JavaScriptTCK;
 
@@ -32,6 +34,20 @@ public class JsUtils {
         instantiatedJsTCK = tck;
     }
 
+    private static Iterable<JavaScriptTCK> tcks(Class<?> clazz) {
+        if (instantiatedJsTCK != null) {
+            return Models.asList(instantiatedJsTCK);
+        }
+        return ServiceLoader.load(JavaScriptTCK.class, cl(clazz));
+    }
+    private static ClassLoader cl(Class<?> c) {
+        try {
+            return c.getClassLoader();
+        } catch (SecurityException ex) {
+            return null;
+        }
+    }
+
     static void execute(Class<?> clazz, String script) throws Exception {
         Fn.Presenter p = Fn.activePresenter();
         p.loadScript(new StringReader(script));
@@ -39,12 +55,13 @@ public class JsUtils {
 
     static boolean executeNow(Class<?> clazz, String script) {
         try {
-            if (instantiatedJsTCK != null) {
-                return instantiatedJsTCK.executeNow(script);
-            } else {
-                execute(clazz, script);
-                return true;
+            for (JavaScriptTCK j : tcks(clazz)) {
+                if (j.executeNow(script)) {
+                    return true;
+                }
             }
+            execute(clazz, script);
+            return true;
         } catch (Exception ex) {
             throw raise(RuntimeException.class, ex);
         }
