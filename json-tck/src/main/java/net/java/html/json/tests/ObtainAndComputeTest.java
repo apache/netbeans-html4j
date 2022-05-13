@@ -18,7 +18,6 @@
  */
 package net.java.html.json.tests;
 
-import java.util.ArrayList;
 import java.util.List;
 import net.java.html.BrwsrCtx;
 import net.java.html.json.ComputedProperty;
@@ -98,7 +97,7 @@ public class ObtainAndComputeTest {
     static final class ObtainModel {
         @ComputedProperty
         public static List<ObtainUser> filteredUsers(List<ObtainUser> users, String filter) {
-            List<ObtainUser> res = new ArrayList<>();
+            List<ObtainUser> res = Models.asList();
             for (ObtainUser user : users) {
                 if (user.getEmail().contains(filter)) {
                     res.add(user);
