@@ -55,13 +55,18 @@ public class JsUtils {
 
     static boolean executeNow(Class<?> clazz, String script) {
         try {
-            for (JavaScriptTCK j : tcks(clazz)) {
-                if (j.executeNow(script)) {
-                    return true;
+            final Iterable<JavaScriptTCK> tcks = tcks(clazz);
+            if (tcks.iterator().hasNext()) {
+                for (JavaScriptTCK j : tcks) {
+                    if (j.executeNow(script)) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                execute(clazz, script);
+                return true;
             }
-            execute(clazz, script);
-            return true;
         } catch (Exception ex) {
             throw raise(RuntimeException.class, ex);
         }
