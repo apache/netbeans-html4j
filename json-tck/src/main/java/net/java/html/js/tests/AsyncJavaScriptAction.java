@@ -26,9 +26,13 @@ final class AsyncJavaScriptAction {
     private AsyncJavaScriptAction() {
     }
 
-    static AsyncJavaScriptAction defineCallback() {
+    static AsyncJavaScriptAction defineCallback(boolean wait4js) {
         AsyncJavaScriptAction action = new AsyncJavaScriptAction();
-        action.defineCallbackImpl();
+        if (wait4js) {
+            action.defineCallbackImpl();
+        } else {
+            action.defineCallbackImplNoWait4js();
+        }
         return action;
     }
 
@@ -40,6 +44,15 @@ final class AsyncJavaScriptAction {
         };
     """)
     private native void defineCallbackImpl();
+
+    @JavaScriptBody(args = {}, javacall = true, wait4js = false, wait4java = false, body = """
+        var self = this;
+        var global = (0 || eval)("this");
+        global.callJava = function(s) {
+            self.@net.java.html.js.tests.AsyncJavaScriptAction::callJava(I)(s);
+        };
+    """)
+    private native void defineCallbackImplNoWait4js();
 
     void callJava(int i) {
         this.result = i;
