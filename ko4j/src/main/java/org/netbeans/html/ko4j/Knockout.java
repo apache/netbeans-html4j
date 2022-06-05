@@ -228,8 +228,19 @@ final class Knockout  {
 
     @JavaScriptBody(args = { "cnt" }, body =
         """
+        function createPromise() {
+            var fn;
+            var p = new Promise(function (resolve, reject) {
+                fn = resolve;
+            });
+            Object.defineProperty(p, 'ko4j', { value : fn, configurable : true });
+            return p;
+        }
+
         var arr = new Array(cnt);
-        for (var i = 0; i < cnt; i++) arr[i] = new Object();
+        for (var i = 0; i < cnt; i++) {
+            arr[i] = createPromise();
+        }
         return arr;
         """
     )
@@ -243,7 +254,17 @@ final class Knockout  {
         args = { "thiz", "ret", "copyFrom", "propNames", "propInfo", "propValues", "funcNames" },
         body =
           """
-          Object.defineProperty(ret, 'ko4j', { value : thiz });
+          var resolve = ret['ko4j'];
+          Object.defineProperty(ret, 'ko4j', { value : thiz, configurable : false });
+
+          function resolvePromises(obj, fn) {
+              if (Array.isArray(obj)) {
+                  Promise.all(obj).then(fn);
+              } else {
+                  Promise.resolve(obj).then(fn);
+              }
+          }
+
           function normalValue(r) {
             if (r) {
               try {
@@ -284,8 +305,9 @@ final class Knockout  {
               if (val == orig()) {
                   return;
               }
-              orig(val);
-              // console.log('on valueHasMutated with ' + val + ' subscribed again');
+              resolvePromises(val, function() {
+                orig(val);
+              });
             };
             ret[name] = cmpt;
           }
@@ -325,8 +347,10 @@ final class Knockout  {
                       alert("Cannot call getValue on " + self + " prop: " + name + " error: " + e);
                     } else {
                       if (value != val) {
-                        value = val;
-                        trigger(val);
+                        resolvePromises(val, function() {
+                            value = val;
+                            trigger(val);
+                        });
                       }
                     }
                   });
@@ -361,6 +385,7 @@ final class Knockout  {
           for (var i = 0; i < funcNames.length; i++) {
             koExpose(i, funcNames[i]);
           }
+          resolve(null);
           """
         )
     private static native void wrapModel(
