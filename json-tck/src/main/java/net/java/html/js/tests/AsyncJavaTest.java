@@ -30,7 +30,11 @@ public class AsyncJavaTest {
         PhaseExecutor.schedule(phases, () -> {
             boolean[] javaExecuted = { false };
             Object objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
-                return new Factorial().factorial(n);
+                int acc = 1;
+                for (int i = 1; i <= n; i++) {
+                    acc *= i;
+                }
+                return acc;
             }, () -> {});
             int initialValue = Bodies.readIntX(objWithX);
             assertEquals(-1, initialValue, "Promise.then shall only be called when the code ends");
@@ -43,8 +47,17 @@ public class AsyncJavaTest {
 
     @KOTest
     public void initializedFromJavaScript() throws Exception {
+        initializedFromJavaScript(true);
+    }
+
+    @KOTest
+    public void initializedFromJavaScriptNoWait4js() throws Exception {
+        initializedFromJavaScript(false);
+    }
+
+    private void initializedFromJavaScript(boolean wait4js) throws Exception {
         PhaseExecutor.schedule(phases, () -> {
-            return AsyncJavaScriptAction.defineCallback();
+            return AsyncJavaScriptAction.defineCallback(wait4js);
         }).then((action) -> {
             AsyncJavaScriptAction.invokeCallbackLater(33);
         }).then((action) -> {

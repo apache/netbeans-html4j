@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 import net.java.html.boot.BrowserBuilder;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.json.tck.KOTest;
@@ -30,7 +31,7 @@ import org.testng.annotations.Factory;
 
 public class GenericTest {
     private static Class<?> browserClass;
-    
+
     public GenericTest() {
     }
 
@@ -41,8 +42,12 @@ public class GenericTest {
     @Factory public static Object[] compatibilityTests() throws Exception {
         return createTests(new Testing());
     }
-    
+
     static Object[] createTests(Testing t) throws Exception {
+        return createTests(t, null);
+    }
+
+    static Object[] createTests(Testing t, Predicate<Method> accept) throws Exception {
         Fn.Presenter presenter = t.presenter;
 
         final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(GenericTest.class).
@@ -57,20 +62,24 @@ public class GenericTest {
         });
 
         List<Object> res = new ArrayList<>();
-        Class<? extends Annotation> test = 
+        Class<? extends Annotation> test =
             loadClass().getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
 
+        if (accept == null) {
+            accept = (m) -> m.getAnnotation(test) != null;
+        }
+
         Class[] arr = (Class[]) loadClass().getDeclaredMethod("tests").invoke(null);
         for (Class c : arr) {
-            addTestMethods(c, test, res, t);
+            addTestMethods(c, accept, res, t);
         }
         return res.toArray();
     }
 
-    private static void addTestMethods(Class c, Class<? extends Annotation> test, List<Object> res, Testing t) throws SecurityException {
+    private static void addTestMethods(Class c, Predicate<Method> accept, List<Object> res, Testing t) throws SecurityException {
         for (Method m : c.getMethods()) {
-            if (m.getAnnotation(test) != null) {
+            if (accept.test(m)) {
                 res.add(new Case(t, m));
             }
         }
@@ -82,12 +91,12 @@ public class GenericTest {
         }
         return browserClass;
     }
-    
+
     public static synchronized void ready(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         GenericTest.class.notifyAll();
     }
-    
+
     public static void initialized() throws Exception {
         Class<?> classpathClass = ClassLoader.getSystemClassLoader().loadClass(GenericTest.class.getName());
         Method m = classpathClass.getMethod("ready", Class.class);

@@ -91,16 +91,20 @@ class Testing {
         return Level.FINE;
     }
 
+    private String ts(Object o) {
+        return o == null ? null : o.toString();
+    }
+
+    protected String js2java(String method, Object a1, Object a2, Object a3, Object a4) throws Exception {
+        return presenter.js2java(method, ts(a1), ts(a2), ts(a3), ts(a4));
+    }
+
     public final class Clbk {
         private Clbk() {
         }
 
-        private String ts(Object o) {
-            return o == null ? null : o.toString();
-        }
-
         public String pass(String method, Object a1, Object a2, Object a3, Object a4) throws Exception {
-            return presenter.js2java(method, ts(a1), ts(a2), ts(a3), ts(a4));
+            return js2java(method, ts(a1), ts(a2), ts(a3), ts(a4));
         }
     }
     private final Clbk clbk = new Clbk();
