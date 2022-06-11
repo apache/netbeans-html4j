@@ -79,7 +79,7 @@ public class DependsChangeTest {
 
         Reference<Object> ref = new WeakReference<Object>(p);
         p = null;
-        assertGC(ref, "MyOverall can now disappear");
+        DeepChangeTest.assertGC(ref, "MyOverall can now disappear");
         assertNotNull(refStrong, "Submodel still used");
     }
 
@@ -216,24 +216,4 @@ public class DependsChangeTest {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-
-    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
-            if (isGone(ref)) {
-                return;
-            }
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
-        }
-        throw new InterruptedException(msg);
-    }
-
-    private static boolean isGone(Reference<?> ref) {
-        return ref.get() == null;
-    }
-
 }

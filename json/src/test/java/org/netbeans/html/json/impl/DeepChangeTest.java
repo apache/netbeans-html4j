@@ -643,19 +643,24 @@ public class DeepChangeTest {
         }
     }
 
-    private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
+    static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
         for (int i = 0; i < 100; i++) {
             if (isGone(ref)) {
                 return;
             }
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
+            forceGC();
         }
         throw new InterruptedException(msg);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void forceGC() {
+        try {
+            System.gc();
+            System.runFinalization();
+        } catch (Error err) {
+            err.printStackTrace();
+        }
     }
 
     private static boolean isGone(Reference<?> ref) {
