@@ -62,6 +62,7 @@ final class ReactiveTech implements Technology<Reactive> {
         return arr;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void runSafe(Runnable r) {
     }

@@ -21,6 +21,7 @@ package org.netbeans.html.json.impl;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import net.java.html.BrwsrCtx;
 import org.netbeans.html.context.spi.Contexts;
@@ -348,13 +349,16 @@ public final class JSON {
         try {
             Class.forName(preload);
             Class<?> clazz = Class.forName(implName);
-            types = (ModelTypes) clazz.newInstance();
-        } catch (ClassNotFoundException ex) {
+            types = (ModelTypes) clazz.getDeclaredConstructor().newInstance();
+        } catch (
+            InvocationTargetException |
+            IllegalAccessException |
+            ClassNotFoundException |
+            NoClassDefFoundError |
+            NoSuchMethodException |
+            InstantiationException ex
+        ) {
             // OK, not supported
-        } catch (NoClassDefFoundError ex) {
-            // OK, not supported
-        } catch (Throwable ex) {
-            ex.printStackTrace();
         } finally {
             if (types == null) {
                 types = new LinkedListTypes();
@@ -383,6 +387,7 @@ public final class JSON {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static <Model> Model bindTo(Model model, BrwsrCtx c) {
         Proto.Type<Model> from = (Proto.Type<Model>) findType(model.getClass());
         if (from == null) {
@@ -443,7 +448,7 @@ public final class JSON {
             if (l != null) {
                 Class.forName(modelClazz.getName(), true, l);
             }
-            modelClazz.newInstance();
+            modelClazz.getDeclaredConstructor().newInstance();
         } catch (Exception ex) {
             // ignore and try again
         }
@@ -501,6 +506,7 @@ public final class JSON {
             throw new IOException("Not supported");
         }
 
+        @Deprecated
         @Override
         public void runSafe(Runnable r) {
             r.run();

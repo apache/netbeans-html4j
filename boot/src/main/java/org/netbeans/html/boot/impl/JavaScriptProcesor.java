@@ -73,6 +73,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     public JavaScriptProcesor() {
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> set = new HashSet<>();
@@ -152,6 +153,18 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             checkJavaScriptBody(r, e, msg);
         }
 
+        processGroup(roundEnv, msg);
+
+        if (roundEnv.processingOver()) {
+            generateCallbackClass(javacalls);
+            generateJavaScriptBodyList(bodies);
+            javacalls.clear();
+        }
+        return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void processGroup(RoundEnvironment roundEnv, final Messager msg) {
         for (Element e : roundEnv.getElementsAnnotatedWith(JavaScriptResource.Group.class)) {
             JavaScriptResource.Group g = e.getAnnotation(JavaScriptResource.Group.class);
             if (g == null) {
@@ -161,13 +174,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 checkJavaScriptBody(r, e, msg);
             }
         }
-
-        if (roundEnv.processingOver()) {
-            generateCallbackClass(javacalls);
-            generateJavaScriptBodyList(bodies);
-            javacalls.clear();
-        }
-        return true;
     }
 
     private void checkJavaScriptBody(JavaScriptResource r, Element e, final Messager msg) {
