@@ -70,7 +70,9 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     @Factory public static Object[] compatibilityTests() throws Exception {
         ScriptEngine eng = new ScriptEngineManager().getEngineByName("nashorn");
         if (eng == null) {
-            throw new SkipException("Nashorn engine not found. Skipping!");
+            return new Object[] {
+                new KOCase(null, null, "Nashorn engine not found. Skipping!")
+            };
         }
 
         Class[] arr = testClasses();
@@ -84,7 +86,11 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
 
         baseUri = DynamicHTTP.initServer();
 
-        final Fn.Presenter p = new ScriptPresenter(eng, KOCase.JS);
+        final Fn.Presenter p = Scripts.newPresenter()
+            .engine(eng)
+            .sanitize(false)
+            .executor(KOCase.JS)
+            .build();
         try {
             Class.forName("java.lang.Module");
         } catch (ClassNotFoundException oldJDK) {
@@ -162,6 +168,8 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
                 return "Does not work on JDK8, due to JDK-8046013";
             case "modifyRadioValueOnEnum":
                 return "Does not work on JDK8";
+            case "obtainAndComputeTest":
+                return "Browser doesn't support addEventListener or attachEvent";
         }
         return null;
     }
@@ -217,9 +225,10 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static native void setProperty(Object json, String key, Object value);
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = "\n"
-        + "var f = new Function(s);\n"
-        + "return f.apply(null, args);\n"
+    @JavaScriptBody(args = { "s", "args" }, body = """
+        var f = new Function(s);
+        return f.apply(null, args);
+        """
     )
     public native Object executeScript(String script, Object[] arguments);
 

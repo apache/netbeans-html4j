@@ -90,14 +90,15 @@ public final class FnUtils {
         return new JsClassLoaderImpl(parent, f, d);
     }
 
-    static String callback(final String body) {
+    static String callback(final String body, boolean promise) {
         return new JsCallback() {
             @Override
             protected CharSequence callMethod(
-                String ident, String fqn, String method, String params
-            ) {
+                    String ident, boolean promise, String fqn, String method, String params) {
                 StringBuilder sb = new StringBuilder();
-                if (ident != null) {
+                if (promise) {
+                    sb.append("vm.promise$");
+                } else if (ident != null) {
                     sb.append("vm.raw$");
                 } else {
                     sb.append("vm.");
@@ -110,7 +111,7 @@ public final class FnUtils {
                 return sb;
             }
 
-        }.parse(body);
+        }.parse(body, promise);
     }
 
     private static final class FindInClass extends ClassVisitor {
@@ -208,16 +209,27 @@ public final class FnUtils {
                         varr.visit(null, argName);
                     }
                     varr.visitEnd();
-                    va.visit("javacall", fia.javacall);
                     va.visit("body", fia.body);
+                    if (fia.javacall != null) {
+                        va.visit("javacall", fia.javacall);
+                    }
+                    if (fia.wait4js != null) {
+                        va.visit("wait4js", fia.wait4js);
+                    }
+                    if (fia.wait4java != null) {
+                        va.visit("wait4java", fia.wait4java);
+                    }
+                    if (fia.keepAlive != null) {
+                        va.visit("keepAlive", fia.keepAlive);
+                    }
                     va.visitEnd();
                 }
                 
                 String body;
                 List<String> args;
-                if (fia.javacall) {
-                    body = callback(fia.body);
-                    args = new ArrayList<String>(fia.args);
+                if ((fia.javacall())) {
+                    body = callback(fia.body, fia.usePromise());
+                    args = new ArrayList<>(fia.args);
                     args.add("vm");
                 } else {
                     body = fia.body;
@@ -241,7 +253,7 @@ public final class FnUtils {
                 // init Fn
                 super.visitInsn(Opcodes.POP);
                 super.visitLdcInsn(Type.getObjectType(FindInClass.this.name));
-                super.visitInsn(fia.keepAlive ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
+                super.visitInsn(fia.keepAlive() ? Opcodes.ICONST_1 : Opcodes.ICONST_0);
                 super.visitLdcInsn(body);
                 super.visitIntInsn(Opcodes.SIPUSH, args.size());
                 super.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
@@ -413,7 +425,7 @@ public final class FnUtils {
                     FindInMethod.super.visitInsn(Opcodes.AASTORE);
                 }
 
-                if (fia.wait4js) {
+                if (!fia.asyncJavaScript()) {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "org/netbeans/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false
                     );
@@ -487,11 +499,12 @@ public final class FnUtils {
 
             private final class FindInAnno extends AnnotationVisitor {
 
-                List<String> args = new ArrayList<String>();
+                List<String> args = new ArrayList<>();
                 String body;
-                boolean javacall = false;
-                boolean wait4js = true;
-                boolean keepAlive = true;
+                Boolean javacall;
+                Boolean wait4js;
+                Boolean wait4java;
+                Boolean keepAlive;
 
                 public FindInAnno() {
                     super(Opcodes.ASM5);
@@ -509,6 +522,10 @@ public final class FnUtils {
                     }
                     if (name.equals("wait4js")) { // NOI18N
                         wait4js = (Boolean) value;
+                        return;
+                    }
+                    if (name.equals("wait4java")) { // NOI18N
+                        wait4java = (Boolean) value;
                         return;
                     }
                     if (name.equals("keepAlive")) { // NOI18N
@@ -529,6 +546,22 @@ public final class FnUtils {
                     if (body != null) {
                         generateJSBody(this);
                     }
+                }
+
+                boolean usePromise() {
+                    return Boolean.FALSE.equals(wait4java);
+                }
+
+                boolean javacall() {
+                    return Boolean.TRUE.equals(javacall);
+                }
+
+                boolean asyncJavaScript() {
+                    return Boolean.FALSE.equals(wait4js);
+                }
+
+                boolean keepAlive() {
+                    return !Boolean.FALSE.equals(keepAlive);
                 }
             }
         }
@@ -622,7 +655,7 @@ public final class FnUtils {
         }
         
         private List<URL> res(String name, boolean oneIsEnough) {
-            List<URL> l = new ArrayList<URL>();
+            List<URL> l = new ArrayList<>();
             f.findResources(name, l, oneIsEnough);
             return l;
         }
@@ -652,6 +685,12 @@ public final class FnUtils {
             }
             if (name.equals(Fn.Presenter.class.getName())) {
                 return Fn.Presenter.class;
+            }
+            if (name.equals(Fn.Ref.class.getName())) {
+                return Fn.Ref.class;
+            }
+            if (name.equals(Fn.Promise.class.getName())) {
+                return Fn.Promise.class;
             }
             if (name.equals(Fn.ToJavaScript.class.getName())) {
                 return Fn.ToJavaScript.class;

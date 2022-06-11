@@ -36,7 +36,14 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'html4j'
 
+//compileJava {
+//    classpath += files("src/main/resources")
+//}
+
+def jars = fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
+
 dependencies {
-    compile fileTree(dir: '../../../../../../../../../boot/target/', include: ['*.jar'])
+    implementation jars
+    annotationProcessor jars
 }
 

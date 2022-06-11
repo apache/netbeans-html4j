@@ -26,10 +26,10 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.java.html.json.Models;
 import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -61,7 +61,7 @@ final class TyrusDynamicHTTP extends HttpHandler {
         for (NetworkListener listener : server.getListeners()) {
             listener.registerAddOn(addon);
         }
-        resources = new ArrayList<Resource>();
+        resources = Models.asList();
 
         conf = server.getServerConfiguration();
         final TyrusDynamicHTTP dh = new TyrusDynamicHTTP();
@@ -83,7 +83,7 @@ final class TyrusDynamicHTTP extends HttpHandler {
         }
         if ("/dynamic".equals(request.getRequestURI())) {
             String mimeType = request.getParameter("mimeType");
-            List<String> params = new ArrayList<String>();
+            List<String> params = Models.asList();
             boolean webSocket = false;
             for (int i = 0;; i++) {
                 String p = request.getParameter("param" + i);
@@ -97,10 +97,10 @@ final class TyrusDynamicHTTP extends HttpHandler {
                 params.add(p);
             }
             final String cnt = request.getParameter("content");
-            String mangle = cnt.replace("%20", " ").replace("%0A", "\n");
+            String mangle = cnt.replace("%20", " ").replace("%0A", "\n").replace("\\\"", "\"");
             ByteArrayInputStream is = new ByteArrayInputStream(mangle.getBytes("UTF-8"));
             URI url;
-            final Resource res = new Resource(is, mimeType, "/dynamic/res" + ++resourcesCount, params.toArray(new String[params.size()]));
+            final Resource res = new Resource(is, mimeType, "/dynamic/res" + ++resourcesCount, params.toArray(new String[0]));
             if (webSocket) {
                 url = registerWebSocket(res);
             } else {

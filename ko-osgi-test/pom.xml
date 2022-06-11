@@ -32,6 +32,7 @@
     <description>Runs the TCK for Knockout in Equinox OSGi Container</description>
     <properties>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
+        <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
     <build>
         <plugins>
@@ -114,6 +115,36 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>net.java.html.boot.fx</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>generic</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>browser</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>webkit</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>net.java.html.geo</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>net.java.html.sound</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

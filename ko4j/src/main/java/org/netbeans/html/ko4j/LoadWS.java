@@ -51,11 +51,13 @@ final class LoadWS {
     }
     
     
-    @JavaScriptBody(args = { "data" }, body = "try {\n"
-        + "    return eval('(' + data + ')');\n"
-        + "  } catch (error) {;\n"
-        + "    return data;\n"
-        + "  }\n"
+    @JavaScriptBody(args = { "data" }, body = """
+        try {
+            return eval('(' + data + ')');
+        } catch (error) {;
+            return data;
+        }
+        """
     )
     private static native Object toJSON(String data);
     
@@ -72,29 +74,30 @@ final class LoadWS {
         call.notifyError(null);
     }
     
-    @JavaScriptBody(args = { "back", "url" }, javacall = true, body = ""
-        + "if (window.WebSocket) {\n"
-        + "  try {\n"
-        + "    var ws = new window.WebSocket(url);\n"
-        + "    ws.onopen = function(ev) {\n"
-        + "      back.@org.netbeans.html.ko4j.LoadWS::onOpen(Ljava/lang/Object;)(ev);\n"
-        + "    };\n"
-        + "    ws.onmessage = function(ev) {\n"
-        + "      back.@org.netbeans.html.ko4j.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data);\n"
-        + "    };\n"
-        + "    ws.onerror = function(ev) {\n"
-        + "      back.@org.netbeans.html.ko4j.LoadWS::onError(Ljava/lang/Object;)(ev);\n"
-        + "    };\n"
-        + "    ws.onclose = function(ev) {\n"
-        + "      back.@org.netbeans.html.ko4j.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason);\n"
-        + "    };\n"
-        + "    return ws;\n"
-        + "  } catch (ex) {\n"
-        + "    return null;\n"
-        + "  }\n"
-        + "} else {\n"
-        + "  return null;\n"
-        + "}\n"
+    @JavaScriptBody(args = { "back", "url" }, javacall = true, wait4java = false, body = """
+        if (window.WebSocket) {
+          try {
+            var ws = new window.WebSocket(url);
+            ws.onopen = function(ev) {
+              back.@org.netbeans.html.ko4j.LoadWS::onOpen(Ljava/lang/Object;)(ev);
+            };
+            ws.onmessage = function(ev) {
+              back.@org.netbeans.html.ko4j.LoadWS::onMessage(Ljava/lang/Object;Ljava/lang/String;)(ev, ev.data);
+            };
+            ws.onerror = function(ev) {
+              back.@org.netbeans.html.ko4j.LoadWS::onError(Ljava/lang/Object;)(ev);
+            };
+            ws.onclose = function(ev) {
+              back.@org.netbeans.html.ko4j.LoadWS::onClose(ZILjava/lang/String;)(ev.wasClean, ev.code, ev.reason);
+            };
+            return ws;
+          } catch (ex) {
+            return null;
+          }
+        } else {
+          return null;
+        }
+        """
     )
     private static Object initWebSocket(Object back, String url) {
         return null;

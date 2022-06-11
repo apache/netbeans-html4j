@@ -24,7 +24,7 @@ package org.netbeans.html.boot.impl;
  * @author Jaroslav Tulach
  */
 abstract class JsCallback {
-    final String parse(String body) {
+    final String parse(String body, boolean promise) {
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         for (;;) {
@@ -50,8 +50,9 @@ abstract class JsCallback {
             int colon4 = body.indexOf("::", next);
             if (sigBeg == -1 || sigEnd == -1 || colon4 == -1) {
                 throw new IllegalStateException(
-                    "Wrong format of instance callback. "
-                    + "Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':\n" 
+                    """
+                    Wrong format of instance callback. Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':
+                    """ 
                     + body
                 );
             }
@@ -62,13 +63,14 @@ abstract class JsCallback {
             int paramBeg = body.indexOf('(', sigEnd + 1);
             if (paramBeg == -1) {
                 throw new IllegalStateException(
-                    "Wrong format of instance callback. "
-                    + "Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':\n" 
+                    """
+                    Wrong format of instance callback. Should be: 'inst.@pkg.Class::method(Ljava/lang/Object;)(param)':
+                    """ 
                     + body
                 );
             }
             
-            sb.append(callMethod(refId, fqn, method, params));
+            sb.append(callMethod(refId, promise, fqn, method, params));
             if (body.charAt(paramBeg + 1) != (')')) {
                 sb.append(",");
             }
@@ -97,8 +99,9 @@ abstract class JsCallback {
             int paramBeg = body.indexOf('(', sigEnd + 1);
             if (sigBeg == -1 || sigEnd == -1 || colon4 == -1 || paramBeg == -1) {
                 throw new IllegalStateException(
-                    "Wrong format of static callback. "
-                    + "Should be: '@pkg.Class::staticMethod(Ljava/lang/Object;)(param)':\n" 
+                    """
+                    Wrong format of static callback. Should be: '@pkg.Class::staticMethod(Ljava/lang/Object;)(param)':
+                    """ 
                     + body
                 );
             }
@@ -107,14 +110,13 @@ abstract class JsCallback {
             String params = body.substring(sigBeg, sigEnd + 1);
 
             
-            sb.append(callMethod(null, fqn, method, params));
+            sb.append(callMethod(null, promise, fqn, method, params));
             pos = paramBeg + 1;
         }
     }
 
     protected abstract CharSequence callMethod(
-        String ident, String fqn, String method, String params
-    );
+            String ident, boolean promise, String fqn, String method, String params);
 
     static String mangle(String fqn, String method, String params) {
         if (params.startsWith("(")) {

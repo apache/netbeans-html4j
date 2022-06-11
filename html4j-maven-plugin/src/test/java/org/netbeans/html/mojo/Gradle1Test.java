@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
@@ -47,14 +48,19 @@ public class Gradle1Test {
         Class<?> clazz = l.loadClass("Gradle1Check");
         Callable<?> r = (Callable<?>) clazz.newInstance();
 
-        try (Closeable c = Fn.activate(new NumberPresenter())) {
+        final NumberPresenter mockPresenter = new NumberPresenter();
+        try (Closeable c = Fn.activate(mockPresenter)) {
             Object value = r.call();
             assertTrue(value instanceof Number, "It is a number");
             assertEquals(((Number)value).intValue(), 42, "The meaning is returned");
         }
+        assertEquals(mockPresenter.loadScriptCount, 1, "One script loaded");
     }
 
     private static final class NumberPresenter implements Fn.Presenter {
+        private final Properties p = new Properties();
+
+        private int loadScriptCount;
 
         @Override
         public Fn defineFn(String code, String... ignore) {
@@ -62,7 +68,11 @@ public class Gradle1Test {
                 code = code.substring(6);
             }
             code = code.replace(';', ' ').trim();
-            return new NumberFn(Integer.valueOf(code));
+            String number = p.getProperty(code);
+            if (number == null) {
+                return new NumberFn(42);
+            }
+            return new NumberFn(Integer.valueOf(number));
         }
 
         @Override
@@ -72,7 +82,8 @@ public class Gradle1Test {
 
         @Override
         public void loadScript(Reader reader) throws Exception {
-            throw new UnsupportedOperationException();
+            p.load(reader);
+            loadScriptCount++;
         }
 
     }

@@ -151,10 +151,10 @@ public class GCBodyTest {
     }
     
     private static void assertGC(Reference<?> ref, String msg) throws InterruptedException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 30; i++) {
             if (isGone(ref)) return;
             long then = System.currentTimeMillis();
-            int size = Bodies.gc(Math.pow(2.0, i));
+            int size = Bodies.gc(1 << i);
             long took = System.currentTimeMillis() - then;
             if (took > 3000) {
                 throw new InterruptedException(msg + " - giving up after " + took + " ms at size of " + size);

@@ -33,6 +33,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.assertEquals;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,18 +44,18 @@ import org.testng.annotations.Test;
  */
 public class FnTest extends JsClassLoaderBase {
     private static Fn.Presenter presenter;
-    
+
     public FnTest() {
     }
 
     @BeforeClass
     public static void createClassLoader() throws Exception {
         final ScriptEngine eng = JsUtils.initializeEngine();
-        
+
         final URL my = FnTest.class.getProtectionDomain().getCodeSource().getLocation();
         ClassLoader parent = JsClassLoaderTest.class.getClassLoader().getParent();
         final URLClassLoader ul = new URLClassLoader(new URL[] { my }, parent);
-        
+
         class Impl implements FindResources, Fn.Presenter, Fn.FromJavaScript {
             @Override
             public void findResources(String path, Collection<? super URL> results, boolean oneIsEnough) {
@@ -119,12 +120,17 @@ public class FnTest extends JsClassLoaderBase {
         Impl impl = new Impl();
         ClassLoader loader = FnUtils.newLoader(impl, impl, parent);
         presenter = impl;
-        
+
         Closeable close = FnContext.activate(impl);
         methodClass = loader.loadClass(JsMethods.class.getName());
         close.close();
     }
-    
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullProcessorNPE() {
+        Fn.activate(null);
+    }
+
     @Test public void flushingPresenter() throws IOException {
         class FP implements Fn.Presenter, Flushable {
             int flush;
@@ -149,7 +155,7 @@ public class FnTest extends JsClassLoaderBase {
                 flush++;
             }
         }
-        
+
         FP p = new FP();
         Closeable c1 = Fn.activate(p);
         Closeable c2 = Fn.activate(p);
@@ -159,7 +165,12 @@ public class FnTest extends JsClassLoaderBase {
         assertEquals(p.flush, 1, "Now flushed");
     }
 
+    private Closeable ctx;
     @BeforeMethod public void initPresenter() {
-        FnContext.currentPresenter(presenter);
+        ctx = Fn.activate(presenter);
+    }
+
+    @AfterMethod public void closePresener() throws Exception {
+        ctx.close();
     }
 }

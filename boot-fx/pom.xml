@@ -35,6 +35,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <publicPackages>net.java.html.boot.fx</publicPackages>
+    <skipTests>${skipJavaFXTests}</skipTests>
   </properties>
   <build>
       <plugins>
@@ -83,7 +84,35 @@
       <artifactId>javafx-web</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-nbjunit</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>test</scope>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <artifactId>webswing-app-toolkit</artifactId>
+      <groupId>org.webswing</groupId>
+      <version>20.1.8</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>jdk.jsobject.modpatch</groupId>
+          <artifactId>jdk.jsobject.modpatch</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>java.desktop.modpatch</groupId>
+          <artifactId>java.desktop.modpatch</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.webswing</groupId>
+          <artifactId>webswing-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
-    <description>A presentation provider to show JavaFX WebView 
-when a Java/HTML based application is about to boot.</description>
+  <description>A presentation provider to show JavaFX WebView 
+    when a Java/HTML based application is about to boot.
+  </description>
 </project>

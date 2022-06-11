@@ -19,7 +19,9 @@
 
 import net.java.html.js.JavaScriptBody;
 import java.util.concurrent.Callable;
+import net.java.html.js.JavaScriptResource;
 
+@JavaScriptResource("/meaning.js")
 public class Gradle1Check implements Callable<Integer> {
 
     @Override
@@ -27,7 +29,7 @@ public class Gradle1Check implements Callable<Integer> {
         return compute();
     }
 
-    @JavaScriptBody(args = {}, body = "return 42;")
+    @JavaScriptBody(args = {}, body = "return meaningOfWorld;")
     private static int compute() {
         return -1;
     }

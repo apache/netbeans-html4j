@@ -36,6 +36,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <bundleSymbolicName>org.netbeans.html.ko4j</bundleSymbolicName>
     <netbeans.compile.on.save>none</netbeans.compile.on.save> 
+    <skipTests>${skipJavaFXTests}</skipTests>
   </properties>
   <build>
       <plugins>
@@ -58,6 +59,12 @@
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
                   <skip>false</skip>
+              </configuration>
+          </plugin>
+          <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                  <forkMode>always</forkMode>
               </configuration>
           </plugin>
       </plugins>
@@ -102,6 +109,11 @@
         <scope>test</scope>
     </dependency>
     <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-swing</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.glassfish.grizzly</groupId>
       <artifactId>grizzly-http-server</artifactId>
       <version>${grizzly.version}</version>
@@ -124,6 +136,12 @@
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-nbjunit</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
     <description>Binds net.java.html.json APIs together with knockout.js</description>

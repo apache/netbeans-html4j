@@ -19,7 +19,6 @@
 package net.java.html.boot.script;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
@@ -50,7 +49,7 @@ public final class KOCase implements ITest, Runnable {
 
     @Override
     public String getTestName() {
-        return m.getName();
+        return m != null ? m.getName() : skipMsg;
     }
 
     @Test
@@ -73,8 +72,8 @@ public final class KOCase implements ITest, Runnable {
     @Override
     public synchronized void run() {
         boolean notify = true;
-        Closeable a = Fn.activate(p);
-        try {
+        try (Closeable a = Fn.activate(p)) {
+            assert a != null;
             if (inst == null) {
                 inst = m.getDeclaringClass().newInstance();
             }
@@ -102,11 +101,6 @@ public final class KOCase implements ITest, Runnable {
         } finally {
             if (notify) {
                 notifyAll();
-            }
-            try {
-                a.close();
-            } catch (IOException ex) {
-                throw new IllegalStateException(ex);
             }
         }
     }

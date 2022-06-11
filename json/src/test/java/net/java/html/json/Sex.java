@@ -18,10 +18,14 @@
  */
 package net.java.html.json;
 
-/**
- *
- * @author Jaroslav Tulach
- */
+@Model(className = "MaleOrFemale", properties = {
+    @Property(name = "sex", type = Sex.class)
+})
 public enum Sex {
     MALE, FEMALE;
+
+    @ComputedProperty
+    static boolean woman(Sex sex) {
+        return FEMALE == sex;
+    }
 }

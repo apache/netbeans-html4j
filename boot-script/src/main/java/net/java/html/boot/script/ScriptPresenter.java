@@ -20,31 +20,37 @@ package net.java.html.boot.script;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.ObjectOutput;
 import java.io.Reader;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import net.java.html.boot.script.impl.Callback;
+import net.java.html.boot.script.impl.PromisePolyfill;
 import org.netbeans.html.boot.spi.Fn;
 import org.netbeans.html.boot.spi.Fn.Presenter;
 
 /** Implementation of {@link Presenter} that delegates
  * to Java {@link ScriptEngine scripting} API. The presenter runs headless
  * without appropriate simulation of browser APIs. Its primary usefulness
- * is inside testing environments. 
+ * is inside testing environments.
  * <p>
- * One can load in browser simulation for example from 
+ * One can load in browser simulation for example from
  * <a href="http://www.envjs.com/">env.js</a>. The best way to achieve so,
  * is to wait until JDK-8046013 gets fixed....
- * 
+ *
  *
  * @author Jaroslav Tulach
  */
@@ -65,28 +71,44 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     private final ScriptEngine eng;
     private final Executor exc;
     private final Object undefined;
+    private final Set<Class<?>> jsReady;
+    private final CallbackImpl callback;
 
-    ScriptPresenter(Executor exc) {
-        this(new ScriptEngineManager().getEngineByName("javascript"), exc);
-    }
+    ScriptPresenter(ScriptEngine eng, Executor exc, boolean sanitize) {
+        if (eng == null) {
+            eng = new ScriptEngineManager().getEngineByName("javascript");
+        }
+        IllegalStateException[] makingPolyglot = { null };
+        final List<String> names = eng.getFactory().getNames();
+        if (names.contains("Graal.js")) { // NOI18N
+            try {
+                Bindings bindings = eng.getBindings(ScriptContext.ENGINE_SCOPE);
+                bindings.put("polyglot.js.allowHostAccess", true); // NOI18N
+            } catch (IllegalStateException ex) {
+                makingPolyglot[0] = ex;
+            }
+        } else if (names.contains("nashorn")) {
+            PromisePolyfill.initialize(eng, this);
+        }
 
-    ScriptPresenter(ScriptEngine eng, Executor exc) {
         this.eng = eng;
         this.exc = exc;
+        Object undef;
         try {
-            eng.eval("function alert(msg) { Packages.java.lang.System.out.println(msg); };");
-            eng.eval("function confirm(msg) { Packages.java.lang.System.out.println(msg); return true; };");
-            eng.eval("function prompt(msg, txt) { Packages.java.lang.System.out.println(msg + ':' + txt); return txt; };");
-            Object undef;
-            if (JDK7) {
-                undef = new JDK7Callback().undefined(eng);
-            } else {
-                undef = ((Object[])eng.eval("Java.to([undefined])"))[0];
+            undef = new UndefinedCallback().undefined(eng);
+            if (sanitize) {
+                Sanitizer.clean(eng);
             }
-            this.undefined = undef;
+            Sanitizer.defineAlert(eng);
         } catch (ScriptException ex) {
+            if (makingPolyglot[0] != null) {
+                throw makingPolyglot[0];
+            }
             throw new IllegalStateException(ex);
         }
+        this.undefined = undef;
+        this.jsReady = new HashSet<>();
+        this.callback = new CallbackImpl();
     }
 
     @Override
@@ -97,7 +119,7 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     @Override
     public Fn defineFn(String code, String[] names, boolean[] keepAlive) {
         return defineImpl(code, names, keepAlive);
-    }    
+    }
     private FnImpl defineImpl(String code, String[] names, boolean[] keepAlive) {
         StringBuilder sb = new StringBuilder();
         sb.append("(function() {\n");
@@ -137,18 +159,19 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     public void loadScript(Reader code) throws Exception {
         eng.eval(code);
     }
-    
+
     //
     // array conversions
     //
-    
-    final Object convertArrays(Object[] arr) throws Exception {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] instanceof Object[]) {
-                arr[i] = convertArrays((Object[]) arr[i]);
-            }
+
+    private Object convertArrays(Object anyArr) throws Exception {
+        int len = Array.getLength(anyArr);
+        Object[] arr = new Object[len];
+        for (int i = 0; i < len; i++) {
+            final Object ith = Array.get(anyArr, i);
+            arr[i] = toJavaScript(ith, true, true);
         }
-        final Object wrapArr = wrapArrFn().invokeImpl(null, false, arr); // NOI18N
+        final Object wrapArr = wrapArrFn().invokeImpl(null, false, arr);
         return wrapArr;
     }
 
@@ -164,7 +187,7 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         return wrapArrImpl;
     }
 
-    final Object checkArray(Object val) throws Exception {
+    private Object checkArray(Object val) throws Exception {
         if (val instanceof Boolean || val instanceof Number || val instanceof String) {
             return val;
         }
@@ -176,6 +199,9 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         }
         Object[] arr = new Object[length];
         fn.invokeImpl(null, false, val, arr);
+        for (int i = 0; i < length; i++) {
+            arr[i] = toJava(arr[i]);
+        }
         return arr;
     }
 
@@ -202,12 +228,70 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         return arraySize;
     }
 
+    private FnImpl wrapJavaObject;
+    private FnImpl wrapJavaObject() {
+        if (wrapJavaObject == null) {
+            try {
+                wrapJavaObject = defineImpl("\n"
+                    + "var obj = {};\n"
+                    + "Object.defineProperty(obj, 'javaObj', {\n"
+                    + "  value : function() { callback.callback(java); }\n"
+                    + "});\n"
+                    + "  if (str) {\n"
+                    + "    Object.defineProperty(obj, 'toString', {\n"
+                    + "      value : function() { return str; }\n"
+                    + "    });\n"
+                    + "  }\n"
+                    + "return obj;\n"
+                    + "", new String[] { "java", "callback", "str" }, null
+                );
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return wrapJavaObject;
+    }
+
+    private FnImpl extractJavaObject;
+    private FnImpl extractJavaObject() {
+        if (extractJavaObject == null) {
+            try {
+                extractJavaObject = defineImpl("\n"
+                    + "var fn = obj && obj['javaObj'];\n"
+                    + "if (typeof fn === 'function') {\n"
+                    + "  fn();\n"
+                    + "};\n"
+                    + "", new String[] { "obj" }, null
+                );
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        }
+        return extractJavaObject;
+    }
+
     @Override
     public Object toJava(Object toJS) {
+        if (toJS == undefined || toJS == null) {
+            return null;
+        }
+        if (toJS instanceof String || toJS instanceof Number || toJS instanceof Boolean || toJS instanceof Character) {
+            return toJS;
+        }
+        jsReady.add(toJS.getClass());
+        try {
+            callback.last = this;
+            extractJavaObject().invokeImpl(null, false, toJS);
+            if (callback.last != this) {
+                toJS = callback.last;
+            }
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
         if (toJS instanceof Weak) {
             toJS = ((Weak)toJS).get();
         }
-        if (toJS == undefined) {
+        if (toJS == undefined || toJS == null) {
             return null;
         }
         try {
@@ -216,12 +300,19 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             throw new IllegalStateException(ex);
         }
     }
-    
+
     @Override
     public Object toJavaScript(Object toReturn) {
-        if (toReturn instanceof Object[]) {
+        return toJavaScript(toReturn, true, true);
+    }
+
+    final Object toJavaScript(Object toReturn, boolean arrayChecks, boolean keepAlive) {
+        if (toReturn == null || !arrayChecks) {
+            return toReturn;
+        }
+        if (toReturn.getClass().isArray()) {
             try {
-                return convertArrays((Object[])toReturn);
+                return convertArrays(toReturn);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
             }
@@ -231,7 +322,30 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
                     return ((Boolean)toReturn) ? true : null;
                 }
             }
-            return toReturn;
+            if (toReturn.getClass().getSimpleName().equals("$JsCallbacks$")) { // NOI18N
+                return toReturn;
+            }
+            if (toReturn instanceof Character) {
+                return (int) (Character) toReturn;
+            }
+            if (
+                toReturn instanceof Boolean || toReturn instanceof String ||
+                toReturn instanceof Number
+            ) {
+                return toReturn;
+            }
+            if (isJSReady(toReturn)) {
+                return toReturn;
+            }
+            if (!keepAlive) {
+                toReturn = new Weak(toReturn);
+            }
+            String name = toReturn instanceof Enum ? toReturn.toString() : null;
+            try {
+                return wrapJavaObject().invokeImpl(null, false, toReturn, callback, name);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
         }
     }
 
@@ -241,8 +355,9 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             command.run();
             return;
         }
-        
+
         class Wrap implements Runnable {
+            @Override
             public void run() {
                 try (Closeable c = Fn.activate(ScriptPresenter.this)) {
                     command.run();
@@ -275,43 +390,36 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
             return invokeImpl(thiz, true, args);
         }
 
-            final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
-                List<Object> all = new ArrayList<>(args.length + 1);
-                all.add(thiz == null ? fn : thiz);
-                for (int i = 0; i < args.length; i++) {
-                    Object conv = args[i];
-                    if (arrayChecks) {
-                        if (args[i] instanceof Object[]) {
-                            Object[] arr = (Object[]) args[i];
-                            conv = ((ScriptPresenter) presenter()).convertArrays(arr);
-                        }
-                        if (conv != null && keepAlive != null
-                            && !keepAlive[i] && !isJSReady(conv)
-                            && !conv.getClass().getSimpleName().equals("$JsCallbacks$") // NOI18N
-                            ) {
-                            conv = new Weak(conv);
-                        }
-                        if (conv instanceof Character) {
-                            conv = (int)(Character)conv;
-                        }
-                    }
-                    all.add(conv);
-                }
-                Object ret = ((Invocable)eng).invokeMethod(fn, "call", all.toArray()); // NOI18N
-                if (ret instanceof Weak) {
-                    ret = ((Weak)ret).get();
-                }
-                if (ret == fn) {
-                    return null;
-                }
-                if (!arrayChecks) {
-                    return ret;
-                }
-                return ((ScriptPresenter)presenter()).checkArray(ret);
+        final Object invokeImpl(Object thiz, boolean arrayChecks, Object... args) throws Exception {
+            Object[] convertedArguments = toArguments(args, thiz, arrayChecks);
+            Object ret = ((Invocable)eng).invokeMethod(fn, "call", convertedArguments); // NOI18N
+            if (ret == fn) {
+                return null;
             }
+            if (!arrayChecks) {
+                return ret;
+            }
+            return ((ScriptPresenter)presenter()).toJava(ret);
+        }
+
+        private Object[] toArguments(Object[] args, Object thiz, boolean arrayChecks) {
+            List<Object> all = new ArrayList<>(args.length + 1);
+            ScriptPresenter sp = (ScriptPresenter) presenter();
+            if (thiz == null) {
+                all.add(fn);
+            } else {
+                all.add(sp.toJavaScript(thiz, true, true));
+            }
+            for (int i = 0; i < args.length; i++) {
+                Object conv = sp.toJavaScript(args[i], arrayChecks, keepAlive == null || keepAlive[i]);
+                all.add(conv);
+            }
+            final Object[] convertedArguments = all.toArray();
+            return convertedArguments;
+        }
     }
-    
-    private static boolean isJSReady(Object obj) {
+
+    private boolean isJSReady(Object obj) {
         if (obj == null) {
             return true;
         }
@@ -321,108 +429,47 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
         if (obj instanceof Number) {
             return true;
         }
-        final String cn = obj.getClass().getName();
-        if (
-            cn.startsWith("com.oracle.truffle") || // NOI18N
-            cn.startsWith("jdk.nashorn") || // NOI18N
-            (cn.contains(".mozilla.") && cn.contains(".Native")) // NOI18N
-        ) {
-            return true;
-        }
         if (obj instanceof Character) {
             return true;
         }
-        return false;
-    }    
-    
+        return jsReady.contains(obj.getClass());
+    }
+
     private static final class Weak extends WeakReference<Object> {
         public Weak(Object referent) {
             super(referent);
         }
     }
 
-    private static final class JDK7Callback implements ObjectOutput {
+    private static final class UndefinedCallback extends Callback {
         private Object undefined;
 
         @Override
-        public void writeObject(Object obj) throws IOException {
+        public void callback(Object obj) {
             undefined = obj;
         }
 
-        @Override
-        public void write(int b) throws IOException {
-        }
-
-        @Override
-        public void write(byte[] b) throws IOException {
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-        }
-
-        @Override
-        public void flush() throws IOException {
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-
-        @Override
-        public void writeBoolean(boolean v) throws IOException {
-        }
-
-        @Override
-        public void writeByte(int v) throws IOException {
-        }
-
-        @Override
-        public void writeShort(int v) throws IOException {
-        }
-
-        @Override
-        public void writeChar(int v) throws IOException {
-        }
-
-        @Override
-        public void writeInt(int v) throws IOException {
-        }
-
-        @Override
-        public void writeLong(long v) throws IOException {
-        }
-
-        @Override
-        public void writeFloat(float v) throws IOException {
-        }
-
-        @Override
-        public void writeDouble(double v) throws IOException {
-        }
-
-        @Override
-        public void writeBytes(String s) throws IOException {
-        }
-
-        @Override
-        public void writeChars(String s) throws IOException {
-        }
-
-        @Override
-        public void writeUTF(String s) throws IOException {
-        }
-
-        public Object undefined(ScriptEngine eng) {
+        public Object undefined(ScriptEngine eng) throws ScriptException {
+            undefined = this;
             try {
-                eng.eval("function isJDK7Undefined(js) { js.writeObject(undefined); }");
+                Object fn = eng.eval("(function(js) { js.callback(undefined); })");
                 Invocable inv = (Invocable) eng;
-                inv.invokeFunction("isJDK7Undefined", this);
-            } catch (NoSuchMethodException | ScriptException ex) {
-                throw new IllegalStateException(ex);
+                inv.invokeMethod(fn, "call", null, this);
+            } catch (NoSuchMethodException ex) {
+                throw new ScriptException(ex);
+            }
+            if (undefined == this) {
+                throw new IllegalStateException();
             }
             return undefined;
         }
     }
+    private static final class CallbackImpl extends Callback {
+        Object last;
 
+        @Override
+        public void callback(Object obj) {
+            last = obj;
+        }
+    }
 }

@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
@@ -37,32 +38,33 @@ import org.testng.annotations.Test;
  */
 public class TitleTest {
     private static Runnable whenInitialized;
-    
+
     public TitleTest() {
     }
 
     @JavaScriptBody(args = { "a", "b"  }, body = "return a + b;")
     private static native int plus(int a, int b);
-    
+
     @Test public void checkReload() throws Throwable {
         final Throwable[] arr = { null };
-        
-        final BrowserBuilder bb = BrowserBuilder.newBrowser().loadClass(TitleTest.class).
+
+        final WebView[] lastWebView = { null };
+        final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter(lastWebView)).loadClass(TitleTest.class).
                 loadPage("empty.html").
                 invoke("initialized");
-        
+
         class ShowBrowser implements Runnable {
             @Override
             public void run() {
                 bb.showAndWait();
             }
         }
-        
+
         class WhenInitialized implements Runnable {
             CountDownLatch cdl = new CountDownLatch(1);
             AbstractFXPresenter p;
             BrwsrCtx ctx;
-            
+
             @Override
             public void run() {
                 try {
@@ -83,10 +85,11 @@ public class TitleTest {
         Executors.newSingleThreadExecutor().submit(new ShowBrowser());
         when.cdl.await();
         if (arr[0] != null) throw arr[0];
-        
-        Stage s = FXBrwsr.findStage();
+
+        assertNotNull(lastWebView[0], "A WebView created");
+        Stage s = (Stage) lastWebView[0].getScene().getWindow();
         assertEquals(s.getTitle(), "FX Presenter Harness");
-        
+
         final CountDownLatch propChange = new CountDownLatch(1);
         s.titleProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -94,7 +97,7 @@ public class TitleTest {
                 propChange.countDown();
             }
         });
-        
+
         when.ctx.execute(new Runnable() {
             @Override
             public void run() {
@@ -105,17 +108,17 @@ public class TitleTest {
         propChange.await(5, TimeUnit.SECONDS);
         assertEquals(s.getTitle(), "New title");
     }
-    
+
     final void doCheckReload() throws Exception {
         int res = plus(30, 12);
         assertEquals(res, 42, "Meaning of world computed");
     }
-    
+
     public static synchronized void initialized() throws Exception {
         whenInitialized.run();
     }
-    
-    @JavaScriptBody(args = { "s" }, body = 
+
+    @JavaScriptBody(args = { "s" }, body =
         "document.getElementsByTagName('title')[0].innerHTML = s;"
     )
     static native void changeTitle(String s);

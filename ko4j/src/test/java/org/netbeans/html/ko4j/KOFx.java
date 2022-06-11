@@ -62,6 +62,7 @@ public final class KOFx implements ITest, Runnable {
         }
     }
 
+    // BEGIN: org.netbeans.html.ko4j.KOFx
     @Override
     public synchronized void run() {
         boolean notify = true;
@@ -77,10 +78,10 @@ public final class KOFx implements ITest, Runnable {
         } catch (InvocationTargetException ex) {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
-                if (count++ < 10000) {
+                if (count++ < 300) {
                     notify = false;
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(30);
                     } catch (Exception ex1) {
                         // ignore and continue
                     }
@@ -102,5 +103,6 @@ public final class KOFx implements ITest, Runnable {
             }
         }
     }
+    // END: org.netbeans.html.ko4j.KOFx
     
 }

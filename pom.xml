@@ -27,19 +27,26 @@
   <packaging>pom</packaging>
   <name>HTML APIs via Java</name>
   <parent>
-    <groupId>net.java</groupId>
-    <artifactId>jvnet-parent</artifactId>
-     <version>3</version>
+      <groupId>org.apache.netbeans</groupId>
+      <artifactId>netbeans-parent</artifactId>
+      <version>2</version>
   </parent>
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <netbeans.version>RELEASE82</netbeans.version>
+      <netbeans.version>RELEASE130</netbeans.version>
+      <graalvm.version>21.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
       <license>COPYING</license>
       <publicPackages />
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
       <netbeans.compile.on.save>none</netbeans.compile.on.save>
       <javadoc.allowjs>--allow-script-in-comments</javadoc.allowjs>
+      <javadoc.warning.fail>true</javadoc.warning.fail>
+      <javadoc.fail>true</javadoc.fail>
+      <sigtestPackages>${publicPackages}</sigtestPackages>
+      <publicMetaInf>META-INF.services.*</publicMetaInf>
+      <skipJavaFXTests>true</skipJavaFXTests>
+      <maven.compiler.source>15</maven.compiler.source>
   </properties>
   <modules>
     <module>json</module>
@@ -55,12 +62,18 @@
     <module>ko-felix-test</module>
     <module>ko-osgi-test</module>
     <module>equinox-agentclass-hook</module>
+    <module>ecj-test</module>
     <module>boot-script</module>
     <!--
     <module>boot-truffle</module>
     -->
     <module>boot-agent-test</module>
     <module>xhr4j</module>
+    <!-- presenters -->
+    <module>browser</module>
+    <module>renderer</module>
+    <module>generic</module>
+    <module>webkit</module>
   </modules>
   <licenses>
       <license>
@@ -75,44 +88,34 @@
       <url>http://apache.org</url>
   </organization>
   <scm>
-      <connection>scm:git:https://gitbox.apache.org/repos/asf//incubator-netbeans-html4j.git</connection>
-      <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/incubator-netbeans-html4j.git</developerConnection>
-      <url>https://github.com/apache/incubator-netbeans-html4j/tree/${project.scm.tag}</url>
+      <connection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</connection>
+      <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/netbeans-html4j.git</developerConnection>
+      <url>https://github.com/apache/netbeans-html4j/tree/${project.scm.tag}</url>
       <tag>master</tag>
   </scm>
   <issueManagement>
       <system>jira</system>
       <url>https://issues.apache.org/jira/browse/NETBEANS</url>
   </issueManagement>
-  <repositories>
-      <repository>
-          <id>netbeans</id>
-          <name>NetBeans</name>
-          <url>http://bits.netbeans.org/maven2/</url>
-      </repository>
-  </repositories>
   <build>
       <plugins>
-           <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>2.4</version>
-            <configuration>
-              <mavenExecutorId>forked-path</mavenExecutorId>
-              <useReleaseProfile>false</useReleaseProfile>
-              <arguments>-Pjvnet-release -Pgpg</arguments>
-              <tag>release-${releaseVersion}</tag>
-            </configuration>
-          </plugin>
+            <plugin>
+              <artifactId>maven-release-plugin</artifactId>
+              <version>2.4</version>
+              <configuration>
+                  <tag>release-${releaseVersion}</tag>
+              </configuration>
+            </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.4</version>
+              <version>3.1.1</version>
               <configuration>
                   <docfilessubdirs>true</docfilessubdirs>
                   <subpackages>${publicPackages}</subpackages>
                   <skip>false</skip>
                   <excludePackageNames>
-org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests:org.netbeans.html.xhr4j
+org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.impl:org.netbeans.html.equinox.*:org.netbeans.html.geo.impl:org.netbeans.html.json.impl:org.netbeans.html.sound.impl:org.netbeans.html.ko.*:org.netbeans.html.ko4j:org.netbeans.html.mojo:org.netbeans.html.wstyrus:net.java.html.js.tests:net.java.html.json.tests:org.netbeans.html.xhr4j:java.lang:net.java.html.boot.script.impl
                   </excludePackageNames>
                 <groups>
                   <group>
@@ -139,19 +142,33 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <title>Service Provider APIs (not commonly interesting)</title>
                     <packages>org.netbeans.html.*</packages>
                   </group>
+                  <group>
+                    <title>Build Your Own Presenter!</title>
+                    <packages>org.netbeans.html.presenters.*</packages>
+                  </group>
                 </groups>
                 <links>
                     <link>http://testng.org/javadocs/</link>
-                    <link>http://bits.netbeans.org/8.0/javadoc/org-openide-util-lookup/</link>
+                    <link>http://bits.netbeans.org/12.0/javadoc/org-openide-util-lookup/</link>
                     <link>http://docs.oracle.com/javase/8/javafx/api/</link>
                 </links>
                 <doclet>org.apidesign.javadoc.codesnippet.Doclet</doclet>
                 <docletArtifact>
                     <groupId>org.apidesign.javadoc</groupId>
                     <artifactId>codesnippet-doclet</artifactId>
-                    <version>0.23</version>
+                    <version>0.81</version>
                 </docletArtifact>
-                <additionalparam>-snippetpath json/src/test -snippetpath boot-fx/src/test ${javadoc.allowjs} -hiddingannotation java.lang.Deprecated</additionalparam>
+                <additionalOptions>
+                    -snippetpath boot-fx/src/test
+                    -snippetpath boot-script/src/test
+                    -snippetpath ko4j/src/test
+                    -snippetpath json/src/test
+                    -snippetpath webkit/src/test
+                    ${javadoc.allowjs}
+                    -hiddingannotation java.lang.Deprecated
+                </additionalOptions>
+                <failOnWarnings>${javadoc.warning.fail}</failOnWarnings>
+                <failOnError>${javadoc.fail}</failOnError>
               </configuration>
             </plugin>
             <plugin>
@@ -185,7 +202,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <version>0.12</version>
+                <version>0.13</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -196,7 +213,9 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     </execution>
                 </executions>
                 <configuration>
+                    <parseSCMIgnoresAsExcludes>false</parseSCMIgnoresAsExcludes>
                     <excludes>
+                        <exclude>release.properties</exclude>
                         <exclude>**/target/**</exclude>
                         <exclude>.gitignore</exclude>
                         <exclude>**/.git/**</exclude>
@@ -206,9 +225,10 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                         <exclude>**/nb-configuration.xml</exclude>
+                        <exclude>**/nbactions.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
-                        <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.4.0.js</exclude>
+                        <exclude>**/main/resources/org/netbeans/html/ko4j/knockout-3.5.0.js</exclude>
                         <exclude>**/test/resources/org/netbeans/html/mojo/gradle*/build/**</exclude>
                     </excludes>
                     <excludeSubProjects>false</excludeSubProjects>
@@ -222,42 +242,16 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-remote-resources-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>per-module-deps</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <resourceBundles>
-                                <!-- Will generate META-INF/DEPENDENCIES
-                                META-INF/LICENSE META-INF/NOTICE -->
-                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                                <!-- Will generate META-INF/DISCLAIMER  -->
-                                <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
-                            </resourceBundles>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>all-deps</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>validate</phase>
-                        <configuration>
-                            <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                            <excludeGroupIds>org.netbeans.html</excludeGroupIds>
-                            <resourceBundles>
-                                <!-- Will generate META-INF/DEPENDENCIES
-                                META-INF/LICENSE META-INF/NOTICE -->
-                                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
-                            </resourceBundles>
-                            <appendedResourcesDirectory>ko4j/src/main/appended-resources</appendedResourcesDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
+                <version>1.6.0</version>
+                <configuration>
+                    <resourceBundles>
+                        <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                    </resourceBundles>
+                    <excludeGroupIds>org.netbeans.html</excludeGroupIds>
+                    <resourceBundles>
+                        <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                    </resourceBundles>
+                </configuration>
             </plugin>
       </plugins>
       <pluginManagement>
@@ -290,10 +284,20 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.8.1</version>
+                <dependencies>
+                    <dependency>
+                        <artifactId>compiler-maven-plugin</artifactId>
+                        <groupId>org.frgaal</groupId>
+                        <version>18.0.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <compilerId>frgaal</compilerId>
+                    <source>17</source>
+                    <target>1.8</target>
+                    <testSource>17</testSource>
+                    <testTarget>1.8</testTarget>
                     <compilerArgs>
                         <compilerArgument>-Xlint:-options</compilerArgument>
                         <compilerArgument>-Xlint:unchecked</compilerArgument>
@@ -304,22 +308,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 </configuration>
               </plugin>
               <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <subpackages>${publicPackages}</subpackages>
-                    <skip>false</skip>
-                </configuration>
-              </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>2.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>${publicPackages},META-INF.services.*;-noimport:=true;-split-package:=first</Export-Package>
+                        <Export-Package>${publicPackages},${publicMetaInf};-noimport:=true;-split-package:=first</Export-Package>
                         <Bundle-SymbolicName>${bundleSymbolicName}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
@@ -347,6 +342,36 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <packages>${sigtestPackages}</packages>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <packages>${publicPackages}</packages>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <releaseVersion>1.7.1</releaseVersion>
+                </configuration>
+            </plugin>
           </plugins>
       </pluginManagement>
   </build>
@@ -365,14 +390,32 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
           </exclusions>
         </dependency>
         <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
+            <version>11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <scope>test</scope>
             <version>11</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.external.google</groupId>
             <artifactId>android-json</artifactId>
             <version>0.0.20131108.vaadin1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dukescript.api</groupId>
+            <artifactId>strings</artifactId>
+            <version>1.6.2</version>
+            <type>jar</type>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
@@ -457,7 +500,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <artifactId>org.apache.felix.framework</artifactId>
             <version>4.2.1</version>
         </dependency>
-      <dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
@@ -499,6 +542,32 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
             <type>jar</type>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.dukescript.api</groupId>
+            <artifactId>junit-browser-runner</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.netbeans.html</groupId>
+                    <artifactId>net.java.html</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <artifactId>js</artifactId>
+            <groupId>org.graalvm.js</groupId>
+            <type>jar</type>
+            <scope>test</scope>
+            <version>${graalvm.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>js-scriptengine</artifactId>
+            <groupId>org.graalvm.js</groupId>
+            <type>jar</type>
+            <scope>test</scope>
+            <version>${graalvm.version}</version>
+        </dependency>
       </dependencies>
   </dependencyManagement>
   <profiles>
@@ -510,39 +579,31 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
               </file>
           </activation>
           <properties>
-            <jfxrt.jar>${java.home}/lib/ext/jfxrt.jar</jfxrt.jar>
+              <skipJavaFXTests>false</skipJavaFXTests>
           </properties>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.netbeans.tools</groupId>
-                      <artifactId>sigtest-maven-plugin</artifactId>
-                      <version>1.0</version>
-                      <executions>
-                          <execution>
-                              <goals>
-                                  <goal>generate</goal>
-                                  <goal>check</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <packages>${publicPackages}</packages>
-                          <releaseVersion>1.5.1</releaseVersion>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
       </profile>
       <profile>
-          <id>jdk7</id>
+          <id>jdk11+</id>
           <activation>
-              <file>
-                  <exists>${java.home}/lib/jfxrt.jar</exists>
-              </file>
+              <jdk>[11,]</jdk>
           </activation>
           <properties>
-            <jfxrt.jar>${java.home}/lib/jfxrt.jar</jfxrt.jar>
+              <skipJavaFXTests>false</skipJavaFXTests>
+          </properties>
+      </profile>
+      <profile>
+          <id>jdk17+</id>
+          <activation>
+              <jdk>[17,]</jdk>
+          </activation>
+          <properties>
+              <javadoc.warning.fail>false</javadoc.warning.fail>
+          </properties>
+      </profile>
+      <profile>
+          <id>apache-release</id>
+          <properties>
+              <javadoc.fail>false</javadoc.fail>
           </properties>
       </profile>
   </profiles>

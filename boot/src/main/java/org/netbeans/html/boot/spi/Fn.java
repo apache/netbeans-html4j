@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +40,7 @@ import org.netbeans.html.boot.impl.FnContext;
  * @author Jaroslav Tulach
  */
 public abstract class Fn {
-    private static Map<String, Set<Presenter>> LOADED;
-    private final Presenter presenter;
+    private final Ref presenter;
     
     /**
      * @deprecated Ineffective as of 0.6. 
@@ -57,7 +58,7 @@ public abstract class Fn {
      * @since 0.6 
      */
     protected Fn(Presenter presenter) {
-        this.presenter = presenter;
+        this.presenter = ref(presenter);
     }
 
     /** True, if currently active presenter is the same as presenter this
@@ -66,7 +67,7 @@ public abstract class Fn {
      * @return true, if proper presenter is used
      */
     public final boolean isValid() {
-        return presenter != null && FnContext.currentPresenter(false) == presenter;
+        return FnContext.currentPresenter(false) == presenter();
     }
     
     /** Helper method to check if the provided instance is valid function.
@@ -144,52 +145,7 @@ public abstract class Fn {
         if (fn == null) {
             return null;
         }
-        return new Fn(fn.presenter()) {
-            @Override
-            public Object invoke(Object thiz, Object... args) throws Exception {
-                loadResource();
-                return fn.invoke(thiz, args);
-            }
-
-            @Override
-            public void invokeLater(Object thiz, Object... args) throws Exception {
-                loadResource();
-                fn.invokeLater(thiz, args);
-            }
-            
-            private void loadResource() throws Exception {
-                Presenter p = presenter();
-                if (p == null) {
-                    p = FnContext.currentPresenter(false);
-                }
-                if (p != null) {
-                    if (LOADED == null) {
-                        LOADED = new HashMap<String, Set<Presenter>>();
-                    }
-                    Set<Presenter> there = LOADED.get(resource);
-                    if (there == null) {
-                        there = new HashSet<Presenter>();
-                        LOADED.put(resource, there);
-                    }
-                    if (there.add(p)) {
-                        final ClassLoader l = caller.getClassLoader();
-                        InputStream is = l.getResourceAsStream(resource);
-                        if (is == null && resource.startsWith("/")) {
-                            is = l.getResourceAsStream(resource.substring(1));
-                        }
-                        if (is == null) {
-                            throw new IOException("Cannot find " + resource + " in " + l);
-                        }
-                        try {
-                            InputStreamReader r = new InputStreamReader(is, "UTF-8");
-                            p.loadScript(r);
-                        } finally {
-                            is.close();
-                        }
-                    }
-                }
-            }
-        };
+        return new Preload(fn.presenter(), fn, resource, caller);
     }
 
     
@@ -213,10 +169,37 @@ public abstract class Fn {
      * 
      * @param p the presenter that should be active until closable is closed
      * @return the closable to close
+     * @throws NullPointerException if the {@code p} is {@code null}
      * @since 0.7
      */
     public static Closeable activate(Presenter p) {
+        if (p == null) {
+            throw new NullPointerException();
+        }
         return FnContext.activate(p);
+    }
+
+    /** Obtains a (usually {@linkplain WeakReference weak}) reference to
+     * the presenter. Such reference is suitable for embedding in various long
+     * living structures with a life-cycle that may outspan the one of presenter.
+     *
+     * @param p the presenter
+     * @return reference to the presenter, {@code null} only if {@code p} is {@code null}
+     * @since 1.6.1
+     * @see Ref
+     */
+    public static Ref<?> ref(final Presenter p) {
+        if (p == null) {
+            return null;
+        }
+        if (p instanceof Ref<?>) {
+            Ref<?> r = ((Ref<?>) p).reference();
+            if (r == null) {
+                throw new NullPointerException();
+            }
+            return r;
+        }
+        return new FallbackIdentity(p);
     }
     
     /** Invokes the defined function with specified <code>this</code> and
@@ -251,14 +234,19 @@ public abstract class Fn {
      * @since 0.7
      */
     protected final Presenter presenter() {
-        return presenter;
+        return presenter == null ? null : presenter.presenter();
     }
     
     /** The representation of a <em>presenter</em> - usually a browser window.
      * Should be provided by a library included in the application and registered
      * in <code>META-INF/services</code>, for example with
      * <code>@ServiceProvider(service = Fn.Presenter.class)</code> annotation.
+     * To verify the implementation of the presenter is correct, implement
+     * associated TCK (e.g. test compatibility kit) at least the headless
+     * one as illustrated at:
      * <p>
+     * {@codesnippet net.java.html.boot.script.ScriptEngineJavaScriptTCK}
+     * 
      * Since 0.7 a presenter may implement {@link Executor} interface, in case
      * it supports single threaded execution environment. The executor's
      * {@link Executor#execute(java.lang.Runnable)} method is then supposed
@@ -363,4 +351,215 @@ public abstract class Fn {
          */
         public Fn defineFn(String code, String[] names, boolean[] keepAlive);
     }
+
+    /** Represents a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises">JavaScript Promise</a>
+     * in Java. A promise is a microtask to be executed as soon as current
+     * "runnable" finishes. At that moment the {@link #compute()} method
+     * is invoked and the result is remebered.
+     * 
+     * @since 1.8
+     */
+    public static abstract class Promise {
+        private static Reference<Fn.Presenter> last = new WeakReference<>(null);
+        private static Fn[] lastFn;
+        private static synchronized Fn[] wrapAndResolve() {
+            final Presenter ap = Fn.activePresenter();
+            if (ap == null) {
+                throw new NullPointerException("No presenter!");
+            }
+            if (lastFn != null && last.get() == ap) {
+                return lastFn;
+            }
+            last = new WeakReference<>(ap);
+            return lastFn = new Fn[] {
+                Fn.define(Promise.class, """
+                    var arr = [null, null, null];
+                    arr[0] = new Promise(function (success, failure) {
+                        arr[1] = success;
+                        arr[2] = failure;
+                    });
+                    return arr;
+                    """),
+                Fn.define(Promise.class, "fn(value);", "fn", "value")
+            };
+        }
+        private final Fn.Presenter presenter;
+        private final Object promise;
+        private final Object success;
+        private final Object failure;
+        private boolean resolved;
+
+        /**
+         * Constructor for subclasses.
+         * @param p the presenter to resolve promise with
+         * @since 1.8
+         */
+        protected Promise(Fn.Presenter p) {
+            this.presenter = p;
+            Object[] promiseSuccessFailure;
+            try (var ctx = Fn.activate(p)) {
+                promiseSuccessFailure = (Object[]) wrapAndResolve()[0].invoke(null);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            this.promise = toJava(promiseSuccessFailure[0]);
+            this.success = toJava(promiseSuccessFailure[1]);
+            this.failure = toJava(promiseSuccessFailure[2]);
+        }
+
+        /**
+         * Schedules the promise invocation and returns JavaScript representation
+         * of the promise.
+         * 
+         * @return JavaScript {@code Promise} object
+         * @since 1.8
+         */
+        public final Object schedule() {
+            try (var ctx = Fn.activate(presenter)) {
+                FnContext.registerMicrotask(this::resolve);
+            } catch (IOException ex) {
+                throw new IllegalStateException(ex);
+            }
+            return promise;
+        }
+
+        /** Implement in subclasses to perform the "promised" Java operation.
+         * Once this method finishes the system resolves the
+         * {@link #schedule() scheduled promise}.
+         * 
+         * @return the value to resolve the promise with
+         * @throws Throwable the exception to resolve the promise with
+         * @since 1.8
+         */
+        protected abstract Object compute() throws Throwable;
+
+        private void resolve() {
+            if (!resolved) {
+                try (var ctx = Fn.activate(presenter)) {
+                    try {
+                        Object result = compute();
+                        wrapAndResolve()[1].invoke(null, success, result);
+                    } catch (Throwable ex) {
+                        wrapAndResolve()[1].invoke(null, failure, ex);
+                    } finally {
+                        resolved = true;
+                    }
+                } catch (Exception ex) {
+                    throw new IllegalStateException(ex);
+                } 
+            }
+        }
+
+        private Object toJava(Object js) {
+            if (Fn.activePresenter() instanceof Fn.FromJavaScript p) {
+                return p.toJava(js);
+            }
+            return js;
+        }
+    }
+
+    /**
+     * Reference to a {@link Presenter}.Each implementation of a {@link Presenter}
+     * may choose a way to reference itself (usually in a {@linkplain WeakReference weak way})
+     * effectively. Various code that needs to hold a reference to a presenter
+     * is then encouraged to obtain such reference via {@link Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)}
+     * call and hold on to it. Holding a reference to an instance of {@link Presenter}
+     * is discouraged as it may lead to memory leaks.
+     * <p>
+     * Presenters willing to to represent a reference to itself effectively shall
+     * also implement the {@link Ref} interface and return reasonable reference
+     * from the {@link #reference()} method.
+     *
+     * @param <P> the type of the presenter
+     * @see Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)
+     * @since 1.6.1
+     */
+    public interface Ref<P extends Presenter> {
+        /** Creates a reference to a presenter.
+         * Rather than calling this method directly, call {@link Fn#ref(org.netbeans.html.boot.spi.Fn.Presenter)}.
+         * @return a (weak) reference to the associated presenter
+         */
+        public Ref<P> reference();
+
+        /** The associated presenter.
+         *
+         * @return the presenter or {@code null}, if it has been GCed meanwhile
+         */
+        public P presenter();
+
+        /** Reference must properly implement {@link #hashCode} and {@link #equals}.
+         *
+         * @return proper hashcode
+         */
+        @Override
+        public int hashCode();
+
+        /** Reference must properly implement {@link #hashCode} and {@link #equals}.
+         *
+         * @return proper equals result
+         */
+        @Override
+        public boolean equals(Object obj);
+    }
+
+    private static class Preload extends Fn {
+        private static Map<String, Set<Ref>> LOADED;
+        private final Fn fn;
+        private final String resource;
+        private final Class<?> caller;
+
+        Preload(Presenter presenter, Fn fn, String resource, Class<?> caller) {
+            super(presenter);
+            this.fn = fn;
+            this.resource = resource;
+            this.caller = caller;
+        }
+
+        @Override
+        public Object invoke(Object thiz, Object... args) throws Exception {
+            loadResource();
+            return fn.invoke(thiz, args);
+        }
+
+        @Override
+        public void invokeLater(Object thiz, Object... args) throws Exception {
+            loadResource();
+            fn.invokeLater(thiz, args);
+        }
+
+        private void loadResource() throws Exception {
+            Ref id = super.presenter;
+            if (id == null) {
+                id = ref(FnContext.currentPresenter(false));
+            }
+            Fn.Presenter realPresenter = id == null ? null : id.presenter();
+            if (realPresenter != null) {
+                if (LOADED == null) {
+                    LOADED = new HashMap<String, Set<Ref>>();
+                }
+                Set<Ref> there = LOADED.get(resource);
+                if (there == null) {
+                    there = new HashSet<Ref>();
+                    LOADED.put(resource, there);
+                }
+                if (there.add(id)) {
+                    final ClassLoader l = caller.getClassLoader();
+                    InputStream is = l.getResourceAsStream(resource);
+                    if (is == null && resource.startsWith("/")) {
+                        is = l.getResourceAsStream(resource.substring(1));
+                    }
+                    if (is == null) {
+                        throw new IOException("Cannot find " + resource + " in " + l);
+                    }
+                    try {
+                        InputStreamReader r = new InputStreamReader(is, "UTF-8");
+                        realPresenter.loadScript(r);
+                    } finally {
+                        is.close();
+                    }
+                }
+            }
+        }
+    }
+
 }

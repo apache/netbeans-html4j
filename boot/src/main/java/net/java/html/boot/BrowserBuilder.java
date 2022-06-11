@@ -320,38 +320,29 @@ public final class BrowserBuilder {
                         public void run() {
                             Throwable firstError = null;
                             if (onLoad != null) {
-                                try {
-                                    FnContext.currentPresenter(currentP);
+                                try (var ctx = Fn.activate(currentP)) {
                                     onLoad.run();
                                 } catch (Throwable ex) {
                                     firstError = ex;
-                                } finally {
-                                    FnContext.currentPresenter(null);
                                 }
                             }
                             INIT: if (methodName != null) {
                                 if (methodArgs.length == 0) {
-                                    try {
+                                    try (var ctx = Fn.activate(currentP)) {
                                         Method m = newClazz.getMethod(methodName);
-                                        FnContext.currentPresenter(currentP);
                                         m.invoke(null);
                                         firstError = null;
                                         break INIT;
                                     } catch (Throwable ex) {
                                         firstError = ex;
-                                    } finally {
-                                        FnContext.currentPresenter(null);
                                     }
                                 }
-                                try {
+                                try (var ctx = Fn.activate(currentP)) {
                                     Method m = newClazz.getMethod(methodName, String[].class);
-                                    FnContext.currentPresenter(currentP);
                                     m.invoke(m, (Object) methodArgs);
                                     firstError = null;
                                 } catch (Throwable ex) {
                                     LOG.log(Level.SEVERE, "Can't call " + methodName + " with args " + Arrays.toString(methodArgs), ex);
-                                } finally {
-                                    FnContext.currentPresenter(null);
                                 }
                             }
                             if (firstError != null) {

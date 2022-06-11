@@ -205,7 +205,7 @@ public class JsClassLoaderBase {
     @Test public void plusOrMul() throws Throwable {
         Method st = methodClass.getMethod("plusOrMul", int.class, int.class);
         assertNotNull(Fn.activePresenter(), "Is there a presenter?");
-        Closeable c = Fn.activate(null);
+        Closeable c = FnContext.activate(null);
         try {
             assertNull(Fn.activePresenter(), "No presenter now");
             assertEquals(st.invoke(null, 6, 7), 42, "Mul in Java");
@@ -214,7 +214,7 @@ public class JsClassLoaderBase {
         }
         assertNotNull(Fn.activePresenter(), "Is there a presenter again");
         assertEquals(st.invoke(null, 6, 7), 13, "Plus in JavaScript");
-        c = Fn.activate(null);
+        c = FnContext.activate(null);
         try {
             assertNull(Fn.activePresenter(), "No presenter again");
             assertEquals(st.invoke(null, 6, 7), 42, "Mul in Java");
@@ -243,10 +243,9 @@ public class JsClassLoaderBase {
     }
     
    @Test public void checkTheTypeOfThrownException() throws Throwable {
-        FnContext.currentPresenter(null);
-        assertNull(Fn.activePresenter(), "No presenter is activer right now");
         java.lang.Object res = null;
-        try {
+        try (var ctx = FnContext.activate(null)) {
+            assertNull(Fn.activePresenter(), "No presenter is activer right now");
             Method st = methodClass.getMethod("plus", int.class, int.class);
             try {
                 res = st.invoke(null, 40, 2);

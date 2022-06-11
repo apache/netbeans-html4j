@@ -36,9 +36,6 @@ import org.netbeans.html.json.spi.Technology;
 final class KOTech
 implements Technology.BatchCopy<Knockout>, Technology.ValueMutated<Knockout>,
 Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
-    private Object[] jsObjects;
-    private int jsIndex;
-
     public KOTech() {
     }
     
@@ -48,51 +45,11 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
     }
 
     final Knockout createKO(Object model, Object copyFrom, PropertyBinding[] propArr, FunctionBinding[] funcArr, Knockout[] ko) {
-        String[] propNames = new String[propArr.length];
-        Number[] propInfo = new Number[propArr.length];
-        Object[] propValues = new Object[propArr.length];
-        for (int i = 0; i < propNames.length; i++) {
-            propNames[i] = propArr[i].getPropertyName();
-            int info =
-                (propArr[i].isReadOnly() ? 1 : 0) +
-                (propArr[i].isConstant()? 2 : 0);
-            propInfo[i] = info;
-            Object value = propArr[i].getValue();
-            if (value instanceof Enum) {
-                value = value.toString();
-            }
-            propValues[i] = value;
-        }
-        String[] funcNames = new String[funcArr.length];
-        for (int i = 0; i < funcNames.length; i++) {
-            funcNames[i] = funcArr[i].getFunctionName();
-        }
-        Object ret = getJSObject();
-        Knockout newKO = new Knockout(model, ret, propArr, funcArr);
+        Knockout newKO = new Knockout(model, copyFrom, propArr, funcArr);
         if (ko != null) {
             ko[0] = newKO;
         }
-        Knockout.wrapModel(
-            newKO,
-            ret, copyFrom,
-            propNames, propInfo, propValues, funcNames
-        );
         return newKO;
-    }
-    
-    private Object getJSObject() {
-        int len = 64;
-        if (jsObjects != null && jsIndex < (len = jsObjects.length)) {
-            Object ret = jsObjects[jsIndex];
-            jsObjects[jsIndex] = null;
-            jsIndex++;
-            return ret;
-        }
-        jsObjects = Knockout.allocJS(len * 2);
-        jsIndex = 1;
-        Object ret = jsObjects[0];
-        jsObjects[0] = null;
-        return ret;
     }
     
     @Override
@@ -117,7 +74,7 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
             if (newValue instanceof Enum) {
                 newValue = newValue.toString();
             }
-            Knockout.valueHasMutated(data.js(), propertyName, oldValue, newValue);
+            data.valueHasMutated(propertyName, oldValue, newValue);
         }
     }
 
@@ -132,7 +89,7 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
     }
     @Override
     public void applyBindings(String id, Knockout data) {
-        Object ko = Knockout.applyBindings(id, data.js());
+        Object ko = data.applyBindings(id);
         if (ko instanceof Knockout) {
             ((Knockout)ko).hold();
             applied.add((Knockout) ko);

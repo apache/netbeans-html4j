@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * @author Jaroslav Tulach
  */
 @Retention(RetentionPolicy.CLASS)
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.METHOD })
 public @interface JavaScriptBody {
     /** Names of parameters for the method generated method that can
      * be referenced from {@link #body()}.
@@ -125,4 +125,28 @@ public @interface JavaScriptBody {
      * @since 1.1
      */
     public boolean keepAlive() default true;
+
+    /** Wait for the call to Java to finish or not. When
+     * an <em>asynchronous Java call</em> is requested
+     * via the {@link #javacall() java call syntax} the result is JavaScript
+     * <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>
+     * object.
+     * Once the Java call is finished, the {@code Promise} gets resolved.
+     * <p>
+     * <em>Compatibility note:</em>
+     * Whether or not the Java call is delayed and <em>performed later</em>
+     * or whether it is executed <em>immediately</em> depends on the actual 
+     * {@linkplain org.netbeans.html.boot.spi.Fn.Presenter presenter implementation}.
+     * Old <em>presenters</em> may not recognize this attribute at all -
+     * it is always preferable to wrap the call into
+     * <code>Promise.resolve(resultOfTheCallToJava)</code>
+     * to make sure the result is really JavaScript
+     * <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>
+     * object.
+     *
+     * @return {@code false} if the Java call should result a <em>promise</em>
+     *   object to be resolved later
+     * @since 1.8
+     */
+    public boolean wait4java() default true;
 }

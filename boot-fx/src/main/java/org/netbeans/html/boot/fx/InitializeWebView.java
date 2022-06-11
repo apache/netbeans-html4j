@@ -18,13 +18,13 @@
  */
 package org.netbeans.html.boot.fx;
 
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import net.java.html.BrwsrCtx;
-import org.netbeans.html.boot.fx.AbstractFXPresenter;
 
 public final class InitializeWebView extends AbstractFXPresenter implements Runnable {
 
@@ -35,7 +35,7 @@ public final class InitializeWebView extends AbstractFXPresenter implements Runn
     public InitializeWebView(WebView webView, Runnable onLoad) {
         this.webView = webView;
         this.myLoad = onLoad;
-        webView.setUserData(this);
+        webView.setUserData(reference());
     }
 
     @Override
@@ -54,37 +54,56 @@ public final class InitializeWebView extends AbstractFXPresenter implements Runn
     @Override
     WebView findView(final URL resource) {
         final Worker<Void> w = webView.getEngine().getLoadWorker();
-        w.stateProperty().addListener(new ChangeListener<Worker.State>() {
-            private String previous;
-
-            @Override
-            public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
-                if (newState.equals(Worker.State.SUCCEEDED)) {
-                    if (checkValid()) {
-                        onPageLoad();
-                    }
-                }
-                if (newState.equals(Worker.State.FAILED)) {
-                    checkValid();
-                    throw new IllegalStateException("Failed to load " + resource);
-                }
-            }
-
-            private boolean checkValid() {
-                final String crnt = webView.getEngine().getLocation();
-                if (previous != null && !previous.equals(crnt)) {
-                    w.stateProperty().removeListener(this);
-                    return false;
-                }
-                previous = crnt;
-                return true;
-            }
-        });
+        w.stateProperty().addListener(new FindViewListener(this, resource, w));
         return webView;
     }
 
     public final void runInContext(Runnable r) {
         ctx.execute(r);
+    }
+
+    private static class FindViewListener extends WeakReference<InitializeWebView>
+    implements ChangeListener<Worker.State> {
+        private InitializeWebView toNotify;
+        private final URL resource;
+        private final Worker<Void> w;
+
+        public FindViewListener(InitializeWebView view, URL resource, Worker<Void> w) {
+            super(view);
+            this.toNotify = view;
+            this.resource = resource;
+            this.w = w;
+        }
+        private String previous;
+
+        @Override
+        public void changed(ObservableValue<? extends Worker.State> ov, Worker.State t, Worker.State newState) {
+            InitializeWebView view = get();
+            if (view == null) {
+                w.stateProperty().removeListener(this);
+                return;
+            }
+            if (newState.equals(Worker.State.SUCCEEDED)) {
+                if (checkValid(view)) {
+                    view.onPageLoad();
+                    toNotify = null;
+                }
+            }
+            if (newState.equals(Worker.State.FAILED)) {
+                checkValid(view);
+                throw new IllegalStateException("Failed to load " + resource);
+            }
+        }
+
+        private boolean checkValid(InitializeWebView view) {
+            final String crnt = view.webView.getEngine().getLocation();
+            if (previous != null && !previous.equals(crnt)) {
+                w.stateProperty().removeListener(this);
+                return false;
+            }
+            previous = crnt;
+            return true;
+        }
     }
 
 }

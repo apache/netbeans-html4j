@@ -35,6 +35,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <publicPackages>net.java.html.sound</publicPackages>
+        <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
     <build>
         <plugins>
@@ -63,8 +64,12 @@
         <dependency>
             <groupId>com.dukescript.api</groupId>
             <artifactId>junit-browser-runner</artifactId>
-            <version>1.0</version>
-            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.netbeans.html</groupId>
+                    <artifactId>net.java.html</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.netbeans.html</groupId>
@@ -95,6 +100,14 @@
           <groupId>org.netbeans.api</groupId>
           <artifactId>org-openide-util-lookup</artifactId>
           <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
         </dependency>
     </dependencies>
 </project>

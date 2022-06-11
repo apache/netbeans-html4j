@@ -18,11 +18,10 @@
  */
 package net.java.html.json;
 
-import net.java.html.json.Model;
-import net.java.html.json.Property;
 import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.Test;
-
+import net.java.html.json.sub.Street;
+import net.java.html.json.sub.Telephone;
 @Model(className = "Address", properties = {
     @Property(name = "street", type = net.java.html.json.sub.Street.class)
 })
@@ -32,4 +31,12 @@ public class AdressTest {
         Address address = new Address();
         assertNotNull(address.getStreet(), "Street is initialized");
     }
+    
+    @ComputedProperty
+    public static String lowerCaseStreetName(Street street){
+        return street.getName().toLowerCase();
+    }
+    
+    @OnReceive(url = "")
+    public static void getTelephone(Address model, Telephone phone){}
 }

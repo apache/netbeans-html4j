@@ -96,8 +96,8 @@ public class SimpleList<E> implements List<E> {
         if (a.length < to - from) {
             a = newArr(a, to - from);
         }
-        for (int i = 0; i < size; i++) {
-            a[i] = (T) arr[i + from];
+        for (int i = from; i < to; i++) {
+            a[i - from] = (T) arr[i];
         }
         return a;
     }

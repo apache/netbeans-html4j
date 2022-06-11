@@ -179,8 +179,6 @@ public class DeepChangeTest {
         One o = (One)v;
         assertEquals(o.changes, 0, "No changes so far");
         assertFalse(o.pb.isReadOnly(), "Normal property");
-        assertEquals(o.get(), myY);
-        assertSame(o.get(), realY);
 
         final MyY newY = new MyY("Hi", 1);
         p.setOne(newY);

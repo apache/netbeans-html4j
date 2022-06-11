@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.netbeans.html</groupId>
+    <artifactId>pom</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.netbeans.html</groupId>
+  <artifactId>ecj-test</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+  <name>Testing ecj</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <configuration>
+                  <skip>true</skip>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <configuration>
+                  <skip>true</skip>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <dependencies>
+                  <dependency>
+                      <groupId>org.codehaus.plexus</groupId>
+                      <artifactId>plexus-compiler-eclipse</artifactId>
+                      <version>2.8.8</version>
+                      <exclusions>
+                          <exclusion>
+                              <groupId>org.eclipse.jdt</groupId>
+                              <artifactId>ecj</artifactId>
+                          </exclusion>
+                      </exclusions>
+                  </dependency>
+                  <dependency>
+                      <groupId>org.eclipse.jdt</groupId>
+                      <artifactId>ecj</artifactId>
+                      <version>3.25.0</version>
+                  </dependency>
+              </dependencies>
+              <configuration>
+                  <compilerId>eclipse</compilerId>
+                  <source>1.8</source>
+                  <target>1.8</target>
+                  <testSource>1.8</testSource>
+                  <testTarget>1.8</testTarget>
+                  <failOnWarning>true</failOnWarning>
+                  <compilerArgs>
+                      <arg>-failOnWarning</arg>
+                      <arg>-warn:all</arg>
+                      <arg>-warn:-nls</arg>
+                      <arg>-s</arg>
+                      <arg>${project.build.directory}/generated-sources/annotations</arg>
+                  </compilerArgs>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.netbeans.html</groupId>
+      <artifactId>net.java.html.json</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.html</groupId>
+      <artifactId>net.java.html.boot</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+      <type>jar</type>
+      <exclusions>
+        <exclusion>
+          <artifactId>bsh</artifactId>
+          <groupId>org.beanshell</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.6.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.6.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.6.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+    <description>Verify annotation processors work with ecj</description>
+</project>

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javafx.application.Platform;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
@@ -71,6 +72,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         
         URI uri = DynamicHTTP.initServer();
     
+        Platform.setImplicitExit(false);
         final BrowserBuilder bb = BrowserBuilder.newBrowser(new FXGCPresenter()).loadClass(KnockoutFXTest.class).
             loadPage(uri.toString()).
             invoke("initialized");
@@ -93,15 +95,38 @@ public final class KnockoutFXTest extends KnockoutTCK {
         return res.toArray();
     }
 
-    private static void seekKOTests(Class<?> c, List<Object> res) throws SecurityException, ClassNotFoundException {
+    // BEGIN: org.netbeans.html.ko4j.KnockoutFXTest
+    private static void seekKOTests(Class<?> c, List<Object> res)
+    throws ClassNotFoundException {
         Class<? extends Annotation> koTest =
             c.getClassLoader().loadClass(KOTest.class.getName()).
             asSubclass(Annotation.class);
         for (Method m : c.getMethods()) {
             if (m.getAnnotation(koTest) != null) {
+                if (skipUnsupported(m)) {
+                    continue;
+                }
                 res.add(new KOFx(browserContext, m));
             }
         }
+    }
+    // END: org.netbeans.html.ko4j.KnockoutFXTest
+
+    private static boolean skipUnsupported(Method m) {
+        String version = System.getProperty("java.version"); // NOI18N
+        if (brokenWebSockets(version) && "connectUsingWebSocket".equals(m.getName())) { // NOI18N
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean brokenWebSockets(String version) {
+        final String prefix = "1.8.0_";
+        if (!version.startsWith(prefix)) {
+            return false;
+        }
+        int updateVersion = Integer.parseInt(version.substring(prefix.length()));
+        return updateVersion >= 212;
     }
 
     static synchronized ClassLoader getClassLoader() throws InterruptedException {
@@ -110,7 +135,7 @@ public final class KnockoutFXTest extends KnockoutTCK {
         }
         return browserClass.getClassLoader();
     }
-    
+
     public static synchronized void initialized(Class<?> browserCls) throws Exception {
         browserClass = browserCls;
         browserContext = Fn.activePresenter();
@@ -164,12 +189,11 @@ public final class KnockoutFXTest extends KnockoutTCK {
     public native Object executeScript(String script, Object[] arguments);
 
     @JavaScriptBody(args = {  }, body = 
-          "var h;"
-        + "if (!!window && !!window.location && !!window.location.href)\n"
-        + "  h = window.location.href;\n"
-        + "else "
-        + "  h = null;"
-        + "return h;\n"
+          """
+          var h;if (!!window && !!window.location && !!window.location.href)
+            h = window.location.href;
+          else   h = null;return h;
+          """
     )
     private static native String findBaseURL();
     

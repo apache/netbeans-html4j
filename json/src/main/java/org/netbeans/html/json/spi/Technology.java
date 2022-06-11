@@ -34,7 +34,7 @@ import org.netbeans.html.context.spi.Contexts.Id;
  * implementation called <b>ko4j</b>.
  *
  * @param <Data> technology internal type that keeps internal data for each
- *    instance of {@linkplains Model model class}.
+ *    instance of {@linkplain Model model class}.
  *
  * @author Jaroslav Tulach
  */

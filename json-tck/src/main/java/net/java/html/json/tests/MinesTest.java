@@ -36,45 +36,46 @@ import static net.java.html.json.tests.Utils.assertEquals;
     @Property(name = "rows", type = Row.class, array = true),
 })
 public final class MinesTest {
-    Mines m;
-    @KOTest public void paintTheGridOnClick() throws Throwable {
-        if (m == null) {
+    private final PhaseExecutor[] phases = { null };
+
+    @KOTest
+    public void paintTheGridOnClick() throws Throwable {
+        PhaseExecutor.schedule(phases, () -> {
             BrwsrCtx ctx = Utils.newContext(MinesTest.class);
-            Object exp = Utils.exposeHTML(MinesTest.class,
-    "            <button id='init' data-bind='click: normalSize'></button>\n" +
-    "            <table>\n" +
-    "                <tbody id='table'>\n" +
-    "                    <!-- ko foreach: rows -->\n" +
-    "                    <tr>\n" +
-    "                        <!-- ko foreach: columns -->\n" +
-    "                        <td data-bind='css: style' >\n" +
-    "                            <div data-bind='text: html'></div>\n" +
-    "                        </td>\n" +
-    "                        <!-- /ko -->\n" +
-    "                    </tr>\n" +
-    "                    <!-- /ko -->\n" +
-    "                </tbody>\n" +
-    "            </table>\n" +
-    ""
-            );
-            m = Models.bind(new Mines(), ctx);
+            Utils.exposeHTML(MinesTest.class, """
+                <button id='init' data-bind='click: normalSize'></button>
+                <table>
+                    <tbody id='table'>
+                        <!-- ko foreach: rows -->
+                        <tr>
+                            <!-- ko foreach: columns -->
+                            <td data-bind='css: style' >
+                                <div data-bind='text: html'></div>
+                            </td>
+                            <!-- /ko -->
+                        </tr>
+                        <!-- /ko -->
+                    </tbody>
+                </table>
+            """);
+            Mines m = Models.bind(new Mines(), ctx);
             m.applyBindings();
+            return m;
+        }).then((data) -> {
             int cnt = Utils.countChildren(MinesTest.class, "table");
             assertEquals(cnt, 0, "Table is empty: " + cnt);
-            scheduleClick("init", 100);
-        }
-
-
-        int cnt = Utils.countChildren(MinesTest.class, "table");
-        if (cnt == 0) {
-            throw new InterruptedException();
-        }
-        assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
-
-        Utils.exposeHTML(MinesTest.class, "");
+        }).then((data) -> {
+            Utils.scheduleClick(MinesTest.class, "init", 10);
+        }).then((data) -> {
+            int cnt = Utils.countChildren(MinesTest.class, "table");
+            assertEquals(cnt, 10, "There is ten rows in the table now: " + cnt);
+        }).finalize((data) -> {
+            Utils.exposeHTML(MinesTest.class, "");
+        }).start();
     }
 
-    @KOTest public void countAround() throws Exception {
+    @KOTest
+    public void countAround() throws Exception {
         Mines mines = new Mines();
         mines.init(5, 5, 0);
         mines.getRows().get(0).getColumns().get(0).setMine(true);
@@ -83,20 +84,6 @@ public final class MinesTest {
 
         int cnt = around(mines, 1, 1);
         assertEquals(cnt, 3, "There are three mines around. Was: " + cnt);
-    }
-
-    private static void scheduleClick(String id, int delay) throws Exception {
-        String s = "var id = arguments[0]; var delay = arguments[1];"
-            + "var e = window.document.getElementById(id);\n "
-            + "var f = function() {;\n "
-            + "  var ev = window.document.createEvent('MouseEvents');\n "
-            + "  ev.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);\n "
-            + "  e.dispatchEvent(ev);\n"
-            + "};\n"
-            + "window.setTimeout(f, delay);";
-        Utils.executeScript(
-            MinesTest.class,
-            s, id, delay);
     }
 
     enum GameState {

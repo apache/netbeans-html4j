@@ -40,15 +40,16 @@ final class LoadJSON {
         }
     }
 
-    @JavaScriptBody(args = {"name", "done"}, javacall = true, body
-        = "if (window[name]) return false;\n "
-        + "window[name] = function(data) {\n "
-        + "  delete window[name];\n"
-        + "  var el = window.document.getElementById(name);\n"
-        + "  el.parentNode.removeChild(el);\n"
-        + "  done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);\n"
-        + "};\n"
-        + "return true;\n"
+    @JavaScriptBody(args = {"name", "done"}, javacall = true, wait4java = false, body = """
+        if (window[name]) return false;
+        window[name] = function(data) {
+            delete window[name];
+            var el = window.document.getElementById(name);
+            el.parentNode.removeChild(el);
+            done.@org.netbeans.html.json.spi.JSONCall::notifySuccess(Ljava/lang/Object;)(data);
+        };
+        return true;
+        """
     )
     private static boolean defineIfUnused(String name, JSONCall done) {
         return true;
@@ -59,47 +60,53 @@ final class LoadJSON {
         return s;
     }
 
-    @JavaScriptBody(args = {"url", "done", "method", "data", "hp"}, javacall = true, body = ""
-        + "var request = new XMLHttpRequest();\n"
-        + "if (!method) method = 'GET';\n"
-        + "request.open(method, url, true);\n"
-        + "request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');\n"
-        + "for (var i = 0; i < hp.length; i += 2) {\n"
-        + "  var h = hp[i];\n"
-        + "  var v = hp[i + 1];\n"
-        + "  request.setRequestHeader(h, v);\n"
-        + "}\n"
-        + "request.onreadystatechange = function() {\n"
-        + "  if (request.readyState !== 4) return;\n"
-        + "  var r = request.response || request.responseText;\n"
-        + "  try {\n"
-        + "    var str = r;\n"
-        + "    if (request.status !== 0)\n"
-        + "      if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;"
-        + "    try { r = eval('(' + r + ')'); } catch (ignore) { }"
-        + "    @org.netbeans.html.ko4j.KOTransfer::notifySuccess(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)(done, str, r);\n"
-        + "  } catch (error) {;\n"
-        + "    @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);\n"
-        + "  }\n"
-        + "};\n"
-        + "request.onerror = function (e) {\n"
-        + "  @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e.type + ' status ' + request.status);\n"
-        + "};\n"
-        + "if (data) request.send(data);\n"
-        + "else request.send();\n"
+    @JavaScriptBody(args = {"url", "done", "method", "data", "hp"}, javacall = true, wait4java = false, body = """
+        var request = new XMLHttpRequest();
+        if (!method) method = 'GET';
+        request.open(method, url, true);
+        request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+        for (var i = 0; i < hp.length; i += 2) {
+          var h = hp[i];
+          var v = hp[i + 1];
+          request.setRequestHeader(h, v);
+        }
+        request.onreadystatechange = function() {
+          if (request.readyState !== 4) return;
+          var r = request.response || request.responseText;
+          try {
+            var str = r;
+            if (request.status !== 0) {
+                if (request.status < 100 || request.status >= 400) throw request.status + ': ' + request.statusText;
+            }
+            try { 
+                r = eval('(' + r + ')');
+            } catch (ignore) {
+            }
+            @org.netbeans.html.ko4j.KOTransfer::notifySuccess(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)(done, str, r);
+          } catch (error) {
+            @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, error);
+          }
+        };
+        request.onerror = function (e) {
+          @org.netbeans.html.ko4j.KOTransfer::notifyError(Ljava/lang/Object;Ljava/lang/Object;)(done, e.type + ' status ' + request.status);
+        };
+        if (data) request.send(data);
+        else request.send();
+        """
     )
     static void loadJSON(
-        String url, JSONCall done, String method, String data, Object[] headerPairs
+        String url, JSONCall done, String method, String data, Object[] hp
     ) {
     }
 
-    @JavaScriptBody(args = {"url", "jsonp"}, body
-        = "var scrpt = window.document.createElement('script');\n "
-        + "scrpt.setAttribute('src', url);\n "
-        + "scrpt.setAttribute('id', jsonp);\n "
-        + "scrpt.setAttribute('type', 'text/javascript');\n "
-        + "var body = document.getElementsByTagName('body')[0];\n "
-        + "body.appendChild(scrpt);\n"
+    @JavaScriptBody(args = {"url", "jsonp"}, body = """
+        var scrpt = window.document.createElement('script');
+        scrpt.setAttribute('src', url);
+        scrpt.setAttribute('id', jsonp);
+        scrpt.setAttribute('type', 'text/javascript');
+        var body = document.getElementsByTagName('body')[0];
+        body.appendChild(scrpt);
+        """
     )
     static void loadJSONP(String url, String jsonp) {
 

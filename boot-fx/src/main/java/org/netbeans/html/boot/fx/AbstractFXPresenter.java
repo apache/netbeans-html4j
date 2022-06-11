@@ -22,11 +22,9 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,7 +50,7 @@ import org.netbeans.html.boot.spi.Fn;
  * @author Jaroslav Tulach
  */
 public abstract class AbstractFXPresenter implements Fn.Presenter,
-Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
+Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable, Fn.Ref<AbstractFXPresenter> {
     static final Logger LOG = Logger.getLogger(FXPresenter.class.getName());
     protected static int cnt;
     protected Runnable onLoad;
@@ -64,6 +62,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     private JSObject newPOJOImpl;
     private Object undefined;
     private JavaValues values;
+    private Id id;
 
     @Override
     protected AbstractFXPresenter clone() {
@@ -74,6 +73,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
             p.undefined = null;
             p.newPOJOImpl = null;
             p.values = null;
+            p.id = null;
             return p;
         } catch (CloneNotSupportedException ex) {
             throw new IllegalStateException(ex);
@@ -192,16 +192,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
 
     abstract WebView findView(final URL resource);
 
-    final JSObject convertArrays(Object[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i] instanceof Object[]) {
-                arr[i] = convertArrays((Object[]) arr[i]);
-            }
-        }
-        final JSObject wrapArr = (JSObject)wrapArrFn().call("array", arr); // NOI18N
-        return wrapArr;
-    }
-
     private final JavaValues values() {
         if (values == null) {
             values = new JavaValues();
@@ -228,20 +218,23 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     JSObject createPOJOWrapper(int hash, int id) {
         if (newPOJOImpl == null) {
             try {
-                newPOJOImpl = (JSObject) defineJSFn(
-                    "var k = {};\n" +
-                    "k.fxBrwsrId = function(hash, id) {\n" +
-                    "  return {\n" +
-                    "    'fxBrwsrId' : function(callback) { callback.hashAndId(hash, id); }\n" +
-                    "  }\n" +
-                    "};\n" +
-                    "return k;\n", new String[] { "callback" }, null
+                newPOJOImpl = (JSObject) defineJSFn("""
+                    var k = {};
+                    k.fxBrwsrId = function(hash, id) {
+                      var obj = {};
+                      Object.defineProperty(obj, 'fxBrwsrId', {
+                        value : function(callback) { callback.hashAndId(hash, id) }
+                      });
+                      return obj;
+                    };
+                    return k;
+                    """, new String[] { "callback" }, null
                 ).invokeImpl(null, false);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
             }
         }
-        return (JSObject) newPOJOImpl.call("fxBrwsrId", hash, id);
+        return (JSObject) newPOJOImpl.call("fxBrwsrId", new Object[] { hash, id });
     }
 
     final Object undefined() {
@@ -252,13 +245,13 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
     }
 
     private int getArrayLength(Object val) throws JSException {
-        int length = ((Number) arraySizeFn().call("array", val, null)).intValue();
+        int length = ((Number) arraySizeFn().call("array", new Object[] { val, null })).intValue();
         return length;
     }
 
     private Object[] toArray(int length, Object val) throws JSException {
         Object[] arr = new Object[length];
-        arraySizeFn().call("array", val, arr);
+        arraySizeFn().call("array", new Object[] { val, arr });
         checkArray(arr);
         return arr;
     }
@@ -336,8 +329,8 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         if (value instanceof Enum) {
             return value;
         }
-        int len = isArray(value);
-        if (len >= 0) {
+        if (value.getClass().isArray()) {
+            int len = Array.getLength(value);
             Object[] copy = new Object[len];
             for (int i = 0; i < len; i++) {
                 copy[i] = toJavaScript(Array.get(value, i));
@@ -436,14 +429,6 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                 t.printStackTrace();
                 throw t;
             }
-        }
-    }
-
-    protected int isArray(Object value) {
-        try {
-            return Array.getLength(value);
-        } catch (IllegalArgumentException ex) {
-            return -1;
         }
     }
 
@@ -581,7 +566,7 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
                     synchronized (this) {
                         this.hash = -1;
                         this.id = -1;
-                        obj.call("fxBrwsrId", this);
+                        obj.call("fxBrwsrId", new Object[] { this });
                         assert this.hash != -1;
                         assert this.id != -1;
                         resultHash = this.hash;
@@ -620,4 +605,32 @@ Fn.KeepAlive, Fn.ToJavaScript, Fn.FromJavaScript, Executor, Cloneable {
         return pojo[0];
     }
 
+    @Override
+    public synchronized Fn.Ref<AbstractFXPresenter> reference() {
+        if (id == null) {
+            id = new Id(this);
+        }
+        return id;
+    }
+
+    @Override
+    public AbstractFXPresenter presenter() {
+        return this;
+    }
+
+    private static final class Id extends WeakReference<AbstractFXPresenter> implements Fn.Ref<AbstractFXPresenter> {
+        Id(AbstractFXPresenter referent) {
+            super(referent);
+        }
+
+        @Override
+        public Fn.Ref<AbstractFXPresenter> reference() {
+            return this;
+        }
+
+        @Override
+        public AbstractFXPresenter presenter() {
+            return get();
+        }
+    }
 }

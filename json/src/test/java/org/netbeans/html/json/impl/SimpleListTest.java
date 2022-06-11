@@ -104,6 +104,25 @@ public class SimpleListTest {
     }
 
     @Test(dataProvider = "lists")
+    public void subListFromTwo(List<Number> list) {
+        list.add(10);
+        list.add(20);
+
+        Number[] first = list.subList(0, 1).toArray(new Number[0]);
+        assertEquals(1, first.length);
+        assertEquals(10, first[0]);
+
+        Number[] second = list.subList(1, 2).toArray(new Number[0]);
+        assertEquals(1, second.length);
+        assertEquals(20, second[0]);
+
+        Number[] both = list.subList(0, 2).toArray(new Number[0]);
+        assertEquals(2, both.length);
+        assertEquals(10, both[0]);
+        assertEquals(20, both[1]);
+    }
+
+    @Test(dataProvider = "lists")
     public void retainAllOnSubList(List<Number> list) {
         list.add(3);
         list.add(3.3f);
