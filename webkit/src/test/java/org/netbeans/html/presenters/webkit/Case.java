@@ -73,7 +73,7 @@ public final class Case implements ITest, IHookable, Runnable {
         boolean notify = true;
         try {
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

@@ -70,7 +70,7 @@ public final class KOFx implements ITest, Runnable {
         try {
             a = (Closeable) itClass.getMethod("activateInOSGi", Object.class).invoke(null, p);
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

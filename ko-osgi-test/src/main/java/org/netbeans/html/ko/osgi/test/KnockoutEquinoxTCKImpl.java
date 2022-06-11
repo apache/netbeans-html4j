@@ -76,7 +76,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     private static Object presenter;
     public static void start(URI server, BundleContext ctx) throws Exception {
         Class<?> clazz = loadOSGiClass("org.netbeans.html.boot.fx.FXPresenter", ctx);
-        presenter = clazz.newInstance();
+        presenter = clazz.getConstructor().newInstance();
         final BrowserBuilder bb = BrowserBuilder.newBrowser(presenter).loadClass(KnockoutEquinoxTCKImpl.class).
             loadPage(server.toString()).
             invoke("initialized");
@@ -156,7 +156,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
         + "var f = new Function(s); "
         + "return f.apply(null, args);"
     )
-    public native Object executeScript(String script, Object[] arguments);
+    public native Object executeScript(String s, Object[] args);
 
     @JavaScriptBody(args = {  }, body = 
           """
@@ -168,7 +168,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
     private static native String findBaseURL();
     
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -184,7 +184,7 @@ public class KnockoutEquinoxTCKImpl extends KnockoutTCK implements Callable<Clas
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
             URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return connectTo.toString();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {

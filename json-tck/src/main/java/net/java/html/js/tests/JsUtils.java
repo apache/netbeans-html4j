@@ -72,6 +72,7 @@ public class JsUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <E extends Throwable> E raise(Class<E> e, Throwable t) throws E {
         throw (E)t;
     }

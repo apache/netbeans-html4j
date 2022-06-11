@@ -160,14 +160,19 @@ public class GCBodyTest {
                 throw new InterruptedException(msg + " - giving up after " + took + " ms at size of " + size);
             }
             
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
+            forceGC();
         }
         throw new InterruptedException(msg);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void forceGC() {
+        try {
+            System.gc();
+            System.runFinalization();
+        } catch (Error err) {
+            err.printStackTrace();
+        }
     }
 
     private static boolean isGone(Reference<?> ref) {
@@ -182,12 +187,7 @@ public class GCBodyTest {
             if (clearJS) {
                 Bodies.gc(Math.pow(2.0, i));
             }
-            try {
-                System.gc();
-                System.runFinalization();
-            } catch (Error err) {
-                err.printStackTrace();
-            }
+            forceGC();
         }
     }
 }

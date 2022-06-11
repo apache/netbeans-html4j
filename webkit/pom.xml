@@ -51,6 +51,7 @@
                     </compilerArguments>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <failOnWarning>false</failOnWarning>
                 </configuration>
             </plugin>
             <plugin>

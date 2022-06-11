@@ -199,7 +199,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
 
     @Override
     public BrwsrCtx createContext() {
-        KO4J fx = new KO4J(browserContext);
+        KO4J fx = new KO4J();
         TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, fx.knockout(), 10).
@@ -225,19 +225,19 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
     private static native void setProperty(Object json, String key, Object value);
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = """
-        var f = new Function(s);
+    @JavaScriptBody(args = { "script", "args" }, body = """
+        var f = new Function(script);
         return f.apply(null, args);
         """
     )
-    public native Object executeScript(String script, Object[] arguments);
+    public native Object executeScript(String script, Object[] args);
 
     private static String findBaseURL() {
         return baseUri.toString();
     }
 
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -253,7 +253,7 @@ public final class KnockoutEnvJSTest extends KnockoutTCK {
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
             URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return connectTo.toString();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {

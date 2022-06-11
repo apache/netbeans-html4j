@@ -75,7 +75,7 @@ public final class KOCase implements ITest, Runnable {
         try (Closeable a = Fn.activate(p)) {
             assert a != null;
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

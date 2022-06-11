@@ -158,7 +158,7 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
         + "var f = new Function(s); "
         + "return f.apply(null, args);"
     )
-    public native Object executeScript(String script, Object[] arguments);
+    public native Object executeScript(String s, Object[] args);
 
     @JavaScriptBody(args = {  }, body = 
           """
@@ -170,7 +170,7 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
     private static native String findBaseURL();
     
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -186,7 +186,7 @@ public class KnockoutFelixTCKImpl extends KnockoutTCK implements Callable<Class[
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
             URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return connectTo.toString();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {

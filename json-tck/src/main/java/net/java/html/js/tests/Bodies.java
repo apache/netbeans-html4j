@@ -89,7 +89,12 @@ final class Bodies {
     @JavaScriptBody(args = { "arr" }, body = "return arr.length;")
     public static native int length(Object[] arr);
     
-    @JavaScriptBody(args = { "o", "vo" }, body = "if (vo) o = o.valueOf(); return typeof o;")
+    @JavaScriptBody(args = { "o", "useValueOf" }, body = """
+        if (useValueOf) {
+            o = o.valueOf();
+        }
+        return typeof o;
+        """)
     public static native String typeof(Object o, boolean useValueOf);
 
     @JavaScriptBody(args = { "b" }, body = "return typeof b;")

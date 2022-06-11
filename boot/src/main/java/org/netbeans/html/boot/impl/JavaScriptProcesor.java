@@ -155,10 +155,11 @@ public final class JavaScriptProcesor extends AbstractProcessor {
 
         processGroup(roundEnv, msg);
 
+        generateCallbackClass(javacalls);
+        javacalls.clear();
         if (roundEnv.processingOver()) {
-            generateCallbackClass(javacalls);
             generateJavaScriptBodyList(bodies);
-            javacalls.clear();
+            bodies.clear();
         }
         return true;
     }
@@ -534,7 +535,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             Map<String, ExecutableElement> map = pkgEn.getValue();
             StringBuilder source = new StringBuilder();
             source.append("package ").append(pkgName).append(";\n");
-            source.append("@java.lang.SuppressWarnings(\"all\")\n");
+            source.append("@java.lang.SuppressWarnings({\"unchecked\", \"all\"})\n");
             source.append("public final class $JsCallbacks$ {\n");
             source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
             source.append("  private final org.netbeans.html.boot.spi.Fn.Ref<?> ref;\n");

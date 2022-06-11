@@ -1132,7 +1132,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     }
 
     private static final class WeakHolder extends PhantomReference<Object> {
-        private static final ReferenceQueue QUEUE = new ReferenceQueue();
+        private static final ReferenceQueue<Object> QUEUE = new ReferenceQueue<>();
         private static final Set<WeakHolder> active = new HashSet<WeakHolder>();
         private final Object knockout;
 

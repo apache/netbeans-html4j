@@ -204,6 +204,7 @@ Executor, Closeable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     static <T extends Exception> T raise(Class<T> aClass, Exception ex) throws T {
         throw (T)ex;
     }
@@ -357,7 +358,7 @@ Executor, Closeable {
                 String prefix = "http://" + server.getServerName(rqst) + ":" + server.getServerPort(rqst) + "/";
                 Writer w = server.getWriter(rspns);
                 server.setContentType(rspns, "text/html");
-                final Command cmd = new Command(server, Browser.this, prefix);
+                final Command<Request, Response, ?> cmd = new Command<>(server, Browser.this, prefix);
                 try {
                     is = new InputStreamReader(page.openStream());
                 } catch (IOException ex) {
@@ -403,7 +404,7 @@ Executor, Closeable {
                 w.close();
             } else if (path.equals("/command.js")) {
                 String id = server.getParameter(rqst, "id");
-                Command c = SESSIONS.get(id);
+                Command<Request, Response, ?> c = findCommand(id);
                 if (c == null) {
                     server.getWriter(rspns).write("No command for " + id);
                     server.setStatus(rspns, 404);
@@ -459,6 +460,11 @@ Executor, Closeable {
                 out.close();
                 is.close();
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        private <Request, Response> Command<Request, Response, ?> findCommand(String id) {
+            return SESSIONS.get(id);
         }
 
         private void emitScript(Writer w, String prefix, String id) throws IOException {

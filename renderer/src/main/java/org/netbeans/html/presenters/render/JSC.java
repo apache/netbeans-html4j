@@ -57,7 +57,7 @@ public interface JSC extends Library {
         }
 
         @Override
-        protected List getFieldOrder() {
+        protected List<String> getFieldOrder() {
             return Arrays.asList(
                 "version", "attributes", "className", "parentClass", 
                 "staticValues", "staticFunctions", "initialize", 

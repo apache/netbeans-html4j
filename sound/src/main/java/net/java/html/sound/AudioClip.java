@@ -50,24 +50,24 @@ public abstract class AudioClip {
     public static AudioClip create(String src) {
         src.getClass();
         BrwsrCtx brwsrCtx = BrwsrCtx.findDefault(AudioClip.class);
-        AudioEnvironment brwsrAE = Contexts.find(brwsrCtx, AudioEnvironment.class);
+        AudioEnvironment<?> brwsrAE = Contexts.find(brwsrCtx, AudioEnvironment.class);
         if (brwsrAE != null) {
-            Impl handle = create(brwsrAE, src);
+            Impl<?> handle = create(brwsrAE, src);
             if (handle != null) {
                 return handle;
             }
         }
         for (AudioEnvironment<?> ae : ServiceLoader.load(AudioEnvironment.class)) {
-            Impl handle = create(ae, src);
+            Impl<?> handle = create(ae, src);
             if (handle != null) {
                 return handle;
             }
         }
-        Impl handle = create(BrowserAudioEnv.DEFAULT, src);
+        Impl<?> handle = create(BrowserAudioEnv.DEFAULT, src);
         return handle != null ? handle : DummyClip.INSTANCE;
     }
     
-    /** Plays the clip from begining to the end.
+    /** Plays the clip from beginning to the end.
      */
     public abstract void play();
 
@@ -102,7 +102,7 @@ public abstract class AudioClip {
     private static <Audio> Impl<Audio> create(AudioEnvironment<Audio> env, String src) {
         Audio a = env.create(src);
         if (a != null) {
-            return new Impl<Audio>(env, src, a);
+            return new Impl<>(env, src, a);
         } else {
             return null;
         }
