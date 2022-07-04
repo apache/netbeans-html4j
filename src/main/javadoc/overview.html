@@ -27,13 +27,13 @@
     </head>
     <body>
         <p>
-        The <em>HTML/Java API</em> is an alternative to Swing and JavaFX for creating 
-        applications with a graphical user interface. It's major strengths is the 
-        intelligent combination of existing technologies. 
+        The <em>HTML/Java API</em> is an alternative to Swing and JavaFX for creating
+        applications with a graphical user interface. It's major strengths is the
+        intelligent combination of existing technologies.
         <br>
         With HTML/Java, the proven model used on servers for many years, has been ported to the client.
          Java is used for developing business and view logic, while
-         HTML5, CSS and JavaScript are used to render the UI. 
+         HTML5, CSS and JavaScript are used to render the UI.
         Get the best of both worlds by combining the industry stability of
         <b>Java</b> and richness of <b>JavaScript</b> ecosystem when it comes
         to UI and rendering frameworks.
@@ -47,21 +47,21 @@
          With Java/HTML we created a better and more powerful alternative, which is still small and easy to maintain.
         </p>
         <h3>Model View ViewModel Pattern</h3>
-        <p> For this Java/HTML makes use of the 
+        <p> For this Java/HTML makes use of the
          <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel">Model View ViewModel (MVVM)</a>
          pattern to separate
          the view from the logic of the application. This approach is different
          from Swing or JavaFX, as the Java code doesn't require any references to the widgets
-         that are displayed in the view. The Java code instead exposes {@link net.java.html.json.Property properties} 
+         that are displayed in the view. The Java code instead exposes {@link net.java.html.json.Property properties}
          for the View to bind to, and {@link net.java.html.json.Function functions} that can be called in response to user
          interactions. This keeps the {@link net.java.html.json.Model Java API} small and simple to learn.</p>
-        
-        
+
+
         <h3>Supported Platforms</h3>
          <p>This architecture also makes it easy to port the technology to different platforms.         Porting of HTML/Java is as easy as implementing
         {@link org.netbeans.html.boot.spi.Fn.Presenter}
         interface and successfully passing the
-        {@link org.netbeans.html.json.tck test compatibility kit}.    
+        {@link org.netbeans.html.json.tck test compatibility kit}.
         Various ports of this rendering pipeline were built including support for
         pure <a target="_blank" href="https://github.com/dukescript/dukescript-presenters/">"webkit desktop rendring</a>
         <a target="_blank" href="https://dukescript.com/javadoc/presenters/com/dukescript/presenters/Android.html">Android WebView</a>
@@ -79,40 +79,40 @@
         The easiest way to get started is following the
         <a target="_blank" href="https://dukescript.com/getting_started.html">getting started</a>
         tutorial. If you prefer commandline you can also use the <a href="https://github.com/dukescript/maven-archetypes" target="_blank">Maven Archetypes</a>.
-         
+
         Just type:
         <pre>
 $ mvn archetype:generate \
     -DarchetypeGroupId=com.dukescript.archetype \
     -DarchetypeArtifactId=knockout4j-archetype \
-    -DgroupId=your.company -DartifactId=test -Dversion=1.0-SNAPSHOT 
+    -DgroupId=your.company -DartifactId=test -Dversion=1.0-SNAPSHOT
     -DarchetypeVersion=0.30 \ <em># or newer version, if available</em>
         </pre>
-        
-        and then you can: 
+
+        and then you can:
         <pre>
 $ cd test
 $ mvn install
 $ mvn -f client/pom.xml process-classes exec:exec
         </pre>
-        
+
         <h3>More Information</h3>
-        <p>We tried to make our API Docs as useful as possible, so they contain 
+        <p>We tried to make our API Docs as useful as possible, so they contain
             lots of valuable information. So this should be your first stop when looking for information:
             Current <a target="_blank" href="https://dukescript.com/javadoc/html+java/dev/">development</a> version
-            
+
         </p>
         <p>The <a href="http://dukescript.com" target="_blank">DukeScript project</a> contains a lot of information for Java/HTML developers.
-            There's a <a href="http://dukescript.com/blog.html" target="_blank">Blog</a> with the latest news and tips and tricks 
-            how to get the most out of these APIs and also an extensive <a href="https://dukescript.com/getting_started.html" target="_blank"> getting started guide</a> 
+            There's a <a href="http://dukescript.com/blog.html" target="_blank">Blog</a> with the latest news and tips and tricks
+            how to get the most out of these APIs and also an extensive <a href="https://dukescript.com/getting_started.html" target="_blank"> getting started guide</a>
             explaining all the concepts and walking you through code examples. For advanced users there's an in depth tutorial on the <a href="https://dukescript.com/knockout4j.html" target="_blank">
                 Knockout For Java</a> API with many examples and tipps and tricks.
         </p>
-          
-        
-        
+
+
+
         <h3>Try it</h3>
-        <p>And finally, if you want to see this API in action, look no further, here's 
+        <p>And finally, if you want to see this API in action, look no further, here's
             <a target="_blank" href="https://github.com/jtulach/minesweeper">an example</a>
             application running with the <a href="https://github.com/jtulach/bck2brwsr/" target="_blank">Bck2Brwsr VM</a> directly in your browser.</p>
                 <script type="text/html" id="field">
@@ -162,13 +162,29 @@ $ mvn -f client/pom.xml process-classes exec:exec
             var vm = new VM();
             vm.loadClass('org.apidesign.demo.minesweeper.MainBrwsr');
         </script>
-        
+
+        <h3>New in version 1.8.1</h3>
+        <p>
+            This is a bugfix release focused on improving
+            {@link org.netbeans.html.presenters.spi.ProtoPresenter}
+            when running in
+            {@linkplain org.netbeans.html.presenters.spi.ProtoPresenterBuilder#loadJavaScript(org.netbeans.html.presenters.spi.ProtoPresenterBuilder.Evaluator, boolean) asynchronous mode}.
+            <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/48">PR #48</a>
+            changes the
+            <a href="https://dukescript.com/knockout4j.html" target="_blank">Knockout For Java</a>
+            binding to use JavaScript {@code Promise} to properly order initialization
+            of many {@link net.java.html.json.Model} classes in a highly
+            asynchronous environment. As a result the underlying JavaScript
+            engine has to (since version 1.8.1) provide support for {@code Promise} or
+            <a href="https://github.com/apache/netbeans-html4j/commit/9f9e34d2c850e363cb9b815fe88c3750b66c78dc" target="_blank">
+            emulate it</a> somehow.
+        </p>
         <h3>New in version 1.8</h3>
         <p>
             Asynchronous calls to Java - since <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/44">PR #44</a>
             the {@link net.java.html.js.JavaScriptBody} annotation supports new
             {@link net.java.html.js.JavaScriptBody#wait4java wait4java=false}
-            attribute. That allows one make an asynchronous call to Java. 
+            attribute. That allows one make an asynchronous call to Java.
             More information in the updated
             {@link net.java.html.js Java/JavaScript interactions} page.
 
@@ -179,7 +195,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
 
         <h3>New in version 1.7.3</h3>
         <p>
-            Giving proper OSGi name to 
+            Giving proper OSGi name to
             <code>org.netbeans.html.presenters.spi</code>,
             <code>org.netbeans.html.presenters.render</code>,
             <code>org.netbeans.html.presenters.browser</code> and
@@ -189,7 +205,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
             to handle opening of a {@code URI} programmatically -
             <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/42">PR #42</a>.
         </p>
-        
+
         <h3>New in version 1.7.2</h3>
         <p>
             Code completions for callbacks from JavaScript to Java -
@@ -290,7 +306,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
             {@link net.java.html.js.JavaScriptResource} annotation has been
             made repeatable -
             <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/4">PR #4</a>.
-            <code>@Model</code> annotation processor bugfix 
+            <code>@Model</code> annotation processor bugfix
             <a target="_blank" href="https://issues.apache.org/jira/browse/NETBEANS-621">#621</a>.
         </p>
 
@@ -335,7 +351,7 @@ $ mvn -f client/pom.xml process-classes exec:exec
         Simplifying {@link org.netbeans.html.json.tck.KnockoutTCK} to avoid
         usage of {@link java.net.URI}, etc.
         </p>
-            
+
         <h3>New features in version 1.4</h3>
 
         Both values <code>null</code> and <code>undefined</code> are
