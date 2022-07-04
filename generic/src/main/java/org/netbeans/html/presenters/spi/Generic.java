@@ -734,10 +734,11 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
 
     final void registerPromise(String a1, String a2, String a3, String a4) {
         synchronized (lock()) {
+            boolean wasEmpty = microTasks.isEmpty();
             microTasks.add(() -> {
                 javapromise(a1, a2, a3, a4);
             });
-            if (topMostCall() == null) {
+            if (wasEmpty && !synchronous) {
                 dispatch(this::flushImpl);
             }
         }
