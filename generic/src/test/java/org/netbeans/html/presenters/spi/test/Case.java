@@ -48,7 +48,7 @@ public final class Case implements ITest, IHookable, Runnable {
 
     @Override
     public String getTestName() {
-        return m.getDeclaringClass().getSimpleName() + "." + m.getName();
+        return t.getClass().getSimpleName() + ":" + m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
     @Test
