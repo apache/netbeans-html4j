@@ -34,13 +34,14 @@ public final class Counter {
         }
     }
 
-    @JavaScriptBody(args = {}, javacall = true, body
-            = "if (!this.counter) {\n"
-            + "  this.counter = function() { return @org.netbeans.html.presenters.spi.test.Counter::count()(); };\n"
-            + "  return true;\n"
-            + "} else {\n"
-            + "  return false;\n"
-            + "}\n"
+    @JavaScriptBody(args = {}, javacall = true, body = """
+        if (!this.counter) {
+          this.counter = function() { return @org.netbeans.html.presenters.spi.test.Counter::count()(); };
+          return true;
+        } else {
+          return false;
+        }
+        """
     )
     private static native boolean rCounter();
     
