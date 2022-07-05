@@ -31,6 +31,9 @@ import org.netbeans.html.presenters.spi.ProtoPresenter;
 import org.netbeans.html.presenters.spi.ProtoPresenterBuilder;
 
 class Testing {
+    static {
+        System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
+    }
     static final Logger LOG = Logger.getLogger(Testing.class.getName());
     final Executor QUEUE;
     final ScriptEngine eng;
