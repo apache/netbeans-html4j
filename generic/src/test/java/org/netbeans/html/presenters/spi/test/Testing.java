@@ -36,6 +36,7 @@ class Testing {
     }
     static final Logger LOG = Logger.getLogger(Testing.class.getName());
     final Executor QUEUE;
+    final Executor CODE;
     final ScriptEngine eng;
     final boolean sync;
     final ProtoPresenter presenter;
@@ -51,10 +52,13 @@ class Testing {
     protected Testing(boolean sync, Executor queue) {
         this.sync = sync;
         this.QUEUE = queue;
+        this.CODE = Executors.newSingleThreadExecutor((r) -> {
+            return new Thread(r, "Code call " + this.getClass().getSimpleName());
+        });
         this.presenter = ProtoPresenterBuilder.newBuilder()
             .app("Testing")
             .type("test")
-            .dispatcher(QUEUE, false)
+            .dispatcher(CODE, false)
             .loadJavaScript(this::loadJS, sync)
             .displayer(this::displayPage)
             .preparator(this::callbackFn, true)
@@ -131,7 +135,7 @@ class Testing {
     }
 
     protected void loadJS(final String js) {
-        QUEUE.execute(new Runnable() {
+        final Runnable toRun = new Runnable() {
             public void run() {
                 try {
                     Object res = eng.eval(js);
@@ -140,7 +144,12 @@ class Testing {
                     LOG.log(Level.SEVERE, "Can't process " + js, ex);
                 }
             }
-        });
+        };
+        if (sync) {
+            toRun.run();
+        } else {
+            QUEUE.execute(toRun);
+        }
     }
 
     public void displayPage(URL url, Runnable r) {
@@ -148,7 +157,7 @@ class Testing {
     }
 
     public void dispatch(Runnable r) {
-        QUEUE.execute(r);
+        CODE.execute(r);
     }
 
     void beforeTest(Class<?> declaringClass) throws Exception {

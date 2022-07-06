@@ -18,7 +18,6 @@
  */
 package org.netbeans.html.presenters.spi.test;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import net.java.html.js.tests.AsyncJavaTest;
 import org.netbeans.html.json.tck.KOTest;

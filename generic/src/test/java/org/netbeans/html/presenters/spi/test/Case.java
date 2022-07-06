@@ -54,13 +54,9 @@ public final class Case implements ITest, IHookable, Runnable {
     @Test
     public void executeTest() throws Exception {
         for (;;) {
-            if (p instanceof Executor) {
-                finished = new CountDownLatch(1);
-                ((Executor)p).execute(this);
-                finished.await();
-            } else {
-                run();
-            }
+            finished = new CountDownLatch(1);
+            t.CODE.execute(this);
+            finished.await();
             if (result instanceof InterruptedException && cnt++ < 100) {
                 Thread.sleep(100);
                 result = null;

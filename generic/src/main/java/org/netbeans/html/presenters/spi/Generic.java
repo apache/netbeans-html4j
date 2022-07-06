@@ -270,7 +270,19 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
         }
     }
 
+    /** Dispatch provided runnable for a later
+     *
+     * @param r the runnable to execute "later"
+     */
     abstract void dispatch(Runnable r);
+
+    final void dispatch(boolean runNowIfPossible, Runnable r) {
+        if (runNowIfPossible && synchronous) {
+            r.run();
+        } else {
+            dispatch(r);
+        }
+    }
 
     /** Makes sure all pending calls into JavaScript are immediately
      * performed.
@@ -738,8 +750,8 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
             microTasks.add(() -> {
                 javapromise(a1, a2, a3, a4);
             });
-            if (wasEmpty && !synchronous) {
-                dispatch(this::flushImpl);
+            if (wasEmpty) {
+                dispatch(false, this::flushImpl);
             }
         }
     }
@@ -827,7 +839,7 @@ abstract class Generic implements Fn.Presenter, Fn.KeepAlive, Flushable {
     private Frame dispatchPendingItem() {
         final Frame top = topMostCall();
         if (top instanceof CallJavaMethod && ((CallJavaMethod)top).method != null && ((CallJavaMethod)top).done == null) {
-            dispatch(new Runnable() {
+            dispatch(true, new Runnable() {
                 @Override
                 public void run() {
                     synchronized (lock()) {
