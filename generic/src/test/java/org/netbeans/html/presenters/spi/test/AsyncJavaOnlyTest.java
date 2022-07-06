@@ -18,6 +18,8 @@
  */
 package org.netbeans.html.presenters.spi.test;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import net.java.html.js.tests.AsyncJavaTest;
 import org.netbeans.html.json.tck.KOTest;
 import static org.netbeans.html.presenters.spi.test.GenericTest.createTests;
@@ -35,6 +37,12 @@ public class AsyncJavaOnlyTest {
     }
 
     private static final class PromisesOnly extends Testing {
+
+        public PromisesOnly() {
+            super(false, Executors.newSingleThreadExecutor((r) -> {
+                return new Thread(r, "PromisesOnly Executor");
+            }));
+        }
         @Override
         protected String js2java(String method, Object a1, Object a2, Object a3, Object a4) throws Exception {
             switch (method) {

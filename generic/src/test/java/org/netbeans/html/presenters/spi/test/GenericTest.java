@@ -40,7 +40,7 @@ public class GenericTest {
     }
 
     @Factory public static Object[] compatibilityTests() throws Exception {
-        return createTests(new Testing());
+        return createTests(Testing.create());
     }
 
     static Object[] createTests(Testing t) throws Exception {

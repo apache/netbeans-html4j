@@ -40,12 +40,13 @@ class Testing {
     final boolean sync;
     final ProtoPresenter presenter;
 
-    public Testing() {
-        this(false);
+    static Testing create() {
+        return new Testing();
     }
-
-    protected Testing(boolean sync) {
-        this(sync, Executors.newSingleThreadExecutor());
+    private Testing() {
+        this(false, Executors.newSingleThreadExecutor((r) -> {
+            return new Thread(r, "Testing Executor");
+        }));
     }
     protected Testing(boolean sync, Executor queue) {
         this.sync = sync;

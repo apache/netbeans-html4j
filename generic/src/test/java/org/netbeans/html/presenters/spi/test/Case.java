@@ -84,7 +84,7 @@ public final class Case implements ITest, IHookable, Runnable {
                 tp.beforeTest(m.getDeclaringClass());
             }
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

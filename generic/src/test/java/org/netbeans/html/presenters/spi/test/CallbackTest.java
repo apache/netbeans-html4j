@@ -19,6 +19,8 @@
 package org.netbeans.html.presenters.spi.test;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import javax.script.ScriptException;
 import static org.testng.Assert.assertEquals;
@@ -36,6 +38,12 @@ public class CallbackTest {
     
     
     private static final class CBP extends Testing {
+
+        public CBP() {
+            super(false, Executors.newSingleThreadExecutor((r) -> {
+                return new Thread(r, "Callback Executor");
+            }));
+        }
 
         @Override
         protected void loadJS(String js) {
