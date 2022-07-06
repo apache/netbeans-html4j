@@ -59,11 +59,12 @@ public class AsyncJavaTest {
         PhaseExecutor.schedule(phases, () -> {
             return AsyncJavaScriptAction.defineCallback(wait4js);
         }).then((action) -> {
-            AsyncJavaScriptAction.invokeCallbackLater(33);
+            action.invokeCallbackLater(33);
         }).then((action) -> {
-            assertEquals(action.getResult(), 33, "Set to 33");
+            final int r = action.getResult();
+            assertEquals(r, 33, "Set to 33");
         }).then((action) -> {
-            AsyncJavaScriptAction.invokeCallbackLater(42);
+            action.invokeCallbackLater(42);
         }).then((action) -> {
             assertEquals(action.getResult(), 42, "Set to 42");
         }).start();
