@@ -21,7 +21,6 @@ package org.netbeans.html.bootagent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import javafx.application.Platform;
-import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
