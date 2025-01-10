@@ -133,10 +133,15 @@ public final class FnUtils {
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
             final AnnotationVisitor del = super.visitAnnotation(desc, visible);
+            if ("Ljava/lang/annotation/Retention;".equals(desc)) {
+                return new RetentionChange(del);
+            }
             if ("Lnet/java/html/js/JavaScriptResource;".equals(desc)) {
+                super.visitAnnotation(desc, true);
                 return new LoadResource(del);
             }
             if ("Lnet/java/html/js/JavaScriptResource$Group;".equals(desc)) {
+                super.visitAnnotation(desc, true);
                 return new LoadResource(del);
             }
             return del;
@@ -179,6 +184,7 @@ public final class FnUtils {
             @Override
             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                 if ("Lnet/java/html/js/JavaScriptBody;".equals(desc)) { // NOI18N
+                    super.visitAnnotation(desc, true);
                     found++;
                     return new FindInAnno();
                 }
@@ -592,6 +598,42 @@ public final class FnUtils {
                 return new LoadResource(super.visitAnnotation(name, desc));
             }
         }
+
+        private final class RetentionChange extends AnnotationVisitor {
+            public RetentionChange(AnnotationVisitor av) {
+                super(Opcodes.ASM5, av);
+            }
+
+            @Override
+            public void visit(String attrName, Object value) {
+                super.visit(attrName, value);
+            }
+
+            @Override
+            public AnnotationVisitor visitArray(String name) {
+                return super.visitArray(name);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String name, String desc) {
+                return super.visitAnnotation(desc, desc);
+            }
+
+            @Override
+            public void visitEnum(String value, String retentionPolicy, String type) {
+                if ("Ljava/lang/annotation/RetentionPolicy;".equals(retentionPolicy)) {
+                    found++;
+                    super.visitEnum(value, retentionPolicy, "RUNTIME");
+                } else {
+                    super.visitEnum(value, retentionPolicy, type);
+                }
+            }
+
+            @Override
+            public void visitEnd() {
+                super.visitEnd();
+            }
+        }
     }
 
     private static class ClassWriterEx extends ClassWriter {
@@ -724,6 +766,11 @@ public final class FnUtils {
                     is = null;
                     if (JsPkgCache.process(this, name)) {
                         arr = FnUtils.transform(arr, this);
+                    } else switch (name) {
+                        case "net.java.html.js.JavaScriptBody" -> arr = FnUtils.transform(arr, this);
+                        case "net.java.html.js.JavaScriptResource" -> arr = FnUtils.transform(arr, this);
+                        case "net.java.html.js.JavaScriptResource$Group" -> arr = FnUtils.transform(arr, this);
+                        default -> {}
                     }
                     return defineClass(name, arr, 0, arr.length);
                 } catch (IOException ex) {
