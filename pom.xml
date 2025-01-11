@@ -67,6 +67,7 @@
     <!--
     <module>boot-truffle</module>
     -->
+    <module>dynamic-loader-test</module>
     <module>boot-agent-test</module>
     <module>xhr4j</module>
     <!-- presenters -->

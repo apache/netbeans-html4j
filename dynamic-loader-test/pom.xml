@@ -26,9 +26,9 @@
         <artifactId>pom</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-    <artifactId>boot-agent-test</artifactId>
+    <artifactId>dynamic-loader-test</artifactId>
     <packaging>jar</packaging>
-    <name>Agent Boot Test</name>
+    <name>Dynamic ClassLoader Test</name>
     <properties>
         <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
