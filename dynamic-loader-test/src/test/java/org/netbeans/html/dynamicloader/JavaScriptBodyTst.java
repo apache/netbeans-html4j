@@ -39,16 +39,29 @@ public class JavaScriptBodyTst {
     public void assertEmptySymbolDefined() {
         assert Boolean.TRUE.equals(eval("empty")) : "empty.js should defined empty global symbol";
     }
+    public void assertEmpty2SymbolDefined() {
+        MultiResource.loadIt();
+        assert Boolean.TRUE.equals(eval("empty2")) : "empty.js should defined empty global symbol";
+    }
+    public void assertEmpty3SymbolDefined() {
+        MultiResource.loadIt();
+        assert Boolean.TRUE.equals(eval("empty3")) : "empty.js should defined empty global symbol";
+    }
 
     public void assertJavaScriptBodyAnnotationPresentInRuntime() throws Exception {
         var mul = JavaScriptBodyTst.class.getDeclaredMethod("mul", int.class, int.class);
         var ann = mul.getAnnotation(JavaScriptBody.class);
-        assert ann != null : "JavaScriptBody annotation must be found in runtime";
+        assert ann == null : "DynamicClassLoader doesn't modify retention unlike -javaagent usage";
     }
 
     public void assertJavaScriptResourceAnnotationPresentInRuntime() throws Exception {
         var ann = JavaScriptBodyTst.class.getAnnotation(JavaScriptResource.class);
-        assert ann != null : "JavaScriptResource annotation must be found in runtime";
+        assert ann == null : "DynamicClassLoader doesn't modify retention unlike -javaagent usage";
+    }
+
+    public void assertJavaScriptResourceGroupAnnotationPresentInRuntime() throws Exception {
+        var ann = MultiResource.class.getAnnotation(JavaScriptResource.Group.class);
+        assert ann == null : "DynamicClassLoader doesn't modify retention unlike -javaagent usage";
     }
 
     @JavaScriptBody(args = { "x", "y" }, body = "return x * y;")
@@ -56,4 +69,12 @@ public class JavaScriptBodyTst {
 
     @JavaScriptBody(args = { "code" }, body = "return eval(code);")
     private static native Object eval(String code);
+
+    @JavaScriptResource("empty_2.js")
+    @JavaScriptResource("empty_3.js")
+    static final class MultiResource {
+        @JavaScriptBody(args = {}, body = "")
+        static void loadIt() {
+        }
+    }
 }
