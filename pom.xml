@@ -226,6 +226,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                         <exclude>**/nb-configuration.xml</exclude>
+                        <exclude>**/dependency-reduced-pom.xml</exclude>
                         <exclude>**/nbactions.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
