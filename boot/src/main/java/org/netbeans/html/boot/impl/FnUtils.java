@@ -766,11 +766,6 @@ public final class FnUtils {
                     is = null;
                     if (JsPkgCache.process(this, name)) {
                         arr = FnUtils.transform(arr, this);
-                    } else switch (name) {
-                        case "net.java.html.js.JavaScriptBody" -> arr = FnUtils.transform(arr, this);
-                        case "net.java.html.js.JavaScriptResource" -> arr = FnUtils.transform(arr, this);
-                        case "net.java.html.js.JavaScriptResource$Group" -> arr = FnUtils.transform(arr, this);
-                        default -> {}
                     }
                     return defineClass(name, arr, 0, arr.length);
                 } catch (IOException ex) {
