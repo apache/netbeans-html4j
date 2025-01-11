@@ -103,9 +103,9 @@ public final class BrowserBuilder {
      * {@link Contexts#newBuilder(java.lang.Object...) created}
      * and can influence the selection
      * of available technologies 
-     * (like {@link org.netbeans.html.json.spi.Technology},
-     * {@link org.netbeans.html.json.spi.Transfer} or
-     * {@link org.netbeans.html.json.spi.WSTransfer}) by name.
+     * (like {@code org.netbeans.html.json.spi.Technology},
+     * {@code org.netbeans.html.json.spi.Transfer} or
+     * {@code org.netbeans.html.json.spi.WSTransfer}) by name.
      * 
      * @param context any instances that should be available to the builder -
      *   implementation dependant

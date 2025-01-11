@@ -64,6 +64,12 @@
       <artifactId>net.java.html.boot</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
+      <exclusions>
+          <exclusion>
+              <groupId>org.ow2.asm</groupId>
+              <artifactId>asm</artifactId>
+          </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
     <description>Find out where your Java program running in an HTML page is!</description>
