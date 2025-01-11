@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>net.java.html.boot.fx</artifactId>
+            <artifactId>net.java.html.boot.script</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -91,6 +91,14 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
         </dependency>
     </dependencies>
 </project>
