@@ -28,15 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Jaroslav Tulach
  */
 final class JsPkgCache {
-    private static final Logger LOG = Logger.getLogger(JsPkgCache.class.getName());
     private final Map<String,Set<String>> props = new WeakHashMap<>();
     private static final Map<ClassLoader, JsPkgCache> CACHE = new WeakHashMap<>();
     private static final Set<String> NONE = Collections.emptySet();
@@ -106,7 +103,8 @@ final class JsPkgCache {
             }
             p = arr;
         } catch (IOException ex) {
-            LOG.log(Level.WARNING, "Can't read " + res, ex);
+            System.err.println("Cannot read: " + res);
+            ex.printStackTrace();
             p = NONE;
         }
 
