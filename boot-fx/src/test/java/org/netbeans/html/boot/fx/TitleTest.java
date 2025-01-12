@@ -21,13 +21,13 @@ package org.netbeans.html.boot.fx;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import static org.netbeans.html.boot.fx.KOFx.assertTitle;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
@@ -88,25 +88,19 @@ public class TitleTest {
 
         assertNotNull(lastWebView[0], "A WebView created");
         Stage s = (Stage) lastWebView[0].getScene().getWindow();
-        assertEquals(s.getTitle(), "FX Presenter Harness");
+        assertTitle(s, "FX Presenter Harness", "Initial title is read from HTML page");
 
         final CountDownLatch propChange = new CountDownLatch(1);
-        s.titleProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> ov, String t, String t1) {
-                propChange.countDown();
-            }
+        s.titleProperty().addListener((ObservableValue<? extends String> ov, String t, String t1) -> {
+            propChange.countDown();
         });
 
-        when.ctx.execute(new Runnable() {
-            @Override
-            public void run() {
-                changeTitle("New title");
-            }
+        when.ctx.execute(() -> {
+            changeTitle("New title");
         });
 
         propChange.await(5, TimeUnit.SECONDS);
-        assertEquals(s.getTitle(), "New title");
+        assertTitle(s, "New title", "Title is dynamically updated");
     }
 
     final void doCheckReload() throws Exception {
