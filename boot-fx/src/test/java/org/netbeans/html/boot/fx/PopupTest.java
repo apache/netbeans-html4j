@@ -26,6 +26,7 @@ import javafx.stage.Stage;
 import net.java.html.BrwsrCtx;
 import net.java.html.boot.BrowserBuilder;
 import net.java.html.js.JavaScriptBody;
+import static org.netbeans.html.boot.fx.KOFx.assertTitle;
 import org.netbeans.html.boot.spi.Fn;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
@@ -84,23 +85,20 @@ public class PopupTest {
 
         assertNotNull(lastWebView[0], "A WebView created");
         Stage s = (Stage) lastWebView[0].getScene().getWindow();
-        assertEquals(s.getTitle(), "FX Presenter Harness");
+        assertTitle(s, "FX Presenter Harness", "Initial title value read from HTML page");
 
         final Object[] window = new Object[1];
         final CountDownLatch openWindow = new CountDownLatch(1);
-        when.ctx.execute(new Runnable() {
-            @Override
-            public void run() {
-                TitleTest.changeTitle("First window");
-                window[0] = openSecondaryWindow("second.html");
-                openWindow.countDown();
-            }
+        when.ctx.execute(() -> {
+            TitleTest.changeTitle("First window");
+            window[0] = openSecondaryWindow("second.html");
+            openWindow.countDown();
         });
 
         openWindow.await(5, TimeUnit.SECONDS);
 
         assertNotNull(window[0], "Second window opened");
 
-        assertEquals(s.getTitle(), "First window", "The title is kept");
+        assertTitle(s, "First window", "The title is kept");
     }
 }
