@@ -97,6 +97,9 @@ Executor, Closeable {
      * If the property is not specified the system tries <b>GTK</b> mode first,
      * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
      * (default LINUX command to launch a browser from a shell script).
+     * <p>
+     * In addition to the above properties, it is possible to also enable
+     * debugging by setting <code>com.dukescript.presenters.browserDebug=true</code>.
      */
     public Browser() {
         this(new Config());
@@ -112,7 +115,7 @@ Executor, Closeable {
     }
 
     Browser(String app, Config config, Supplier<HttpServer<?,?,?, ?>> serverProvider) {
-        this.serverProvider = serverProvider != null ? serverProvider : GrizzlyServer::new;
+        this.serverProvider = serverProvider != null ? serverProvider : SimpleServer::new;
         this.app = app;
         this.config = new Config(config);
     }
@@ -216,7 +219,7 @@ Executor, Closeable {
     public final static class Config {
         private Consumer<URI> browser;
         Integer port;
-        boolean debug;
+        boolean debug = Boolean.getBoolean("com.dukescript.presenters.browserDebug");
 
         /**
          * Default constructor.
@@ -306,7 +309,7 @@ Executor, Closeable {
          * @return this instance
          * @since 1.8
          */
-        Config debug(boolean debug) {
+        public Config debug(boolean debug) {
             this.debug = debug;
             return this;
         }
