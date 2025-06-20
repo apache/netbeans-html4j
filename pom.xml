@@ -36,6 +36,7 @@
       <netbeans.version>RELEASE130</netbeans.version>
       <graalvm.version>21.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
+      <openjfx.version>11.0.2</openjfx.version>
       <license>COPYING</license>
       <publicPackages />
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
@@ -393,13 +394,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>11</version>
+            <version>${openjfx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <scope>test</scope>
-            <version>11</version>
+            <version>${openjfx.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.external.google</groupId>

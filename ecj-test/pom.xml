@@ -51,6 +51,7 @@
           <plugin>
               <artifactId>maven-javadoc-plugin</artifactId>
               <configuration>
+                  <subpackages>org.netbeans.html.ecjtest.dummy</subpackages>
                   <skip>true</skip>
               </configuration>
           </plugin>
