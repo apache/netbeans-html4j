@@ -50,6 +50,34 @@
                   </instructions>
               </configuration>
           </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-enforcer-plugin</artifactId>
+              <configuration>
+                  <skip>true</skip>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>3.6.0</version>
+              <executions>
+                  <execution>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>shade</goal>
+                      </goals>
+                      <configuration>
+                          <relocations>
+                              <relocation>
+                                  <pattern>org.objectweb.asm</pattern>
+                                  <shadedPattern>org.netbeans.html.boot.asm5</shadedPattern>
+                              </relocation>
+                          </relocations>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
       </plugins>
   </build>
   <dependencies>
@@ -57,8 +85,6 @@
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
       <type>jar</type>
-      <scope>provided</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

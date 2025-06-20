@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.html.bootagent;
+package org.netbeans.html.dynamicloader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import javafx.application.Platform;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
@@ -50,7 +51,8 @@ public final class KOFx implements ITest, IHookable, Runnable {
     @Test
     public synchronized void executeTest() throws Exception {
         if (result == null) {
-            run();
+            Platform.runLater(this);
+            wait();
         }
         if (result instanceof Exception) {
             throw (Exception)result;
@@ -75,7 +77,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
                 notify = false;
-                run();
+                Platform.runLater(this);
                 return;
             }
             result = r;
@@ -92,5 +94,5 @@ public final class KOFx implements ITest, IHookable, Runnable {
     public void run(IHookCallBack ihcb, ITestResult itr) {
         ihcb.runTestMethod(itr);
     }
-    
+
 }

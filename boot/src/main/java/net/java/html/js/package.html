@@ -25,10 +25,10 @@
         Mix your Java and JavaScript code seamlessly - perform calls from Java
         to JavaScript and back with as much freedom as JavaScript gives you
         and as much type safety you can get from Java. Execute your code
-        in a headless testing environment or in a 
-        <a href="http://wiki.apidesign.org/wiki/FXBrwsr">JavaFX WebView</a>. 
+        in a headless testing environment or in a
+        <a href="http://wiki.apidesign.org/wiki/FXBrwsr">JavaFX WebView</a>.
         When done, deploy to <a href="http://bck2brwsr.apidesign.org">real browsers</a>.
-        
+
         <h3>Simple Meaning of World</h3>
         The whole support is build around @<a href="JavaScriptBody.html">JavaScriptBody</a>
         annotation. Use it to create parametrised JavaScript snippet easily
@@ -42,7 +42,7 @@
         The <em>meaning</em> method now becomes a properly typed Java
         surface to your JavaScript code which can be directly
         called from the rest of your Java code:
-<pre>        
+<pre>
 <b>public static void</b> main(String... args) {
   <b>assert</b> 42 == meaning(40, 2) : <em>"Meaning of World should be 42!"</em>;
 }
@@ -53,24 +53,24 @@
         <a target="top" href="https://github.com/apache/netbeans-html4j/tree/release-1.7.1/json-tck/src/main/java/net/java/html/js/tests/Bodies.java">Bodies</a>.
         <p></p>
         <em>Editing hint:</em> one can see the list of arguments of the
-        <em>meaning</em> is now duplicated - it is once specified in Java, 
-        and once inside of the {@link net.java.html.js.JavaScriptBody} 
-        array of <code>args</code>. This is necessary to keep the names of 
+        <em>meaning</em> is now duplicated - it is once specified in Java,
+        and once inside of the {@link net.java.html.js.JavaScriptBody}
+        array of <code>args</code>. This is necessary to keep the names of
         arguments accessible during runtime. However don't despair - there
         is a code completion for the value of <code>args</code> attribute!
         Just type the Java signature first and then press Ctrl+Space and the
         right parameter names will be inserted for you.
-        
+
         <a name="#library"><h3>Including JavaScript Libraries</h3></a>
 
         Large amount of JavaScript code is easier to be delivered in whole
         files rather than {@link net.java.html.js.JavaScriptBody small code snippets} -
         that is also possible thanks to {@link net.java.html.js.JavaScriptResource}
         annotation. Imagine file <code>mul.js</code> with following content:
-<pre> 
+<pre>
 <b>function</b> <em>mul</em>(x, y) { <b>return</b> x * y; }
 </pre>
-        Place the file next to your class and reference it with 
+        Place the file next to your class and reference it with
         {@link net.java.html.js.JavaScriptResource the annotation}:
 <pre>
 {@code @}{@link net.java.html.js.JavaScriptResource}("mul.js") <b>class</b> Mul {
@@ -90,38 +90,38 @@
         <p></p>
         <em>Real code tip:</em>
         <a target="top" href="https://github.com/apache/netbeans-html4j/tree/release-1.7.1/ko4j/src/main/java/org/netbeans/html/ko4j/Knockout.java">this</a>
-        is the way 
+        is the way
         the <a target="top" href="http://knockoutjs.com">knockout.js</a> library
         is included in its <em>ko4j</em> library.
-        
+
         <h3>Callback to Java</h3>
-        
+
         Often JavaScript code needs to call back into the Java classes.
         For example when a button in a browser is pressed and your code would
         like to invoke a runnable to handle such situation:
-<pre> 
-{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"id", "r"}, {@link net.java.html.js.JavaScriptBody#javacall() javacall} = true, body = "\n" + 
-"       document.getElementById(id).onclick = function() {\n" + 
-"        r.<em>{@code @}java.lang.Runnable::run()</em>();\n" + 
-"       };\n" + 
+<pre>
+{@code @}{@link net.java.html.js.JavaScriptBody}(args = {"id", "r"}, {@link net.java.html.js.JavaScriptBody#javacall() javacall} = true, body = "\n" +
+"       document.getElementById(id).onclick = function() {\n" +
+"        r.<em>{@code @}java.lang.Runnable::run()</em>();\n" +
+"       };\n" +
 "    ")
 <b>public static native void</b> onClick(String id, Runnable r);
 </pre>
-        As can be seen, there is a special syntax (starting with <b>@</b>) to 
+        As can be seen, there is a special syntax (starting with <b>@</b>) to
         properly identify the right Java method to call on a Java object passed
         into the JavaScript interpreter. The syntax starts with a fully
-        qualified name of the class, followed by <b>::</b> and name of the 
+        qualified name of the class, followed by <b>::</b> and name of the
         method including signature of its parameters. In case of runnable,
         this is just <em>()</em> as the method has no parameters, but the
         signature can be more complicated. For example in case of following method
 <pre><b>static int</b> compare(<b>int</b> i1, String s1, <b>int</b> i2, String s2)
-</pre>        
+</pre>
         it would be <em>(ILjava/lang/String;ILjava/lang/String;)</em> (btw. the
-        return type is not included in the signature). The actual parameters 
+        return type is not included in the signature). The actual parameters
         then follows. The JavaScript call to such compare method would then
         look like:
 <pre>{@code @}the.pkg.Clazz::compare(ILjava/lang/String;ILjava/lang/String;)(1, 'One', 2, 'Two');
-</pre>        
+</pre>
         This syntax gives enough flexibility, helps to properly select one
         of overloaded methods and follows the tradition of previous attempts to
         provide JavaScript to Java calling conventions.
@@ -133,15 +133,15 @@
         <p></p>
         <pre>[instance.]@classname::methodname(signature)(arguments)</pre>
         <ul>
-            <li><b>instance</b> - must be present when calling an 
-                instance method and must be absent when calling a 
+            <li><b>instance</b> - must be present when calling an
+                instance method and must be absent when calling a
                 static method</li>
-            <li><b>classname</b> - fully qualified name of the class in 
-                which the method is declared 
+            <li><b>classname</b> - fully qualified name of the class in
+                which the method is declared
             </li>
-            <li><b>signature</b> - internal JVM method signature 
-                (as specified at 
-                <a target="top" href="http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432">JNI type Signatures</a>) 
+            <li><b>signature</b> - internal JVM method signature
+                (as specified at
+                <a target="top" href="http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432">JNI type Signatures</a>)
                 without the trailing signature of the method return type</li>
             <li><b>arguments</b> - the actual values to pass to the called Java method
             </li>
@@ -149,9 +149,9 @@
 
         <p>Here is the <a target="top" href="http://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/types.html#wp16432">JNI type signatures table</a>
             one can use to convert
-            Java parameters to JVM's internal <em>letter</em> based 
+            Java parameters to JVM's internal <em>letter</em> based
             representation:</p>
-        
+
         <table border=1 width='100%'>
             <tr>
                 <td><b>Type Signature</b></td>
@@ -201,19 +201,19 @@
         </table>
         <p></p>
         <em>Editing hint:</em> The callback syntax may seem complicated at
-        first, however there is an associated <b>annotation processor</b> 
+        first, however there is an associated <b>annotation processor</b>
         that checks the syntax and verifies the referenced class and
         method with the requested signature exist. If it does not, the
-        <em>compilation fails offering correct alternatives</em>. 
+        <em>compilation fails offering correct alternatives</em>.
         Thus don't despair seeing the syntax, make sure you get the
-        fully qualified name of the callback class right. 
-        You'll get warning and help 
+        fully qualified name of the callback class right.
+        You'll get warning and help
         if there is a typo in the specified signature then -
         during compilation of your code.
-        
+
         <h3>Overloaded Methods</h3>
-        
-        Specifying the actual callback signature is important in case of 
+
+        Specifying the actual callback signature is important in case of
         overloaded methods. Imagine a class:
 <pre>
 <b>package</b> x.y.z;
@@ -227,8 +227,8 @@
   <b>int</b> pulse(<b>long</b> evenMore) {
     <b>return</b> (<b>int</b>) (5 + evenMore);
   }
-}</pre>        
-        you then need to choose in {@link net.java.html.js.JavaScriptBody} 
+}</pre>
+        you then need to choose in {@link net.java.html.js.JavaScriptBody}
         the appropriate method to call:
 <pre>
 {@code @}{@link net.java.html.js.JavaScriptBody}(args = { "h" }, javacall = <b>true</b>, <em>// you want to process the @ syntax</em>
@@ -242,17 +242,17 @@
   }
 </pre>
         <p>
-        To avoid ambiguity, the specification of the correct signature is 
+        To avoid ambiguity, the specification of the correct signature is
         required on every call. However, to simplify the development,
         there is an annotation processor to
         verify the signature really refers to an existing method.
         </p>
-        
+
         <h3>Arrays by Copy</h3>
-        
+
         It is possible to exchange arrays between Java and JavaScript. Some
         implementations can pass arrays by reference, however in some systems
-        this is hard to achieve. To choose the least common denominator, 
+        this is hard to achieve. To choose the least common denominator,
         the TCK for behavior of {@link net.java.html.js.JavaScriptBody} requires
         the arrays to be always transfered by a copy. As such following code:
         <pre>
@@ -262,33 +262,33 @@
   String[] hello = { "Hello", "World!" };
   uselessModify(arr);
   System.out.println(arr[0] + " " + arr[1]);
-}            
+}
 </pre>
         will still print <em>Hello World!</em> in spite the JavaScript code
         sets the 0-th array element to <code>null</code>. Because the array
         is passed as a copy, such assignment has no effect on the Java array.
         <p></p>
-        In case one needs to modify an array in a JavaScript and use its 
+        In case one needs to modify an array in a JavaScript and use its
         values in Java, one has to return the array back as a return value:
-        <pre>        
+        <pre>
 {@code @}{@link net.java.html.js.JavaScriptBody}(args = {"arr"}, body = "arr[0] = 'Ahoy'; return arr;")
 <b>private static native</b> Object[] usefulModify(String[] arr);
 <b>public static void</b> main(String... args) {
   String[] hello = { "Hello", "World!" };
   Object[] ret = usefulModify(arr);
   System.out.println(ret[0] + " " + ret[1]);
-}            
+}
 </pre>
         now the program prints <em>Ahoy World!</em> as the modified array
         is returned back and converted (by a copy) into a Java <code>Object[]</code>
         (but of course the <code>ret != hello</code>). Usually the copy based
-        passing of arrays works OK. It is however good to keep it in mind to 
+        passing of arrays works OK. It is however good to keep it in mind to
         avoid unwanted surprises.
-        
+
         <h3>Instance Reference to JavaScript Object</h3>
-        
+
         When writing wrappers around existing JavaScript libraries, it may be
-        useful to hold a reference to some JavaScript object from a Java 
+        useful to hold a reference to some JavaScript object from a Java
         instance and use it later.
 <pre>
 <b>class</b> WrapperAroundJsObj {
@@ -309,12 +309,12 @@
     args = { "js", "v" }, body = "js.value = v;", wait4js = false
   )
   <b>private static native void</b> setValue(Object js, int v);
-}            
-</pre>      
-        The type of the Java reference is {@link java.lang.Object}. 
+}
+</pre>
+        The type of the Java reference is {@link java.lang.Object}.
         From a Java perspective it has no additional methods or fields, however
         its properties can be manipulated from JavaScript. Send the object back
-        to JavaScript by passing it as a parameter of some method 
+        to JavaScript by passing it as a parameter of some method
         (like the <code>setValue</code> one) and perform necessary JavaScript
         calls or changes on it.
 
@@ -340,22 +340,26 @@
 }
 </pre>
         This is the behavior since version 1.4.
-        
+
         <h3>Post Process Classes</h3>
         <a name="post-process"></a>
 
         Classes with {@link net.java.html.js.JavaScriptBody} annotated methods need to
         be post processed before they can be used - e.g. their <code>native</code>
-        body needs to be generated to call into JavaScript (btw. the code is performed
+        body needs to be generated to call into JavaScript (btw. the call is performed
         via {@link org.netbeans.html.boot.spi.Fn}). There are three ways
-        such post processing can happen.
+        such a post processing can be achieved.
         <p></p>
-        <b>Compile time</b> processing - this is the preferred method that
-        most of the <a href="http://html.java.net">Html Java APIs</a> are using. 
+
+        <h4>Compile time</h4>
+        <a name="post-process-compile"></a>
+
+        The <b>Compile time</b> is the preferred method of post-processing that
+        most of the <a href="http://html.java.net">Html Java APIs</a> are using.
         Just include following plugin configuration into your <code>pom.xml</code>
         and your classes will be ready for execution as soon as <em>process-classes</em>
         <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a> phase is over:
-<pre> 
+<pre>
 &lt;plugin&gt;
     &lt;groupId&gt;org.netbeans.html&lt;/groupId&gt;
     &lt;artifactId&gt;html4j-maven-plugin&lt;/artifactId&gt;
@@ -370,33 +374,49 @@
     &lt;/executions&gt;
 &lt;/plugin&gt;
 </pre>
-        This plugin works in orchestration with 
+        This plugin works in orchestration with
         <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">annotation
         processor</a> associated with {@link net.java.html.js.JavaScriptBody}
         and {@link net.java.html.js.JavaScriptResource} - the processor creates
-        list of files that need post-processing. The 
+        list of files that need post-processing. The
         <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
-        plugin reads these files, processes classes mentioned in them and 
+        plugin reads these files, processes classes mentioned in them and
         modifies (and deletes at the end) the files to not include classes
         already processed.
         <p></p>
-        <b>Instrumentation Agent</b> - one can do processing in runtime 
+
+        <h4>Instrumentation Agent</h4>
+        <a name="post-process-agent"></a>
+
+        <b>Instrumentation Agent</b> can perform the post <em>processing in runtime</em>
         using JDK's {@link java.lang.instrument.ClassFileTransformer instrumentation}
-        abilities. The JAR artifact of <code>org.netbeans.html:net.java.html.boot</code>
-        contains an <code>Agent-Class</code> and <code>Premain-Class</code> 
-        definitions in its manifest. As such one can launch the Java virtual
+        abilities. The JAR artifact of
+        <a href="https://central.sonatype.com/artifact/org.netbeans.html/net.java.html.boot">org.netbeans.html:net.java.html.boot</a>
+        contains an <code>Agent-Class</code> and <code>Premain-Class</code>
+        attributes in its manifest. As such one can launch the Java virtual
         machine with
 <pre>
 $ java -javaagent:jarpath=net.java.html.boot-x.y.jar
-</pre>        
-        and the runtime will take care of processing bytecode of classes 
-        not yet processed in compile time before they are loaded into the
-        virtual machine. 
+</pre>
+        and the runtime will take care of processing bytecode of classes
+        before they are loaded into the
+        virtual machine. Since version 1.8.2 this agent also <b>changes retention</b>
+        of {@link net.java.html.js.JavaScriptBody}
+        and {@link net.java.html.js.JavaScriptResource} annotations
+        to {@link java.lang.annotation.RetentionPolicy#RUNTIME}.
+        As such technologies that need
+        access to these annotations during runtime can do so by using the
+        <code>-javaagent</code> JVM switch.
         <p></p>
-        <b>Special classloading</b> - when booting your application with
+
+        <h4>Special classloading</h4>
+        <a name="post-process-classloader"></a>
+
+        There is a special implementation of <b>dynamic classloader</b>.
+        When booting your application with
         {@link net.java.html.boot.BrowserBuilder} there is a 3rd option of
         processing the classes. If there are some classes not yet processed
-        (remember the files listing them generated by the 
+        (remember the files listing them generated by the
         <a href="http://wiki.apidesign.org/wiki/AnnotationProcessor">annotation
         processor</a>), the {@link net.java.html.boot.BrowserBuilder#showAndWait() launching method}
         will create a special classloader to that does the processing before
@@ -406,16 +426,16 @@ $ java -javaagent:jarpath=net.java.html.boot-x.y.jar
         processing needs to also include <code>asm-5.0.jar</code> on application
         classpath), it is recommended
         to perform the <b>compile time</b> processing.
-        
+
         <h3>Getting Started</h3>
-        
-        There are many ways to start developing 
-        <a href="http://html.java.net">Html for Java</a> application. 
+
+        There are many ways to start developing
+        <a href="http://html.java.net">Html for Java</a> application.
         However to be sure one chooses the most recent setup, it is recommended
-        to switch to good old command line and use a 
+        to switch to good old command line and use a
         <a href="http://wiki.apidesign.org/wiki/Knockout4Java">Maven archetype</a>
         associated with every version of this project. Just type:
-<pre>      
+<pre>
 $ mvn archetype:generate \
  -DarchetypeGroupId=org.apidesign.html \
  -DarchetypeArtifactId=knockout4j-archetype \
@@ -426,10 +446,10 @@ $ mvn archetype:generate \
 $ cd myfirstbrwsrpage
 $ mvn process-classes exec:java
 </pre>
-        In a few seconds (or minutes if 
+        In a few seconds (or minutes if
         <a href="http://wiki.apidesign.org/wiki/Maven">Maven</a>
-        decides to download the whole Internet of dependencies) you should 
-        see a sample Hello World application. It is basically composed from one 
+        decides to download the whole Internet of dependencies) you should
+        see a sample Hello World application. It is basically composed from one
         Java and one HTML file:
 <pre>
 $ ls src/main/java/**/DataModel.java
@@ -437,22 +457,22 @@ $ ls src/main/webapp/pages/index.html
 </pre>
         Play with them, modify them and enjoy
         <a href="http://html.java.net">Html for Java</a>!
-        
+
         <a name="debugging">
         <h3>Mixed Java/JavaScript Debugging</h3>
         </a>
-        
+
         <p>
-        The following video shows how easy it is to use 
-        NetBeans 8.0, JDK8 to debug an application that intermixes Java 
-        and JavaScript calls. One can put breakpoints into Java part, 
-        as well as JavaScript source code, inspect Java as well 
-        as JavaScript variables and switch between these two 
+        The following video shows how easy it is to use
+        NetBeans 8.0, JDK8 to debug an application that intermixes Java
+        and JavaScript calls. One can put breakpoints into Java part,
+        as well as JavaScript source code, inspect Java as well
+        as JavaScript variables and switch between these two
         languages without any restrictions.
         </p>
-        
-        <iframe width="420" height="315" 
-            src="http://www.youtube.com/embed/EvaTejQDRwA" 
+
+        <iframe width="420" height="315"
+            src="http://www.youtube.com/embed/EvaTejQDRwA"
             frameborder="0" allowfullscreen>
         </iframe>
     </body>

@@ -27,6 +27,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.Test;
 
 public class ResourceOrderTest {
@@ -39,7 +40,8 @@ public class ResourceOrderTest {
         InputStream is = ResourceOrder.class.getResourceAsStream("ResourceOrder.class");
 
         int[] valueCount = { 0 };
-        List<String> values = new ArrayList<>();
+        List<String> visibleValues = new ArrayList<>();
+        List<String> hiddenValues = new ArrayList<>();
 
         ClassReader r = new ClassReader(is);
         r.accept(new ClassVisitor(Opcodes.ASM5) {
@@ -101,6 +103,7 @@ public class ResourceOrderTest {
                                     public void visit(String name, Object value) {
                                         Assert.assertEquals(name, "value");
                                         Assert.assertTrue(value instanceof String, "It is a string: " + value);
+                                        var values = visible ? visibleValues : hiddenValues;
                                         values.add((String) value);
                                     }
                                 };
@@ -124,10 +127,14 @@ public class ResourceOrderTest {
                 };
             }
         }, 0);
+        assertValues("Hidden values found", hiddenValues);
+        assertTrue("No visible visible values after processing with Maven plugin: " + visibleValues, visibleValues.isEmpty());
+    }
 
-        assertEquals(values.size(), 3, "There are there elements: " + values);
-        assertEquals(values.get(0), "initArray.js");
-        assertEquals(values.get(1), "addHello.js");
-        assertEquals(values.get(2), "addWorld.js");
+    private void assertValues(String prefix, List<String> values) {
+        assertEquals(values.size(), 3, prefix + ": There are there elements: " + values);
+        assertEquals(values.get(0), "initArray.js", prefix + " 0");
+        assertEquals(values.get(1), "addHello.js", prefix + " 1");
+        assertEquals(values.get(2), "addWorld.js", prefix + " 2");
     }
 }
