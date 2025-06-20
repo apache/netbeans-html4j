@@ -19,6 +19,8 @@
 package org.netbeans.html.presenters.spi.test;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import static org.netbeans.html.presenters.spi.test.GenericTest.createTests;
 import static org.netbeans.html.presenters.spi.test.Testing.LOG;
@@ -31,7 +33,7 @@ public class SynchronizedTest {
 
     private static class Synchronized extends Testing {
         public Synchronized() {
-            super(true, (r) -> r.run());
+            super(true, new SynchronousExecutor());
         }
 
         @Override
@@ -58,4 +60,36 @@ public class SynchronizedTest {
         void beforeTest(Class<?> declaringClass) throws Exception {
         }
     } // end of Synchronized
+
+    private static class SynchronousExecutor implements Executor {
+        private LinkedList<Runnable> pending;
+
+        SynchronousExecutor() {
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            if (pending != null) {
+                pending.add(command);
+                return;
+            }
+            try {
+                pending = new LinkedList<>();
+                pending.add(command);
+                for (;;) {
+                    Runnable toRun = pending.pollFirst();
+                    if (toRun == null) {
+                        break;
+                    }
+                    try {
+                        toRun.run();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+            } finally {
+                pending = null;
+            }
+        }
+    }
 }

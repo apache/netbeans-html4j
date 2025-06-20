@@ -22,8 +22,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.netbeans.html.boot.spi.Fn;
+import static org.testng.Assert.fail;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITest;
@@ -36,7 +40,7 @@ import org.testng.annotations.Test;
  */
 public final class KOFx implements ITest, IHookable, Runnable {
     private static final Timer SCHEDULER = new Timer("Fx Scheduler");
-    
+
     private final Fn.Presenter p;
     private final Method m;
     private Object result;
@@ -99,7 +103,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
     public void run(IHookCallBack ihcb, ITestResult itr) {
         ihcb.runTestMethod(itr);
     }
-    
+
     private static void schedule(Runnable task, long delay) {
         SCHEDULER.schedule(new TimerTask() {
             @Override
@@ -107,5 +111,19 @@ public final class KOFx implements ITest, IHookable, Runnable {
                 Platform.runLater(task);
             }
         }, delay);
+    }
+
+    static void assertTitle(Stage s, String expTitle, String msg) {
+        for (var i = 0; i < 100; i++) {
+            var title = s.getTitle();
+            if (expTitle.equals(title)) {
+                return;
+            }
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+            }
+        }
+        fail(msg + " expecting: " + expTitle + " but was: " + s.getTitle());
     }
 }

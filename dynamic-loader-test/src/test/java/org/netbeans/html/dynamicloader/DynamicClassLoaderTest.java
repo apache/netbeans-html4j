@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.html.bootagent;
+package org.netbeans.html.dynamicloader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -39,7 +39,7 @@ import org.testng.annotations.Factory;
 public class DynamicClassLoaderTest {
     private static Class<?> browserClass;
     private static Fn.Presenter browserPresenter;
-    
+
     public DynamicClassLoaderTest() {
     }
 
@@ -74,7 +74,7 @@ public class DynamicClassLoaderTest {
         }
         return browserClass;
     }
-    
+
     public static void ready(Class<?> browserCls) throws Exception {
         Class<?> origClazz = ClassLoader.getSystemClassLoader().loadClass(DynamicClassLoaderTest.class.getName());
         final Field f1 = origClazz.getDeclaredField("browserClass");
@@ -87,7 +87,7 @@ public class DynamicClassLoaderTest {
             origClazz.notifyAll();
         }
     }
-    
+
     public static void initialized() throws Exception {
         BrwsrCtx b1 = BrwsrCtx.findDefault(DynamicClassLoaderTest.class);
         assertNotSame(b1, BrwsrCtx.EMPTY, "Browser context is not empty");

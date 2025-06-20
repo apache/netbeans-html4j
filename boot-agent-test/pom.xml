@@ -28,7 +28,7 @@
     </parent>
     <artifactId>boot-agent-test</artifactId>
     <packaging>jar</packaging>
-    <name>Dynamic Boot Test</name>
+    <name>Agent Boot Test</name>
     <properties>
         <skipTests>${skipJavaFXTests}</skipTests>
     </properties>
@@ -46,6 +46,23 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <argLine>-javaagent:${org.netbeans.html:net.java.html.boot:jar}</argLine>
                 </configuration>
             </plugin>
         </plugins>
@@ -71,26 +88,18 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>net.java.html.boot.fx</artifactId>
+            <artifactId>net.java.html.boot.script</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <scope>test</scope>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <scope>test</scope>
+          <groupId>org.graalvm.js</groupId>
+          <artifactId>js-scriptengine</artifactId>
         </dependency>
     </dependencies>
 </project>

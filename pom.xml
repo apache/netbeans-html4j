@@ -36,6 +36,7 @@
       <netbeans.version>RELEASE130</netbeans.version>
       <graalvm.version>21.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
+      <openjfx.version>11.0.2</openjfx.version>
       <license>COPYING</license>
       <publicPackages />
       <bundleSymbolicName>${project.artifactId}</bundleSymbolicName>
@@ -46,7 +47,7 @@
       <sigtestPackages>${publicPackages}</sigtestPackages>
       <publicMetaInf>META-INF.services.*</publicMetaInf>
       <skipJavaFXTests>true</skipJavaFXTests>
-      <maven.compiler.source>15</maven.compiler.source>
+      <maven.compiler.source>20</maven.compiler.source>
   </properties>
   <modules>
     <module>json</module>
@@ -67,6 +68,7 @@
     <!--
     <module>boot-truffle</module>
     -->
+    <module>dynamic-loader-test</module>
     <module>boot-agent-test</module>
     <module>xhr4j</module>
     <!-- presenters -->
@@ -225,6 +227,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                         <exclude>**/.maven/**</exclude>
                         <exclude>**/*.sigtest</exclude>
                         <exclude>**/nb-configuration.xml</exclude>
+                        <exclude>**/dependency-reduced-pom.xml</exclude>
                         <exclude>**/nbactions.xml</exclude>
                         <exclude>README.md</exclude>
                         <exclude>DEPENDENCIES</exclude>
@@ -263,6 +266,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                 <configuration>
                     <systemPropertyVariables>
                         <fxpresenter.headless>true</fxpresenter.headless>
+                        <polyglot.engine.WarnInterpreterOnly>false</polyglot.engine.WarnInterpreterOnly>
                     </systemPropertyVariables>
                 </configuration>
               </plugin>
@@ -289,14 +293,14 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <dependency>
                         <artifactId>compiler-maven-plugin</artifactId>
                         <groupId>org.frgaal</groupId>
-                        <version>18.0.0</version>
+                        <version>21.0.0</version>
                     </dependency>
                 </dependencies>
                 <configuration>
                     <compilerId>frgaal</compilerId>
-                    <source>17</source>
+                    <source>19</source>
                     <target>1.8</target>
-                    <testSource>17</testSource>
+                    <testSource>19</testSource>
                     <testTarget>1.8</testTarget>
                     <compilerArgs>
                         <compilerArgument>-Xlint:-options</compilerArgument>
@@ -397,13 +401,13 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>11</version>
+            <version>${openjfx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <scope>test</scope>
-            <version>11</version>
+            <version>${openjfx.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.external.google</groupId>

@@ -21,6 +21,8 @@ package org.netbeans.html.boot.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +64,21 @@ public final class FnUtils {
      * @since 0.7
      */
     public static byte[] transform(byte[] bytecode, ClassLoader loader) {
+        return transform(bytecode, loader, false);
+    }
+    /** Seeks for {@link JavaScriptBody} and {@link JavaScriptResource} annotations
+     * in the bytecode and converts them into real code. Used by Maven plugin
+     * postprocessing classes.
+     *
+     * @param bytecode the original bytecode with javascript specific annotations
+     * @param loader the loader to load resources (scripts and classes) when needed
+     * @param makeVisible {@code true} if the {@link Retention} of the
+     *  {@link JavaScriptBody} and {@link JavaScriptResource} annotations
+     *  should be changed to {@link RetentionPolicy#RUNTIME}
+     * @return the transformed bytecode
+     * @since 1.8.2
+     */
+    public static byte[] transform(byte[] bytecode, ClassLoader loader, boolean makeVisible) {
         ClassReader cr = new ClassReader(bytecode) {
             // to allow us to compile with -profile compact1 on 
             // JDK8 while processing the class as JDK7, the highest
@@ -75,11 +92,11 @@ public final class FnUtils {
                 return s;
             }
         };
-        FindInClass tst = new FindInClass(loader, null);
+        FindInClass tst = new FindInClass(loader, null, makeVisible);
         cr.accept(tst, 0);
         if (tst.found > 0) {
             ClassWriter w = new ClassWriterEx(loader, cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-            FindInClass fic = new FindInClass(loader, w);
+            FindInClass fic = new FindInClass(loader, w, makeVisible);
             cr.accept(fic, 0);
             bytecode = w.toByteArray();
         }
@@ -119,9 +136,11 @@ public final class FnUtils {
         private int found;
         private int resourcesCnt = 0;
         private final String[] resources = new String[256];
+        private final boolean makeVisible;
 
-        public FindInClass(ClassLoader l, ClassVisitor cv) {
+        FindInClass(ClassLoader l, ClassVisitor cv, boolean makeVisible) {
             super(Opcodes.ASM5, cv);
+            this.makeVisible = makeVisible;
         }
 
         @Override
@@ -133,11 +152,16 @@ public final class FnUtils {
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
             final AnnotationVisitor del = super.visitAnnotation(desc, visible);
+            if ("Ljava/lang/annotation/Retention;".equals(desc)) {
+                return makeVisible ? new RetentionChange(del) : del;
+            }
             if ("Lnet/java/html/js/JavaScriptResource;".equals(desc)) {
-                return new LoadResource(del);
+                var visibleDel = makeVisible ? super.visitAnnotation(desc, true) : null;
+                return new LoadResource(DoubleVisitor.combine(del, visibleDel));
             }
             if ("Lnet/java/html/js/JavaScriptResource$Group;".equals(desc)) {
-                return new LoadResource(del);
+                var visibleDel = makeVisible ? super.visitAnnotation(desc, true) : null;
+                return new LoadResource(DoubleVisitor.combine(del, visibleDel));
             }
             return del;
         }
@@ -179,8 +203,9 @@ public final class FnUtils {
             @Override
             public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
                 if ("Lnet/java/html/js/JavaScriptBody;".equals(desc)) { // NOI18N
+                    var visibleDel = makeVisible ? super.visitAnnotation(desc, true) : null;
                     found++;
-                    return new FindInAnno();
+                    return DoubleVisitor.combine(new FindInAnno(), visibleDel);
                 }
                 return super.visitAnnotation(desc, visible);
             }
@@ -506,7 +531,7 @@ public final class FnUtils {
                 Boolean wait4java;
                 Boolean keepAlive;
 
-                public FindInAnno() {
+                FindInAnno() {
                     super(Opcodes.ASM5);
                 }
 
@@ -566,8 +591,60 @@ public final class FnUtils {
             }
         }
 
+        private static final class DoubleVisitor extends AnnotationVisitor {
+            private final AnnotationVisitor a2;
+
+            private DoubleVisitor(AnnotationVisitor a1, AnnotationVisitor a2) {
+                super(Opcodes.ASM5, a1);
+                assert a2 != null;
+                this.a2 = a2;
+            }
+
+            static AnnotationVisitor combine(AnnotationVisitor a1, AnnotationVisitor a2) {
+                if (a1 == null) {
+                    return a2;
+                } else if (a2 == null) {
+                    return a1;
+                } else {
+                    return new DoubleVisitor(a1, a2);
+                }
+            }
+
+            @Override
+            public void visitEnd() {
+                super.visitEnd();
+                a2.visitEnd();
+            }
+
+            @Override
+            public AnnotationVisitor visitArray(String name) {
+                var v1 = super.visitArray(name);
+                var v2 = a2.visitArray(name);
+                return DoubleVisitor.combine(v1, v2);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String name, String desc) {
+                var v1 = super.visitAnnotation(name, desc);
+                var v2 = a2.visitAnnotation(name, desc);
+                return DoubleVisitor.combine(v1, v2);
+            }
+
+            @Override
+            public void visitEnum(String name, String desc, String value) {
+                super.visitEnum(name, desc, value);
+                a2.visitEnum(name, desc, value);
+            }
+
+            @Override
+            public void visit(String name, Object value) {
+                super.visit(name, value);
+                a2.visit(name, value);
+            }
+        }
+
         private final class LoadResource extends AnnotationVisitor {
-            public LoadResource(AnnotationVisitor av) {
+            LoadResource(AnnotationVisitor av) {
                 super(Opcodes.ASM5, av);
             }
 
@@ -592,6 +669,42 @@ public final class FnUtils {
             @Override
             public AnnotationVisitor visitAnnotation(String name, String desc) {
                 return new LoadResource(super.visitAnnotation(name, desc));
+            }
+        }
+
+        private final class RetentionChange extends AnnotationVisitor {
+            RetentionChange(AnnotationVisitor av) {
+                super(Opcodes.ASM5, av);
+            }
+
+            @Override
+            public void visit(String attrName, Object value) {
+                super.visit(attrName, value);
+            }
+
+            @Override
+            public AnnotationVisitor visitArray(String name) {
+                return super.visitArray(name);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String name, String desc) {
+                return super.visitAnnotation(desc, desc);
+            }
+
+            @Override
+            public void visitEnum(String value, String retentionPolicy, String type) {
+                if ("Ljava/lang/annotation/RetentionPolicy;".equals(retentionPolicy)) {
+                    found++;
+                    super.visitEnum(value, retentionPolicy, "RUNTIME");
+                } else {
+                    super.visitEnum(value, retentionPolicy, type);
+                }
+            }
+
+            @Override
+            public void visitEnd() {
+                super.visitEnd();
             }
         }
     }

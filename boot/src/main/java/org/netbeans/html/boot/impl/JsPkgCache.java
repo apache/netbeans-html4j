@@ -20,7 +20,6 @@ package org.netbeans.html.boot.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collections;
@@ -29,22 +28,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Jaroslav Tulach
  */
 final class JsPkgCache {
-    private final Map<String,Set<String>> props = new WeakHashMap<String, Set<String>>();
-    private static final Map<ClassLoader, JsPkgCache> CACHE = new WeakHashMap<ClassLoader, JsPkgCache>();
+    private final Map<String,Set<String>> props = new WeakHashMap<>();
+    private static final Map<ClassLoader, JsPkgCache> CACHE = new WeakHashMap<>();
     private static final Set<String> NONE = Collections.emptySet();
 
-    public static boolean process(ClassLoader l, String className) {
-        if (className.equals("org.netbeans.html.boot.impl.Test")) { // NOI18N
-            return true;
+    public static boolean process(ClassLoader loader, String dotOrSlashClassName) {
+        if (loader == null) {
+            return false;
         }
+        var slashClassName = dotOrSlashClassName.replace('.', '/');
+        var className = dotOrSlashClassName.replace('/', '.');
+        return switch (className) {
+            case "net.java.html.js.JavaScriptBody" -> true; // NOI18N
+            case "net.java.html.js.JavaScriptResource" -> true; // NOI18N
+            case "net.java.html.js.JavaScriptResource$Group" -> true; // NOI18N;
+            case "org.netbeans.html.boot.impl.Test" -> true; // NOI18N
+            default -> packageCheck(loader, slashClassName, className);
+        };
+    }
+
+    private static boolean packageCheck(ClassLoader l, String slashClassName, String dotClassName) {
         Set<String> p;
         JsPkgCache c;
         String pkgName;
@@ -54,17 +63,17 @@ final class JsPkgCache {
                 c = new JsPkgCache();
                 CACHE.put(l, c);
             }
-            int lastDot = className.lastIndexOf('.');
-            pkgName = className.substring(0, lastDot + 1).replace('.', '/');
+            int lastDot = slashClassName.lastIndexOf('/');
+            pkgName = slashClassName.substring(0, lastDot + 1);
             p = c.props.get(pkgName);
             if (p == NONE) {
                 return false;
             } else if (p != null) {
-                return p.contains(className);
+                return p.contains(dotClassName);
             }
         }
         final String res = pkgName + "net.java.html.js.classes";
-        
+
         Enumeration<URL> en;
         try {
             en = l.getResources(res);
@@ -77,7 +86,7 @@ final class JsPkgCache {
         }
 
         try {
-            Set<String> arr = new TreeSet<String>();
+            Set<String> arr = new TreeSet<>();
             while (en.hasMoreElements()) {
                 URL u = en.nextElement();
                 BufferedReader r = new BufferedReader(
@@ -94,15 +103,14 @@ final class JsPkgCache {
             }
             p = arr;
         } catch (IOException ex) {
-            LOG.log(Level.WARNING, "Can't read " + res, ex);
+            System.err.println("Cannot read: " + res);
+            ex.printStackTrace();
             p = NONE;
         }
-        
+
         synchronized (CACHE) {
             c.props.put(pkgName, p);
-            return p.contains(className);
+            return p.contains(dotClassName);
         }
-        
     }
-    private static final Logger LOG = Logger.getLogger(JsPkgCache.class.getName());
 }

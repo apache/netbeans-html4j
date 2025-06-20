@@ -19,6 +19,7 @@
 package net.java.html.js.tests;
 
 import static net.java.html.js.tests.JavaScriptBodyTest.assertEquals;
+import static net.java.html.js.tests.JavaScriptBodyTest.assertFalse;
 import net.java.html.json.tests.PhaseExecutor;
 import org.netbeans.html.json.tck.KOTest;
 
@@ -28,19 +29,20 @@ public class AsyncJavaTest {
     @KOTest
     public void dontWaitForJavaFactorial() throws Exception {
         PhaseExecutor.schedule(phases, () -> {
-            boolean[] javaExecuted = { false };
-            Object objWithX = AsyncJava.computeInAsyncJava(5, (n) -> {
+            Object[] arr = { null, false };
+            arr[0] = AsyncJava.computeInAsyncJava(5, (n) -> {
                 int acc = 1;
                 for (int i = 1; i <= n; i++) {
                     acc *= i;
                 }
                 return acc;
-            }, () -> {});
-            int initialValue = Bodies.readIntX(objWithX);
-            assertEquals(-1, initialValue, "Promise.then shall only be called when the code ends");
-            return objWithX;
-        }).then((objWithX) -> {
-            int result = Bodies.readIntX(objWithX);
+            }, () -> {
+                arr[1] = true;
+            });
+            assertFalse((Boolean) arr[1], "Promise.then shall only be called when the code ends");
+            return arr;
+        }).then((arr) -> {
+            int result = Bodies.readIntX(arr[0]);
             assertEquals(result, 120);
         }).start();
     }
@@ -59,11 +61,12 @@ public class AsyncJavaTest {
         PhaseExecutor.schedule(phases, () -> {
             return AsyncJavaScriptAction.defineCallback(wait4js);
         }).then((action) -> {
-            AsyncJavaScriptAction.invokeCallbackLater(33);
+            action.invokeCallbackLater(33);
         }).then((action) -> {
-            assertEquals(action.getResult(), 33, "Set to 33");
+            final int r = action.getResult();
+            assertEquals(r, 33, "Set to 33");
         }).then((action) -> {
-            AsyncJavaScriptAction.invokeCallbackLater(42);
+            action.invokeCallbackLater(42);
         }).then((action) -> {
             assertEquals(action.getResult(), 42, "Set to 42");
         }).start();

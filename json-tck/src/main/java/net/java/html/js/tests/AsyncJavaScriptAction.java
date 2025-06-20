@@ -21,16 +21,20 @@ package net.java.html.js.tests;
 import net.java.html.js.JavaScriptBody;
 
 final class AsyncJavaScriptAction {
+    private final String name;
     private int result;
 
-    private AsyncJavaScriptAction() {
+    private AsyncJavaScriptAction(String name) {
+        this.name = name;
     }
 
     static AsyncJavaScriptAction defineCallback(boolean wait4js) {
-        AsyncJavaScriptAction action = new AsyncJavaScriptAction();
+        AsyncJavaScriptAction action;
         if (wait4js) {
+            action = new AsyncJavaScriptAction("callJava");
             action.defineCallbackImpl();
         } else {
+            action = new AsyncJavaScriptAction("callJavaNoWait");
             action.defineCallbackImplNoWait4js();
         }
         return action;
@@ -48,7 +52,7 @@ final class AsyncJavaScriptAction {
     @JavaScriptBody(args = {}, javacall = true, wait4js = false, wait4java = false, body = """
         var self = this;
         var global = (0 || eval)("this");
-        global.callJava = function(s) {
+        global.callJavaNoWait = function(s) {
             self.@net.java.html.js.tests.AsyncJavaScriptAction::callJava(I)(s);
         };
     """)
@@ -58,16 +62,16 @@ final class AsyncJavaScriptAction {
         this.result = i;
     }
 
-    static boolean invokeCallbackLater(int n) {
+    boolean invokeCallbackLater(int n) {
         return JsUtils.executeNow(AsyncJavaScriptAction.class, """
             if (typeof setTimeout === 'function') {
                 setTimeout(function() {
-                    callJava($n);
+                    $name($n);
                 }, 5);
             } else {
-                callJava($n);
+                $name($n);
             }
-        """.replaceAll("\\$n", "" + n));
+        """.replaceAll("\\$name", name).replaceAll("\\$n", "" + n));
     }
 
     int getResult() {

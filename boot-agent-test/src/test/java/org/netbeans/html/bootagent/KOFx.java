@@ -20,8 +20,6 @@ package org.netbeans.html.bootagent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import javafx.application.Platform;
-import org.netbeans.html.boot.impl.FnContext;
 import org.netbeans.html.boot.spi.Fn;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
@@ -52,8 +50,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
     @Test
     public synchronized void executeTest() throws Exception {
         if (result == null) {
-            Platform.runLater(this);
-            wait();
+            run();
         }
         if (result instanceof Exception) {
             throw (Exception)result;
@@ -78,7 +75,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
             Throwable r = ex.getTargetException();
             if (r instanceof InterruptedException) {
                 notify = false;
-                Platform.runLater(this);
+                run();
                 return;
             }
             result = r;
