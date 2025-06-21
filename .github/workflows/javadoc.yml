@@ -43,7 +43,7 @@ jobs:
         java-version: ${{ matrix.java }}
 
     - name: Build
-      run: mvn -q install -DskipTests
+      run: mvn install -DskipTests
 
     - name: Javadoc
       run: mvn -q "javadoc:aggregate"
