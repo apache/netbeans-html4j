@@ -65,6 +65,13 @@ import org.openide.util.lookup.ServiceProvider;
  *   &lt;version&gt;<a target="blank" href="http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.dukescript.presenters%22%20AND%20a%3A%22browser%22">1.x</a>&lt;/version&gt;
  * &lt;/dependency&gt;
  * </pre>
+ *
+ * Since 1.8.2 version this presenter uses lightweight HTTP server
+ * implementation that eliminates the need for Grizzly dependencies.
+ * A <em>compatibility mode</em> can be turned on by including the
+ * <code>org.glassfish.grizzly:grizzly-http-server:2.3.19</code>
+ * dependency during execution - see
+ * <a target="_blank" href="https://github.com/apache/netbeans-html4j/pull/26">PR-26</a> for more details.
  */
 @ServiceProvider(service = Presenter.class)
 public final class Browser implements Fn.Presenter, Fn.KeepAlive, Flushable,
@@ -97,6 +104,9 @@ Executor, Closeable {
      * If the property is not specified the system tries <b>GTK</b> mode first,
      * followed by <b>AWT</b> and then tries to execute <code>xdg-open</code>
      * (default LINUX command to launch a browser from a shell script).
+     * <p>
+     * In addition to the above properties, it is possible to also enable
+     * debugging by setting <code>com.dukescript.presenters.browserDebug=true</code>.
      */
     public Browser() {
         this(new Config());
@@ -112,7 +122,7 @@ Executor, Closeable {
     }
 
     Browser(String app, Config config, Supplier<HttpServer<?,?,?, ?>> serverProvider) {
-        this.serverProvider = serverProvider != null ? serverProvider : GrizzlyServer::new;
+        this.serverProvider = serverProvider != null ? serverProvider : SimpleServer::new;
         this.app = app;
         this.config = new Config(config);
     }
@@ -216,7 +226,7 @@ Executor, Closeable {
     public final static class Config {
         private Consumer<URI> browser;
         Integer port;
-        boolean debug;
+        boolean debug = Boolean.getBoolean("com.dukescript.presenters.browserDebug");
 
         /**
          * Default constructor.
@@ -306,7 +316,7 @@ Executor, Closeable {
          * @return this instance
          * @since 1.8
          */
-        Config debug(boolean debug) {
+        public Config debug(boolean debug) {
             this.debug = debug;
             return this;
         }
