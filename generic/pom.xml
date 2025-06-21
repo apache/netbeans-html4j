@@ -93,6 +93,7 @@
                     </compilerArguments>
                     <testSource>15</testSource>
                     <testTarget>1.8</testTarget>
+                    <failOnWarning>false</failOnWarning>
                 </configuration>
             </plugin>
             <plugin>

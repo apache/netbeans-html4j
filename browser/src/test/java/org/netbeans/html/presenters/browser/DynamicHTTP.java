@@ -42,6 +42,7 @@ final class DynamicHTTP extends Handler {
         server = s;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public <Request, Response> void service(HttpServer<Request, Response, ?, ?> s, Request request, Response response) throws IOException {
         if ("/dynamic".equals(s.getRequestURI(request))) {

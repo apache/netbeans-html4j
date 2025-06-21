@@ -270,7 +270,7 @@ public final class FnUtils {
                 super.visitMethodInsn(
                         Opcodes.INVOKESTATIC,
                         "org/netbeans/html/boot/spi/Fn", "isValid",
-                        "(Lorg/netbeans/html/boot/spi/Fn;)Z"
+                        "(Lorg/netbeans/html/boot/spi/Fn;)Z", false
                 );
                 Label ifNotNull = new Label();
                 super.visitJumpInsn(Opcodes.IFNE, ifNotNull);
@@ -294,7 +294,8 @@ public final class FnUtils {
                 }
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                         "org/netbeans/html/boot/spi/Fn", "define",
-                        "(Ljava/lang/Class;ZLjava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
+                        "(Ljava/lang/Class;ZLjava/lang/String;[Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;",
+                        false
                 );
                 Label noPresenter = new Label();
                 super.visitInsn(Opcodes.DUP);
@@ -309,7 +310,8 @@ public final class FnUtils {
                     super.visitLdcInsn(resource);
                     super.visitMethodInsn(Opcodes.INVOKESTATIC,
                             "org/netbeans/html/boot/spi/Fn", "preload",
-                            "(Lorg/netbeans/html/boot/spi/Fn;Ljava/lang/Class;Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;"
+                            "(Lorg/netbeans/html/boot/spi/Fn;Ljava/lang/Class;Ljava/lang/String;)Lorg/netbeans/html/boot/spi/Fn;",
+                            false
                     );
                 }
                 super.visitInsn(Opcodes.DUP);
@@ -387,7 +389,7 @@ public final class FnUtils {
                                 throw new IllegalStateException(t.toString());
                         }
                         FindInMethod.super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                                factory, "valueOf", "(" + descriptor + ")L" + factory + ";"
+                                factory, "valueOf", "(" + descriptor + ")L" + factory + ";", false
                         );
                         FindInMethod.super.visitInsn(Opcodes.AASTORE);
                     }
@@ -444,13 +446,13 @@ public final class FnUtils {
                     int lastSlash = FindInClass.this.name.lastIndexOf('/');
                     String jsCallbacks = FindInClass.this.name.substring(0, lastSlash + 1) + "$JsCallbacks$";
                     FindInMethod.super.visitFieldInsn(Opcodes.GETSTATIC, jsCallbacks, "VM", "L" + jsCallbacks + ";");
-                    FindInMethod.super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, jsCallbacks, "current", "()L" + jsCallbacks + ";");
+                    FindInMethod.super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, jsCallbacks, "current", "()L" + jsCallbacks + ";", false);
                     FindInMethod.super.visitInsn(Opcodes.AASTORE);
                 }
 
                 if (!fia.asyncJavaScript()) {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                            "org/netbeans/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
+                            "org/netbeans/html/boot/spi/Fn", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false
                     );
                     switch (sv.returnType.getSort()) {
                         case Type.VOID:
@@ -467,7 +469,7 @@ public final class FnUtils {
                             super.visitJumpInsn(Opcodes.IFNULL, handleNullValue);
                             super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
                             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                                    "java/lang/Boolean", "booleanValue", "()Z"
+                                    "java/lang/Boolean", "booleanValue", "()Z", false
                             );
                             super.visitInsn(Opcodes.IRETURN);
                             super.visitLabel(handleNullValue);
@@ -478,13 +480,13 @@ public final class FnUtils {
                         default:
                             super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Number");
                             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                                    "java/lang/Number", sv.returnType.getClassName() + "Value", "()" + sv.returnType.getDescriptor()
+                                    "java/lang/Number", sv.returnType.getClassName() + "Value", "()" + sv.returnType.getDescriptor(), false
                             );
                             super.visitInsn(sv.returnType.getOpcode(Opcodes.IRETURN));
                     }
                 } else {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                            "org/netbeans/html/boot/spi/Fn", "invokeLater", "(Ljava/lang/Object;[Ljava/lang/Object;)V"
+                            "org/netbeans/html/boot/spi/Fn", "invokeLater", "(Ljava/lang/Object;[Ljava/lang/Object;)V", false
                     );
                     super.visitInsn(Opcodes.RETURN);
                 }
@@ -496,7 +498,7 @@ public final class FnUtils {
                     super.visitInsn(Opcodes.DUP);
                     super.visitLdcInsn("No presenter active. Use BrwsrCtx.execute!");
                     super.visitMethodInsn(Opcodes.INVOKESPECIAL, 
-                        "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V"
+                        "java/lang/IllegalStateException", "<init>", "(Ljava/lang/String;)V", false
                     );
                     this.visitInsn(Opcodes.ATHROW);
                 }

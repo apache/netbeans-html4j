@@ -51,12 +51,16 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Jaroslav Tulach
  */
 @ServiceProvider(service=Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({
     "net.java.html.geo.OnLocation"
 })
 public final class GeoProcessor extends AbstractProcessor {
-    private static final Logger LOG = Logger.getLogger(GeoProcessor.class.getName());
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
+    }
+    
+    
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean ok = true;

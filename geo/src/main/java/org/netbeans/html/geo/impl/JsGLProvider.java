@@ -98,7 +98,7 @@ public final class JsGLProvider extends GLProvider<Object, Long> {
     @JavaScriptBody(args = {"watch"}, body = "navigator.geolocation.clearWatch(watch);")
     public native void stop(Long watch);
 
-    @JavaScriptBody(args = { "p" }, body = "return p.timestamp;")
+    @JavaScriptBody(args = { "position" }, body = "return position.timestamp;")
     private static native long timeStamp(Object position);
 
     @Override

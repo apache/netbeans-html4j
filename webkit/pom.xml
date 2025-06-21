@@ -49,6 +49,7 @@
                     <compilerArguments>
                         <Aversion>${project.version}</Aversion>
                     </compilerArguments>
+                    <failOnWarning>false</failOnWarning>
                     <source>20</source>
                     <target>8</target>
                 </configuration>

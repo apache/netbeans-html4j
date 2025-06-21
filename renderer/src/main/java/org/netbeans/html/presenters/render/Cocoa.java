@@ -63,6 +63,7 @@ final class Cocoa extends Show implements Callback {
         this(null, null, null, false);
     }
 
+    @SuppressWarnings("deprecation")
     Cocoa(Fn.Presenter p, Runnable onPageLoad, Runnable onContext, boolean hl) {
         this.presenter = p;
         this.onPageLoad = onPageLoad;
@@ -80,6 +81,7 @@ final class Cocoa extends Show implements Callback {
         return jsContext;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void show(URI page) {
         this.page = page.toASCIIString();
@@ -165,7 +167,7 @@ final class Cocoa extends Show implements Callback {
     }
 
     public interface ObjC extends Library {
-
+        @SuppressWarnings("deprecation")
         public static ObjC INSTANCE = (ObjC) Native.loadLibrary("objc.A", ObjC.class);
 
         public boolean class_addMethod(Pointer cls, Pointer name, Callback imp, String types);
@@ -389,7 +391,7 @@ final class Cocoa extends Show implements Callback {
         }
 
         @Override
-        protected List getFieldOrder() {
+        protected List<String> getFieldOrder() {
             return Arrays.asList("x", "y", "width", "height");
         }
     }

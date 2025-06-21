@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.boot.impl.FnContext;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITest;
@@ -55,7 +54,7 @@ public final class ScriptEngineCase implements ITest, IHookable {
     public synchronized void executeTest() throws Throwable {
         skipAsyncJavaTestWhenNoPromise();
         // BEGIN: net.java.html.boot.script.ScriptEngineCase#run
-        Object instance = method.getDeclaringClass().newInstance();;
+        Object instance = method.getDeclaringClass().getConstructor().newInstance();
         for (int round = 0;; round++) {
             try (var ctx = Fn.activate(p)) {
                 assert ctx != null;

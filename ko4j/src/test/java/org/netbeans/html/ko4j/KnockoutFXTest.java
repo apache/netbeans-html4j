@@ -182,11 +182,11 @@ public final class KnockoutFXTest extends KnockoutTCK {
     private static native void setProperty(Object json, String key, Object value);
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = ""
-        + "var f = new Function(s); "
+    @JavaScriptBody(args = { "script", "args" }, body = ""
+        + "var f = new Function(script); "
         + "return f.apply(null, args);"
     )
-    public native Object executeScript(String script, Object[] arguments);
+    public native Object executeScript(String script, Object[] args);
 
     @JavaScriptBody(args = {  }, body = 
           """

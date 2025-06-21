@@ -73,6 +73,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
     public JavaScriptProcesor() {
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> set = new HashSet<>();
@@ -152,6 +153,19 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             checkJavaScriptBody(r, e, msg);
         }
 
+        processGroup(roundEnv, msg);
+
+        generateCallbackClass(javacalls);
+        javacalls.clear();
+        if (roundEnv.processingOver()) {
+            generateJavaScriptBodyList(bodies);
+            bodies.clear();
+        }
+        return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void processGroup(RoundEnvironment roundEnv, final Messager msg) {
         for (Element e : roundEnv.getElementsAnnotatedWith(JavaScriptResource.Group.class)) {
             JavaScriptResource.Group g = e.getAnnotation(JavaScriptResource.Group.class);
             if (g == null) {
@@ -161,13 +175,6 @@ public final class JavaScriptProcesor extends AbstractProcessor {
                 checkJavaScriptBody(r, e, msg);
             }
         }
-
-        if (roundEnv.processingOver()) {
-            generateCallbackClass(javacalls);
-            generateJavaScriptBodyList(bodies);
-            javacalls.clear();
-        }
-        return true;
     }
 
     private void checkJavaScriptBody(JavaScriptResource r, Element e, final Messager msg) {
@@ -528,7 +535,7 @@ public final class JavaScriptProcesor extends AbstractProcessor {
             Map<String, ExecutableElement> map = pkgEn.getValue();
             StringBuilder source = new StringBuilder();
             source.append("package ").append(pkgName).append(";\n");
-            source.append("@java.lang.SuppressWarnings(\"all\")\n");
+            source.append("@java.lang.SuppressWarnings({\"unchecked\", \"all\"})\n");
             source.append("public final class $JsCallbacks$ {\n");
             source.append("  static final $JsCallbacks$ VM = new $JsCallbacks$(null);\n");
             source.append("  private final org.netbeans.html.boot.spi.Fn.Ref<?> ref;\n");

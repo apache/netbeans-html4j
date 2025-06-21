@@ -126,7 +126,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     
     @Override
     public BrwsrCtx createContext() {
-        KO4J ko = new KO4J(browserContext);
+        KO4J ko = new KO4J();
         TyrusContext tc = new TyrusContext();
         Contexts.Builder cb = Contexts.newBuilder().
             register(Technology.class, ko.knockout(), 10).
@@ -152,11 +152,11 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     }
 
     @Override
-    @JavaScriptBody(args = { "s", "args" }, body = ""
-        + "var f = new Function(s); "
+    @JavaScriptBody(args = { "script", "args" }, body = ""
+        + "var f = new Function(script); "
         + "return f.apply(null, args);"
     )
-    public native Object executeScript(String script, Object[] arguments);
+    public native Object executeScript(String script, Object[] args);
 
     @JavaScriptBody(args = {  }, body = 
           """
@@ -168,7 +168,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
     private static native String findBaseURL();
     
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -184,7 +184,7 @@ public final class TyrusKnockoutTest extends KnockoutTCK {
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
             URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return connectTo.toString();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } catch (URISyntaxException ex) {
