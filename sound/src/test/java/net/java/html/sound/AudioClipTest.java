@@ -18,9 +18,13 @@
  */
 package net.java.html.sound;
 
+import net.java.html.js.JavaScriptBody;
 import net.java.html.junit.BrowserRunner;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.netbeans.html.boot.spi.Fn;
 
 @RunWith(BrowserRunner.class)
 public class AudioClipTest {
@@ -30,6 +34,40 @@ public class AudioClipTest {
 
     @Test
     public void testPlayNonExistingClip() {
-        AudioClip.create("non-existing.mp3").play();
+        var clip = AudioClip.create("non-existing.mp3");
+        clip.play();
+    }
+
+    @Test
+    public void testAudioSystemIsSupported() {
+        var clip = AudioClip.create("non-existing.mp3");
+        if (assumeAudioObject()) {
+            var p = Fn.activePresenter().getClass().getName();
+            assertTrue("Playing should be supported on " + p, clip.isSupported());
+        }
+    }
+
+    @JavaScriptBody(args = {  }, body = """
+    try {
+        var audio = new Audio("any.mp3");
+        return null;
+    } catch (err) {
+        return "Error constructing new Audio: " + err.toString();
+    }
+    """)
+    private static String createAudioObjectOrFail() {
+        return "Not running in a browser at all!";
+    }
+
+    private static boolean assumeAudioObject() {
+        var errMsg = createAudioObjectOrFail();
+        var p = Fn.activePresenter().getClass().getName();
+        if (errMsg == null) {
+            return true;
+        } else {
+            // it is expected that ScriptPresenter doesn't have Audio
+            Assume.assumeTrue("No Audio for " + p + ":" + errMsg, p.contains("ScriptPresenter"));
+            return false;
+        }
     }
 }

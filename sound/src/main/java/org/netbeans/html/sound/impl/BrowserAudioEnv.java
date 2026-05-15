@@ -33,9 +33,13 @@ public final class BrowserAudioEnv implements AudioEnvironment<Object> {
     }
     
     @Override
-    @JavaScriptBody(args = { "src" }, body = ""
-        + "if (typeof Audio !== 'object') return null;"
-        + "return new Audio(src);")
+    @JavaScriptBody(args = { "src" }, body = """
+    if (typeof Audio === 'undefined') {
+        return null;
+    } else {
+        return new Audio(src);
+    }
+    """)
     public Object create(String src) {
         // null if not running in browser
         return null;
