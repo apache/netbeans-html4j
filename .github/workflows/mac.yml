@@ -30,6 +30,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         java: [ '11', '17' ] 
         os: [ macos-14 ]

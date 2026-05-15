@@ -30,6 +30,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         java: [ '8', '11', '17', '21' ]
         os: [ windows-2022 ]
