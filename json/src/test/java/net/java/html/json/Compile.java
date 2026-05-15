@@ -224,11 +224,15 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 }
             }
         };
-
-        ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", sourceLevel), null, Arrays.asList(file)).call();
-
-        Map<String, byte[]> result = new HashMap<String, byte[]>();
-
+        var options = new ArrayList<String>();
+        options.addAll(Arrays.asList("-source", sourceLevel));
+        options.addAll(Arrays.asList("-target", sourceLevel));
+        if (isJDK11()) {
+            options.add("-proc:full");
+        }
+        var task = ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, options, null, Arrays.asList(file));
+        task.call();
+        var result = new HashMap<String, byte[]>();
         for (Map.Entry<String, ByteArrayOutputStream> e : class2BAOS.entrySet()) {
             result.put(e.getKey(), e.getValue().toByteArray());
         }
@@ -283,5 +287,22 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             sb.append(msg);
         }
         fail(sb.toString());
+    }
+
+    static boolean isJDK8() {
+        try {
+            Class.forName("java.lang.FunctionalInterface");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
+    static boolean isJDK11() {
+        try {
+            Class.forName("java.lang.Module");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
     }
 }

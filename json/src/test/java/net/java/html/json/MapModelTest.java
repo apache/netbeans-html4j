@@ -306,7 +306,7 @@ public class MapModelTest {
 
         assertNotEquals(one.changes, 0, "At least one change");
 
-        if (isJDK8()) {
+        if (Compile.isJDK8()) {
             assertEquals(one.changes, 1, "Exactly one echange");
         }
     }
@@ -374,15 +374,6 @@ public class MapModelTest {
         assertEquals(incThreeTimes.cnt, 3, "Property change delivered three times");
     }
 
-    private static boolean isJDK8() {
-        try {
-            Class.forName("java.lang.FunctionalInterface");
-            return true;
-        } catch (ClassNotFoundException ex) {
-            return false;
-        }
-    }
-    
     static final class One {
         int changes;
         final PropertyBinding pb;
