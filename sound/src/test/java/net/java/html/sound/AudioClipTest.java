@@ -42,7 +42,8 @@ public class AudioClipTest {
     public void testAudioSystemIsSupported() {
         var clip = AudioClip.create("non-existing.mp3");
         if (assumeAudioObject()) {
-            assertTrue("Playing should be supported on modern browsers", clip.isSupported());
+            var p = Fn.activePresenter().getClass().getName();
+            assertTrue("Playing should be supported on " + p, clip.isSupported());
         }
     }
 
@@ -62,7 +63,6 @@ public class AudioClipTest {
         var errMsg = createAudioObjectOrFail();
         var p = Fn.activePresenter().getClass().getName();
         if (errMsg == null) {
-            System.err.println("Audio found for " + p);
             return true;
         } else {
             // it is expected that ScriptPresenter doesn't have Audio
