@@ -18,6 +18,7 @@
  */
 package net.java.html.json;
 
+import org.netbeans.html.testing.Compile;
 import java.io.IOException;
 import java.util.Locale;
 import javax.tools.Diagnostic;

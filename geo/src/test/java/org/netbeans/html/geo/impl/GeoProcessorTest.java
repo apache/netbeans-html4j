@@ -19,6 +19,7 @@
 package org.netbeans.html.geo.impl;
 
 import java.io.IOException;
+import org.netbeans.html.testing.Compile;
 import org.testng.annotations.Test;
 
 /** Test whether the annotation processor detects errors correctly.

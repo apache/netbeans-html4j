@@ -18,6 +18,7 @@
  */
 package net.java.html.json;
 
+import org.netbeans.html.testing.Compile;
 import net.java.html.BrwsrCtx;
 import java.io.IOException;
 import java.io.InputStream;

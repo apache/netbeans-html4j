@@ -76,6 +76,7 @@
     <module>renderer</module>
     <module>generic</module>
     <module>webkit</module>
+    <module>testing</module>
   </modules>
   <licenses>
       <license>

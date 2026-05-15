@@ -70,12 +70,10 @@
             <artifactId>strings</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>testing</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
