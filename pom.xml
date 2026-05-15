@@ -34,7 +34,6 @@
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <netbeans.version>RELEASE130</netbeans.version>
-      <graalvm.version>21.3.0</graalvm.version>
       <grizzly.version>2.3.8</grizzly.version>
       <openjfx.version>11.0.2</openjfx.version>
       <license>COPYING</license>
@@ -551,20 +550,6 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
                     <artifactId>net.java.html</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <artifactId>js</artifactId>
-            <groupId>org.graalvm.js</groupId>
-            <type>jar</type>
-            <scope>test</scope>
-            <version>${graalvm.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>js-scriptengine</artifactId>
-            <groupId>org.graalvm.js</groupId>
-            <type>jar</type>
-            <scope>test</scope>
-            <version>${graalvm.version}</version>
         </dependency>
       </dependencies>
   </dependencyManagement>
