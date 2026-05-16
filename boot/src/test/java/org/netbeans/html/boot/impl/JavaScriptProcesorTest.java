@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import org.netbeans.html.testing.Compile;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;

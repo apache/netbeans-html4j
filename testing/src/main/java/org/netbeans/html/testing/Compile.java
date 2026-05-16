@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.html.geo.impl;
+package org.netbeans.html.testing;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,15 +44,17 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  *
  * @author Jaroslav Tulach
  */
-final class Compile implements DiagnosticListener<JavaFileObject> {
-    private final List<Diagnostic<? extends JavaFileObject>> errors = 
-            new ArrayList<Diagnostic<? extends JavaFileObject>>();
+public final class Compile implements DiagnosticListener<JavaFileObject> {
+    private final List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
     private final Map<String, byte[]> classes;
     private final String pkg;
     private final String cls;
@@ -72,28 +74,37 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
     public static Compile create(String html, String code) throws IOException {
         return create(html, code, "8");
     }
-    static Compile create(String html, String code, String sourceLevel) throws IOException {
+
+    /** Performs compilation of given HTML page and associated Java code
+     */
+    public static Compile create(String html, String code, String sourceLevel) throws IOException {
         return new Compile(html, code, sourceLevel);
     }
-    
+
     /** Checks for given class among compiled resources */
     public byte[] get(String res) {
         return classes.get(res);
     }
-    
+
     /** Obtains errors created during compilation.
      */
-    public List<Diagnostic<? extends JavaFileObject>> getErrors() {
-        List<Diagnostic<? extends JavaFileObject>> err;
-        err = new ArrayList<Diagnostic<? extends JavaFileObject>>();
+    public final List<Diagnostic<? extends JavaFileObject>> getErrors() {
+        return getDiagnostics(Diagnostic.Kind.ERROR);
+    }
+
+    /** Obtains diagnostics of a specific kind created during compilation.
+     * @param kind the kind of diagnostics to obtain
+     */
+    public final List<Diagnostic<? extends JavaFileObject>> getDiagnostics(Diagnostic.Kind kind) {
+        var err = new ArrayList<Diagnostic<? extends JavaFileObject>>();
         for (Diagnostic<? extends JavaFileObject> diagnostic : errors) {
-            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+            if (diagnostic.getKind() == kind) {
                 err.add(diagnostic);
             }
         }
         return err;
     }
-    
+
     private Map<String, byte[]> compile(final String html, final String code) throws IOException {
         StandardJavaFileManager sjfm = ToolProvider.getSystemJavaCompiler().getStandardFileManager(this, null, null);
 
@@ -117,15 +128,24 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 return new ByteArrayInputStream(html.getBytes());
             }
         };
-        
+
         final URI scratch;
         try {
             scratch = new URI("mem://mem3");
         } catch (URISyntaxException ex) {
             throw new IOException(ex);
         }
-        
+
         JavaFileManager jfm = new ForwardingJavaFileManager<JavaFileManager>(sjfm) {
+            @Override
+            public FileObject getFileForOutput(JavaFileManager.Location location, String packageName, String relativeName, FileObject sibling) throws IOException {
+                try {
+                    return new VirtFO(new URI("mem://resource/" + relativeName), Kind.OTHER, relativeName);
+                } catch (URISyntaxException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+
             @Override
             public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind, FileObject sibling) throws IOException {
                 if (kind  == Kind.CLASS) {
@@ -139,7 +159,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                         }
                     };
                 }
-                
+
                 if (kind == Kind.SOURCE) {
                     final String n = className.replace('.', '/') + ".java";
                     final URI un;
@@ -150,7 +170,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                     }
                     return new VirtFO(un/*sibling.toUri()*/, kind, n);
                 }
-                
+
                 throw new IllegalStateException();
             }
 
@@ -161,7 +181,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                         return htmlFile;
                     }
                 }
-                
+
                 return null;
             }
 
@@ -170,7 +190,7 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 if (a instanceof VirtFO && b instanceof VirtFO) {
                     return ((VirtFO)a).getName().equals(((VirtFO)b).getName());
                 }
-                
+
                 return super.isSameFile(a, b);
             }
 
@@ -182,7 +202,30 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                     super(uri, kind);
                     this.n = n;
                 }
-                private final ByteArrayOutputStream data = new ByteArrayOutputStream();
+                private final ByteArrayOutputStream data = new ByteArrayOutputStream() {
+
+                    @Override
+                    public void close() throws IOException {
+                        super.close();
+
+                        int opening = count(toString(), '{');
+                        int closing = count(toString(), '}');
+
+                        assertEquals(opening, closing, "There should be pair number of { and } in\n" + toString());
+                    }
+                };
+
+                int count(String where, char what) {
+                    int at = -1;
+                    int cnt = 0;
+                    for (;;) {
+                        at = where.indexOf(what, at + 1);
+                        if (at == -1) {
+                            return cnt;
+                        }
+                        cnt++;
+                    }
+                }
 
                 @Override
                 public OutputStream openOutputStream() throws IOException {
@@ -201,11 +244,15 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
                 }
             }
         };
-
-        ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, /*XXX:*/Arrays.asList("-source", sourceLevel, "-target", sourceLevel), null, Arrays.asList(file)).call();
-
-        Map<String, byte[]> result = new HashMap<String, byte[]>();
-
+        var options = new ArrayList<String>();
+        options.addAll(Arrays.asList("-source", sourceLevel));
+        options.addAll(Arrays.asList("-target", sourceLevel));
+        if (isJDK17()) {
+            options.add("-proc:full");
+        }
+        var task = ToolProvider.getSystemJavaCompiler().getTask(null, jfm, this, options, null, Arrays.asList(file));
+        task.call();
+        var result = new HashMap<String, byte[]>();
         for (Map.Entry<String, ByteArrayOutputStream> e : class2BAOS.entrySet()) {
             result.put(e.getKey(), e.getValue().toByteArray());
         }
@@ -241,12 +288,14 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
         String fqn = "'" + pkg + '.' + cls + "'";
         return html.replace("'${fqn}'", fqn);
     }
-
-    void assertErrors() {
+    public final void assertErrors() {
         assertFalse(getErrors().isEmpty(), "There are supposed to be some errors");
     }
+    public final void assertNoErrors() {
+        assertTrue(getErrors().isEmpty(), "There are supposed to be no errors: " + getErrors());
+    }
 
-    void assertError(String expMsg) {
+    public final void assertError(String expMsg) {
         StringBuilder sb = new StringBuilder();
         sb.append("Can't find ").append(expMsg).append(" among:");
         for (Diagnostic<? extends JavaFileObject> e : errors) {
@@ -258,5 +307,30 @@ final class Compile implements DiagnosticListener<JavaFileObject> {
             sb.append(msg);
         }
         fail(sb.toString());
+    }
+
+    public static boolean isJDK8() {
+        try {
+            Class.forName("java.lang.FunctionalInterface");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
+    public static boolean isJDK11() {
+        try {
+            Class.forName("java.lang.Module");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
+    public static boolean isJDK17() {
+        try {
+            Class.forName("java.lang.Record");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
     }
 }
