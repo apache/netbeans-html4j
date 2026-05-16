@@ -555,7 +555,7 @@ org.netbeans.html.boot.impl:org.netbeans.html.boot.fx:org.netbeans.html.context.
   </dependencyManagement>
   <profiles>
       <profile>
-          <id>jdk8</id>
+          <id>javafx8</id>
           <activation>
               <file>
                   <exists>${java.home}/lib/ext/jfxrt.jar</exists>

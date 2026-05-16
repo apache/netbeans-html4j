@@ -52,42 +52,48 @@
     </build>
     <profiles>
         <profile>
-            <id>jdk11+</id>
+            <id>graaljs8</id>
             <activation>
-                <jdk>[11,21)</jdk>
+                <jdk>[1.8,21)</jdk>
             </activation>
+            <properties>
+                <graaljs.version>21.3.0</graaljs.version>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.graalvm.js</groupId>
                     <artifactId>js</artifactId>
                     <scope>runtime</scope>
-                    <version>21.3.0</version>
+                    <version>${graaljs.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.graalvm.js</groupId>
                     <artifactId>js-scriptengine</artifactId>
                     <scope>runtime</scope>
-                    <version>21.3.0</version>
+                    <version>${graaljs.version}</version>
                 </dependency>
             </dependencies>
         </profile>
         <profile>
-            <id>jdk21+</id>
+            <id>graaljs21</id>
             <activation>
                 <jdk>[21,]</jdk>
             </activation>
+            <properties>
+                <graaljs.version>25.0.3</graaljs.version>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.graalvm.js</groupId>
                     <artifactId>js-language</artifactId>
                     <scope>runtime</scope>
-                    <version>25.0.3</version>
+                    <version>${graaljs.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.graalvm.js</groupId>
                     <artifactId>js-scriptengine</artifactId>
                     <scope>runtime</scope>
-                    <version>25.0.3</version>
+                    <version>${graaljs.version}</version>
                 </dependency>
             </dependencies>
         </profile>
