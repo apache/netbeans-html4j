@@ -162,13 +162,14 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
     public void loadScript(Reader code) throws Exception {
         var ctx = eng.getContext();
         if (code instanceof Callable<?> moreInfo && moreInfo.call() instanceof URL u) {
-            String file;
             try {
-                file = new File(u.toURI()).getPath();
+                var file = new File(u.toURI());
+                if (file.exists()) {
+                    ctx.setAttribute(ScriptEngine.FILENAME, file.getPath(), ScriptContext.ENGINE_SCOPE);
+                }
             } catch (IllegalArgumentException ex) {
-                file = u.toString();
+                // ignore URLs not representing a file
             }
-            ctx.setAttribute(ScriptEngine.FILENAME, file, ScriptContext.ENGINE_SCOPE);
         }
         eng.eval(code, ctx);
     }
