@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import net.java.html.js.JavaScriptBody;
 import org.netbeans.html.boot.spi.Fn;
-import org.netbeans.html.boot.impl.FnContext;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITest;

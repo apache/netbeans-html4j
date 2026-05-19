@@ -19,6 +19,7 @@
 package net.java.html.boot.script;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.ref.WeakReference;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +39,7 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import net.java.html.boot.script.impl.Callback;
 import net.java.html.boot.script.impl.PromisePolyfill;
 import org.netbeans.html.boot.spi.Fn;
@@ -157,7 +160,18 @@ Presenter, Fn.FromJavaScript, Fn.ToJavaScript, Executor {
 
     @Override
     public void loadScript(Reader code) throws Exception {
-        eng.eval(code);
+        var ctx = eng.getContext();
+        if (code instanceof Callable<?> moreInfo && moreInfo.call() instanceof URL u) {
+            try {
+                var file = new File(u.toURI());
+                if (file.exists()) {
+                    ctx.setAttribute(ScriptEngine.FILENAME, file.getPath(), ScriptContext.ENGINE_SCOPE);
+                }
+            } catch (IllegalArgumentException ex) {
+                // ignore URLs not representing a file
+            }
+        }
+        eng.eval(code, ctx);
     }
 
     //
