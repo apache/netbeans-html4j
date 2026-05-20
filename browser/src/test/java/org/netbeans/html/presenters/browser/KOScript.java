@@ -85,7 +85,7 @@ public final class KOScript implements ITest, IHookable, Runnable {
                 updateName.invoke(null, getTestName(), cnt);
             }
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

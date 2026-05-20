@@ -116,7 +116,7 @@ public class KoBrowserTest extends KnockoutTCK {
     }
 
     @Override
-    public URI prepareURL(String content, String mimeType, String[] parameters) {
+    public String prepareWebResource(String content, String mimeType, String[] parameters) {
         try {
             final URL baseURL = new URL(JavaScriptUtilities.findBaseURL());
             StringBuilder sb = new StringBuilder();
@@ -132,7 +132,7 @@ public class KoBrowserTest extends KnockoutTCK {
             URLConnection c = query.openConnection();
             BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
             URI connectTo = new URI(br.readLine());
-            return connectTo;
+            return connectTo.toString();
         } catch (IOException | URISyntaxException ex) {
             throw new IllegalStateException(ex);
         }

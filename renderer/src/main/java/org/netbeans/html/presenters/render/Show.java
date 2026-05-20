@@ -79,7 +79,7 @@ public abstract class Show {
         impl.getClass(); // NPE check
         try {
             Class<?> c = Class.forName(Show.class.getPackage().getName() + '.' + impl);
-            Show show = (Show) c.newInstance();
+            Show show = (Show) c.getConstructor().newInstance();
             show.show(page);
         } catch (ClassNotFoundException ex) {
             LOG.log(Level.INFO, "Trying command line execution of {0}", impl);

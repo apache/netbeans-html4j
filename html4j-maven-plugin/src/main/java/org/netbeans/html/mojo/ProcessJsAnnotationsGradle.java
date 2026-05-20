@@ -19,7 +19,6 @@
 
 package org.netbeans.html.mojo;
 
-import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
@@ -38,8 +37,7 @@ public final class ProcessJsAnnotationsGradle implements Plugin<Project> {
         p.afterEvaluate(new Action<Project>() {
             @Override
             public void execute(final Project p) {
-                Set<? extends Task> tasks = (Set<? extends Task>) p.property("tasks");
-                for (Task task : tasks) {
+                for (Task task : p.getTasks()) {
                     if (task.getName().startsWith("compile")) {
                         process.dependsOn(task);
                     }

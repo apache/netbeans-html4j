@@ -76,7 +76,7 @@ public final class KOFx implements ITest, IHookable, Runnable {
         try (var ctx = Fn.activate(p)) {
             assert ctx != null;
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

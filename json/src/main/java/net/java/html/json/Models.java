@@ -177,6 +177,7 @@ public final class Models {
      * @return full features implementation of mutable and extendable list
      * @since 1.5
      */
+    @SafeVarargs
     public static <T> List<T> asList(T... values) {
         return SimpleList.asList(values);
     }

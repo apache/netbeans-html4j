@@ -76,7 +76,7 @@ public class JsClassLoaderBase {
     
     @Test public void instanceMethod() throws Throwable {
         Method plus = methodClass.getMethod("plusInst", int.class);
-        java.lang.Object inst = methodClass.newInstance();
+        java.lang.Object inst = methodClass.getConstructor().newInstance();
         try {
             assertEquals(plus.invoke(inst, 10), 10);
         } catch (InvocationTargetException ex) {
@@ -94,7 +94,7 @@ public class JsClassLoaderBase {
     }
 
     @Test public void getThis() throws Throwable {
-        java.lang.Object th = methodClass.newInstance();
+        java.lang.Object th = methodClass.getConstructor().newInstance();
         Method st = methodClass.getMethod("getThis");
         try {
             assertEquals(st.invoke(th), th);
@@ -154,7 +154,7 @@ public class JsClassLoaderBase {
     
     @Test public void callJavaScriptMethodOnOwnClass() throws Throwable {
         try {
-            java.lang.Object thiz = methodClass.newInstance();
+            java.lang.Object thiz = methodClass.getConstructor().newInstance();
             Method st = methodClass.getMethod("returnYourSelf", methodClass);
             assertEquals(st.invoke(null, thiz), thiz, "Returns this");
         } catch (InvocationTargetException ex) {
@@ -172,6 +172,7 @@ public class JsClassLoaderBase {
         assertEquals(st.invoke(null, "42"), 42, "Meaning of JavaScript?");
     }
 
+    @SuppressWarnings("unchecked")
     @Test public void passEnum() throws Throwable {
         Class<?> enmClazz = methodClass.getDeclaredClasses()[0];
         assertTrue(Enum.class.isAssignableFrom(enmClazz), "It is an enum: " + enmClazz);
@@ -199,7 +200,7 @@ public class JsClassLoaderBase {
     
     @Test public void recordError() throws Throwable {
         Method st = methodClass.getMethod("recordError", java.lang.Object.class);
-        assertEquals(st.invoke(methodClass.newInstance(), "Hello"), "Hello", "The same parameter returned");
+        assertEquals(st.invoke(methodClass.getConstructor().newInstance(), "Hello"), "Hello", "The same parameter returned");
     }
     
     @Test public void plusOrMul() throws Throwable {

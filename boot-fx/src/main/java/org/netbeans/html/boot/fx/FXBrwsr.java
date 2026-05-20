@@ -137,6 +137,7 @@ public class FXBrwsr extends Application {
         start(primaryStage, this.getParameters().getRaw().get(0));
     }
 
+    @SuppressWarnings("unchecked")
     final void start(Stage primaryStage, String callee) {
         BorderPane r = new BorderPane();
         Object[] arr = findInitialSize(callee);

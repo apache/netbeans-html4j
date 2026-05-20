@@ -50,6 +50,7 @@ public final class ServerFactories {
         return arr.toArray(new Object[0][]);
     }
 
+    @SuppressWarnings("unchecked")
     static Fn.Presenter[] collect(
         String browserName, Collection<? super ITest> res,
         Class<? extends Annotation> test, Supplier<Class[]> tests

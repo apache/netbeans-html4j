@@ -170,11 +170,12 @@ public class KnockoutEquinoxIT {
     private static Class<?> browserClass;
     private static Object browserContext;
 
+    @SuppressWarnings("unchecked")
     @Factory public static Object[] compatibilityTests() throws Exception {
         Class<?> tck = loadOSGiClass(KnockoutTCK.class);
         Class<?> peer = loadOSGiClass(KnockoutEquinoxTCKImpl.class);
         // initialize the TCK
-        Callable<Class[]> inst = (Callable<Class[]>) peer.newInstance();
+        Callable<Class[]> inst = (Callable<Class[]>) peer.getConstructor().newInstance();
 
         Class[] arr = inst.call();
         for (int i = 0; i < arr.length; i++) {

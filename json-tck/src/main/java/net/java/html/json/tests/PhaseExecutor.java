@@ -44,7 +44,8 @@ public final class PhaseExecutor<T> {
     private final RuntimeException alloc;
     private static PhaseExecutor prev;
     */
-    
+
+    @SuppressWarnings("unchecked")
     public static <T> PhaseExecutor<T> schedule(PhaseExecutor[] phases, Init<T> data) throws Exception {
         if (phases[0] == null) {
             phases[0] = new PhaseExecutor<T>(data.initialize());
@@ -76,7 +77,7 @@ public final class PhaseExecutor<T> {
         }
 
         while (at < tasks.size()) {
-            Action a = tasks.get(at);
+            Action<T> a = tasks.get(at);
             try {
                 a.run(data);
             } catch (Exception | Error ex) {
@@ -94,7 +95,7 @@ public final class PhaseExecutor<T> {
     }
 
     private final void cleanUp() throws Exception {
-        for (Action a : clean) {
+        for (Action<T> a : clean) {
             a.run(data);
         }
     }

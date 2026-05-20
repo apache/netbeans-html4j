@@ -118,7 +118,7 @@ final class GTK extends Show implements InvokeLater {
         public int width, height;
 
         @Override
-        protected List getFieldOrder() {
+        protected List<String> getFieldOrder() {
             return Arrays.asList("x", "y", "width", "height");
         }
     }
@@ -380,6 +380,7 @@ final class GTK extends Show implements InvokeLater {
             }
         }
 
+        @SuppressWarnings("deprecation")
         static <T> T loadLibrary(Class<T> type, boolean allowObjects, Collection<Throwable> errors) {
             String libName = System.getProperty("com.dukescript.presenters.renderer." + type.getSimpleName());
             if (libName == null) {

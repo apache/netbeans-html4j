@@ -68,7 +68,7 @@ public final class KOFx implements ITest, Runnable {
         try {
             a = KnockoutEquinoxIT.activateInOSGi(p);
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

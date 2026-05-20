@@ -102,7 +102,8 @@ Technology.ApplyId<Knockout>, Technology.ToJavaScript<Knockout> {
     public Object wrapArray(Object[] arr) {
         return arr;
     }
-    
+
+    @SuppressWarnings("deprecation")
     @Override
     public void runSafe(final Runnable r) {
         r.run();

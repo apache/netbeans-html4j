@@ -69,7 +69,7 @@ public final class KOFx implements ITest, Runnable {
         Closeable a = Fn.activate(p);
         try {
             if (inst == null) {
-                inst = m.getDeclaringClass().newInstance();
+                inst = m.getDeclaringClass().getConstructor().newInstance();
             }
             result = m.invoke(inst);
             if (result == null) {

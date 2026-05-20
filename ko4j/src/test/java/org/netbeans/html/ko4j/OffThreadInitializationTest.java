@@ -126,6 +126,7 @@ public class OffThreadInitializationTest {
             return arr;
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public void runSafe(Runnable r) {
             r.run();

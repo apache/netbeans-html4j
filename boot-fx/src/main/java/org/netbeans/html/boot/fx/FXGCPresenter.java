@@ -101,14 +101,19 @@ public final class FXGCPresenter extends AbstractFXPresenter {
             }
 
             try {
-                System.gc();
-                System.runFinalization();
+                forceGC();
             } catch (Error err) {
                 LOG.log(Level.INFO, "Problems during GCing attempt of " + ref.get(), err);
             }
         }
         final long took = System.currentTimeMillis() - l;
         LOG.log(Level.FINE, "Good: No GC of {1} for {0} ms.", new Object[]{took, ref.get()});
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void forceGC() {
+        System.gc();
+        System.runFinalization();
     }
 
 }

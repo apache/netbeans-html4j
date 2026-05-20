@@ -104,10 +104,15 @@ public class GCKnockoutTest {
                         }
                         return arr.length;""";
             Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
-            System.gc();
-            System.runFinalization();
+            forceGC();
         }
         throw new OutOfMemoryError(msg);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void forceGC() {
+        System.gc();
+        System.runFinalization();
     }
 
     private void assertNotGC(Reference<?> ref, String msg) throws Exception {
@@ -123,8 +128,7 @@ public class GCKnockoutTest {
                         }
                         return arr.length;""";
             Object cnt = Utils.executeScript(GCKnockoutTest.class, gc, Math.pow(2.0, i));
-            System.gc();
-            System.runFinalization();
+            forceGC();
         }
     }
 

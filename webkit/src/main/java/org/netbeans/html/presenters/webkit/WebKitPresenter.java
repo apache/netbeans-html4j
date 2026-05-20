@@ -458,6 +458,7 @@ public final class WebKitPresenter implements Fn.Presenter, Fn.KeepAlive, Execut
         private final boolean[] keepAlive;
         
         public JSCFn(Pointer fn, boolean[] keepAlive) {
+            super(WebKitPresenter.this);
             this.fn = fn;
             this.keepAlive = keepAlive;
             protect(this, fn);

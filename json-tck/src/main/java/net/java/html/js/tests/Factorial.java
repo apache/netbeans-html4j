@@ -35,5 +35,5 @@ public final class Factorial {
         var im1 = this.@net.java.html.js.tests.Factorial::minusOne(I)(i);
         return this.@net.java.html.js.tests.Factorial::factorial(I)(im1) * i;"""
     )
-    native int factorial(int n);
+    native int factorial(int i);
 }
